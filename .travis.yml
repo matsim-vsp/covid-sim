@@ -20,5 +20,6 @@ deploy:
   skip_cleanup: true
   local_dir: dist/
   github_token: $TRAVIS_TOKEN
+  target-branch: gh-pages
   on:
-    branch: gh_pages
+    branch: master
