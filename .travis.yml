@@ -1,0 +1,24 @@
+language: node_js
+dist: trusty
+node_js:
+  - '10'
+
+addons:
+
+branches:
+  only:
+    - master
+
+# build the webapp into ./dist
+script:
+  - yarn run build && yarn run test:unit
+
+# the script statement for each deploy refer to the deploy.sh script because the script tag in the deploy section
+# only supports one command...
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: dist/
+  github_token: xx
+  on:
+    branch: gh_pages

@@ -1,0 +1,194 @@
+<template lang="pug">
+#app
+  .content
+    h2 Mobility traces and the spreading of COVID-19
+    p
+      a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
+      br
+      a(href="mailto:mueller@vsp.tu-berlin.de") Sebastian Alexander Müller,&nbsp;
+      a(href="mailto:michael.balmer@senozon.com") Michael Balmer,&nbsp;
+      a(href="mailto:andreas.neumann@senozon.com") Andreas Neumann,&nbsp;
+      a(href="mailto:nagel@vsp.tu-berlin.de") Kai Nagel
+      br
+      a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin
+      | &nbsp;|&nbsp;
+      a(href="https://senozon.com/") Senozon AG
+    p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from the literature, including recent publications. This results in a virus spreading dynamics model. The results should be verified but because of the current time pressure, we publish them in their current state. Recommendations for improvement are welcome.
+
+    p The simulations begin on Day 0, with 40 infected individuals in the population. The outcomes below examine consequences of starting various interventions a number of days after the simulation starts.
+
+  section-viewer.viewer(:state="state")
+
+</template>
+
+<script lang="ts">
+// ###########################################################################
+import YAML from 'yaml'
+import Papa from 'papaparse'
+
+import { Component, Vue } from 'vue-property-decorator'
+import SectionViewer from './SectionViewer.vue'
+
+@Component({
+  components: {
+    SectionViewer,
+  },
+})
+export default class App extends Vue {
+  private state: any = {
+    measures: {},
+    runLookup: {},
+    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+  }
+
+  public async mounted() {
+    const parsed = await this.loadIndexData()
+    const matrix = await this.generateScenarioMatrix(parsed)
+  }
+
+  private async loadIndexData() {
+    console.log('fetching data')
+    const response = await fetch(this.state.publicPath + 'v1-info.txt')
+    const text = await response.text()
+    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
+    console.log({ parsed: parsed.data })
+
+    return parsed.data
+  }
+
+  private async generateScenarioMatrix(parsed: any[]) {
+    console.log('generating lookups')
+    const measures: any = {}
+    const runLookup: any = {}
+
+    // first get column names for the measures that have been tested
+    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+
+    for (const label of Object.keys(parsed[0])) {
+      if (ignore.indexOf(label) > -1) continue
+      measures[label] = new Set()
+    }
+
+    // get all possible values
+    for (const run of parsed) {
+      if (!run.RunId) continue
+
+      // note this particular value, for every value
+      for (const measure of Object.keys(measures)) {
+        if (run[measure]) measures[measure].add(run[measure])
+      }
+
+      // store the run in a lookup using all values as the key
+      let lookupKey = ''
+      for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
+      runLookup[lookupKey] = run
+    }
+
+    for (const measure of Object.keys(measures)) {
+      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
+    }
+
+    console.log({ measures, runLookup })
+    this.state.measures = measures
+    this.state.runLookup = runLookup
+  }
+}
+
+// ###########################################################################
+</script>
+
+<style scoped>
+#app {
+  color: #222;
+  background-color: #eee;
+  display: flex;
+  flex-direction: column;
+  margin: 0rem 0rem;
+  padding: 0px 0px;
+  font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.nav-bar {
+  position: fixed;
+  width: 100%;
+  top: 0px;
+  background-color: white;
+  box-shadow: 0px 5px 10px #44444440;
+  padding: 0rem 0rem 0rem 1rem;
+  z-index: 5;
+}
+
+.address-header {
+  margin-top: 4rem;
+  background-color: #d3e1ee;
+  padding: 3rem 10rem;
+}
+
+.address-header h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.address-header h3 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-top: -0.5rem;
+}
+
+.content {
+  padding: 0rem 2rem;
+  margin: 2rem 0rem;
+  padding-bottom: 1rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer {
+  padding: 0rem 2rem;
+  margin: 0rem 0rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  text-align: center;
+  padding: 2rem 0.5rem;
+  background-color: #627785;
+}
+
+.footer p {
+  color: white;
+}
+
+.footer a {
+  color: #334;
+}
+
+.footer img {
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .content {
+    padding: 0rem 1rem;
+    margin-top: 0px;
+  }
+
+  .address-header {
+    padding-left: 2rem;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    padding: 0rem 1rem;
+    margin: 1rem 0rem;
+    row-gap: 1rem;
+  }
+}
+</style>
