@@ -13,14 +13,8 @@
       a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin
       | &nbsp;|&nbsp;
       a(href="https://senozon.com/") Senozon AG
-    p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from the literature, including recent publications. This results in a virus spreading dynamics model. The results should be verified but because of the current time pressure, we publish them in their current state. Recommendations for improvement are welcome.
 
-    h4 Examining noncompliance rates for stay-at-home orders
-
-    p The interventions below depict disease spread following various levels of adherence or compliance with stay-at-home policies.
-      ul
-        li The simulations begin on Day 0, with 40 infected individuals in the population.
-        li Intervention measures go into effect on day 30.
+    p.readme(v-html="readme")
 
   section-viewer.viewer(:state="state")
 
@@ -45,6 +39,8 @@ export default class App extends Vue {
     runLookup: {},
     publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
+
+  private readme = require('@/assets/v2-notes.md')
 
   public async mounted() {
     const parsed = await this.loadIndexData()

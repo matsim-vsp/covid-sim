@@ -4,6 +4,9 @@
     h2 VSP Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
+    .readme(v-html="readme")
+
+    h6 Available visualizations:
     ul
       li: router-link(to="/v1") v1: Intervention Strategies
       li: router-link(to="/v2") v2: Compliance Rates
@@ -12,12 +15,15 @@
 
 </template>
 
-<script>
-// @ is an alias to /src
+<script lang="ts">
+const readme = require('@/assets/index.md')
 
 export default {
   name: 'Home',
   components: {},
+  data: function() {
+    return { readme }
+  },
 }
 </script>
 
@@ -39,7 +45,11 @@ export default {
 }
 
 a {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #00499c;
+}
+
+.readme {
+  margin-bottom: 2rem;
 }
 </style>
