@@ -14,8 +14,8 @@
   router-view()
 
   .footer
-    img(alt="TU-Berlin logo" src="@/assets/logo.png" width=225)
-    img(alt="MATSim logo" src="@/assets/matsim-logo-white.png" width=250)
+    img(alt="TU-Berlin logo" src="@/assets/images/vsp-logo.png" width=225)
+    img(alt="MATSim logo" src="@/assets/images/matsim-logo-white.png" width=250)
     p COVID-19 Scenario Viewer, &copy; 2020 VSP TU-Berlin
     p For more info about VSP, see
       a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
@@ -93,7 +93,7 @@ h3 {
 }
 
 .footer a {
-  color: #334;
+  color: #043b26;
 }
 
 .footer img {
