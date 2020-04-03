@@ -8,3 +8,9 @@ V4 attempts to replay the development so far, and explores results of various sc
   - Type A: Work and shopping 60% banned; leisure, business and errands 80% banned
   - Type B: Work and shopping 80% banned; leisure, business and errands 90% banned
 - Educational facilities can be reopened on **day 63** (estimated to be the 20th of April) but because of data problems we are particularly unsure of the timeline.
+
+The **base doubling time is approx. 3 days**. It corresponds to the German growth rate 2nd & 3rd week of Mar, i.e. with slight cultural adaptations but not policy interventions.
+
+The **doubling time of "Type A" is approx. 13 days**, which is _more optimistic_ than what we currently measure (approx. 9 days).
+
+"Type B" is even more optimistic.
