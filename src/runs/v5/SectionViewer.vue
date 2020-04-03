@@ -2,13 +2,13 @@
 #main-section
   .pieces
     .sliders
-      h5 School Reopenings
+      h5 Re-Opening of Educational Facilites at Day 63
       p.subhead Students Returning (%):
 
       .myslider(v-for="measure in Object.keys(state.measures).slice(0,4)" :key="measure")
         my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-      h5 Activity Resumption
+      h5 Activity Restrictions from Day 35
       p.subhead By type (%)
 
       .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
