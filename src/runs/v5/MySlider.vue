@@ -39,7 +39,7 @@ export default class SectionViewer extends Vue {
     remainingFractionHigher: 'Going to univ./higher ed.',
 
     remainingFractionLeisure: 'Leisure activities',
-    remainingFractionWork: 'Still working',
+    remainingFractionWork: 'Work activities',
     remainingFractionShopping: 'Shopping activities',
     remainingFractionErrandsBusiness: 'Errands & Business',
   }
