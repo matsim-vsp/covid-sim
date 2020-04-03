@@ -8,7 +8,7 @@
       .myslider(v-for="measure in Object.keys(state.measures).slice(0,4)" :key="measure")
         my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-      h5 Activity Restrictions from Day 35
+      h5 Percentage of Activities still occuring after Day 35
       p.subhead By type (%)
 
       .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
