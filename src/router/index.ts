@@ -25,6 +25,11 @@ const routes = [
     name: 'V4',
     component: () => import(/* webpackChunkName: "V4" */ '@/runs/v4/V4.vue'),
   },
+  {
+    path: '/v5',
+    name: 'V5',
+    component: () => import(/* webpackChunkName: "V5" */ '@/runs/v5/V5.vue'),
+  },
 ]
 
 const router = new VueRouter({

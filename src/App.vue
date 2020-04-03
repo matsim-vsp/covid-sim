@@ -10,6 +10,8 @@
     a.space(href="/covid-sim/v3") V3
     | |
     router-link.space(to="/v4") V4
+    | |
+    router-link.space(to="/v5") V5
 
   router-view()
 
