@@ -1,5 +1,5 @@
 RunScript;Config;RunId;Output;remainingFractionKiga;remainingFractionPrimary;remainingFractionSecondary;remainingFractionHigher;remainingFractionLeisure;remainingFractionWork;remainingFractionShopping;remainingFractionErrandsBusiness
-run.sh;config_sz1.xml;sz0;output/1.0-1.0-1.0-1.0-0.4-0.4-0.4-0.4;1.0;1.0;1.0;1.0;0.4;0.4;0.4;0.4
+run.sh;config_sz1.xml;sz0;output/0.0-1.0-1.0-1.0-0.4-0.4-0.4-0.4;1.0;1.0;1.0;1.0;0.4;0.4;0.4;0.4
 run.sh;config_sz1.xml;sz1;output/1.0-1.0-1.0-1.0-0.4-0.4-0.4-0.4;1.0;1.0;1.0;1.0;0.4;0.4;0.4;0.4
 run.sh;config_sz2.xml;sz2;output/1.0-1.0-1.0-1.0-0.4-0.4-0.4-0.2;1.0;1.0;1.0;1.0;0.4;0.4;0.4;0.2
 run.sh;config_sz3.xml;sz3;output/1.0-1.0-1.0-1.0-0.4-0.4-0.2-0.4;1.0;1.0;1.0;1.0;0.4;0.4;0.2;0.4

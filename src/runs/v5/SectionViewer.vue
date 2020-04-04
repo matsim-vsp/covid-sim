@@ -2,20 +2,32 @@
 #main-section
   .pieces
     .sliders
-      h5 Reopening of educational facilites at day 63
-      p.subhead Students Returning (%):
-
-      .myslider(v-for="measure in Object.keys(state.measures).slice(0,4)" :key="measure")
-        my-slider(:measure="measure" :state="state" @changed="sliderChanged")
-
-      h5 Percentage of out-of-home activities still occuring after day 35
-      p.subhead By type (%)
-
-      .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
-        my-slider(:measure="measure" :state="state" @changed="sliderChanged")
-
       h5 Cumulative Infected
       p.infected {{ prettyInfected }}
+
+      h5 Select Scenario
+      .button-choices.buttons.has-addons
+        button.button.is-small(
+          :class="{'is-link': isBase, 'is-selected': isBase}"
+          :key="'base'" @click='setBase(true)') Base Case
+        button.button.is-small(
+          :class="{'is-link': !isBase, 'is-selected': !isBase}"
+          :key="'do-something'" @click='setBase(false)') Alternatives
+
+      .selection-widgets(:class="{'totally-disabled': isBase}")
+        .g1
+          h5.title Reopening of educational facilities at day 63
+          p.subhead Students Returning (%):
+
+          .myslider(v-for="measure in Object.keys(state.measures).slice(0,4)" :key="measure")
+            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+
+        .g1
+          h5.title Percentage of out-of-home activities still occuring after day 35
+          p.subhead By type (%)
+
+          .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
+            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
     vue-plotly.plot1(:data="data" :layout="layout" :options="options")
     vue-plotly.plot2(:data="data" :layout="loglayout" :options="options")
@@ -41,6 +53,8 @@ export default class SectionViewer extends Vue {
   @Prop() private state!: any
 
   private currentRun: any = {}
+
+  private isBase = true
 
   private data: any[] = []
   private layout = {
@@ -72,6 +86,12 @@ export default class SectionViewer extends Vue {
         color: '#7f7f7f'
       } */
     },
+  }
+
+  private setBase(value: boolean) {
+    this.isBase = value
+    this.showPlotForCurrentSituation()
+    // this.runChanged()
   }
 
   private loglayout = {
@@ -164,7 +184,7 @@ export default class SectionViewer extends Vue {
 
   private updateTotalInfected() {
     const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-    this.state.cumulativeInfected = infectedCumulative.y[149]
+    this.state.cumulativeInfected = infectedCumulative.y[infectedCumulative.y.length - 1]
   }
 
   private sliderChanged(measure: any, value: any) {
@@ -174,6 +194,12 @@ export default class SectionViewer extends Vue {
   }
 
   private showPlotForCurrentSituation() {
+    if (this.isBase) {
+      this.currentRun = { RunId: 'sz0' }
+      this.runChanged()
+      return
+    }
+
     let lookupKey = ''
     for (const measure of Object.keys(this.state.measures)) lookupKey += this.currentSituation[measure] + '-'
 
@@ -258,10 +284,10 @@ h5 {
 }
 
 .pieces {
-  padding: 2rem 0rem;
+  padding: 1rem 0rem;
   display: grid;
   grid-gap: 1rem;
-  grid-template-columns: 12rem auto;
+  grid-template-columns: 13rem auto;
   grid-template-rows: auto;
 }
 
@@ -351,6 +377,27 @@ p.section-label :hover {
   font-size: 2rem;
   margin-top: -0.5rem;
   color: rgb(151, 71, 34);
+}
+
+.button-choices button {
+  margin-right: 0.5rem;
+}
+
+.title {
+  line-height: 1.4rem;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.totally-disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.g1 {
+  padding: 0rem 1rem 1rem 0.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #ccf;
+  border-radius: 4px;
 }
 
 @media only screen and (max-width: 768px) {
