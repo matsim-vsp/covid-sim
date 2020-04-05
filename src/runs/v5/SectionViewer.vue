@@ -2,9 +2,6 @@
 #main-section
   .pieces
     .sliders
-      h5 Cumulative Infected
-      p.infected {{ prettyInfected }}
-
       h5 Select Scenario
       .button-choices.buttons.has-addons
         button.button.is-small(
@@ -16,18 +13,21 @@
 
       .selection-widgets(:class="{'totally-disabled': isBase}")
         .g1
+          h5.title Percentage of out-of-home activities still occuring after day 35
+          p.subhead By type (%)
+
+          .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
+            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+
+        .g1
           h5.title Reopening of educational facilities at day 63
           p.subhead Students Returning (%):
 
           .myslider(v-for="measure in Object.keys(state.measures).slice(0,4)" :key="measure")
             my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-        .g1
-          h5.title Percentage of out-of-home activities still occuring after day 35
-          p.subhead By type (%)
-
-          .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
-            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+      h5 Cumulative Infected
+      p.infected {{ prettyInfected }}
 
     vue-plotly.plot1(:data="data" :layout="layout" :options="options")
     vue-plotly.plot2(:data="data" :layout="loglayout" :options="options")
