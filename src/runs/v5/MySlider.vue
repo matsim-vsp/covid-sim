@@ -38,9 +38,9 @@ export default class SectionViewer extends Vue {
     remainingFractionSecondary: 'Going to secondary school',
     remainingFractionHigher: 'Going to univ./higher ed.',
 
-    remainingFractionLeisure: 'Leisure activities',
     remainingFractionWork: 'Work activities',
     remainingFractionShopping: 'Shopping activities',
+    remainingFractionLeisure: 'Leisure activities',
     remainingFractionErrandsBusiness: 'Errands & Business',
   }
 
@@ -55,6 +55,8 @@ export default class SectionViewer extends Vue {
       let label = x
       if (x === 0.2) label = '20%'
       if (x === 0.4) label = '40%'
+      if (x === 0.6) label = '60%'
+      if (x === 0.8) label = '80%'
 
       if (isNaN(label)) {
         if (!this.showButtons) this.value = label // select first choice
@@ -82,6 +84,10 @@ export default class SectionViewer extends Vue {
       answer = 0.2
     } else if (answer === '40%') {
       answer = 0.4
+    } else if (answer === '60%') {
+      answer = 0.6
+    } else if (answer === '80%') {
+      answer = 0.8
     } else if (!isNaN(answer)) {
       answer = 0.01 * answer
     }

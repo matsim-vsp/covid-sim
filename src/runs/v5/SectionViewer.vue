@@ -287,7 +287,7 @@ h5 {
   padding: 1rem 0rem;
   display: grid;
   grid-gap: 1rem;
-  grid-template-columns: 13rem auto;
+  grid-template-columns: 16.5rem auto;
   grid-template-rows: auto;
 }
 
