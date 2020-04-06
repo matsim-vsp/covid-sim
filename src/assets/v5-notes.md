@@ -17,7 +17,7 @@ Other than google, we do not take the last day, but take visual averages over ab
 
 The best approximation to this with our options below would be:
 - **leisure** at **20%** (with the assumption that parks do not contribute that much to infections)
-- **work** at **40%**
+- **work** at **60%**
 - **shopping** at **40%**
 - **errands & business unclear**
 
