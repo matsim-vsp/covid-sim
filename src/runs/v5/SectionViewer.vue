@@ -6,7 +6,7 @@
       .button-choices.buttons.has-addons
         button.button.is-small(
           :class="{'is-link': isBase, 'is-selected': isBase}"
-          :key="'base'" @click='setBase(true)') Base Case
+          :key="'base'" @click='setBase(true)') No Restrictions Throughout
         button.button.is-small(
           :class="{'is-link': !isBase, 'is-selected': !isBase}"
           :key="'do-something'" @click='setBase(false)') Alternatives
