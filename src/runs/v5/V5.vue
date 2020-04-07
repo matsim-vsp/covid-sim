@@ -26,7 +26,7 @@ import YAML from 'yaml'
 import Papa from 'papaparse'
 
 import { Component, Vue } from 'vue-property-decorator'
-import SectionViewer from '@/runs/v5/SectionViewer.vue'
+import SectionViewer from '@/runs/v5/ChartSelector.vue'
 
 @Component({
   components: {

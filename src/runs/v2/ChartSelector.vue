@@ -2,16 +2,11 @@
 #main-section
   .pieces
     .sliders
-      h5 School Attendance
-      p.subhead Percent Still Attending:
+      h5 Intervention Options
+      p.subhead Percent Noncompliance:
 
       .myslider(v-for="measure in Object.keys(state.measures)" :key="measure")
         my-slider(:measure="measure" :state="state" @changed="sliderChanged")
-
-      h5 Cumulative Infected
-        br
-        | by Day 150
-      p.infected {{ prettyInfected }}
 
     vue-plotly.plot1(:data="data" :layout="layout" :options="options")
     vue-plotly.plot2(:data="data" :layout="loglayout" :options="options")
@@ -25,7 +20,7 @@ import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 
-import MySlider from './MySlider.vue'
+import MySlider from './SelectWidget.vue'
 
 @Component({
   components: {
@@ -38,7 +33,7 @@ export default class SectionViewer extends Vue {
 
   private currentRun: any = {}
 
-  private data: any[] = []
+  private data: any = []
   private layout = {
     title: {
       text: 'Status of simulated residents vs. days',
@@ -123,15 +118,8 @@ export default class SectionViewer extends Vue {
     this.loadZipData()
   }
 
-  private get prettyInfected() {
-    if (!this.state.cumulativeInfected) return ''
-
-    const rounded = 100 * Math.round(this.state.cumulativeInfected * 0.01)
-    return Number(rounded).toLocaleString()
-  }
-
   private async loadZipData() {
-    this.zipLoader = new ZipLoader(this.state.publicPath + 'v4-data.zip')
+    this.zipLoader = new ZipLoader(this.state.publicPath + 'v2-data.zip')
 
     await this.zipLoader.load()
 
@@ -144,7 +132,6 @@ export default class SectionViewer extends Vue {
 
     if (this.loadedSeriesData[this.currentRun.RunId]) {
       this.data = this.loadedSeriesData[this.currentRun.RunId]
-      this.updateTotalInfected()
       return
     }
 
@@ -155,16 +142,9 @@ export default class SectionViewer extends Vue {
     this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
 
     this.data = timeSerieses
-    this.updateTotalInfected()
-  }
-
-  private updateTotalInfected() {
-    const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-    this.state.cumulativeInfected = infectedCumulative.y[149]
   }
 
   private sliderChanged(measure: any, value: any) {
-    console.log(measure, value)
     this.currentSituation[measure] = value
     this.showPlotForCurrentSituation()
   }
@@ -173,7 +153,6 @@ export default class SectionViewer extends Vue {
     let lookupKey = ''
     for (const measure of Object.keys(this.state.measures)) lookupKey += this.currentSituation[measure] + '-'
 
-    console.log(lookupKey)
     this.currentRun = this.state.runLookup[lookupKey]
     if (!this.currentRun) return
 
@@ -339,14 +318,6 @@ a {
 
 p.section-label :hover {
   color: #667883;
-}
-
-.infected {
-  padding-left: 0rem;
-  font-weight: bold;
-  font-size: 2rem;
-  margin-top: -0.5rem;
-  color: rgb(151, 71, 34);
 }
 
 @media only screen and (max-width: 768px) {
