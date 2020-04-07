@@ -164,8 +164,6 @@ export default class SectionViewer extends Vue {
   }
 
   private async runChanged() {
-    console.log({ run: this.currentRun })
-
     if (this.loadedSeriesData[this.currentRun.RunId]) {
       this.data = this.loadedSeriesData[this.currentRun.RunId]
       this.updateTotalInfected()
@@ -245,9 +243,15 @@ export default class SectionViewer extends Vue {
 
     for (const column of Object.keys(this.labels)) {
       const name = this.labels[column]
+
+      if (name === 'In Quarantine') continue
+
       const y: number[] = this.unpack(data, column)
       serieses.push({ x, y, name })
     }
+
+    // Add Berlin "Reported Cases"
+    serieses.push(this.state.berlinCases)
 
     return serieses
   }

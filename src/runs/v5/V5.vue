@@ -38,19 +38,54 @@ export default class App extends Vue {
     measures: {},
     runLookup: {},
     cumulativeInfected: 0,
+    berlinCases: [],
     publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
 
   private readme = require('@/assets/v5-notes.md')
+  private berlinCSV = require('@/assets/berlin-cases.csv').default
 
   public async mounted() {
-    const parsed = await this.loadIndexData()
+    await this.loadDataInBackground()
+  }
+
+  private async loadDataInBackground() {
+    this.state.berlinCases = this.prepareBerlinData()
+
+    const parsed = await this.loadCSVData(this.state.publicPath + 'v5-info.txt')
     const matrix = await this.generateScenarioMatrix(parsed)
   }
 
-  private async loadIndexData() {
+  private prepareBerlinData() {
+    const data = Papa.parse(this.berlinCSV, { header: true, dynamicTyping: true }).data
+
+    // pull the cases field out of the CSV
+    const cases = data.map(x => x.cases)
+
+    // 14 days of zero cases in Berlin before the RKI data begins
+    const zeroCases = new Array(14).fill(0)
+    const fullTimeline = zeroCases.concat(cases)
+
+    console.log({ fullTimeline })
+
+    const series = {
+      name: 'Berlin Reported Cases',
+      x: [...Array(fullTimeline.length).keys()], // range
+      y: fullTimeline,
+      line: {
+        dash: 'dot',
+        width: 3,
+        color: 'rgb(0,200,150)',
+      },
+    }
+
+    console.log({ berlinSeries: series })
+    return series
+  }
+
+  private async loadCSVData(filepath: string) {
     console.log('fetching data')
-    const response = await fetch(this.state.publicPath + 'v5-info.txt')
+    const response = await fetch(filepath)
     const text = await response.text()
     const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
     console.log({ parsed: parsed.data })
