@@ -6,7 +6,7 @@
 
     .readme(v-html="readme")
 
-    h6 Available visualizations:
+    h5 Available visualizations:
     ul
       li: router-link(to="/v1") v1: Intervention Strategies
       li: router-link(to="/v2") v2: Compliance Rates
@@ -14,16 +14,20 @@
       li: router-link(to="/v4") v4: School Attendance
       li: router-link(to="/v5") v5: Reopening Options
 
+    hr
+    .readme(v-html="readmeBottom")
+
 </template>
 
 <script lang="ts">
 const readme = require('@/assets/index.md')
+const bottom = require('@/assets/index-bottom.md')
 
 export default {
   name: 'Home',
   components: {},
   data: function() {
-    return { readme }
+    return { readme, readmeBottom: bottom }
   },
 }
 </script>
