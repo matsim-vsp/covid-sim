@@ -59,19 +59,21 @@ export default class App extends Vue {
   private prepareBerlinData() {
     const data = Papa.parse(this.berlinCSV, { header: true, dynamicTyping: true }).data
 
-    // pull the cases field out of the CSV
-    const cases = data.map(x => x.cases)
-
     // 14 days of zero cases in Berlin before the RKI data begins
-    const zeroCases = new Array(14).fill(0)
-    const fullTimeline = zeroCases.concat(cases)
+    const zeroDays = 14
+    const cases = new Array(zeroDays).fill(0)
 
-    console.log({ fullTimeline })
+    // pull the cases field out of the CSV
+    let cumulative = 0
+    for (let i = 0; i < data.length; i++) {
+      cumulative += data[i].cases
+      cases.push(cumulative)
+    }
 
     const series = {
-      name: 'Berlin Reported Cases',
-      x: [...Array(fullTimeline.length).keys()], // range
-      y: fullTimeline,
+      name: 'Berlin Reported (Cumul.)',
+      x: [...Array(cases.length).keys()].slice(1), // range
+      y: cases,
       line: {
         dash: 'dot',
         width: 3,
