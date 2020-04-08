@@ -28,7 +28,7 @@ export default class AnimationView extends Vue {
   @Prop() private isLoaded!: boolean
 
   private timeFactor = 360.0
-  private networkFilename = '/network.zip'
+  private networkFilename = 'network.zip'
 
   private state = store.state
 
@@ -67,6 +67,8 @@ export default class AnimationView extends Vue {
   private currentTrips = new Map()
   private indexOfNextTripToAnimate = 0
 
+  private publicPath = ''
+
   @Watch('state.isRunning')
   private playPauseSim() {
     // endless animation loop
@@ -83,6 +85,8 @@ export default class AnimationView extends Vue {
   }
 
   private mounted() {
+    this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
+
     setTimeout(() => {
       this.setup()
     }, 10)
@@ -129,7 +133,7 @@ export default class AnimationView extends Vue {
     console.log('loading network', this.networkFilename)
 
     // load zipfile
-    const zipLoader = new ZipLoader(this.networkFilename)
+    const zipLoader = new ZipLoader(this.publicPath + this.networkFilename)
     await zipLoader.load()
 
     // extract json
@@ -160,6 +164,7 @@ export default class AnimationView extends Vue {
 
   private async loadAgents() {
     console.log('loading agents')
+
     const response = await fetch('/3js.1000.json')
     const data = await response.json()
 
