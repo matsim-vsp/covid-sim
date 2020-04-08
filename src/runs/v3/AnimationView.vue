@@ -1,5 +1,6 @@
-<template>
-  <div id="container"></div>
+<template lang="pug">
+#anim-container
+
 </template>
 
 <script lang="ts">
@@ -23,9 +24,9 @@ interface Agent {
 }
 
 @Component
-export default class ThreeComponent extends Vue {
+export default class AnimationView extends Vue {
   private timeFactor = 300.0
-  private networkFilename = 'network.zip'
+  private networkFilename = '/network.zip'
 
   private state = store.state
 
@@ -205,9 +206,12 @@ export default class ThreeComponent extends Vue {
   }
 
   private initScene() {
-    this.container = document.getElementById('container')
+    console.log('hereee 5-----')
+
+    this.container = document.getElementById('anim-container')
     if (!this.container) return
 
+    console.log('hereee 0-----')
     this.scene.background = new THREE.Color(0x181518)
 
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
@@ -313,7 +317,8 @@ export default class ThreeComponent extends Vue {
 <style scoped lang="scss">
 $navHeight: 3rem;
 
-#container {
+#anim-container {
+  height: 100rem;
   margin: 0 0;
   padding: 0 0;
   position: absolute;

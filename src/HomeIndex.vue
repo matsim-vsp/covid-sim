@@ -10,7 +10,7 @@
     ul
       li: router-link(to="/v1") v1: Intervention Strategies
       li: router-link(to="/v2") v2: Compliance Rates
-      li: a(href="/covid-sim/v3/") v3: Trip Visualization
+      li: router-link(to="/v3") v3: Trip Visualization
       li: router-link(to="/v4") v4: School Attendance
       li: router-link(to="/v5") v5: Reopening Options
 

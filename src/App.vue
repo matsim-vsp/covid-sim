@@ -7,7 +7,7 @@
     | |
     router-link.space(to="/v2") V2
     | |
-    a.space(href="/covid-sim/v3") V3
+    router-link.space(to="/v3") V3
     | |
     router-link.space(to="/v4") V4
     | |
