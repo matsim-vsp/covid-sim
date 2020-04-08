@@ -5,11 +5,11 @@
       h5 Select Scenario
       .button-choices.buttons.has-addons
         button.button.is-small(
-          :class="{'is-link': isBase, 'is-selected': isBase}"
-          :key="'base'" @click='setBase(true)') No Restrictions Throughout
-        button.button.is-small(
           :class="{'is-link': !isBase, 'is-selected': !isBase}"
           :key="'do-something'" @click='setBase(false)') Alternatives
+        button.button.is-small(
+          :class="{'is-link': isBase, 'is-selected': isBase}"
+          :key="'base'" @click='setBase(true)') What would have happened with life as usual
 
       .selection-widgets(:class="{'totally-disabled': isBase}")
         .g1
@@ -54,7 +54,7 @@ export default class SectionViewer extends Vue {
 
   private currentRun: any = {}
 
-  private isBase = true
+  private isBase = false
 
   private data: any[] = []
   private layout = {
