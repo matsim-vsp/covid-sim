@@ -165,7 +165,7 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents')
 
-    const response = await fetch('/3js.1000.json')
+    const response = await fetch(this.publicPath + '3js.1000.json')
     const data = await response.json()
 
     let id = 0
