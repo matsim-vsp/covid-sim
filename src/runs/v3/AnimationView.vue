@@ -27,7 +27,7 @@ interface Agent {
 export default class AnimationView extends Vue {
   @Prop() private isLoaded!: boolean
 
-  private timeFactor = 360.0
+  private timeFactor = 720.0
   private networkFilename = 'network.zip'
 
   private state = store.state
@@ -165,7 +165,7 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents')
 
-    const response = await fetch(this.publicPath + '3js.1000.json')
+    const response = await fetch(this.publicPath + '3js.3000.json')
     const data = await response.json()
 
     let id = 0
