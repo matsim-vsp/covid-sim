@@ -34,7 +34,8 @@ export default class AnimationView extends Vue {
 
   private scene = new THREE.Scene()
   private renderer = new THREE.WebGLRenderer({ antialias: true })
-  private camera = new THREE.Camera()
+  private camera?: THREE.PerspectiveCamera
+
   private clock = new THREE.Clock(false) // do not autostart clock!
   private OrbitControl = require('@/OrbitControl')
 
@@ -85,6 +86,24 @@ export default class AnimationView extends Vue {
     setTimeout(() => {
       this.setup()
     }, 10)
+
+    window.addEventListener('resize', this.onWindowResize, false)
+  }
+
+  private beforeDestroy() {
+    window.removeEventListener('resize', this.onWindowResize)
+  }
+
+  private onWindowResize() {
+    this.container = document.getElementById('anim-container')
+    if (!this.container || !this.camera) return
+
+    const canvas = this.renderer.domElement
+
+    this.camera.aspect = this.container.clientWidth / this.container.clientHeight
+    this.camera.updateProjectionMatrix()
+
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
   }
 
   private async setup() {
@@ -141,7 +160,7 @@ export default class AnimationView extends Vue {
 
   private async loadAgents() {
     console.log('loading agents')
-    const response = await fetch('/3js.5000.json')
+    const response = await fetch('/3js.1000.json')
     const data = await response.json()
 
     let id = 0
@@ -248,6 +267,8 @@ export default class AnimationView extends Vue {
   private pauseTime = 0
 
   private moveCameraWhilePaused() {
+    if (!this.camera) return
+
     if (!this.state.isRunning) {
       this.renderer.render(this.scene, this.camera)
       this.cameraControls.update()
@@ -291,7 +312,7 @@ export default class AnimationView extends Vue {
       this.agents[trip.agentId].position.setY(worldY)
     }
 
-    this.renderer.render(this.scene, this.camera)
+    if (this.camera) this.renderer.render(this.scene, this.camera)
     this.cameraControls.update()
 
     if (this.state.isRunning) requestAnimationFrame(this.animate) // endless animation loop
