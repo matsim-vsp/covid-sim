@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue, Watch, Prop } from 'vue-property-decorator'
 import * as THREE from 'three'
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import ZipLoader from 'zip-loader'
@@ -25,7 +25,9 @@ interface Agent {
 
 @Component
 export default class AnimationView extends Vue {
-  private timeFactor = 300.0
+  @Prop() private isLoaded!: boolean
+
+  private timeFactor = 360.0
   private networkFilename = '/network.zip'
 
   private state = store.state
@@ -97,6 +99,9 @@ export default class AnimationView extends Vue {
     this.$store.commit('setMessage', 'done')
     this.initScene()
 
+    // let UI know we're about to begin!
+    this.$emit('loaded', true)
+
     this.clock.start()
     this.animate()
   }
@@ -136,7 +141,7 @@ export default class AnimationView extends Vue {
 
   private async loadAgents() {
     console.log('loading agents')
-    const response = await fetch('/3js.5000.json')
+    const response = await fetch('/3js.1000.json')
     const data = await response.json()
 
     let id = 0
@@ -315,16 +320,15 @@ export default class AnimationView extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-$navHeight: 3rem;
+$navHeight: 2.5rem;
 
 #anim-container {
-  height: 100rem;
   margin: 0 0;
   padding: 0 0;
   position: absolute;
   width: 100%;
   top: $navHeight;
   bottom: 0.25rem;
-  background-color: black;
+  background-color: #223;
 }
 </style>

@@ -1,21 +1,9 @@
 <template lang="pug">
 #app
-  #nav
-    router-link.space(to="/") Home
-    | |
-    router-link.space(to="/v1") V1
-    | |
-    router-link.space(to="/v2") V2
-    | |
-    router-link.space(to="/v3") V3
-    | |
-    router-link.space(to="/v4") V4
-    | |
-    router-link.space(to="/v5") V5
+  my-nav-bar#nav
+  router-view
 
-  router-view()
-
-  .footer
+  .footer(v-if="!state.isFullScreen")
     a(href="https://vsp.tu-berlin.de")
       img(alt="TU-Berlin logo" src="@/assets/images/vsp-logo.png" width=225)
     a(href="https://matsim.org")
@@ -26,6 +14,21 @@
       a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
 
 </template>
+
+<script lang="ts">
+import MyNavBar from '@/components/TopNavBar.vue'
+import store from '@/store/index.ts'
+
+export default {
+  name: 'App',
+  components: { MyNavBar },
+  data: function() {
+    return {
+      state: store.state,
+    }
+  },
+}
+</script>
 
 <style>
 @import '~bulma/css/bulma.css';
@@ -44,7 +47,10 @@ body,
 html {
   margin: 0px 0px;
   padding: 0px 0px;
-  background-color: #aab;
+}
+
+html {
+  background-color: #333;
 }
 
 h2 {

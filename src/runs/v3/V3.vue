@@ -1,11 +1,14 @@
 <template lang="pug">
-#app
-  animation-view.biggie
+#v3-app
+  animation-view(@loaded="toggleLoaded")
+
   #nav
-    p: router-link(to="/") Traces
+    p: router-link(to=".") Activity Traces
     p &bullet;
     p.my-center {{ state.message }}
-    button.button.is-small(@click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
+    button.button.is-white.is-outlined.is-small(
+      v-if="isLoaded"
+      @click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
 
 </template>
 
@@ -21,36 +24,47 @@ import AnimationView from '@/runs/v3/AnimationView.vue'
 })
 export default class App extends Vue {
   private state = store.state
+  private isLoaded = false
 
   private toggleSimulation() {
     console.log('halt!')
     this.$store.commit('setSimulation', !store.state.isRunning)
   }
+
+  private mounted() {
+    this.$store.commit('setFullScreen', true)
+  }
+  private beforeDestroy() {
+    this.$store.commit('setFullScreen', false)
+  }
+
+  private toggleLoaded(loaded: boolean) {
+    this.isLoaded = loaded
+  }
 }
 </script>
 
 <style scoped lang="scss">
-$navHeight: 3rem;
+$navHeight: 2.5rem;
 
-#app {
+#v3-app {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: $navHeight;
+  bottom: 0.2rem;
   width: 100%;
-  height: 500px;
   display: grid;
   grid-template-rows: $navHeight 1fr;
   grid-template-columns: 1fr;
 }
 
 #nav {
-  background-color: #648cb4;
+  display: flex;
+  flex-direction: row;
+  background-color: rgb(30, 85, 56); /* #648cb4; */
   grid-row: 1 / 2;
   grid-column: 1 / 2;
   margin: 0 0;
-  padding-left: 1rem;
-  display: flex;
-  flex-direction: row;
+  padding: 0 0.5rem 0 2rem;
 
   a {
     font-weight: bold;
@@ -69,8 +83,8 @@ $navHeight: 3rem;
   }
 }
 
-.biggie {
-  height: 100rem;
+#nav button {
+  margin: auto 0;
 }
 
 .my-center {

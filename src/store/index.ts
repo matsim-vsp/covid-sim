@@ -7,8 +7,12 @@ export default new Vuex.Store({
   state: {
     message: 'loading',
     isRunning: true,
+    isFullScreen: false,
   },
   mutations: {
+    setFullScreen(state, value) {
+      state.isFullScreen = value
+    },
     setMessage(state, value) {
       state.message = value
     },
