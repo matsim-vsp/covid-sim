@@ -20,6 +20,7 @@
     "moment": "^2.24.0",
     "papaparse": "^5.1.1",
     "plotly.js": "^1.52.3",
+    "three": "^0.115.0",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.3.0",
