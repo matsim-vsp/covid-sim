@@ -9,7 +9,7 @@
           :key="'do-something'" @click='setBase(false)') Alternatives
         button.button.is-small(
           :class="{'is-link': isBase, 'is-selected': isBase}"
-          :key="'base'" @click='setBase(true)') What would have happened with life as usual
+          :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
 
       .selection-widgets(:class="{'totally-disabled': isBase}")
         .g1
