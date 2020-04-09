@@ -18,12 +18,36 @@ interface Trip {
   status?: string
 }
 
+enum Health {
+  Susceptible = 'susceptible',
+  InfectedButNotContagious = 'infectedButNotContagious',
+  Contagious = 'contagious',
+}
+
 @Component
 export default class AnimationView extends Vue {
   @Prop() private isLoaded!: boolean
 
-  private timeFactor = 1000.0
+  private timeFactor = 2000.0
   private networkFilename = 'network.zip'
+
+  private lightMode = {
+    background: 0xa8adad,
+    links: 0x777784,
+    susceptible: 0xffff44,
+    infectedButNotContagious: 0x0077ff,
+    contagious: 0xbb0044,
+  }
+
+  private darkMode = {
+    background: 0x181518,
+    links: 0x223355,
+    susceptible: 0xffff00,
+    infectedButNotContagious: 0x00ffff,
+    contagious: 0xff33cc,
+  }
+
+  private colors = this.darkMode
 
   private state = store.state
 
@@ -42,15 +66,16 @@ export default class AnimationView extends Vue {
 
   private geomSmall = new THREE.CircleBufferGeometry(100, 4)
   private geomMed = new THREE.CircleBufferGeometry(275, 5)
-  private geomBig = new THREE.CircleBufferGeometry(300, 16)
+  private geomBig = new THREE.CircleBufferGeometry(300, 30)
 
-  private yellow = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-  private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.8 })
-  private red = new THREE.MeshBasicMaterial({ color: 0xff33cc, transparent: true, opacity: 0.8 })
-
-  private linkMaterial = new THREE.LineBasicMaterial({ color: 0x223355 })
-
-  private agents: { [id: string]: THREE.Mesh } = {}
+  private linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
+  private red = new THREE.MeshBasicMaterial({ color: this.colors.contagious, transparent: true, opacity: 0.8 })
+  private yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
+  private cyan = new THREE.MeshBasicMaterial({
+    color: this.colors.infectedButNotContagious,
+    transparent: true,
+    opacity: 0.8,
+  })
 
   private xRange = [1e25, -1e25]
   private yRange = [1e25, -1e25]
@@ -59,6 +84,7 @@ export default class AnimationView extends Vue {
   private midpointX = 4595000
   private midpointY = 5820000
 
+  private agents: { [id: string]: THREE.Mesh } = {}
   private allTrips: Trip[] = []
   private currentTrips = new Map()
   private indexOfNextTripToAnimate = 0
@@ -242,7 +268,7 @@ export default class AnimationView extends Vue {
     if (!this.container) return
 
     console.log('hereee 0-----')
-    this.scene.background = new THREE.Color(0x181518)
+    this.scene.background = new THREE.Color(this.colors.background)
 
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.container.appendChild(this.renderer.domElement)
@@ -402,6 +428,5 @@ $navHeight: 2.5rem;
   width: 100%;
   top: $navHeight;
   bottom: 0.25rem;
-  background-color: #223;
 }
 </style>
