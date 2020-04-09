@@ -6,9 +6,14 @@
     p: router-link(to=".") Activity Traces
     p &bullet;
     p.my-center {{ state.message }}
+
     button.button.is-white.is-outlined.is-small(
       v-if="isLoaded"
       @click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
+
+    button.button.is-white.is-outlined.is-small(
+      v-if="isLoaded"
+      @click='rotateColors') Colors
 
 </template>
 
@@ -42,6 +47,10 @@ export default class App extends Vue {
 
   private toggleLoaded(loaded: boolean) {
     this.isLoaded = loaded
+  }
+
+  private rotateColors() {
+    this.$store.commit('rotateColors')
   }
 }
 </script>

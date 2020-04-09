@@ -10,18 +10,13 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import ZipLoader from 'zip-loader'
 
 import store from '@/store/index.ts'
+import { ColorScheme, Health } from '@/Interfaces'
 
 interface Trip {
   id: number
   timestamps: number[]
   path?: number[]
   status?: string
-}
-
-enum Health {
-  Susceptible = 'susceptible',
-  InfectedButNotContagious = 'infectedButNotContagious',
-  Contagious = 'contagious',
 }
 
 @Component
@@ -106,6 +101,62 @@ export default class AnimationView extends Vue {
     }
   }
 
+  @Watch('state.colorScheme')
+  private switchColorScheme(scheme: ColorScheme) {
+    this.colors = scheme == ColorScheme.LightMode ? this.lightMode : this.darkMode
+
+    this.scene.background = new THREE.Color(this.colors.background)
+
+    setTimeout(() => {
+      this.bgSwapColors()
+    }, 50)
+  }
+
+  private bgSwapColors() {
+    const oldRed = this.red
+    const oldYellow = this.yellow
+    const oldCyan = this.cyan
+
+    this.red = new THREE.MeshBasicMaterial({ color: this.colors.contagious, transparent: true, opacity: 0.8 })
+    this.yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
+    this.cyan = new THREE.MeshBasicMaterial({
+      color: this.colors.infectedButNotContagious,
+      transparent: true,
+      opacity: 0.8,
+    })
+
+    // rebuild the streets
+    const net = this.scene.getObjectByName('network')
+    if (net) this.scene.remove(net)
+
+    this.linkMaterial.dispose()
+    this.linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
+
+    if (this.networkMesh) {
+      this.networkMesh = new THREE.LineSegments(this.networkMesh.geometry, this.linkMaterial)
+      this.networkMesh.name = 'network'
+      this.scene.add(this.networkMesh)
+    }
+
+    // rebuild every agent
+    for (const id of Object.keys(this.agents)) {
+      const agent = this.agents[id]
+      if (!agent) return
+
+      // get infection status
+      let healthStatus = Health.Susceptible
+      if (agent.material === oldRed) healthStatus = Health.Contagious
+      if (agent.material === oldCyan) healthStatus = Health.InfectedButNotContagious
+
+      const facelift = this.getMeshForInfection(healthStatus)
+      facelift.position.copy(agent.position)
+
+      this.scene.remove(agent)
+      this.scene.add(facelift)
+      this.agents[id] = facelift
+    }
+  }
+
   private mounted() {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
@@ -166,6 +217,7 @@ export default class AnimationView extends Vue {
 
     this.$store.commit('setMessage', 'loading network')
     this.networkMesh = await this.loadNetworkMeshFromFile()
+    this.networkMesh.name = 'network'
     this.scene.add(this.networkMesh)
 
     this.$store.commit('setMessage', 'done')
@@ -275,8 +327,8 @@ export default class AnimationView extends Vue {
 
     const near = 1
     const far = 50000
-    this.camera = new THREE.PerspectiveCamera(170, this.container.clientWidth / this.container.clientHeight, near, far)
 
+    this.camera = new THREE.PerspectiveCamera(170, this.container.clientWidth / this.container.clientHeight, near, far)
     this.cameraControls = new this.OrbitControl.MapControls(this.camera, this.renderer.domElement)
     this.cameraControls.enablePan = true
     this.cameraControls.screenSpacePanning = true
