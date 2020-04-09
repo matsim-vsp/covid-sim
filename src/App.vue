@@ -1,6 +1,7 @@
 <template lang="pug">
 #app
   my-nav-bar#nav
+
   router-view
 
   .footer(v-if="!state.isFullScreen")
@@ -47,6 +48,7 @@ body,
 html {
   margin: 0px 0px;
   padding: 0px 0px;
+  overflow-y: auto;
 }
 
 html {
