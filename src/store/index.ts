@@ -9,7 +9,9 @@ export default new Vuex.Store({
     message: 'loading',
     isRunning: true,
     isFullScreen: false,
-    colorScheme: ColorScheme.DarkMode,
+    colorScheme: localStorage.getItem('colorscheme')
+      ? localStorage.getItem('colorscheme')
+      : ColorScheme.DarkMode,
   },
   mutations: {
     setFullScreen(state, value: boolean) {
@@ -22,7 +24,9 @@ export default new Vuex.Store({
       state.isRunning = value
     },
     rotateColors(state) {
-      state.colorScheme = state.colorScheme === ColorScheme.DarkMode ? ColorScheme.LightMode : ColorScheme.DarkMode
+      state.colorScheme =
+        state.colorScheme === ColorScheme.DarkMode ? ColorScheme.LightMode : ColorScheme.DarkMode
+      localStorage.setItem('colorscheme', state.colorScheme)
     },
   },
   actions: {},

@@ -23,7 +23,7 @@ interface Trip {
 export default class AnimationView extends Vue {
   @Prop() private isLoaded!: boolean
 
-  private timeFactor = 2000.0
+  private timeFactor = 960.0
   private networkFilename = 'network.zip'
 
   private lightMode = {
@@ -41,10 +41,9 @@ export default class AnimationView extends Vue {
     infectedButNotContagious: 0x00ffff,
     contagious: 0xff33cc,
   }
-
-  private colors = this.darkMode
-
   private state = store.state
+
+  private colors = this.state.colorScheme == ColorScheme.DarkMode ? this.darkMode : this.lightMode
 
   private scene = new THREE.Scene()
   private renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -60,7 +59,7 @@ export default class AnimationView extends Vue {
   private cameraControls: any
 
   private geomSmall = new THREE.CircleBufferGeometry(100, 4)
-  private geomMed = new THREE.CircleBufferGeometry(275, 5)
+  private geomMed = new THREE.CircleBufferGeometry(275, 5).rotateZ((18.0 * Math.PI) / 180)
   private geomBig = new THREE.CircleBufferGeometry(300, 30)
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
@@ -421,12 +420,8 @@ export default class AnimationView extends Vue {
   private handleInfectionEvent(event: Trip) {
     if (!event.status) return
 
-    console.log({ infection: event })
-
     const agent = this.agents[event.id]
     if (!agent) return
-
-    console.log({ agent })
 
     const infection = this.getMeshForInfection(event.status)
 

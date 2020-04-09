@@ -1,6 +1,6 @@
 export enum ColorScheme {
-  LightMode,
-  DarkMode,
+  LightMode = 'light',
+  DarkMode = 'dark',
 }
 
 export enum Health {
