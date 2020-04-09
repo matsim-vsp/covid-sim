@@ -12,22 +12,17 @@ import ZipLoader from 'zip-loader'
 import store from '@/store/index.ts'
 
 interface Trip {
-  agentId: number
-  timestamps: number[]
-  path: number[]
-}
-
-interface Agent {
-  path: []
-  timestamps: number[]
   id: number
+  timestamps: number[]
+  path?: number[]
+  status?: string
 }
 
 @Component
 export default class AnimationView extends Vue {
   @Prop() private isLoaded!: boolean
 
-  private timeFactor = 720.0
+  private timeFactor = 1000.0
   private networkFilename = 'network.zip'
 
   private state = store.state
@@ -46,7 +41,7 @@ export default class AnimationView extends Vue {
   private cameraControls: any
 
   private geomSmall = new THREE.CircleBufferGeometry(100, 4)
-  private geomBig = new THREE.CircleBufferGeometry(400, 16)
+  private geomBig = new THREE.CircleBufferGeometry(300, 16)
 
   private yellow = new THREE.MeshBasicMaterial({ color: 0xffff00 })
   private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff })
@@ -54,7 +49,7 @@ export default class AnimationView extends Vue {
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: 0x223355 })
 
-  private agents: THREE.Mesh[] = []
+  private agents: { [id: string]: THREE.Mesh } = {}
 
   private xRange = [1e25, -1e25]
   private yRange = [1e25, -1e25]
@@ -163,67 +158,44 @@ export default class AnimationView extends Vue {
   }
 
   private async loadAgents() {
-    console.log('loading agents')
+    console.log('loading agents and infections')
 
-    const response = await fetch(this.publicPath + '3js.2000.json')
-    const data = await response.json()
+    const response = await fetch(this.publicPath + 'infections.json')
+    const allEvents = await response.json()
 
-    let id = 0
-    for (const agent of data) {
-      agent.id = id++
+    for (const event of allEvents) {
+      const id = event.id
 
-      const isSusceptible = agent.status == 'susceptible'
-      const circle = isSusceptible
-        ? new THREE.Mesh(this.geomSmall, this.yellow)
-        : new THREE.Mesh(this.geomBig, this.red)
-
-      const initialX = agent.path[0][0]
-      const initialY = agent.path[0][1]
-      circle.position.set(initialX, initialY, isSusceptible ? 0 : 1) // infected on top!
-
-      for (const point of agent.path) {
-        this.xRange = [Math.min(this.xRange[0], point[0]), Math.max(this.xRange[1], point[0])]
-        this.yRange = [Math.min(this.yRange[0], point[1]), Math.max(this.yRange[1], point[1])]
+      // first trip for this agent? Save as start-point
+      if (!this.agents[id] && event.path) {
+        const circle = new THREE.Mesh(this.geomSmall, this.yellow)
+        const initialX = event.path[0][0]
+        const initialY = event.path[0][1]
+        circle.position.set(initialX, initialY, 0)
+        this.agents[id] = circle
       }
 
-      this.agents.push(circle)
-
-      this.parseTripsForAgent(agent)
+      // record range of coords (for non-Berlin use later)
+      if (event.path) {
+        for (const point of event.path) {
+          this.xRange = [Math.min(this.xRange[0], point[0]), Math.max(this.xRange[1], point[0])]
+          this.yRange = [Math.min(this.yRange[0], point[1]), Math.max(this.yRange[1], point[1])]
+        }
+      }
     }
+    this.allTrips = allEvents
 
     // normalize the xy now that we know the full map extent
     // berlin: not gonna cuz its hardcode up above
     if (!this.midpointX) this.midpointX = (this.xRange[0] + this.xRange[1]) / 2
     if (!this.midpointY) this.midpointY = (this.yRange[0] + this.yRange[1]) / 2
 
-    for (const agent of this.agents) {
+    // center the dots on 0,0
+    for (const id of Object.keys(this.agents)) {
+      const agent = this.agents[id]
       agent.position.setX(agent.position.x - this.midpointX)
       agent.position.setY(agent.position.y - this.midpointY)
-    }
-
-    this.sortAllTrips()
-  }
-
-  private parseTripsForAgent(agent: Agent) {
-    // need at least two timepoints to make a trip!
-    if (agent.timestamps.length < 2) return
-
-    for (let i = 1; i < agent.timestamps.length; i++) {
-      const newPoint = agent.path[i]
-
-      if (agent.path[i - 1][0] === newPoint[0] && agent.path[i - 1][1] === newPoint[1]) {
-        // don't create a trip with identical start/end POINTS
-        continue
-      } else if (agent.timestamps[i - 1] === agent.timestamps[i]) {
-        // don't create a trip with identical start/end TIMES
-        continue
-      } else {
-        this.allTrips.push({
-          agentId: agent.id,
-          timestamps: [agent.timestamps[i - 1], agent.timestamps[i]],
-          path: [agent.path[i - 1], newPoint],
-        })
-      }
+      this.scene.add(agent)
     }
   }
 
@@ -258,10 +230,6 @@ export default class AnimationView extends Vue {
 
     this.camera.position.set(0, 0, 3000)
     this.camera.lookAt(0, 0, -1)
-
-    for (const agent of this.agents) {
-      this.scene.add(agent)
-    }
 
     this.cameraControls.update()
 
@@ -299,10 +267,16 @@ export default class AnimationView extends Vue {
     for (const tripNumber of this.currentTrips.keys()) {
       const trip = this.currentTrips.get(tripNumber)
 
-      // remove finished trips -- does this break the looP
+      // Handle infection events first:
+      if (trip.status) {
+        this.handleInfectionEvent(trip)
+        this.currentTrips.delete(tripNumber)
+        continue
+      }
+
+      // Remove trips that already finished
       if (elapsedSeconds > trip.timestamps[1]) {
         this.currentTrips.delete(tripNumber)
-        if (this.currentTrips.size === 0) this.clock.stop()
         continue
       }
 
@@ -313,9 +287,12 @@ export default class AnimationView extends Vue {
       const worldX = trip.path[0][0] + percentComplete * (trip.path[1][0] - trip.path[0][0]) - this.midpointX
       const worldY = trip.path[0][1] + percentComplete * (trip.path[1][1] - trip.path[0][1]) - this.midpointY
 
-      this.agents[trip.agentId].position.setX(worldX)
-      this.agents[trip.agentId].position.setY(worldY)
+      this.agents[trip.id].position.setX(worldX)
+      this.agents[trip.id].position.setY(worldY)
     }
+
+    // if ALL trips have been animation to completion, WE ARE DONE
+    if (this.currentTrips.size === 0 && this.allTripsHaveBegun) this.clock.stop()
 
     if (this.camera) this.renderer.render(this.scene, this.camera)
     this.cameraControls.update()
@@ -323,9 +300,47 @@ export default class AnimationView extends Vue {
     if (this.state.isRunning) requestAnimationFrame(this.animate) // endless animation loop
   }
 
+  private getMeshForInfection(status: string): THREE.Mesh {
+    switch (status) {
+      case 'contagious':
+        return new THREE.Mesh(this.geomBig, this.red)
+      case 'infectedButNotContagious':
+        return new THREE.Mesh(this.geomBig, this.cyan)
+      default:
+        return new THREE.Mesh(this.geomSmall, this.yellow)
+    }
+  }
+
+  private handleInfectionEvent(event: Trip) {
+    if (!event.status) return
+
+    console.log({ infection: event })
+
+    const agent = this.agents[event.id]
+    if (!agent) return
+
+    console.log({ agent })
+
+    const infection = this.getMeshForInfection(event.status)
+
+    infection.position.copy(agent.position)
+    if (event.status === 'infectedButNotContagious') {
+      infection.position.setZ(2)
+    }
+
+    this.scene.remove(agent)
+    this.scene.add(infection)
+    this.agents[event.id] = infection
+  }
+
+  private allTripsHaveBegun = false
+
   private addTripsForTimestampToQueue(elapsedSeconds: number) {
     // maybe we've added everything already
-    if (this.indexOfNextTripToAnimate >= this.allTrips.length) return
+    if (this.indexOfNextTripToAnimate >= this.allTrips.length) {
+      this.allTripsHaveBegun = true
+      return
+    }
 
     const seconds = Math.floor(elapsedSeconds)
 
