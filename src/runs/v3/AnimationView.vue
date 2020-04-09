@@ -82,15 +82,43 @@ export default class AnimationView extends Vue {
   private mounted() {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
-    setTimeout(() => {
-      this.setup()
-    }, 10)
+    //    setTimeout(() => {
+    this.setup()
+    //    }, 10)
 
     window.addEventListener('resize', this.onWindowResize, false)
   }
 
+  private exitSimulation() {
+    this.clock = new THREE.Clock(false)
+    this.pauseTime = 0
+    this.nextClockUpdateTime = 0
+    this.indexOfNextTripToAnimate = 0
+    this.currentTrips.clear()
+    this.allTrips = []
+    this.agents = {}
+
+    while (this.scene.children.length) {
+      this.scene.remove(this.scene.children[0])
+    }
+  }
+
   private beforeDestroy() {
+    // reset the sim to zero
+    this.exitSimulation()
+
     window.removeEventListener('resize', this.onWindowResize)
+
+    // Some types of THREE objects must be manually destroyed
+    // https://threejs.org/docs/index.html#manual/en/introduction/How-to-dispose-of-objects
+    if (this.networkMesh) this.networkMesh.geometry.dispose()
+    this.linkMaterial.dispose()
+    this.yellow.dispose()
+    this.red.dispose()
+    this.cyan.dispose()
+    this.geomSmall.dispose()
+    this.geomBig.dispose()
+    this.scene.dispose()
   }
 
   private onWindowResize() {
@@ -110,9 +138,8 @@ export default class AnimationView extends Vue {
     await this.loadAgents()
 
     this.$store.commit('setMessage', 'loading network')
-    const networkMesh = await this.loadNetworkMeshFromFile()
-    console.log({ networkMesh })
-    this.scene.add(networkMesh)
+    this.networkMesh = await this.loadNetworkMeshFromFile()
+    this.scene.add(this.networkMesh)
 
     this.$store.commit('setMessage', 'done')
     this.initScene()
@@ -124,6 +151,7 @@ export default class AnimationView extends Vue {
     this.animate()
   }
 
+  private networkMesh?: THREE.LineSegments
   private async loadNetworkMeshFromFile() {
     console.log('loading network', this.networkFilename)
 
@@ -152,9 +180,9 @@ export default class AnimationView extends Vue {
     }
 
     const mergedLines = BufferGeometryUtils.mergeBufferGeometries(links)
-    const networkMesh = new THREE.LineSegments(mergedLines, this.linkMaterial)
+    this.networkMesh = new THREE.LineSegments(mergedLines, this.linkMaterial)
 
-    return networkMesh
+    return this.networkMesh
   }
 
   private async loadAgents() {

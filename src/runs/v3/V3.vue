@@ -33,9 +33,11 @@ export default class App extends Vue {
 
   private mounted() {
     this.$store.commit('setFullScreen', true)
+    this.$store.commit('setSimulation', true)
   }
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
+    this.$store.commit('setSimulation', true)
   }
 
   private toggleLoaded(loaded: boolean) {
