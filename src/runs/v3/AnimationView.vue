@@ -45,8 +45,8 @@ export default class AnimationView extends Vue {
   private geomBig = new THREE.CircleBufferGeometry(300, 16)
 
   private yellow = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-  private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 })
-  private red = new THREE.MeshBasicMaterial({ color: 0xff33cc, transparent: true, opacity: 0.7 })
+  private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.8 })
+  private red = new THREE.MeshBasicMaterial({ color: 0xff33cc, transparent: true, opacity: 0.8 })
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: 0x223355 })
 
@@ -200,7 +200,7 @@ export default class AnimationView extends Vue {
         const circle = new THREE.Mesh(this.geomSmall, this.yellow)
         const initialX = event.path[0][0]
         const initialY = event.path[0][1]
-        circle.position.set(initialX, initialY, 0)
+        circle.position.set(initialX, initialY, 2)
         this.agents[id] = circle
       }
 
@@ -354,7 +354,10 @@ export default class AnimationView extends Vue {
 
     infection.position.copy(agent.position)
     if (event.status === 'infectedButNotContagious') {
-      infection.position.setZ(2)
+      infection.position.setZ(1)
+    }
+    if (event.status === 'contagious') {
+      infection.position.setZ(0)
     }
 
     this.scene.remove(agent)
