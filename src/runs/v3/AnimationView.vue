@@ -41,11 +41,12 @@ export default class AnimationView extends Vue {
   private cameraControls: any
 
   private geomSmall = new THREE.CircleBufferGeometry(100, 4)
+  private geomMed = new THREE.CircleBufferGeometry(275, 5)
   private geomBig = new THREE.CircleBufferGeometry(300, 16)
 
   private yellow = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-  private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff })
-  private red = new THREE.MeshBasicMaterial({ color: 0xff00bb })
+  private cyan = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 })
+  private red = new THREE.MeshBasicMaterial({ color: 0xff33cc, transparent: true, opacity: 0.7 })
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: 0x223355 })
 
@@ -333,7 +334,7 @@ export default class AnimationView extends Vue {
       case 'contagious':
         return new THREE.Mesh(this.geomBig, this.red)
       case 'infectedButNotContagious':
-        return new THREE.Mesh(this.geomBig, this.cyan)
+        return new THREE.Mesh(this.geomMed, this.cyan)
       default:
         return new THREE.Mesh(this.geomSmall, this.yellow)
     }
