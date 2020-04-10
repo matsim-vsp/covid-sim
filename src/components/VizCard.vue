@@ -1,7 +1,7 @@
 <template lang="pug">
 .card
-  .card-image
-  // (:style="thumbnailCSS")
+  .card-image()
+  // :style="{ 'background-image': `url(${mm})` }")
 
   .card-title {{ viz.title }}
 
@@ -30,10 +30,8 @@ export default class VizThumbnail extends Vue {
     return this.viz.url.slice(1) // 'no timestamp' // new Date(this.viz.createdAt * 1000.0).toUTCString().slice(0, -7)
   }
 
-  private get thumbnailCSS() {
-    return {
-      backgroundImage: 'url(/assets/images/v1-thumb.png)',
-    }
+  private mm() {
+    return 'assets/images/v1-thumb.png'
   }
 }
 </script>
@@ -43,12 +41,11 @@ export default class VizThumbnail extends Vue {
   display: grid;
   flex-direction: column;
   border-top: solid 0.5rem #1e5538;
-  min-height: 10rem;
-  margin-bottom: 2rem;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: auto 1fr auto;
   grid-template-columns: auto;
   opacity: 0.9;
   transition: 0.2s;
+  height: 100%;
 }
 
 .card:hover {
@@ -63,8 +60,8 @@ export default class VizThumbnail extends Vue {
   height: 12rem;
   background-size: cover;
   overflow: hidden;
-  background-color: #e8e8ea;
-  background-image: url(../assets/images/v1-thumb.png);
+  background-color: #ffffff; /*#e8e8ea;*/
+  background-image: url(../assets/images/v3-thumb.png);
 }
 
 .card .card-title {
@@ -80,7 +77,7 @@ export default class VizThumbnail extends Vue {
   margin-bottom: 0.75rem;
   margin-right: auto;
   padding: 0.5rem 0.5rem 0.75rem 0.5rem;
-  background-color: #479ccc;
+  background-color: #4499c7;
   opacity: 0.85;
 }
 
@@ -116,6 +113,18 @@ export default class VizThumbnail extends Vue {
 @media only screen and (max-width: 640px) {
   .card {
     min-height: 8rem;
+  }
+
+  .card .card-image {
+    height: 10rem;
+  }
+
+  .card .card-subtitle {
+    font-size: 1rem;
+  }
+
+  .card .card-endnotes {
+    font-size: 1rem;
   }
 }
 </style>

@@ -7,10 +7,8 @@
   .content
     .readme(v-html="readme")
 
-    h5 Available visualizations:
-
     .viz-cards
-      .one-viz(v-for="viz in links")
+      .one-viz(v-for="viz in links" :key="viz.url")
         router-link(:to="viz.url")
           viz-card(:viz="viz")
 
@@ -52,8 +50,7 @@ export default {
         {
           url: '/v4',
           title: 'School Attendance',
-          subtitle:
-            'Sending students back to kindergarten, primary and secondary school, and universities',
+          subtitle: 'The return to kindergarten, primary and secondary school, and universities',
         },
         {
           url: '/v5',
@@ -101,12 +98,26 @@ a {
 }
 
 .readme {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .viz-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 1.5rem;
+  gap: 2rem;
+}
+
+.one-viz {
+  margin-bottom: 1rem;
+}
+
+@media only screen and (max-width: 640px) {
+  .banner {
+    padding: 2rem 1rem;
+  }
+
+  .content {
+    padding: 2rem 1rem 8rem 1rem;
+  }
 }
 </style>

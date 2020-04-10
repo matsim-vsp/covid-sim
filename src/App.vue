@@ -77,16 +77,6 @@ h3 {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#nav {
-  padding: 0.5rem 1rem;
-  background-color: #648cb4;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #043b26;
-}
-
 #nav a.router-link-exact-active {
   color: #ffffff;
 }

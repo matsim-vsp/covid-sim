@@ -36,26 +36,17 @@ export default {
   color: #ffffff;
 }
 
-h2 {
-  font-size: 2.5rem;
-  font-weight: bold;
-}
-
-h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #043b26;
-}
-
-#nav a.router-link-exact-active {
-  color: #ffffff;
-}
-
 .space {
   margin: 0 1rem;
+}
+
+@media only screen and (max-width: 640px) {
+  #nav {
+    padding: 0.5rem 0.5rem;
+  }
+
+  .space {
+    margin: 0 0.6rem;
+  }
 }
 </style>
