@@ -1,12 +1,11 @@
 <template lang="pug">
 .card
-  .card-image()
-  // :style="{ 'background-image': `url(${mm})` }")
+  .card-image(:style="{'background-image': `url(${thumbnail})`}")
 
   .card-title {{ viz.title }}
 
   .card-bottom
-    .card-endnotes {{ timestamp }}
+    .card-endnotes {{ vizNumber }}
 
   .card-subtitle {{ viz.subtitle }}
 
@@ -26,12 +25,14 @@ export default class VizThumbnail extends Vue {
   @Prop({ required: true })
   private viz!: Viz
 
-  private get timestamp() {
-    return this.viz.url.slice(1) // 'no timestamp' // new Date(this.viz.createdAt * 1000.0).toUTCString().slice(0, -7)
+  private get vizNumber() {
+    return this.viz.url.slice(1)
   }
 
-  private mm() {
-    return 'assets/images/v1-thumb.png'
+  private get thumbnail() {
+    const zimg = require(`../assets/images${this.viz.url}-thumb.png`)
+
+    return zimg
   }
 }
 </script>
@@ -60,21 +61,20 @@ export default class VizThumbnail extends Vue {
   height: 12rem;
   background-size: cover;
   overflow: hidden;
-  background-color: #ffffff; /*#e8e8ea;*/
-  background-image: url(../assets/images/v3-thumb.png);
+  background-color: #e8e8ea;
 }
 
 .card .card-title {
   z-index: 2;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: bold;
   font-family: 'Roboto Slab', Roboto, Avenir, Helvetica, sans-serif;
   color: white;
   line-height: 1.9rem;
   margin-top: auto;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
   margin-right: auto;
   padding: 0.5rem 0.5rem 0.75rem 0.5rem;
   background-color: #4499c7;
@@ -85,10 +85,11 @@ export default class VizThumbnail extends Vue {
   grid-row: 3 / 4;
   grid-column: 1 / 2;
   padding: 0.5rem 1.5rem 0.25rem 0.5rem;
+  background-color: #f4f4f4;
 }
 
 .card-endnotes {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-top: -3px;
   margin-right: -0.75rem;
   text-align: right;
@@ -98,11 +99,11 @@ export default class VizThumbnail extends Vue {
 .card-subtitle {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
-  padding: 1rem 0.5rem;
+  padding: 0.5rem 0.5rem 0rem 0.5rem;
   color: #1e5538;
   background-color: #f4f4f4;
   font-weight: normal;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.3rem;
 }
 
@@ -111,12 +112,8 @@ export default class VizThumbnail extends Vue {
 }
 
 @media only screen and (max-width: 640px) {
-  .card {
-    min-height: 8rem;
-  }
-
   .card .card-image {
-    height: 10rem;
+    height: 11rem;
   }
 
   .card .card-subtitle {
