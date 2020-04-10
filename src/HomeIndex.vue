@@ -1,18 +1,18 @@
 <template lang="pug">
 #home
-  .content
+  .banner
     h2 VSP Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
+  .content
     .readme(v-html="readme")
 
     h5 Available visualizations:
-    ul
-      li: router-link(to="/v1") v1: Intervention Strategies
-      li: router-link(to="/v2") v2: Compliance Rates
-      li: router-link(to="/v3") v3: Trip Visualization
-      li: router-link(to="/v4") v4: School Attendance
-      li: router-link(to="/v5") v5: Reopening Options
+
+    .viz-cards
+      .one-viz(v-for="viz in links")
+        router-link(:to="viz.url")
+          viz-card(:viz="viz")
 
     hr
     .readme(v-html="readmeBottom")
@@ -23,30 +23,76 @@
 const readme = require('@/assets/index.md')
 const bottom = require('@/assets/index-bottom.md')
 
+import VizCard from '@/components/VizCard.vue'
+
 export default {
   name: 'Home',
-  components: {},
+  components: { VizCard },
   data: function() {
-    return { readme, readmeBottom: bottom }
+    return {
+      readme,
+      readmeBottom: bottom,
+      links: [
+        {
+          url: '/v1',
+          title: 'Intervention Strategies',
+          subtitle: 'Exploring the effects of several stay-at-home interventions.',
+        },
+        {
+          url: '/v2',
+          title: 'Compliance Rates',
+          subtitle:
+            'How COVID-19 spreads under various levels of compliance for work, shopping, leisure',
+        },
+        {
+          url: '/v3',
+          title: 'Infection Traces',
+          subtitle: 'Animation of infection spreading through the population',
+        },
+        {
+          url: '/v4',
+          title: 'School Attendance',
+          subtitle:
+            'Sending students back to kindergarten, primary and secondary school, and universities',
+        },
+        {
+          url: '/v5',
+          title: 'Reopening Options',
+          subtitle:
+            'Combinations of school reopening and people getting back to their regular activities',
+        },
+      ],
+    }
   },
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+$fancyFont: 'Roboto Slab', Roboto, Avenir, Helvetica, sans-serif;
+
 #home {
-  padding: 2rem 2rem 8rem 2rem;
   background-color: #eee;
 }
 
-.content h2 {
-  margin-bottom: 0.25rem;
+.content {
+  padding: 2rem 2rem 8rem 2rem;
 }
 
-.content h3 {
-  font-size: 1.4rem;
+.banner {
+  padding: 2rem 2rem;
+  background-color: #1e5538;
+  color: white;
+}
+
+.banner h2 {
+  margin-bottom: 0rem;
+  font-size: 1.6rem;
+}
+
+.banner h3 {
+  font-size: 1.3rem;
   font-weight: normal;
   margin-top: 0px;
-  margin-bottom: 2rem;
 }
 
 a {
@@ -56,5 +102,11 @@ a {
 
 .readme {
   margin-bottom: 2rem;
+}
+
+.viz-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
 }
 </style>

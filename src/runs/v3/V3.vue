@@ -98,7 +98,7 @@ $navHeight: 2.5rem;
 #nav {
   display: flex;
   flex-direction: row;
-  background-color: rgb(30, 85, 56); /* #648cb4; */
+  background-color: #1e5538; /* #648cb4; */
   grid-row: 1 / 2;
   grid-column: 1 / 2;
   margin: 0 0;
