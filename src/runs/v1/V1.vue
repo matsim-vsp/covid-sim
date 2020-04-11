@@ -1,19 +1,6 @@
 <template lang="pug">
 #app
   .content
-    h2 Mobility traces and the spreading of COVID-19
-    p
-      a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
-      br
-      a(href="mailto:mueller@vsp.tu-berlin.de") Sebastian Alexander Müller,&nbsp;
-      a(href="mailto:michael.balmer@senozon.com") Michael Balmer,&nbsp;
-      a(href="mailto:andreas.neumann@senozon.com") Andreas Neumann,&nbsp;
-      a(href="mailto:nagel@vsp.tu-berlin.de") Kai Nagel
-      br
-      a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin
-      | &nbsp;|&nbsp;
-      a(href="https://senozon.com/") Senozon AG
-
     .readme(v-html="readme")
 
   section-viewer.viewer(:state="state")
@@ -98,7 +85,7 @@ export default class App extends Vue {
 // ###########################################################################
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 #app {
   color: #222;
   display: flex;

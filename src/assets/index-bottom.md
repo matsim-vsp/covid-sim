@@ -1,4 +1,6 @@
-##### Other COVID-19 scenario simulations on the web
+## Other COVID-19 scenario simulations on the web
+
+Many other teams worldwide are working on COVID-19 simulations, here are a few that we are aware of.
 
 - https://ivtmobis.ethz.ch/mobis/covid19/
 

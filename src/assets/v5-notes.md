@@ -1,6 +1,6 @@
-#### Reopening Options
+## Reopening Options
 
-V5 Notes:
+Here we describe the effects of reopening society at various levels for work, school, leisure and other activities.
 
 - The simulations refer to the **Berlin** region (Berlin city plus some surroundings).
 - Berlin Reported Cases are from [RKI](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0). For many cases, a delay between infection and reporting may occur.

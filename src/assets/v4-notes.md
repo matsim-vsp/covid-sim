@@ -1,4 +1,4 @@
-#### School Attendance Scenarios
+## School Attendance Scenarios
 
 V4 attempts to replay the development so far, and explores results of various school attendance scenarios and two levels of restrictions on non-school activity:
 
