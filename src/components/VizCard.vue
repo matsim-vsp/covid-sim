@@ -4,7 +4,7 @@
 
   .card-title {{ viz.title }}
 
-  .card-bottom
+  .card-id
     .card-endnotes {{ vizNumber }}
 
   .card-subtitle {{ viz.subtitle }}
@@ -43,8 +43,8 @@ export default class VizThumbnail extends Vue {
 .card {
   display: grid;
   flex-direction: column;
-  border-top: solid 0.5rem #1e5538;
-  grid-template-rows: auto 1fr auto;
+  border-top: solid 0.5rem $bannerHighlight;
+  grid-template-rows: auto 1fr;
   grid-template-columns: auto;
   opacity: 0.9;
   transition: 0.1s;
@@ -83,25 +83,26 @@ export default class VizThumbnail extends Vue {
   opacity: 0.92;
 }
 
-.card .card-bottom {
-  grid-row: 3 / 4;
+.card .card-id {
+  grid-row: 1 / 2;
   grid-column: 1 / 2;
-  padding: 0.5rem 0.5rem 0.25rem 0.5rem;
-  background-color: #f4f4f4;
+  padding: 0rem 0.5rem 0.4rem 0.5rem;
+  background-color: $bannerHighlight;
+  z-index: 3;
+  margin: 0 0 auto auto;
 }
 
 .card-endnotes {
-  font-size: 1rem;
-  margin-top: -3px;
+  font-size: 0.8rem;
   text-align: right;
   line-height: 90%;
-  color: $bannerHighlight;
+  color: white;
 }
 
 .card-subtitle {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
-  padding: 0.5rem 0.5rem 0rem 0.5rem;
+  padding: 0.5rem 0.5rem;
   color: $bannerHighlight;
   background-color: #f4f4f4;
   font-size: 0.9rem;
