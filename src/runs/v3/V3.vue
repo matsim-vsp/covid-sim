@@ -102,7 +102,7 @@ $navHeight: 2.5rem;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
   margin: 0 0;
-  padding: 0 0.5rem 0 2rem;
+  padding: 0 1rem 0 3rem;
 
   a {
     font-weight: bold;
@@ -138,5 +138,10 @@ $navHeight: 2.5rem;
 #rview {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
+}
+@media only screen and (max-width: 768px) {
+  #nav {
+    padding-left: 1rem;
+  }
 }
 </style>
