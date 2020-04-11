@@ -27,9 +27,9 @@ export default class AnimationView extends Vue {
   private networkFilename = 'network.zip'
 
   private lightMode = {
-    background: 0xa8adad,
-    links: 0x777784,
-    susceptible: 0xffff44,
+    background: 0xdddde4,
+    links: 0x9999aa,
+    susceptible: 0x447700,
     infectedButNotContagious: 0x0077ff,
     contagious: 0xbb0044,
   }
@@ -63,7 +63,11 @@ export default class AnimationView extends Vue {
   private geomBig = new THREE.CircleBufferGeometry(300, 30)
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
-  private red = new THREE.MeshBasicMaterial({ color: this.colors.contagious, transparent: true, opacity: 0.8 })
+  private red = new THREE.MeshBasicMaterial({
+    color: this.colors.contagious,
+    transparent: true,
+    opacity: 0.8,
+  })
   private yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
   private cyan = new THREE.MeshBasicMaterial({
     color: this.colors.infectedButNotContagious,
@@ -116,7 +120,11 @@ export default class AnimationView extends Vue {
     const oldYellow = this.yellow
     const oldCyan = this.cyan
 
-    this.red = new THREE.MeshBasicMaterial({ color: this.colors.contagious, transparent: true, opacity: 0.8 })
+    this.red = new THREE.MeshBasicMaterial({
+      color: this.colors.contagious,
+      transparent: true,
+      opacity: 0.8,
+    })
     this.yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
     this.cyan = new THREE.MeshBasicMaterial({
       color: this.colors.infectedButNotContagious,
@@ -327,7 +335,12 @@ export default class AnimationView extends Vue {
     const near = 1
     const far = 50000
 
-    this.camera = new THREE.PerspectiveCamera(170, this.container.clientWidth / this.container.clientHeight, near, far)
+    this.camera = new THREE.PerspectiveCamera(
+      170,
+      this.container.clientWidth / this.container.clientHeight,
+      near,
+      far
+    )
     this.cameraControls = new this.OrbitControl.MapControls(this.camera, this.renderer.domElement)
     this.cameraControls.enablePan = true
     this.cameraControls.screenSpacePanning = true
@@ -365,7 +378,10 @@ export default class AnimationView extends Vue {
     if (elapsedSeconds >= this.nextClockUpdateTime) {
       const hour = Math.floor(elapsedSeconds / 3600)
       const minute = Math.floor(elapsedSeconds / 60) % 60
-      this.$store.commit('setMessage', (hour < 10 ? '0' : '') + hour + (minute < 10 ? ':0' : ':') + minute)
+      this.$store.commit(
+        'setMessage',
+        (hour < 10 ? '0' : '') + hour + (minute < 10 ? ':0' : ':') + minute
+      )
       this.nextClockUpdateTime += 300
     }
 
@@ -390,8 +406,10 @@ export default class AnimationView extends Vue {
       const currentProgress = elapsedSeconds - trip.timestamps[0]
       const percentComplete = (1.0 * currentProgress) / tripDuration
 
-      const worldX = trip.path[0][0] + percentComplete * (trip.path[1][0] - trip.path[0][0]) - this.midpointX
-      const worldY = trip.path[0][1] + percentComplete * (trip.path[1][1] - trip.path[0][1]) - this.midpointY
+      const worldX =
+        trip.path[0][0] + percentComplete * (trip.path[1][0] - trip.path[0][0]) - this.midpointX
+      const worldY =
+        trip.path[0][1] + percentComplete * (trip.path[1][1] - trip.path[0][1]) - this.midpointY
 
       this.agents[trip.id].position.setX(worldX)
       this.agents[trip.id].position.setY(worldY)
