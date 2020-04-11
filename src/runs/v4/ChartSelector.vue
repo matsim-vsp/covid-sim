@@ -8,13 +8,20 @@
       .myslider(v-for="measure in Object.keys(state.measures)" :key="measure")
         my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-      h5 Cumulative Infected
+      h5.cumulative Cumulative Infected
         br
         | by Day 150
       p.infected {{ prettyInfected }}
 
-    vue-plotly.plot1(:data="data" :layout="layout" :options="options")
-    vue-plotly.plot2(:data="data" :layout="loglayout" :options="options")
+    .linear-plot
+      h5 Simulated Population Health Outcomes Over Time
+      p Linear scale
+      vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
+
+    .log-plot
+      h5 Simulated Population Health Outcomes Over Time
+      p Log scale
+      vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
 
 </template>
 
@@ -37,70 +44,45 @@ export default class SectionViewer extends Vue {
   @Prop() private state!: any
 
   private currentRun: any = {}
-
   private data: any[] = []
+
   private layout = {
-    title: {
-      text: 'Status of simulated residents vs. days',
-    },
+    autosize: true,
     legend: {
       orientation: 'h',
     },
-    autosize: true,
-    height: 500,
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
       size: 12,
       color: '#000',
     },
+    margin: { l: 50, t: 10, r: 10, b: 0 },
     yaxis: {
-      // type: 'log',
       autorange: true,
     },
-    xaxis: {
-      /*
-      title: {
-        text: 'Days after outbreak begins',
-      },
-      /* font: {
-        family: 'Courier New, monospace',
-        size: 18,
-        color: '#7f7f7f'
-      } */
-    },
+    xaxis: {},
   }
 
   private loglayout = {
-    title: 'Log scale:',
     autosize: true,
     legend: {
       orientation: 'h',
     },
-    height: 500,
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
       size: 12,
       color: '#000',
     },
+    margin: { l: 50, t: 10, r: 10, b: 0 },
     yaxis: {
       type: 'log',
       autorange: true,
-    },
-    xaxis: {
-      /*
-      title: {
-        text: 'Days after outbreak begins',
-      },
-      /* font: {
-        family: 'Courier New, monospace',
-        size: 18,
-        color: '#7f7f7f'
-      } */
     },
   }
 
   private options = {
     displayModeBar: false,
+    responsive: true,
   }
 
   private currentSituation: any = {}
@@ -171,7 +153,8 @@ export default class SectionViewer extends Vue {
 
   private showPlotForCurrentSituation() {
     let lookupKey = ''
-    for (const measure of Object.keys(this.state.measures)) lookupKey += this.currentSituation[measure] + '-'
+    for (const measure of Object.keys(this.state.measures))
+      lookupKey += this.currentSituation[measure] + '-'
 
     console.log(lookupKey)
     this.currentRun = this.state.runLookup[lookupKey]
@@ -233,31 +216,17 @@ export default class SectionViewer extends Vue {
   flex-direction: row;
 }
 
-.categories {
-  display: flex;
-  flex-direction: column;
-}
-
 h5 {
-  margin-top: 2rem;
-}
-
-.sliders h5 {
   font-weight: bold;
   font-size: 18px;
-}
-
-.plot h5 {
-  color: #667883;
-  text-align: center;
-  margin-top: 5rem;
 }
 
 .pieces {
   padding: 2rem 0rem;
   display: grid;
+  width: 100%;
   grid-gap: 1rem;
-  grid-template-columns: 12rem auto;
+  grid-template-columns: 15rem 1fr;
   grid-template-rows: auto;
 }
 
@@ -273,18 +242,31 @@ h5 {
 .sliders {
   grid-column: 1 / 2;
   grid-row: 1 / 3;
+  margin-right: 3rem;
   display: flex;
   flex-direction: column;
 }
 
-.plot1 {
+.linear-plot {
+  text-align: center;
+  height: 30rem;
   grid-column: 2 / 3;
   grid-row: 1 / 2;
+  display: flex;
+  flex-direction: column;
 }
 
-.plot2 {
+.log-plot {
+  margin-top: 2rem;
+  text-align: center;
   grid-column: 2 / 3;
   grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.plotsize {
+  height: 30rem;
 }
 
 p.subhead {
@@ -302,45 +284,6 @@ p.subhead {
   padding: 1rem 0rem;
 }
 
-img {
-  height: 18rem;
-  object-fit: contain;
-}
-
-.nav-icons {
-  margin: 0.5rem 1rem;
-  font-size: 2rem;
-  color: #b9c6d1;
-}
-
-.nav-icons :hover {
-  transition: all 0.3s ease;
-  color: #667883;
-}
-
-.nav-icons.is-active {
-  color: #667883;
-}
-
-.medium-zoom {
-  padding: 0rem 1rem 1rem 0.5rem;
-}
-
-a {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.section-label {
-  font-size: 0.8rem;
-  font-weight: normal;
-  color: #0cf;
-}
-
-p.section-label :hover {
-  color: #667883;
-}
-
 .infected {
   padding-left: 0rem;
   font-weight: bold;
@@ -349,7 +292,15 @@ p.section-label :hover {
   color: rgb(151, 71, 34);
 }
 
-@media only screen and (max-width: 768px) {
+.button-choices button {
+  margin-right: 0.5rem;
+}
+
+.cumulative {
+  margin-top: 2rem;
+}
+
+@media only screen and (max-width: 640px) {
   #main-section {
     flex-direction: column;
     padding: 0 0;
@@ -362,6 +313,9 @@ p.section-label :hover {
     flex-direction: column;
   }
 
+  .linear-plot {
+    margin-top: 2rem;
+  }
   .sliders {
     width: 15rem;
   }

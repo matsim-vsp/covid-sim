@@ -29,7 +29,7 @@ export default class AnimationView extends Vue {
   private lightMode = {
     background: 0xdddde4,
     links: 0x9999aa,
-    susceptible: 0x447700,
+    susceptible: 0x333333,
     infectedButNotContagious: 0x0077ff,
     contagious: 0xbb0044,
   }
