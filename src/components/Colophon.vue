@@ -6,6 +6,7 @@
   .professor Kai Nagel, Professor
 
   .team COVID-19 Team
+
   p Billy Charlton
   p Ricardo Ewert
   p Ihab Kaddoura
@@ -14,6 +15,7 @@
   p Tilmann Schlenter
 
   .team Contact
+
   p: a(href="mailto:info@vsp.tu-berlin.de") info@vsp.tu&#8209;berlin.de
 
   .team Partners
@@ -21,7 +23,7 @@
   p: a(href='https://senozon.com' target="_blank") Senozon AG
 
   .team Supported By
-    a(href='https://bmbf.de' target="_blank")
+  a(href='https://bmbf.de' target="_blank")
     img(src="@/assets/images/bmbf-logo.png")
 
 </template>
