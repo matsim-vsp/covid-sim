@@ -21,10 +21,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles.scss';
+
 #nav {
   padding: 0.5rem 1rem;
-  background-color: #648cb4;
+  background-color: $matsimBlue;
 }
 
 #nav a {

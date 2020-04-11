@@ -5,15 +5,16 @@
     h3 COVID-19 Analysis Portal
 
   .content
-    .readme(v-html="readme")
+    .main
+      .readme(v-html="readme")
 
-    .viz-cards
-      .one-viz(v-for="viz in links" :key="viz.url")
-        router-link(:to="viz.url")
-          viz-card(:viz="viz")
+      .viz-cards
+        .one-viz(v-for="viz in links" :key="viz.url")
+          router-link(:to="viz.url")
+            viz-card(:viz="viz")
 
-    hr
-    .readme(v-html="readmeBottom")
+      .readme(v-html="readmeBottom")
+    colophon.colophon
 
 </template>
 
@@ -21,31 +22,22 @@
 const readme = require('@/assets/index.md')
 const bottom = require('@/assets/index-bottom.md')
 
+import Colophon from '@/components/Colophon.vue'
 import VizCard from '@/components/VizCard.vue'
 
 export default {
   name: 'Home',
-  components: { VizCard },
+  components: { Colophon, VizCard },
   data: function() {
     return {
       readme,
       readmeBottom: bottom,
       links: [
         {
-          url: '/v1',
-          title: 'Intervention Strategies',
-          subtitle: 'Exploring the effects of several stay-at-home interventions.',
-        },
-        {
-          url: '/v2',
-          title: 'Compliance Rates',
+          url: '/v5',
+          title: 'Reopening Options',
           subtitle:
-            'How COVID-19 spreads under various levels of compliance for work, shopping, leisure',
-        },
-        {
-          url: '/v3',
-          title: 'Infection Traces',
-          subtitle: 'Animation of infection spreading through the population',
+            'Combinations of school reopening and people getting back to their regular activities',
         },
         {
           url: '/v4',
@@ -53,10 +45,20 @@ export default {
           subtitle: 'The return to kindergarten, primary and secondary school, and universities',
         },
         {
-          url: '/v5',
-          title: 'Reopening Options',
+          url: '/v3',
+          title: 'Infection Traces',
+          subtitle: 'Animation of infection spreading through the population',
+        },
+        {
+          url: '/v2',
+          title: 'Compliance Rates',
           subtitle:
-            'Combinations of school reopening and people getting back to their regular activities',
+            'How COVID-19 spreads under various levels of compliance for work, shopping, leisure restrictions',
+        },
+        {
+          url: '/v1',
+          title: 'Intervention Strategies',
+          subtitle: 'Exploring the effects of several stay-at-home interventions.',
         },
       ],
     }
@@ -65,19 +67,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$fancyFont: 'Roboto Slab', Roboto, Avenir, Helvetica, sans-serif;
+@import '@/styles.scss';
 
 #home {
-  background-color: #eee;
+  background-color: #e4e4e4;
 }
 
 .content {
   padding: 2rem 2rem 8rem 2rem;
+  display: flex;
 }
 
 .banner {
   padding: 2rem 2rem;
-  background-color: #1e5538;
+  background-color: $bannerHighlight;
   color: white;
 }
 
@@ -98,7 +101,9 @@ a {
 }
 
 .readme {
+  margin-top: 1rem;
   margin-bottom: 3rem;
+  flex: 1;
 }
 
 .viz-cards {
@@ -111,6 +116,22 @@ a {
   margin-bottom: 1rem;
 }
 
+.preamble {
+  display: flex;
+}
+
+.colophon {
+  margin-left: 3rem;
+  padding-left: 3rem;
+  text-align: right;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+.main {
+  width: 100%;
+}
+
 @media only screen and (max-width: 640px) {
   .banner {
     padding: 2rem 1rem;
@@ -118,6 +139,11 @@ a {
 
   .content {
     padding: 2rem 1rem 8rem 1rem;
+    flex-direction: column-reverse;
+  }
+
+  .colophon {
+    display: none;
   }
 }
 </style>

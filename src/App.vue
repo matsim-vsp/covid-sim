@@ -55,6 +55,15 @@ html {
   background-color: #333;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Roboto Slab', Avenir, Helvetica, Arial, sans-serif;
+}
+
 h2 {
   font-size: 2.5rem;
   font-weight: bold;
@@ -67,7 +76,6 @@ h3 {
 
 #app {
   color: #222;
-  background-color: #eee;
   display: flex;
   flex-direction: column;
   margin: 0rem 0rem;
@@ -75,6 +83,7 @@ h3 {
   font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #e4e4e4;
 }
 
 #nav a.router-link-exact-active {

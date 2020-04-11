@@ -24,6 +24,6 @@ The best approximation to this with our options below would be:
 - **shopping** at **40%**
 - **errands & business unclear**
 
-If one assumes that the capacity of the Berlin system for critical COVID cases is about 1000, then one finds that there is awfully little room to relax restrictions.
+If one assumes that the capacity of the Berlin system for critical COVID cases is about 1000, then one finds that there is scant little room to relax restrictions.
 
 Or alternatively: The currently "blunt" restrictions would need to be replaced by something smarter.

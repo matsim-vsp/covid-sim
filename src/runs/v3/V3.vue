@@ -13,7 +13,7 @@
 
   #hover-panel(v-if="isLoaded")
     .left-side
-      img(src="@/assets/images/darkmode.png" width=40 @click='rotateColors')
+      img(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
 
     .right-side
 

@@ -101,7 +101,6 @@ export default class App extends Vue {
 <style scoped>
 #app {
   color: #222;
-  background-color: #eee;
   display: flex;
   flex-direction: column;
   margin: 0rem 0rem;

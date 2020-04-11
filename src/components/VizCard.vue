@@ -37,7 +37,9 @@ export default class VizThumbnail extends Vue {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles.scss';
+
 .card {
   display: grid;
   flex-direction: column;
@@ -45,7 +47,7 @@ export default class VizThumbnail extends Vue {
   grid-template-rows: auto 1fr auto;
   grid-template-columns: auto;
   opacity: 0.9;
-  transition: 0.2s;
+  transition: 0.1s;
   height: 100%;
 }
 
@@ -77,30 +79,30 @@ export default class VizThumbnail extends Vue {
   margin-bottom: 0;
   margin-right: auto;
   padding: 0.5rem 0.5rem 0.75rem 0.5rem;
-  background-color: #4499c7;
-  opacity: 0.85;
+  background-color: $matsimBlue;
+  opacity: 0.92;
 }
 
 .card .card-bottom {
   grid-row: 3 / 4;
   grid-column: 1 / 2;
-  padding: 0.5rem 1.5rem 0.25rem 0.5rem;
+  padding: 0.5rem 0.5rem 0.25rem 0.5rem;
   background-color: #f4f4f4;
 }
 
 .card-endnotes {
   font-size: 1rem;
   margin-top: -3px;
-  margin-right: -0.75rem;
   text-align: right;
   line-height: 90%;
+  color: $bannerHighlight;
 }
 
 .card-subtitle {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
   padding: 0.5rem 0.5rem 0rem 0.5rem;
-  color: #1e5538;
+  color: $bannerHighlight;
   background-color: #f4f4f4;
   font-weight: normal;
   font-size: 1.1rem;
