@@ -163,19 +163,14 @@ export default class App extends Vue {
 @media only screen and (max-width: 768px) {
   .content {
     padding: 0rem 1rem;
-    margin-top: 0px;
+    margin-top: 2rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    row-gap: 1rem;
   }
 
   .address-header {
     padding-left: 2rem;
-  }
-
-  .content {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    padding: 0rem 1rem;
-    margin: 1rem 0rem;
-    row-gap: 1rem;
   }
 }
 </style>

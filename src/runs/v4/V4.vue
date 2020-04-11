@@ -127,20 +127,15 @@ h2 {
 
 @media only screen and (max-width: 768px) {
   .content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
     padding: 0rem 1rem;
-    margin-top: 0px;
+    margin: 2rem 0rem;
+    row-gap: 1rem;
   }
 
   .address-header {
     padding-left: 2rem;
-  }
-
-  .content {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    padding: 0rem 1rem;
-    margin: 1rem 0rem;
-    row-gap: 1rem;
   }
 }
 </style>

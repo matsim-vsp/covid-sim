@@ -151,7 +151,8 @@ export default class SectionViewer extends Vue {
 
   private showPlotForCurrentSituation() {
     let lookupKey = ''
-    for (const measure of Object.keys(this.state.measures)) lookupKey += this.currentSituation[measure] + '-'
+    for (const measure of Object.keys(this.state.measures))
+      lookupKey += this.currentSituation[measure] + '-'
 
     this.currentRun = this.state.runLookup[lookupKey]
     if (!this.currentRun) return
@@ -314,7 +315,7 @@ p.section-label :hover {
   color: #667883;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 630px) {
   #main-section {
     flex-direction: column;
     padding: 0 0;

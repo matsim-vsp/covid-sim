@@ -162,22 +162,17 @@ h2 {
   padding-top: 1rem;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 640px) {
   .content {
-    padding: 0rem 1rem;
-    margin-top: 0px;
+    padding: 1rem 1rem;
+    margin-top: 1rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    row-gap: 1rem;
   }
 
   .address-header {
     padding-left: 2rem;
-  }
-
-  .content {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    padding: 0rem 1rem;
-    margin: 1rem 0rem;
-    row-gap: 1rem;
   }
 }
 </style>

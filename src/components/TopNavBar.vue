@@ -25,7 +25,7 @@ export default {
 @import '@/styles.scss';
 
 #nav {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 2rem;
   background-color: $matsimBlue;
 }
 

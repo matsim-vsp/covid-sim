@@ -53,20 +53,9 @@ export default {
       readmeBottom: bottom,
       links: [
         {
-          url: '/v5',
-          title: 'Reopening Options',
-          subtitle:
-            'Combinations of school reopening and people getting back to their regular activities',
-        },
-        {
-          url: '/v4',
-          title: 'School Attendance',
-          subtitle: 'The return to kindergarten, primary and secondary school, and universities',
-        },
-        {
-          url: '/v3',
-          title: 'Infection Traces',
-          subtitle: 'Animation of infection spreading through the population',
+          url: '/v1',
+          title: 'Intervention Strategies',
+          subtitle: 'Exploring the effects of several stay-at-home interventions.',
         },
         {
           url: '/v2',
@@ -75,9 +64,20 @@ export default {
             'How COVID-19 spreads under various levels of compliance for work, shopping, leisure restrictions',
         },
         {
-          url: '/v1',
-          title: 'Intervention Strategies',
-          subtitle: 'Exploring the effects of several stay-at-home interventions.',
+          url: '/v3',
+          title: 'Infection Traces',
+          subtitle: 'Animation of infection spreading through the population',
+        },
+        {
+          url: '/v4',
+          title: 'School Attendance',
+          subtitle: 'The return to kindergarten, primary and secondary school, and universities',
+        },
+        {
+          url: '/v5',
+          title: 'Reopening Options',
+          subtitle:
+            'Combinations of school reopening and people getting back to their regular activities',
         },
       ],
     }
@@ -93,12 +93,13 @@ export default {
 }
 
 .content {
-  padding: 2rem 2rem 8rem 2rem;
+  padding: 2rem 3rem 8rem 3rem;
   display: flex;
+  width: 100%;
 }
 
 .banner {
-  padding: 1.75rem 2rem 2rem 2rem;
+  padding: 1.75rem 3rem 2rem 3rem;
   background-color: $bannerHighlight;
   color: white;
 }
@@ -144,7 +145,7 @@ a {
 }
 
 .colophon {
-  margin-left: 3rem;
+  margin-left: auto;
   padding-left: 3rem;
   text-align: right;
   font-size: 0.85rem;
@@ -152,7 +153,11 @@ a {
 }
 
 .main {
-  width: 100%;
+  max-width: 64rem;
+}
+
+.main .top a {
+  font-size: 0.9rem;
 }
 
 @media only screen and (max-width: 640px) {
