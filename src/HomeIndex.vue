@@ -7,11 +7,11 @@
   .content
     .main
       .top
-        p The latest COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
+        p This site disseminates COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
         p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from recent literature and publications. This results in a virus spreading dynamics model.
 
         h2 Paper: Mobility traces and the spreading of COVID-19
-        p The virus spreading dynamics model is described in this paper. The results should be verified, but because of the current time pressure, we publish them in their current state. Recommendations for improvement are welcome.
+        p The virus spreading dynamics model is described in this paper. The results should be verified, but because of the current time pressure, we publish them in their current state. Recommendations for improvement are welcome. Published on 20th March, 2020.
 
         p
           a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
