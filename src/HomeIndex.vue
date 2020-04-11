@@ -1,7 +1,7 @@
 <template lang="pug">
 #home
   .banner
-    h2 VSP Technische Universität Berlin
+    h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
   .content
@@ -79,7 +79,7 @@ export default {
 }
 
 .banner {
-  padding: 2rem 2rem;
+  padding: 1.75rem 2rem 2rem 2rem;
   background-color: $bannerHighlight;
   color: white;
 }

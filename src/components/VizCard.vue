@@ -60,7 +60,7 @@ export default class VizThumbnail extends Vue {
 .card .card-image {
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  height: 12rem;
+  height: 10rem;
   background-size: cover;
   overflow: hidden;
   background-color: #e8e8ea;
@@ -104,8 +104,7 @@ export default class VizThumbnail extends Vue {
   padding: 0.5rem 0.5rem 0rem 0.5rem;
   color: $bannerHighlight;
   background-color: #f4f4f4;
-  font-weight: normal;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   line-height: 1.3rem;
 }
 
