@@ -125,7 +125,7 @@ export default class App extends Vue {
 }
 
 .content {
-  padding: 0rem 2rem;
+  padding: 0rem 3rem;
   margin: 2rem 0rem;
   padding-bottom: 1rem;
   width: 100%;
