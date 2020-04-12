@@ -59,9 +59,9 @@ export default {
         },
         {
           url: '/v2',
-          title: 'Compliance Rates',
+          title: 'Adherence Rates',
           subtitle:
-            'How COVID-19 spreads under various levels of compliance for work, shopping, leisure restrictions',
+            'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions',
         },
         {
           url: '/v3',
@@ -70,14 +70,14 @@ export default {
         },
         {
           url: '/v4',
-          title: 'School Attendance',
-          subtitle: 'The return to kindergarten, primary and secondary school, and universities',
+          title: 'School Reopening Options (1)',
+          subtitle: 'Explore re-opening of kindergarten, primary and secondary school, and universities',
         },
         {
           url: '/v5',
-          title: 'Reopening Options',
+          title: 'School Reopening Options (2)',
           subtitle:
-            'Combinations of school reopening and people getting back to their regular activities',
+            'Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
         },
       ],
     }

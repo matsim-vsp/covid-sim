@@ -1,6 +1,6 @@
-## Examining noncompliance rates for stay-at-home orders
+## Examining adherence rates for stay-at-home orders
 
-The interventions below depict disease spread following various levels of adherence or compliance with stay-at-home policies.
+The interventions below depict disease spread following various levels of adherence with stay-at-home policies.
 
 - The simulations refer to the **Berlin** region (Berlin city plus some surroundings).
 - The simulations begin on Day 0, with 40 infected individuals in the population.
