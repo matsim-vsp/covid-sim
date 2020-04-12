@@ -21,7 +21,7 @@ The best approximation to this with our options below would be:
 - **leisure** at **20%** (with the assumption that parks do not contribute that much to infections)
 - **work** at **60%**
 - **shopping** at **40%**
-- **errands & business at **40%**
+- **errands & business** at **40%**
 
 If one assumes that the capacity of the Berlin system for critical COVID cases is about 1000, then one finds that there is scant little room to relax restrictions.
 
