@@ -285,7 +285,7 @@ h5 {
   text-align: center;
   height: 30rem;
   grid-column: 2 / 3;
-  grid-row: 1 / 2;
+  grid-row: 2 / 3;
   display: flex;
   flex-direction: column;
 }
@@ -294,7 +294,7 @@ h5 {
   margin-top: 2rem;
   text-align: center;
   grid-column: 2 / 3;
-  grid-row: 2 / 3;
+  grid-row: 1 / 2;
   display: flex;
   flex-direction: column;
 }

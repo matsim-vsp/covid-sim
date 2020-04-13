@@ -10,20 +10,10 @@
         p This site disseminates COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
         p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from recent literature and publications. This results in a virus spreading dynamics model.
 
-        h2 Paper: Mobility traces and the spreading of COVID-19
-        p The virus spreading dynamics model is described in this paper. The results should be verified, but because of the current time pressure, we publish them in their current state. Recommendations for improvement are welcome. Published on 20th March, 2020.
+        h2 Method: Mobility traces and the spreading of COVID-19
+        p The virus spreading dynamics model is described in this paper:&nbsp;
 
-        p
           a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
-          br
-          a(href="mailto:mueller@vsp.tu-berlin.de") Sebastian Alexander Müller,&nbsp;
-          a(href="mailto:michael.balmer@senozon.com") Michael Balmer,&nbsp;
-          a(href="mailto:andreas.neumann@senozon.com") Andreas Neumann,&nbsp;
-          a(href="mailto:nagel@vsp.tu-berlin.de") Kai Nagel
-          br
-          a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin
-          | &nbsp;|&nbsp;
-          a(href="https://senozon.com/") Senozon AG
 
       .readme(v-html="readme")
 
@@ -34,6 +24,16 @@
 
       .readme(v-html="readmeBottom")
     colophon.colophon
+
+<!--          br-->
+<!--          a(href="mailto:mueller@vsp.tu-berlin.de") Sebastian Alexander Müller,&nbsp;-->
+<!--          a(href="mailto:michael.balmer@senozon.com") Michael Balmer,&nbsp;-->
+<!--          a(href="mailto:andreas.neumann@senozon.com") Andreas Neumann,&nbsp;-->
+<!--          a(href="mailto:nagel@vsp.tu-berlin.de") Kai Nagel-->
+<!--          br-->
+<!--          a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin-->
+<!--          | &nbsp;|&nbsp;-->
+<!--          a(href="https://senozon.com/") Senozon AG-->
 
 </template>
 
