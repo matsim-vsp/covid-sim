@@ -368,8 +368,6 @@ export default class AnimationView extends Vue {
     }
   }
 
-  private newInfectionsToAnimate: any = new Set()
-
   private animate() {
     const elapsedSeconds = this.timeFactor * (this.clock.getElapsedTime() + this.pauseTime)
 
@@ -402,17 +400,6 @@ export default class AnimationView extends Vue {
       if (elapsedSeconds > trip.timestamps[1]) {
         this.currentTrips.delete(tripNumber)
         continue
-      }
-
-      // zooom new infections
-      for (const infection of this.newInfectionsToAnimate) {
-        const inf = infection as THREE.Mesh
-        if (inf.scale.x > 1.0) {
-          inf.scale.set(inf.scale.x - 0.01, inf.scale.x - 0.01, 1.0)
-        } else {
-          inf.scale.set(1, 1, 1)
-          this.newInfectionsToAnimate.delete(infection)
-        }
       }
 
       const tripDuration = trip.timestamps[1] - trip.timestamps[0]
@@ -458,8 +445,7 @@ export default class AnimationView extends Vue {
 
     infection.position.copy(agent.position)
     if (event.status === 'infectedButNotContagious') {
-      infection.scale.set(3, 3, 1)
-      this.newInfectionsToAnimate.add(infection)
+      infection.position.setZ(1)
     }
     if (event.status === 'contagious') {
       infection.position.setZ(0)
