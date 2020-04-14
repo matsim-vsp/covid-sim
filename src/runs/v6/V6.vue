@@ -1,9 +1,11 @@
 <template lang="pug">
 #app
   .content
+    h1 {{ city }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
     .readme(v-html="readme")
 
-  section-viewer.viewer(:state="state")
+  .view-section
+    section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
 
 </template>
 
@@ -32,7 +34,14 @@ export default class App extends Vue {
   private readme = require('@/assets/v6-notes.md')
   private berlinCSV = require('@/assets/berlin-cases.csv').default
 
+  private city = 'berlin'
+  private plusminus = 'p5'
+
   public async mounted() {
+    this.city = this.$route.params.city
+    this.plusminus = this.$route.params.pm
+    console.log(this.city, this.plusminus)
+
     await this.loadDataInBackground()
   }
 
@@ -124,10 +133,6 @@ export default class App extends Vue {
 </script>
 
 <style scoped>
-#app {
-  max-width: 70rem;
-}
-
 .address-header {
   margin-top: 4rem;
   background-color: #d3e1ee;
@@ -149,15 +154,20 @@ export default class App extends Vue {
   padding: 0rem 3rem;
   margin: 2rem 0rem;
   padding-bottom: 1rem;
-  width: 100%;
+  max-width: 100%; /* 70em; */
   display: flex;
   flex-direction: column;
+}
+
+.view-section {
+  width: 100%;
+  background-color: white;
 }
 
 .viewer {
   padding: 0rem 2rem;
   margin: 0rem 0rem;
-  width: 100%;
+  max-width: 70em;
   display: flex;
   flex-direction: column;
 }

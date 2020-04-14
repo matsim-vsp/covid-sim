@@ -29,15 +29,15 @@
       h5.cumulative Cumulative Infected
       p.infected {{ prettyInfected }}
 
-    .linear-plot
-      h5 Simulated Population Health Outcomes Over Time
-      p Linear scale
-      vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
-
     .log-plot
       h5 Simulated Population Health Outcomes Over Time
       p Log scale
       vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
+
+    .linear-plot
+      h5 Simulated Population Health Outcomes Over Time
+      p Linear scale
+      vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
 </template>
 
@@ -58,6 +58,9 @@ import MySlider from './SelectWidget.vue'
 })
 export default class SectionViewer extends Vue {
   @Prop() private state!: any
+
+  @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private plusminus!: string
 
   private isBase = false
   private data: any[] = []
@@ -137,7 +140,8 @@ export default class SectionViewer extends Vue {
   }
 
   private async loadZipData() {
-    this.zipLoader = new ZipLoader(this.state.publicPath + 'v6-data-berlin.zip')
+    const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
+    this.zipLoader = new ZipLoader(filepath)
 
     await this.zipLoader.load()
 
@@ -158,13 +162,18 @@ export default class SectionViewer extends Vue {
   }
 
   private testErrors() {
-    const low = [
+    const blow: any = [
       {
         x: [1, 2, 3],
         y: [1, 1.1, 1.2],
         name: 'low',
       },
     ]
+
+    const z = blow[0].x.length
+
+    console.log({ z })
+
     const high = [
       {
         x: [1, 2, 3, 4],
@@ -173,7 +182,10 @@ export default class SectionViewer extends Vue {
       },
     ]
 
-    const answer = this.generateErrorBars(low, high)
+    blow[0].x.push(55)
+    console.log({ z })
+
+    const answer = this.generateErrorBars(blow, high)
     console.log({ answer })
   }
 
@@ -184,17 +196,19 @@ export default class SectionViewer extends Vue {
       const lowLen = low[metric].x.length
       const highLen = high[metric].x.length
 
+      console.log({ lowLen, highLen })
+
       let newX: any[] = []
       newX = newX.concat(low[metric]['x'])
-      if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
-      if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
+      // if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
+      // if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
 
       newX = newX.concat(high[metric]['x'].slice().reverse()) // slice copies, then reverse reverses in-place.
 
       let newY: any[] = []
       newY = newY.concat(low[metric]['y'])
-      if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
-      if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
+      // if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
+      // if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
 
       newY = newY.concat(high[metric]['y'].slice().reverse()) // slice copies, then reverse reverses in-place.
 
@@ -216,24 +230,22 @@ export default class SectionViewer extends Vue {
 
   private async runChanged() {
     // maybe we already did the calcs
-    if (this.loadedSeriesData[this.currentRunLow.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRunLow.RunId]
+    if (this.loadedSeriesData[this.currentRun.RunId]) {
+      this.data = this.loadedSeriesData[this.currentRun.RunId]
       this.updateTotalInfected()
       return
     }
 
     // load both datasets
-    const csvLow: any[] = await this.loadCSV(this.currentRunLow)
-    const csvHigh: any[] = await this.loadCSV(this.currentRunHigh)
+    const csvLow: any[] = await this.loadCSV(this.currentRun)
     const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
-    const timeSeriesesHigh = this.generateSeriesFromCSVData(csvHigh)
 
-    const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
+    // const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
 
     // cache the result
-    this.loadedSeriesData[this.currentRunLow.RunId] = errorBars
+    this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
 
-    this.data = errorBars
+    this.data = timeSeriesesLow
     this.updateTotalInfected()
   }
 
@@ -250,7 +262,7 @@ export default class SectionViewer extends Vue {
 
   private showPlotForCurrentSituation() {
     if (this.isBase) {
-      this.currentRunLow = { RunId: 'sz0' }
+      this.currentRun = { RunId: 'sz0' }
       this.runChanged()
       return
     }
@@ -259,22 +271,23 @@ export default class SectionViewer extends Vue {
     for (const measure of Object.keys(this.state.measures))
       lookupKey += this.currentSituation[measure] + '-'
 
-    const lookup = lookupKey.replace('undefined', 'BAND')
-    const lookupLow = lookupKey.replace('undefined', '-5')
-    const lookupHigh = lookupKey.replace('undefined', '5')
+    const suffix = this.plusminus === 'p5' ? '5' : '-5'
+    const lookup = lookupKey.replace('undefined', suffix)
+    // const lookupLow = lookupKey.replace('undefined', '-5')
+    // const lookupHigh = lookupKey.replace('undefined', '5')
 
-    console.log(lookupKey, lookupLow, lookupHigh)
+    console.log(lookup) // , lookupLow, lookupHigh)
 
-    this.currentRunLow = this.state.runLookup[lookupLow]
-    this.currentRunHigh = this.state.runLookup[lookupHigh]
+    this.currentRun = this.state.runLookup[lookup]
+    // this.currentRunHigh = this.state.runLookup[lookupHigh]
 
-    if (!this.currentRunLow) return
+    if (!this.currentRun) return
 
     this.runChanged()
   }
 
-  private currentRunLow: any = {}
-  private currentRunHigh: any = {}
+  private currentRun: any = {}
+  // private currentRunHigh: any = {}
 
   private unpack(rows: any[], key: any) {
     let v = rows.map(function(row) {
@@ -320,7 +333,7 @@ export default class SectionViewer extends Vue {
     }
 
     // Add Berlin "Reported Cases"
-    // serieses.push(this.state.berlinCases)
+    if (this.city === 'berlin') serieses.push(this.state.berlinCases)
 
     return serieses
   }
@@ -370,9 +383,9 @@ h5 {
 
 .linear-plot {
   text-align: center;
-  height: 30rem;
+  height: 40rem;
   grid-column: 2 / 3;
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   display: flex;
   flex-direction: column;
 }
@@ -380,8 +393,9 @@ h5 {
 .log-plot {
   margin-top: 2rem;
   text-align: center;
+  height: 40rem;
   grid-column: 2 / 3;
-  grid-row: 3 / 4;
+  grid-row: 2 / 3;
   display: flex;
   flex-direction: column;
 }
