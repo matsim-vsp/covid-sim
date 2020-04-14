@@ -146,6 +146,7 @@ export default class SectionViewer extends Vue {
 
   private async loadZipData() {
     const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
+    console.log(filepath)
     this.zipLoader = new ZipLoader(filepath)
 
     await this.zipLoader.load()

@@ -1,8 +1,8 @@
 <template lang="pug">
 #app
+  h1.which-city {{ cityCap }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
   .content
-    h1 {{ city }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
-    .readme(v-html="readme")
+    .readme(v-html="runNotes")
 
   .view-section
     section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
@@ -31,11 +31,23 @@ export default class App extends Vue {
     publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
 
-  private readme = require('@/assets/v6-notes.md')
+  private readme: any = {
+    berlin: require('@/assets/v6-notes.md'),
+    munich: require('@/assets/v6-notes.md'),
+  }
+
+  private get runNotes() {
+    return this.readme[this.city]
+  }
+
+  private get cityCap() {
+    return this.city.toUpperCase()
+  }
+
   private berlinCSV = require('@/assets/berlin-cases.csv').default
 
-  private city = 'berlin'
-  private plusminus = 'p5'
+  private city = ''
+  private plusminus = ''
 
   public async mounted() {
     this.city = this.$route.params.city
@@ -133,7 +145,9 @@ export default class App extends Vue {
 // ###########################################################################
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles.scss';
+
 .address-header {
   margin-top: 4rem;
   background-color: #d3e1ee;
@@ -175,6 +189,14 @@ export default class App extends Vue {
 
 h2 {
   padding-top: 1rem;
+}
+
+.which-city {
+  background-color: $bannerHighlight;
+  padding: 0.5rem 3rem;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 640px) {
