@@ -48,7 +48,8 @@ export default class App extends Vue {
   private async loadDataInBackground() {
     this.state.berlinCases = this.prepareBerlinData()
 
-    const parsed = await this.loadCSVData(this.state.publicPath + 'v6-info-berlin.txt')
+    const filepath = this.state.publicPath + 'v6-info-' + this.city + '.txt'
+    const parsed = await this.loadCSVData(filepath)
     const matrix = await this.generateScenarioMatrix(parsed)
   }
 

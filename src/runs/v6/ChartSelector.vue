@@ -3,7 +3,7 @@
   .pieces
     .sliders
       h5 Select Scenario
-      .button-choices.buttons.has-addons
+      .button-choices.buttons.has-addons(v-if="city==='berlin'")
         button.button.is-small(
           :class="{'is-link': !isBase, 'is-selected': !isBase}"
           :key="'do-something'" @click='setBase(false)') Alternatives
@@ -61,6 +61,11 @@ export default class SectionViewer extends Vue {
 
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private plusminus!: string
+
+  @Watch('city') switchCity() {
+    this.loadedSeriesData = {}
+    this.loadZipData()
+  }
 
   private isBase = false
   private data: any[] = []
