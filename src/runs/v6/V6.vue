@@ -124,6 +124,10 @@ export default class App extends Vue {
 </script>
 
 <style scoped>
+#app {
+  max-width: 70rem;
+}
+
 .address-header {
   margin-top: 4rem;
   background-color: #d3e1ee;
