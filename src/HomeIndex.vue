@@ -71,18 +71,6 @@ export default {
           subtitle:
             'Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
         },
-        {
-          url: '/v6',
-          title: 'Berlin Reopening Options (3)',
-          subtitle:
-            'Berlin - Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
-        },
-        {
-          url: '/v7',
-          title: 'Munich Reopening Options',
-          subtitle:
-            'Munich - Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
-        },
       ],
     }
   },
