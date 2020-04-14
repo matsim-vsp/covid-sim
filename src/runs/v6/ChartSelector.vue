@@ -114,6 +114,7 @@ export default class SectionViewer extends Vue {
     nSusceptible: 'Susceptible',
     nInfectedButNotContagious: 'Infected, not contagious',
     nContagious: 'Contagious',
+    nShowingSymptoms: 'Showing Symptoms',
     nSeriouslySick: 'Seriously Sick',
     nCritical: 'Critical',
     nTotalInfected: 'Total Infected',
@@ -147,6 +148,7 @@ export default class SectionViewer extends Vue {
   private fillcolors: any = {
     Susceptible: '#0000ff',
     'Seriously Sick': '#cc2211',
+    'Showing Symptoms': '#00ffff',
     'Infected Cumulative': '#f791cf',
     'Infected, not contagious': '#ee8800',
     Critical: '#882299',
