@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeIndex from '@/HomeIndex.vue'
-import AnimationView from '@/runs/v3/AnimationView.vue'
 
 Vue.use(VueRouter)
 
@@ -35,6 +34,16 @@ const routes = [
     path: '/v5',
     name: 'V5',
     component: () => import(/* webpackChunkName: "V5" */ '@/runs/v5/V5.vue'),
+  },
+  {
+    path: '/v6',
+    name: 'V6',
+    component: () => import(/* webpackChunkName: "V5" */ '@/runs/v6/V6.vue'),
+  },
+  {
+    path: '/v7',
+    name: 'V7',
+    component: () => import(/* webpackChunkName: "V5" */ '@/runs/v7/V7.vue'),
   },
 ]
 

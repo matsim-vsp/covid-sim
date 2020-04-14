@@ -8,7 +8,7 @@ Here we describe the effects of reopening society at various levels for work, sc
 - On **day 35**, work, shopping, errands and business are reduced, corresponding to the currently valid "Kontaktsperre"; the percentage of work, leisure, shopping, errands and business activities still occuring after **day 35** can be set.
 - Educational facilities can be reopened on **day 63** (corresonding to the 20th of April).
 
-[Google COVID-19 Mobility report](google.com/covid19/mobility) shows for Berlin after day 35:
+[Google COVID-19 Mobility report](https://google.com/covid19/mobility) shows for Berlin after day 35:
 
 - retail & recreation down by about 70% (i.e. at about **30%**)
 - grocery & pharmacy down by about 20% (i.e. at about **80%**)

@@ -23,17 +23,8 @@
             viz-card(:viz="viz")
 
       .readme(v-html="readmeBottom")
-    colophon.colophon
 
-<!--          br-->
-<!--          a(href="mailto:mueller@vsp.tu-berlin.de") Sebastian Alexander Müller,&nbsp;-->
-<!--          a(href="mailto:michael.balmer@senozon.com") Michael Balmer,&nbsp;-->
-<!--          a(href="mailto:andreas.neumann@senozon.com") Andreas Neumann,&nbsp;-->
-<!--          a(href="mailto:nagel@vsp.tu-berlin.de") Kai Nagel-->
-<!--          br-->
-<!--          a(href="https://vsp.tu-berlin.de/") VSP Technische Universität Berlin-->
-<!--          | &nbsp;|&nbsp;-->
-<!--          a(href="https://senozon.com/") Senozon AG-->
+    colophon.colophon
 
 </template>
 
@@ -71,13 +62,26 @@ export default {
         {
           url: '/v4',
           title: 'School Reopening Options (1)',
-          subtitle: 'Explore re-opening of kindergarten, primary and secondary school, and universities',
+          subtitle:
+            'Explore re-opening of kindergarten, primary and secondary school, and universities',
         },
         {
           url: '/v5',
           title: 'School Reopening Options (2)',
           subtitle:
             'Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
+        },
+        {
+          url: '/v6',
+          title: 'Berlin Reopening Options (3)',
+          subtitle:
+            'Berlin - Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
+        },
+        {
+          url: '/v7',
+          title: 'Munich Reopening Options',
+          subtitle:
+            'Munich - Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
         },
       ],
     }

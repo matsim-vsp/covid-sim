@@ -29,11 +29,6 @@
       h5.cumulative Cumulative Infected
       p.infected {{ prettyInfected }}
 
-    .band-plot
-      h5 ZZSimulated Population Health Outcomes Over Time
-      p Linear scale
-      vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
-
     .linear-plot
       h5 Simulated Population Health Outcomes Over Time
       p Linear scale
@@ -128,6 +123,8 @@ export default class SectionViewer extends Vue {
   }
 
   private mounted() {
+    this.testErrors()
+
     this.loadZipData()
   }
 
@@ -147,29 +144,100 @@ export default class SectionViewer extends Vue {
     this.runChanged()
   }
 
-  private generateErrorBars() {}
+  private fillcolors: any = {
+    Susceptible: '#0000ff',
+    'Seriously Sick': '#cc2211',
+    'Infected Cumulative': '#f791cf',
+    'Infected, not contagious': '#ee8800',
+    Critical: '#882299',
+    Recovered: '#eedd44',
+    Contagious: '#00aa00',
+    'Total Infected': '#a65628',
+  }
+
+  private testErrors() {
+    const low = [
+      {
+        x: [1, 2, 3],
+        y: [1, 1.1, 1.2],
+        name: 'low',
+      },
+    ]
+    const high = [
+      {
+        x: [1, 2, 3, 4],
+        y: [3, 4, 5, 6],
+        name: 'high',
+      },
+    ]
+
+    const answer = this.generateErrorBars(low, high)
+    console.log({ answer })
+  }
+
+  private generateErrorBars(low: any[], high: any[]): any[] {
+    console.log({ low, high })
+
+    for (let metric = 0; metric < low.length; metric++) {
+      const lowLen = low[metric].x.length
+      const highLen = high[metric].x.length
+
+      let newX: any[] = []
+      newX = newX.concat(low[metric]['x'])
+      if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
+      if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
+
+      newX = newX.concat(high[metric]['x'].slice().reverse()) // slice copies, then reverse reverses in-place.
+
+      let newY: any[] = []
+      newY = newY.concat(low[metric]['y'])
+      if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
+      if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
+
+      newY = newY.concat(high[metric]['y'].slice().reverse()) // slice copies, then reverse reverses in-place.
+
+      low[metric].x = newX
+      low[metric].y = newY
+
+      const color = this.fillcolors[low[metric]['name']]
+      // scatterplot fakes a look like error bands
+      low[metric].fillcolor = color + '20'
+      low[metric].showlegend = true
+      low[metric].line = { color: color }
+      low[metric].fill = 'tozerox'
+      low[metric].type = 'scatter'
+    }
+
+    console.log({ errorBar: low })
+    return low
+  }
 
   private async runChanged() {
+    // maybe we already did the calcs
     if (this.loadedSeriesData[this.currentRunLow.RunId]) {
-      this.generateErrorBars()
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
+      this.data = this.loadedSeriesData[this.currentRunLow.RunId]
       this.updateTotalInfected()
       return
     }
 
-    const csv: any[] = await this.loadCSV(this.currentRun)
-    const timeSerieses = this.generateSeriesFromCSVData(csv)
+    // load both datasets
+    const csvLow: any[] = await this.loadCSV(this.currentRunLow)
+    const csvHigh: any[] = await this.loadCSV(this.currentRunHigh)
+    const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
+    const timeSeriesesHigh = this.generateSeriesFromCSVData(csvHigh)
+
+    const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
 
     // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
+    this.loadedSeriesData[this.currentRunLow.RunId] = errorBars
 
-    this.data = timeSerieses
+    this.data = errorBars
     this.updateTotalInfected()
   }
 
   private updateTotalInfected() {
     const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-    this.state.cumulativeInfected = infectedCumulative.y[infectedCumulative.y.length - 1]
+    this.state.cumulativeInfected = Math.max(...infectedCumulative.y)
   }
 
   private sliderChanged(measure: any, value: any) {
@@ -180,7 +248,7 @@ export default class SectionViewer extends Vue {
 
   private showPlotForCurrentSituation() {
     if (this.isBase) {
-      this.currentRun = { RunId: 'sz0' }
+      this.currentRunLow = { RunId: 'sz0' }
       this.runChanged()
       return
     }
@@ -212,13 +280,14 @@ export default class SectionViewer extends Vue {
       return row[key] // * 4
     })
 
+    /*
     v = v.slice(0, 150)
 
     // maybe the sim ended early - go out to 150 anyway
     if (v.length < 150) {
       v.push(key === 'day' ? 150 : v[v.length - 1])
     }
-
+    */
     return v
   }
 
@@ -249,7 +318,7 @@ export default class SectionViewer extends Vue {
     }
 
     // Add Berlin "Reported Cases"
-    serieses.push(this.state.berlinCases)
+    // serieses.push(this.state.berlinCases)
 
     return serieses
   }
@@ -275,7 +344,7 @@ h5 {
   display: grid;
   width: 100%;
   grid-gap: 1rem;
-  grid-template-columns: 17rem 1fr;
+  grid-template-columns: auto 1fr;
   grid-template-rows: auto;
 }
 
@@ -290,17 +359,9 @@ h5 {
 
 .sliders {
   grid-column: 1 / 2;
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   margin-right: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.band-plot {
-  text-align: center;
-  height: 30rem;
-  grid-column: 2 / 3;
-  grid-row: 1 / 2;
+  width: 17rem;
   display: flex;
   flex-direction: column;
 }
