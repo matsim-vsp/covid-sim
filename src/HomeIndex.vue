@@ -46,7 +46,8 @@ export default {
         {
           url: '/v1',
           title: 'Intervention Strategies',
-          subtitle: 'Exploring the effects of several stay-at-home interventions (results from 24-25/mar).',
+          subtitle:
+            'Exploring the effects of several stay-at-home interventions (results from 24-25/mar).',
         },
         {
           url: '/v2',
@@ -62,7 +63,8 @@ export default {
         {
           url: '/v4',
           title: 'School Reopening Options (1)',
-          subtitle: 'Explore re-opening of kindergarten, primary and secondary school, and universities (results from 1/apr).',
+          subtitle:
+            'Explore re-opening of kindergarten, primary and secondary school, and universities (results from 1/apr).',
         },
         {
           url: '/v5',
@@ -80,7 +82,7 @@ export default {
 @import '@/styles.scss';
 
 #home {
-  background-color: #e4e4e4;
+  background-color: $paleBackground;
 }
 
 .content {

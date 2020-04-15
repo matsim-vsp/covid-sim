@@ -2,7 +2,6 @@
 #main-section
   .pieces
     .sliders
-      h5 Select Scenario
       .button-choices.buttons.has-addons(v-if="city==='berlin'")
         button.button.is-small(
           :class="{'is-link': !isBase, 'is-selected': !isBase}"
@@ -364,10 +363,10 @@ h5 {
 }
 
 .pieces {
-  padding: 2rem 0rem;
+  padding: 0rem 0rem;
   display: grid;
   width: 100%;
-  grid-gap: 1rem;
+  grid-gap: 0rem;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto;
 }
@@ -393,7 +392,7 @@ h5 {
 .log-plot {
   background-color: #f4f4f4;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  margin: 0 0 1rem 0;
+  margin: 0 0 1rem 1rem;
   text-align: center;
   grid-column: 2 / 3;
   grid-row: 2 / 3;
@@ -405,6 +404,7 @@ h5 {
 .linear-plot {
   background-color: #f4f4f4;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  margin: 1rem 0 1rem 1rem;
   text-align: center;
   grid-column: 2 / 3;
   grid-row: 3 / 4;
@@ -444,8 +444,15 @@ p.subhead {
   color: rgb(151, 71, 34);
 }
 
+.button-choices {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
 .button-choices button {
-  margin-right: 0.5rem;
+  width: 100%;
 }
 
 .title {
@@ -461,7 +468,7 @@ p.subhead {
 .g1 {
   padding: 0rem 1rem 1rem 0.5rem;
   margin-bottom: 2rem;
-  border: 1px solid #ccf;
+  border: 1px solid #aaa;
   border-radius: 4px;
 }
 
@@ -476,14 +483,23 @@ p.subhead {
     margin: 0 0rem;
   }
 
+  p.infected {
+    margin-bottom: 1rem;
+  }
+
   .pieces {
     padding: 1rem 1rem;
     display: flex;
     flex-direction: column;
   }
 
+  .log-plot {
+    margin-left: 0;
+  }
+
   .linear-plot {
     margin-top: 2rem;
+    margin-left: 0;
   }
   .sliders {
     width: 15rem;

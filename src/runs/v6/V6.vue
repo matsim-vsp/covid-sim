@@ -4,10 +4,13 @@
   .content
     .readme(v-html="topNotes")
 
+    h3.select-scenario Select Scenario:
+
   .view-section
     section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
 
   .content(v-if="bottomNotes")
+    h3 Further Notes
     .readme(v-html="bottomNotes")
 
 </template>
@@ -66,6 +69,7 @@ export default class App extends Vue {
   private plusminus = ''
 
   public async mounted() {
+    console.log({ route: this.$route })
     this.city = this.$route.params.city
     this.plusminus = this.$route.params.pm
     console.log(this.city, this.plusminus)
@@ -184,13 +188,17 @@ export default class App extends Vue {
 .content {
   padding: 0rem 3rem;
   margin: 2rem 0rem;
-  padding-bottom: 1rem;
   max-width: 70em;
   display: flex;
   flex-direction: column;
 }
 
+.content h3.select-scenario {
+  margin-bottom: 0;
+}
+
 .view-section {
+  padding-left: 1rem;
   width: 100%;
 }
 
@@ -217,6 +225,10 @@ export default class App extends Vue {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
     row-gap: 1rem;
+  }
+
+  .view-section {
+    padding-left: 0;
   }
 
   .address-header {

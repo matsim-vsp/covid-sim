@@ -10,8 +10,6 @@ Here we depict the effects of reopening society at various levels for work, scho
 
 {{PLOTS}}
 
-### Further notes
-
 [Google COVID-19 Mobility report](https://google.com/covid19/mobility) shows for Berlin after day 35:
 
 - retail & recreation down by about 70% (i.e. at about **30%**)

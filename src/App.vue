@@ -31,7 +31,8 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import '@/styles.scss';
 @import '~bulma/css/bulma.css';
 
 html {
@@ -83,7 +84,7 @@ h3 {
   font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #e4e4e4;
+  background-color: $paleBackground;
 }
 
 #nav a.router-link-exact-active {
