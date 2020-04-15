@@ -1,11 +1,11 @@
 <template lang="pug">
 #app
-  h1.which-city {{ cityCap }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
+  h1.which-city {{ cityCap }}
   .content
     .readme(v-html="runNotes")
 
   .view-section
-    section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
+    section-viewer.viewer(:state="state" :city="city")
 
 </template>
 
@@ -47,12 +47,9 @@ export default class App extends Vue {
   private berlinCSV = require('@/assets/berlin-cases.csv').default
 
   private city = ''
-  private plusminus = ''
 
   public async mounted() {
     this.city = this.$route.params.city
-    this.plusminus = this.$route.params.pm
-    console.log(this.city, this.plusminus)
 
     await this.loadDataInBackground()
   }

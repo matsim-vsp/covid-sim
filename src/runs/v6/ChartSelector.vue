@@ -60,7 +60,6 @@ export default class SectionViewer extends Vue {
   @Prop() private state!: any
 
   @Prop({ required: true }) private city!: string
-  @Prop({ required: true }) private plusminus!: string
 
   @Watch('city') switchCity() {
     this.loadedSeriesData = {}
@@ -69,6 +68,9 @@ export default class SectionViewer extends Vue {
 
   private isBase = false
   private data: any[] = []
+
+  private currentRunLow: any = {}
+  private currentRunHigh: any = {}
 
   private layout = {
     autosize: true,
@@ -168,17 +170,13 @@ export default class SectionViewer extends Vue {
   }
 
   private testErrors() {
-    const blow: any = [
+    const low: any = [
       {
         x: [1, 2, 3],
         y: [1, 1.1, 1.2],
         name: 'low',
       },
     ]
-
-    const z = blow[0].x.length
-
-    console.log({ z })
 
     const high = [
       {
@@ -188,10 +186,7 @@ export default class SectionViewer extends Vue {
       },
     ]
 
-    blow[0].x.push(55)
-    console.log({ z })
-
-    const answer = this.generateErrorBars(blow, high)
+    const answer = this.generateErrorBars(low, high)
     console.log({ answer })
   }
 
@@ -206,15 +201,15 @@ export default class SectionViewer extends Vue {
 
       let newX: any[] = []
       newX = newX.concat(low[metric]['x'])
-      // if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
-      // if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
+      if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
+      if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
 
       newX = newX.concat(high[metric]['x'].slice().reverse()) // slice copies, then reverse reverses in-place.
 
       let newY: any[] = []
       newY = newY.concat(low[metric]['y'])
-      // if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
-      // if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
+      if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
+      if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
 
       newY = newY.concat(high[metric]['y'].slice().reverse()) // slice copies, then reverse reverses in-place.
 
@@ -236,22 +231,24 @@ export default class SectionViewer extends Vue {
 
   private async runChanged() {
     // maybe we already did the calcs
-    if (this.loadedSeriesData[this.currentRun.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
+    if (this.loadedSeriesData[this.currentRunLow.RunId]) {
+      this.data = this.loadedSeriesData[this.currentRunLow.RunId]
       this.updateTotalInfected()
       return
     }
 
     // load both datasets
-    const csvLow: any[] = await this.loadCSV(this.currentRun)
+    const csvLow: any[] = await this.loadCSV(this.currentRunLow)
+    const csvHigh: any[] = await this.loadCSV(this.currentRunHigh)
     const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
+    const timeSeriesesHigh = this.generateSeriesFromCSVData(csvHigh)
 
-    // const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
+    const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
 
     // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
+    this.loadedSeriesData[this.currentRunLow.RunId] = errorBars
 
-    this.data = timeSeriesesLow
+    this.data = errorBars
     this.updateTotalInfected()
   }
 
@@ -268,7 +265,7 @@ export default class SectionViewer extends Vue {
 
   private showPlotForCurrentSituation() {
     if (this.isBase) {
-      this.currentRun = { RunId: 'sz0' }
+      this.currentRunLow = { RunId: 'sz0' }
       this.runChanged()
       return
     }
@@ -277,38 +274,25 @@ export default class SectionViewer extends Vue {
     for (const measure of Object.keys(this.state.measures))
       lookupKey += this.currentSituation[measure] + '-'
 
-    const suffix = this.plusminus === 'p5' ? '5' : '-5'
-    const lookup = lookupKey.replace('undefined', suffix)
-    // const lookupLow = lookupKey.replace('undefined', '-5')
-    // const lookupHigh = lookupKey.replace('undefined', '5')
+    const lookup = lookupKey.replace('undefined', 'BAND')
+    const lookupLow = lookupKey.replace('undefined', '-5')
+    const lookupHigh = lookupKey.replace('undefined', '5')
 
-    console.log(lookup) // , lookupLow, lookupHigh)
+    console.log(lookupLow, lookupHigh)
 
-    this.currentRun = this.state.runLookup[lookup]
-    // this.currentRunHigh = this.state.runLookup[lookupHigh]
+    this.currentRunLow = this.state.runLookup[lookupLow]
+    this.currentRunHigh = this.state.runLookup[lookupHigh]
 
-    if (!this.currentRun) return
+    if (!this.currentRunLow) return
 
     this.runChanged()
   }
-
-  private currentRun: any = {}
-  // private currentRunHigh: any = {}
 
   private unpack(rows: any[], key: any) {
     let v = rows.map(function(row) {
       if (key === 'day') return row[key]
       return row[key] // * 4
     })
-
-    /*
-    v = v.slice(0, 150)
-
-    // maybe the sim ended early - go out to 150 anyway
-    if (v.length < 150) {
-      v.push(key === 'day' ? 150 : v[v.length - 1])
-    }
-    */
     return v
   }
 
@@ -339,7 +323,7 @@ export default class SectionViewer extends Vue {
     }
 
     // Add Berlin "Reported Cases"
-    if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+    // if (this.city === 'berlin') serieses.push(this.state.berlinCases)
 
     return serieses
   }
