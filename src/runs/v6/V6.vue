@@ -1,6 +1,11 @@
 <template lang="pug">
 #app
-  h1.which-city {{ cityCap }}
+  .city-picker
+    router-link.which-city(v-for="zcity in cities"
+      :key="zcity" :class="{'selected': zcity.toLowerCase()===city.toLowerCase()}"
+      :to="'/v6/' + zcity.toLowerCase()")
+      h1 {{ zcity }}
+
   .content
     .readme(v-html="topNotes")
 
@@ -18,7 +23,7 @@
 import YAML from 'yaml'
 import Papa from 'papaparse'
 
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import SectionViewer from '@/runs/v6/ChartSelector.vue'
 
 @Component({
@@ -35,12 +40,22 @@ export default class App extends Vue {
     publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
 
+  private get cities() {
+    return ['Berlin', 'Munich']
+  }
+
   private readme: any = {
     berlin: require('@/assets/v6-notes.md'),
     munich: require('@/assets/v6-notes.md'),
   }
 
   private plotTag = '{{PLOTS}}'
+
+  @Watch('$route') async routeChanged(to: any, from: any) {
+    console.log(to)
+    await this.loadDataInBackground()
+    this.city = to.params.city
+  }
 
   private get topNotes() {
     const notes = this.readme[this.city]
@@ -193,12 +208,31 @@ export default class App extends Vue {
   flex-direction: column;
 }
 
-.which-city {
+.city-picker {
+  display: flex;
   background-color: $bannerHighlight;
-  padding: 0.5rem 3rem;
-  color: white;
+  padding: 0.3rem 3rem 0 3rem;
+}
+
+.which-city {
+  padding: 0rem 2rem 0.2rem 2rem;
+  margin-top: 0.1rem;
   font-size: 1.2rem;
   font-weight: bold;
+  text-transform: capitalize;
+}
+
+a.which-city {
+  color: #bbb;
+}
+
+.selected {
+  padding-top: 0.1rem;
+  background-color: $paleBackground;
+}
+
+a.selected {
+  color: black;
 }
 
 .bottom {
