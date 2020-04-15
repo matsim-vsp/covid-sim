@@ -36,6 +36,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "V5" */ '@/runs/v5/V5.vue'),
   },
   {
+    path: '/v6',
+    redirect: '/v6/berlin/m5',
+  },
+  {
     path: '/v6/:city/:pm',
     name: 'V6b',
     component: () => import(/* webpackChunkName: "V6b" */ '@/runs/v6/V6.vue'),

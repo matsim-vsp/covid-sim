@@ -21,7 +21,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import store from '@/store/index.ts'
+
+import store from '@/store'
 import AnimationView from '@/runs/v3/AnimationView.vue'
 
 @Component({

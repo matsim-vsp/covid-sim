@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import ZipLoader from 'zip-loader'
 
-import store from '@/store/index.ts'
+import store from '@/store'
 import { ColorScheme, Health } from '@/Interfaces'
 
 interface Trip {
