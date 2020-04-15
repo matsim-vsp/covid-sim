@@ -218,9 +218,9 @@ export default class SectionViewer extends Vue {
 
       const color = this.fillcolors[low[metric]['name']]
       // scatterplot fakes a look like error bands
-      low[metric].fillcolor = color + '40'
+      low[metric].fillcolor = color + '20'
       low[metric].showlegend = true
-      low[metric].line = { color: color + 'a0' }
+      low[metric].line = { color: color }
       low[metric].fill = 'tozerox'
       low[metric].type = 'scatter'
     }
