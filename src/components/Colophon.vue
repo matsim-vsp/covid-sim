@@ -12,7 +12,7 @@
   p Ihab Kaddoura
   p Sebastian Müller
   p Christian Rakow
-  p Tilmann Schlenter
+  p Tilmann Schlenther
 
   .team Contact
 
