@@ -12,7 +12,7 @@
   p Ihab Kaddoura
   p Sebastian Müller
   p Christian Rakow
-  p Tilmann Schlenther
+  p Tilmann Schlenter
 
   .team Contact
 
@@ -20,7 +20,7 @@
 
   .team Partners
 
-  p: a(href='https://senozon.com' target="_blank") Senozon AG
+  p: a(href='https://senozon.com' target="_blank") Senozon Deutschland GmbH
 
   .team Supported By
   a(href='https://bmbf.de' target="_blank")
