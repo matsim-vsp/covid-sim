@@ -1,17 +1,15 @@
 <template lang="pug">
 #app
-  h1.which-city {{ cityCap }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
+  h1.which-city {{ cityCap }}
   .content
     .readme(v-html="topNotes")
 
-    h3.select-scenario Select Scenario:
+    .view-section
+      section-viewer.viewer(:state="state" :city="city")
 
-  .view-section
-    section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
-
-  .content(v-if="bottomNotes")
-    h3 Further Notes
-    .readme(v-html="bottomNotes")
+    .bottom(v-if="bottomNotes")
+      h3 Further Notes
+      .readme(v-html="bottomNotes")
 
 </template>
 
@@ -43,8 +41,11 @@ export default class App extends Vue {
   }
 
   private plotTag = '{{PLOTS}}'
+
   private get topNotes() {
     const notes = this.readme[this.city]
+    if (!notes) return ''
+
     const i = notes.indexOf(this.plotTag)
 
     if (i < 0) return notes
@@ -53,6 +54,8 @@ export default class App extends Vue {
 
   private get bottomNotes() {
     const notes = this.readme[this.city]
+    if (!notes) return ''
+
     const i = notes.indexOf(this.plotTag)
 
     if (i < 0) return ''
@@ -66,13 +69,11 @@ export default class App extends Vue {
   private berlinCSV = require('@/assets/berlin-cases.csv').default
 
   private city = ''
-  private plusminus = ''
+  private plusminus = '-5'
 
   public async mounted() {
     console.log({ route: this.$route })
     this.city = this.$route.params.city
-    this.plusminus = this.$route.params.pm
-    console.log(this.city, this.plusminus)
 
     await this.loadDataInBackground()
   }
@@ -168,26 +169,9 @@ export default class App extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-.address-header {
-  margin-top: 4rem;
-  background-color: #d3e1ee;
-  padding: 3rem 10rem;
-}
-
-.address-header h2 {
-  font-size: 2.5rem;
-  font-weight: bold;
-}
-
-.address-header h3 {
-  font-size: 1rem;
-  font-weight: normal;
-  margin-top: -0.5rem;
-}
-
 .content {
   padding: 0rem 3rem;
-  margin: 2rem 0rem;
+  margin: 2rem 0 4rem 0;
   max-width: 70em;
   display: flex;
   flex-direction: column;
@@ -198,12 +182,11 @@ export default class App extends Vue {
 }
 
 .view-section {
-  padding-left: 1rem;
   width: 100%;
 }
 
 .viewer {
-  padding: 0rem 2rem;
+  padding: 0rem 0rem;
   margin: 0rem 0rem;
   max-width: 70em;
   display: flex;
@@ -218,6 +201,10 @@ export default class App extends Vue {
   font-weight: bold;
 }
 
+.bottom {
+  margin-top: 2rem;
+}
+
 @media only screen and (max-width: 640px) {
   .content {
     padding: 1rem 1rem;
@@ -227,12 +214,8 @@ export default class App extends Vue {
     row-gap: 1rem;
   }
 
-  .view-section {
-    padding-left: 0;
-  }
-
-  .address-header {
-    padding-left: 2rem;
+  .which-city {
+    padding: 0.5rem 1rem;
   }
 }
 </style>

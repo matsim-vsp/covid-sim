@@ -1,42 +1,56 @@
 <template lang="pug">
-#main-section
-  .pieces
-    .sliders
-      .button-choices.buttons.has-addons(v-if="city==='berlin'")
+#charts
+  .preamble
+    h3.select-scenario Select Scenario:
+
+    .variation
+      b Variation
+      .variation-choices.buttons.has-addons
         button.button.is-small(
-          :class="{'is-link': !isBase, 'is-selected': !isBase}"
-          :key="'do-something'" @click='setBase(false)') Alternatives
+          :class="{'is-link': plusminus === '-5', 'is-selected': plusminus === '-5'}"
+          @click="setPlusMinus('-5')") -5
         button.button.is-small(
-          :class="{'is-link': isBase, 'is-selected': isBase}"
-          :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
+          :class="{'is-link': plusminus === '5', 'is-selected': plusminus === '5'}"
+          @click="setPlusMinus('5')") +5
 
-      .selection-widgets(:class="{'totally-disabled': isBase}")
-        .g1
-          h5.title Percentage of out-of-home activities still occuring after day 35
-          p.subhead By type (%)
+  #main-section
+    .pieces
+      .sliders
+        .button-choices.buttons.has-addons(v-if="city==='berlin'")
+          button.button.is-small(
+            :class="{'is-link': !isBase, 'is-selected': !isBase}"
+            :key="'do-something'" @click='setBase(false)') Alternatives
+          button.button.is-small(
+            :class="{'is-link': isBase, 'is-selected': isBase}"
+            :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
 
-          .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
-            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+        .selection-widgets(:class="{'totally-disabled': isBase}")
+          .g1
+            h5.title Percentage of out-of-home activities still occuring after day 35
+            p.subhead By type (%)
 
-        .g1
-          h5.title Reopening of educational facilities at day 63
-          p.subhead Students Returning (%):
+            .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
+              my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-          .myslider(v-for="measure in Object.keys(state.measures).slice(1,4)" :key="measure")
-            my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+          .g1
+            h5.title Reopening of educational facilities at day 63
+            p.subhead Students Returning (%):
 
-      h5.cumulative Cumulative Infected
-      p.infected {{ prettyInfected }}
+            .myslider(v-for="measure in Object.keys(state.measures).slice(1,4)" :key="measure")
+              my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-    .log-plot
-      h5 Simulated Population Health Outcomes Over Time
-      p Log scale
-      vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
+        h5.cumulative Cumulative Infected
+        p.infected {{ prettyInfected }}
 
-    .linear-plot
-      h5 Simulated Population Health Outcomes Over Time
-      p Linear scale
-      vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
+      .log-plot
+        h5 Simulated Population Health Outcomes Over Time
+        p Log scale
+        vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
+
+      .linear-plot
+        h5 Simulated Population Health Outcomes Over Time
+        p Linear scale
+        vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
 </template>
 
@@ -59,14 +73,20 @@ export default class SectionViewer extends Vue {
   @Prop() private state!: any
 
   @Prop({ required: true }) private city!: string
-  @Prop({ required: true }) private plusminus!: string
 
   @Watch('city') switchCity() {
     this.loadedSeriesData = {}
     this.loadZipData()
   }
 
+  @Watch('plusminus') switchPlusMinus() {
+    console.log('now we are', this.plusminus)
+    this.showPlotForCurrentSituation()
+  }
+
   private isBase = false
+  private plusminus = '-5'
+
   private data: any[] = []
 
   private layout = {
@@ -117,6 +137,10 @@ export default class SectionViewer extends Vue {
     this.showPlotForCurrentSituation()
   }
 
+  private setPlusMinus(value: string) {
+    this.plusminus = value
+  }
+
   private currentSituation: any = {}
   private loadedSeriesData: any = {}
   private zipLoader: any
@@ -135,8 +159,6 @@ export default class SectionViewer extends Vue {
   }
 
   private mounted() {
-    this.testErrors()
-
     this.loadZipData()
   }
 
@@ -280,7 +302,7 @@ export default class SectionViewer extends Vue {
     for (const measure of Object.keys(this.state.measures))
       lookupKey += this.currentSituation[measure] + '-'
 
-    const suffix = this.plusminus === 'p5' ? '5' : '-5'
+    const suffix = this.plusminus === '5' ? '5' : '-5'
     const lookup = lookupKey.replace('undefined', suffix)
     // const lookupLow = lookupKey.replace('undefined', '-5')
     // const lookupHigh = lookupKey.replace('undefined', '5')
@@ -440,7 +462,8 @@ p.subhead {
   padding-left: 0rem;
   font-weight: bold;
   font-size: 2rem;
-  margin-top: -0.5rem;
+  margin-top: -1rem;
+  margin-left: 1rem;
   color: rgb(151, 71, 34);
 }
 
@@ -473,7 +496,26 @@ p.subhead {
 }
 
 .cumulative {
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+.preamble {
+  display: flex;
+  flex-direction: row;
   margin-top: 2rem;
+}
+
+.variation {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+
+.variation-choices {
+  padding: 0 0;
 }
 
 @media only screen and (max-width: 640px) {
@@ -488,7 +530,7 @@ p.subhead {
   }
 
   .pieces {
-    padding: 1rem 1rem;
+    padding: 1rem 0rem;
     display: flex;
     flex-direction: column;
   }

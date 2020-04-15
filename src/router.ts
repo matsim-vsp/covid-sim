@@ -37,22 +37,16 @@ const routes = [
   },
   {
     path: '/v6',
-    redirect: '/v6/berlin/m5',
+    redirect: '/v6/berlin',
+  },
+  {
+    path: '/v6/:city',
+    name: 'V6',
+    component: () => import(/* webpackChunkName: "V6" */ '@/runs/v6/V6.vue'),
   },
   {
     path: '/v6/:city/:pm',
-    name: 'V6b',
-    component: () => import(/* webpackChunkName: "V6b" */ '@/runs/v6/V6.vue'),
-    /* props: (route: any) => {
-      return {
-        city: route.params.city,
-      }
-    },*/
-  },
-  {
-    path: '/v6m',
-    name: 'V6m',
-    component: () => import(/* webpackChunkName: "V6m" */ '@/runs/v7/V7.vue'),
+    redirect: '/v6/:city',
   },
 ]
 
