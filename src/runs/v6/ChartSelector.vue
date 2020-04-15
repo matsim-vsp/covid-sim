@@ -85,6 +85,8 @@ export default class SectionViewer extends Vue {
       autorange: true,
     },
     xaxis: {},
+    plot_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8',
   }
 
   private loglayout = {
@@ -102,6 +104,8 @@ export default class SectionViewer extends Vue {
       type: 'log',
       autorange: true,
     },
+    plot_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8',
   }
 
   private options = {
@@ -350,7 +354,6 @@ export default class SectionViewer extends Vue {
 
 <style scoped>
 #main-section {
-  background-color: white;
   display: flex;
   flex-direction: row;
 }
@@ -387,23 +390,31 @@ h5 {
   flex-direction: column;
 }
 
-.linear-plot {
-  text-align: center;
-  height: 40rem;
-  grid-column: 2 / 3;
-  grid-row: 3 / 4;
-  display: flex;
-  flex-direction: column;
-}
-
 .log-plot {
-  margin-top: 2rem;
+  background-color: #f4f4f4;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  margin: 0 0 1rem 0;
   text-align: center;
-  height: 40rem;
   grid-column: 2 / 3;
   grid-row: 2 / 3;
   display: flex;
   flex-direction: column;
+  border: 1px solid #ccc;
+}
+
+.linear-plot {
+  background-color: #f4f4f4;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  text-align: center;
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+}
+
+h5 {
+  margin-top: 0.5rem;
 }
 
 .plotsize {

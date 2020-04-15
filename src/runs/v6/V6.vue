@@ -2,10 +2,13 @@
 #app
   h1.which-city {{ cityCap }} / {{ plusminus === 'p5' ? '+5' : '-5' }}
   .content
-    .readme(v-html="runNotes")
+    .readme(v-html="topNotes")
 
   .view-section
     section-viewer.viewer(:state="state" :city="city" :plusminus="plusminus")
+
+  .content(v-if="bottomNotes")
+    .readme(v-html="bottomNotes")
 
 </template>
 
@@ -36,8 +39,21 @@ export default class App extends Vue {
     munich: require('@/assets/v6-notes.md'),
   }
 
-  private get runNotes() {
-    return this.readme[this.city]
+  private plotTag = '{{PLOTS}}'
+  private get topNotes() {
+    const notes = this.readme[this.city]
+    const i = notes.indexOf(this.plotTag)
+
+    if (i < 0) return notes
+    return notes.substring(0, i)
+  }
+
+  private get bottomNotes() {
+    const notes = this.readme[this.city]
+    const i = notes.indexOf(this.plotTag)
+
+    if (i < 0) return ''
+    return notes.substring(i + this.plotTag.length)
   }
 
   private get cityCap() {
@@ -169,14 +185,13 @@ export default class App extends Vue {
   padding: 0rem 3rem;
   margin: 2rem 0rem;
   padding-bottom: 1rem;
-  max-width: 100%; /* 70em; */
+  max-width: 70em;
   display: flex;
   flex-direction: column;
 }
 
 .view-section {
   width: 100%;
-  background-color: white;
 }
 
 .viewer {
@@ -185,10 +200,6 @@ export default class App extends Vue {
   max-width: 70em;
   display: flex;
   flex-direction: column;
-}
-
-h2 {
-  padding-top: 1rem;
 }
 
 .which-city {
