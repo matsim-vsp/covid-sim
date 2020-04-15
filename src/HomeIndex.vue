@@ -46,30 +46,29 @@ export default {
         {
           url: '/v1',
           title: 'Intervention Strategies',
-          subtitle: 'Exploring the effects of several stay-at-home interventions.',
+          subtitle: 'Exploring the effects of several stay-at-home interventions (results from 24-25/mar).',
         },
         {
           url: '/v2',
           title: 'Adherence Rates',
           subtitle:
-            'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions',
+            'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions (results from 27-28/mar).',
         },
         {
           url: '/v3',
           title: 'Infection Traces',
-          subtitle: 'Animation of infection spreading through the population',
+          subtitle: 'Animation of infection spreading through the population.',
         },
         {
           url: '/v4',
           title: 'School Reopening Options (1)',
-          subtitle:
-            'Explore re-opening of kindergarten, primary and secondary school, and universities',
+          subtitle: 'Explore re-opening of kindergarten, primary and secondary school, and universities (results from 1/apr).',
         },
         {
           url: '/v5',
           title: 'School Reopening Options (2)',
           subtitle:
-            'Select adherence rates for stay-at-home and re-opening of kindergarten/schools/universities',
+            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities (results from 3-6/apr).',
         },
       ],
     }
