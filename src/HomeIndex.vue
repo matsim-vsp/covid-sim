@@ -4,27 +4,28 @@
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
-  .content
-    .main
-      .top
-        p This site disseminates COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
-        p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from recent literature and publications. This results in a virus spreading dynamics model.
-
-        h2 Method: Mobility traces and the spreading of COVID-19
-        p The virus spreading dynamics model is described in this paper:&nbsp;
-
-          a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
-
-      .readme(v-html="readme")
-
-      .viz-cards
-        .one-viz(v-for="viz in links" :key="viz.url")
-          router-link(:to="viz.url")
-            viz-card(:viz="viz")
-
-      .readme(v-html="readmeBottom")
-
+  .page-area
     colophon.colophon
+
+    .content
+      .main
+        .top
+          p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from recent literature and publications. This results in a virus spreading dynamics model.
+          p This site disseminates COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
+
+          h2 Method: Mobility traces and the spreading of COVID-19
+          p The virus spreading dynamics model is described in this paper:&nbsp;
+
+            a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835
+
+        .readme(v-html="readme")
+
+        .viz-cards
+          .one-viz(v-for="viz in links" :key="viz.url")
+            router-link(:to="viz.url")
+              viz-card(:viz="viz")
+
+        .readme(v-html="readmeBottom")
 
 </template>
 
@@ -94,6 +95,7 @@ export default {
 }
 
 .content {
+  flex: 1;
   padding: 2rem 3rem 8rem 3rem;
   display: flex;
   width: 100%;
@@ -146,11 +148,10 @@ a {
 }
 
 .colophon {
-  margin-left: auto;
-  padding-left: 3rem;
+  padding: 2rem 2rem 1rem 5rem;
   text-align: right;
   font-size: 0.85rem;
-  margin-top: 1rem;
+  background-color: white;
 }
 
 .main {
@@ -159,6 +160,11 @@ a {
 
 .main .top a {
   font-size: 0.9rem;
+}
+
+.page-area {
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 @media only screen and (max-width: 640px) {

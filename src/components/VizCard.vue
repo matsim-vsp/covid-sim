@@ -43,6 +43,7 @@ export default class VizThumbnail extends Vue {
 .card {
   display: grid;
   flex-direction: column;
+  border: solid 1px #ccc;
   border-top: solid 0.5rem $bannerHighlight;
   grid-template-rows: auto 1fr;
   grid-template-columns: auto;
