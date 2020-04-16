@@ -113,7 +113,7 @@ export default class App extends Vue {
     }
 
     const series = {
-      name: 'Berlin Reported (Cumul.)',
+      name: 'Berlin Infections (RKI)',
       x: [...Array(cases.length).keys()].slice(1), // range
       y: cases,
       line: {
