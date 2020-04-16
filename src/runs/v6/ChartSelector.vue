@@ -60,6 +60,7 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
+import moment from 'moment'
 
 import MySlider from './SelectWidget.vue'
 
@@ -76,6 +77,7 @@ export default class SectionViewer extends Vue {
 
   private MAX_DAYS = 200
   private plusminus = '-5'
+  private simStart = { year: 2020, month: 2, day: 16 } // ('20200216', 'YYYYMMDD')
 
   @Watch('city') private switchCity() {
     this.loadedSeriesData = {}
@@ -106,7 +108,10 @@ export default class SectionViewer extends Vue {
       title: 'Population',
       autorange: true,
     },
-    xaxis: {},
+    xaxis: {
+      range: ['2020-02-16', '2020-08-31'],
+      type: 'date',
+    },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
   }
@@ -123,6 +128,10 @@ export default class SectionViewer extends Vue {
       color: '#000',
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
+    xaxis: {
+      range: ['2020-02-16', '2020-08-31'],
+      type: 'date',
+    },
     yaxis: {
       type: 'log',
       autorange: true,
@@ -364,10 +373,22 @@ export default class SectionViewer extends Vue {
     return z.data
   }
 
+  private calculateDatefromSimulationDay(day: number) {
+    const shiftDays = this.plusminus === '-5' ? -5 : 5
+    const date = moment('2020-02-16')
+      .add(day + shiftDays, 'days')
+      .format('YYYY-MM-DD')
+    return date
+  }
+
   private generateSeriesFromCSVData(data: any[]) {
     const serieses = []
 
-    const x: number[] = this.unpack(data, 'day')
+    const days: number[] = this.unpack(data, 'day')
+    console.log({ days })
+    const x = days.map(d => this.calculateDatefromSimulationDay(d))
+
+    console.log({ x })
 
     for (const column of Object.keys(this.labels)) {
       const name = this.labels[column]

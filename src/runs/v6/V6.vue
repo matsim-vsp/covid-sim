@@ -22,6 +22,7 @@
 // ###########################################################################
 import YAML from 'yaml'
 import Papa from 'papaparse'
+import * as moment from 'moment'
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import SectionViewer from '@/runs/v6/ChartSelector.vue'
@@ -101,20 +102,33 @@ export default class App extends Vue {
     // Our simulation start date is 2020.02.16 based on school closures 13.March
     // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
     // Thus we begin Berlin data with 2 cases.
-    const data = Papa.parse(this.berlinCSV, { header: true, dynamicTyping: true }).data
+    const data = Papa.parse(this.berlinCSV, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
 
-    const cases = []
+    console.log({ data })
+
+    const dates: any = []
+    const cases: any = []
+    let cumulative = 0
+
+    console.log('fetched berlin data:', data.length)
 
     // pull the cases field out of the CSV
-    let cumulative = 0
-    for (let i = 0; i < data.length; i++) {
-      cumulative += data[i].cases
+    for (const datapoint of data) {
+      const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
+
+      dates.push(day)
+
+      cumulative += datapoint.cases
       cases.push(cumulative)
     }
 
     const series = {
       name: 'Berlin Infections (RKI)',
-      x: [...Array(cases.length).keys()].slice(1), // range
+      x: dates,
       y: cases,
       line: {
         dash: 'dot',
