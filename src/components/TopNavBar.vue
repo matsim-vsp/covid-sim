@@ -1,6 +1,6 @@
 <template lang="pug">
 #me
-  router-link.space(to="/") Home
+  router-link.space.home(to="/") Home
   | |
   router-link.space(to="/v1") V1
   | |
@@ -36,6 +36,14 @@ export default {
 #nav a {
   font-weight: bold;
   color: #043b26;
+}
+
+#nav a.router-link-active.home {
+  color: #043b26;
+}
+
+#nav a.router-link-exact-active.home {
+  color: #ffffff;
 }
 
 #nav a.router-link-active {
