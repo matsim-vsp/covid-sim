@@ -2,7 +2,7 @@
 #colophon-content
   .logo(style="width: 100%;")
     a(href='https://www.vsp.tu-berlin.de' target="_blank")
-      img(src="@/assets/images/vsp-logo.png")
+      img(src="@/assets/images/tu-logo.png")
   .professor Kai Nagel, Professor
 
   .team COVID-19 Team
@@ -13,6 +13,10 @@
   p Sebastian Müller
   p Christian Rakow
   p Tilmann Schlenther
+
+  .team MATSim-EpiSim
+
+  p: a(href="https://github.com/matsim-org/matsim-episim") Source code
 
   .team Contact
 
