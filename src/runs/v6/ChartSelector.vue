@@ -74,18 +74,20 @@ export default class SectionViewer extends Vue {
 
   @Prop({ required: true }) private city!: string
 
-  @Watch('city') switchCity() {
+  private MAX_DAYS = 200
+  private plusminus = '-5'
+
+  @Watch('city') private switchCity() {
     this.loadedSeriesData = {}
     this.loadZipData()
   }
 
-  @Watch('plusminus') switchPlusMinus() {
+  @Watch('plusminus') private switchPlusMinus() {
     console.log('now we are', this.plusminus)
     this.showPlotForCurrentSituation()
   }
 
   private isBase = false
-  private plusminus = '-5'
 
   private data: any[] = []
 
@@ -330,17 +332,15 @@ export default class SectionViewer extends Vue {
   private unpack(rows: any[], key: any) {
     let v = rows.map(function(row) {
       if (key === 'day') return row[key]
-      return row[key] // * 4
+      return row[key]
     })
 
-    /*
-    v = v.slice(0, 150)
+    v = v.slice(0, this.MAX_DAYS)
 
     // maybe the sim ended early - go out to 150 anyway
-    if (v.length < 150) {
-      v.push(key === 'day' ? 150 : v[v.length - 1])
+    if (v.length < this.MAX_DAYS) {
+      v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
     }
-    */
     return v
   }
 
