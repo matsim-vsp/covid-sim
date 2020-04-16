@@ -72,12 +72,14 @@ export default {
           subtitle:
             'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities (results from 3-6/apr).',
         },
+        /*
         {
           url: '/v6',
           title: 'Berlin and Munich: Reopening Options (3)',
           subtitle:
             'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities (results from 3-6/apr).',
         },
+        */
       ],
     }
   },
