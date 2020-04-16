@@ -77,10 +77,6 @@ export default class App extends Vue {
     return notes.substring(i + this.plotTag.length)
   }
 
-  private get cityCap() {
-    return this.city.toUpperCase()
-  }
-
   private berlinCSV = require('@/assets/berlin-cases.csv').default
 
   private city = ''

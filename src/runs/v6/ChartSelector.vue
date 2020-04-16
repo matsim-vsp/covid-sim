@@ -43,12 +43,12 @@
         p.infected {{ prettyInfected }}
 
       .log-plot
-        h5 Simulated Population Health Outcomes Over Time
+        h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
         p Log scale
         vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
 
       .linear-plot
-        h5 Simulated Population Health Outcomes Over Time
+        h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
         p Linear scale
         vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
@@ -101,6 +101,7 @@ export default class SectionViewer extends Vue {
     },
     margin: { l: 50, t: 10, r: 10, b: 0 },
     yaxis: {
+      title: 'Population',
       autorange: true,
     },
     xaxis: {},
@@ -110,6 +111,7 @@ export default class SectionViewer extends Vue {
 
   private loglayout = {
     autosize: true,
+    showlegend: true,
     legend: {
       orientation: 'h',
     },
@@ -118,10 +120,11 @@ export default class SectionViewer extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { l: 50, t: 10, r: 10, b: 0 },
+    margin: { t: 5, r: 10, b: 0, l: 60 },
     yaxis: {
       type: 'log',
       autorange: true,
+      title: 'Population (log scale)',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
@@ -139,6 +142,10 @@ export default class SectionViewer extends Vue {
 
   private setPlusMinus(value: string) {
     this.plusminus = value
+  }
+
+  private get cityCap() {
+    return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
   }
 
   private currentSituation: any = {}
@@ -412,7 +419,7 @@ h5 {
 }
 
 .log-plot {
-  background-color: #f4f4f4;
+  background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
   margin: 0 0 1rem 1rem;
   text-align: center;
@@ -424,7 +431,7 @@ h5 {
 }
 
 .linear-plot {
-  background-color: #f4f4f4;
+  background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
   margin: 1rem 0 1rem 1rem;
   text-align: center;
