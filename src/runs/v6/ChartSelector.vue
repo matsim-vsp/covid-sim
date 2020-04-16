@@ -171,6 +171,8 @@ export default class SectionViewer extends Vue {
     this.loadZipData()
   }
 
+  private zipCache: any = {}
+
   private get prettyInfected() {
     if (!this.state.cumulativeInfected) return ''
 
@@ -179,13 +181,19 @@ export default class SectionViewer extends Vue {
   }
 
   private async loadZipData() {
-    const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
-    console.log(filepath)
-    this.zipLoader = new ZipLoader(filepath)
-
-    await this.zipLoader.load()
+    // check cache first!
+    if (this.zipCache[this.city]) {
+      console.log('using cached zip for!', this.city)
+      this.zipLoader = this.zipCache[this.city]
+    } else {
+      // load the zip from file
+      const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
+      this.zipLoader = new ZipLoader(filepath)
+      await this.zipLoader.load()
+    }
 
     console.log('zip loaded!')
+    this.zipCache[this.city] = this.zipLoader
     this.runChanged()
   }
 
