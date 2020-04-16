@@ -93,7 +93,7 @@ export default class VizThumbnail extends Vue {
 }
 
 .card-endnotes {
-  font-size: 0.8rem;
+  font-size: 1rem;
   text-align: right;
   line-height: 90%;
   color: white;
