@@ -98,11 +98,12 @@ export default class App extends Vue {
   }
 
   private prepareBerlinData() {
+    // Our simulation start date is 2020.02.16 based on school closures 13.March
+    // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
+    // Thus we begin Berlin data with 2 cases.
     const data = Papa.parse(this.berlinCSV, { header: true, dynamicTyping: true }).data
 
-    // 14 days of zero cases in Berlin before the RKI data begins
-    const zeroDays = 14
-    const cases = new Array(zeroDays).fill(0)
+    const cases = []
 
     // pull the cases field out of the CSV
     let cumulative = 0
