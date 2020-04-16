@@ -16,7 +16,7 @@
   #main-section
     .pieces
       .sliders
-        .button-choices.buttons.has-addons(v-if="city==='berlin'")
+        .button-choices.buttons.has-addons
           button.button.is-small(
             :class="{'is-link': !isBase, 'is-selected': !isBase}"
             :key="'do-something'" @click='setBase(false)') Alternatives
@@ -374,9 +374,8 @@ export default class SectionViewer extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    const shiftDays = this.plusminus === '-5' ? -5 : 5
     const date = moment('2020-02-16')
-      .add(day + shiftDays, 'days')
+      .add(day, 'days')
       .format('YYYY-MM-DD')
     return date
   }
