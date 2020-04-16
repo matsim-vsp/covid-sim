@@ -26,14 +26,14 @@
 
         .selection-widgets(:class="{'totally-disabled': isBase}")
           .g1
-            h5.title Percentage of out-of-home activities still occuring after day 35
+            h5.title Percentage of out-of-home activities still occuring after March 23
             p.subhead By type (%)
 
             .myslider(v-for="measure in Object.keys(state.measures).slice(4)" :key="measure")
               my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
           .g1
-            h5.title Reopening of educational facilities at day 63
+            h5.title Reopening of educational facilities on April 20
             p.subhead Students Returning (%):
 
             .myslider(v-for="measure in Object.keys(state.measures).slice(1,4)" :key="measure")
@@ -374,7 +374,8 @@ export default class SectionViewer extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    const date = moment('2020-02-16')
+    const startDay = this.plusminus === '-5' ? '2020-02-22' : '2020-02-12'
+    const date = moment(startDay)
       .add(day, 'days')
       .format('YYYY-MM-DD')
     return date

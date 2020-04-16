@@ -119,7 +119,6 @@ export default class App extends Vue {
     // pull the cases field out of the CSV
     for (const datapoint of data) {
       const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
-
       dates.push(day)
 
       cumulative += datapoint.cases
