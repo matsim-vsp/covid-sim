@@ -1,178 +1,168 @@
 <template lang="pug">
-#app
-  .content
-    .readme(v-html="readme")
+#v3-app
+  animation-view(@loaded="toggleLoaded" :speed="speed")
 
-  section-viewer.viewer(:state="state")
+  #nav
+    p: router-link(to=".") Infection Traces
+    p &bullet;
+    p.my-center {{ state.message }}
+
+    .controls(v-if="isLoaded")
+      p Speed: {{ speed }}
+      vue-slider.speed-slider(v-model="speed" :data="speedStops" :width="100")
+
+      button.button.is-white.is-outlined.is-small(
+        v-if="isLoaded"
+        @click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
+
+  #hover-panel(v-if="isLoaded")
+    .left-side
+      img(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
+
+    .right-side
 
 </template>
 
 <script lang="ts">
-// ###########################################################################
-import YAML from 'yaml'
-import Papa from 'papaparse'
+import { Component, Vue, Watch } from 'vue-property-decorator'
+import VueSlider from 'vue-slider-component'
 
-import { Component, Vue } from 'vue-property-decorator'
-import SectionViewer from '@/runs/v7/ChartSelector.vue'
+import store from '@/store'
+import AnimationView from '@/runs/v3/AnimationView.vue'
 
 @Component({
   components: {
-    SectionViewer,
+    AnimationView,
+    VueSlider,
   },
 })
 export default class App extends Vue {
-  private state: any = {
-    measures: {},
-    runLookup: {},
-    cumulativeInfected: 0,
-    berlinCases: [],
-    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+  private state = store.state
+  private isLoaded = false
+
+  private speedStops = [-10, -5, -2, -1, 0, 1, 2, 5, 10]
+  private speed = 1
+
+  private toggleSimulation() {
+    console.log('halt!')
+    this.$store.commit('setSimulation', !store.state.isRunning)
   }
 
-  private readme = require('@/assets/v7-notes.md')
-  private berlinCSV = require('@/assets/berlin-cases.csv').default
-
-  public async mounted() {
-    await this.loadDataInBackground()
+  private mounted() {
+    this.$store.commit('setFullScreen', true)
+    this.$store.commit('setSimulation', true)
+  }
+  private beforeDestroy() {
+    this.$store.commit('setFullScreen', false)
+    this.$store.commit('setSimulation', true)
   }
 
-  private async loadDataInBackground() {
-    this.state.berlinCases = this.prepareBerlinData()
-
-    const parsed = await this.loadCSVData(this.state.publicPath + 'v7-info-munich.txt')
-    const matrix = await this.generateScenarioMatrix(parsed)
+  private toggleLoaded(loaded: boolean) {
+    this.isLoaded = loaded
   }
 
-  private prepareBerlinData() {
-    const data = Papa.parse(this.berlinCSV, { header: true, dynamicTyping: true }).data
-
-    // 14 days of zero cases in Berlin before the RKI data begins
-    const zeroDays = 14
-    const cases = new Array(zeroDays).fill(0)
-
-    // pull the cases field out of the CSV
-    let cumulative = 0
-    for (let i = 0; i < data.length; i++) {
-      cumulative += data[i].cases
-      cases.push(cumulative)
-    }
-
-    const series = {
-      name: 'Berlin Reported (Cumul.)',
-      x: [...Array(cases.length).keys()].slice(1), // range
-      y: cases,
-      line: {
-        dash: 'dot',
-        width: 3,
-        color: 'rgb(0,200,150)',
-      },
-    }
-
-    console.log({ berlinSeries: series })
-    return series
-  }
-
-  private async loadCSVData(filepath: string) {
-    console.log('fetching data')
-    const response = await fetch(filepath)
-    const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
-    console.log({ parsed: parsed.data })
-
-    return parsed.data
-  }
-
-  private async generateScenarioMatrix(parsed: any[]) {
-    console.log('generating lookups')
-    const measures: any = {}
-    const runLookup: any = {}
-
-    // first get column names for the measures that have been tested
-    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
-
-    for (const label of Object.keys(parsed[0])) {
-      if (ignore.indexOf(label) > -1) continue
-      measures[label] = new Set()
-    }
-
-    // get all possible values
-    for (const run of parsed) {
-      if (!run.RunId) continue
-
-      // note this particular value, for every value
-      for (const measure of Object.keys(measures)) {
-        if (run[measure] === 0 || run[measure]) measures[measure].add(run[measure])
-      }
-
-      // store the run in a lookup using all values as the key
-      let lookupKey = ''
-      for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
-      runLookup[lookupKey] = run
-    }
-
-    for (const measure of Object.keys(measures)) {
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
-    }
-
-    console.log({ measures, runLookup })
-    this.state.measures = measures
-    this.state.runLookup = runLookup
+  private rotateColors() {
+    this.$store.commit('rotateColors')
   }
 }
-
-// ###########################################################################
 </script>
 
-<style scoped>
-.address-header {
-  margin-top: 4rem;
-  background-color: #d3e1ee;
-  padding: 3rem 10rem;
-}
+<style scoped lang="scss">
+@import '~vue-slider-component/theme/default.css';
+@import '@/styles.scss';
 
-.address-header h2 {
-  font-size: 2.5rem;
-  font-weight: bold;
-}
-
-.address-header h3 {
-  font-size: 1rem;
-  font-weight: normal;
-  margin-top: -0.5rem;
-}
-
-.content {
-  padding: 0rem 3rem;
-  margin: 2rem 0rem;
-  padding-bottom: 1rem;
+#v3-app {
+  position: absolute;
+  top: $navHeight;
+  bottom: 0.2rem;
   width: 100%;
+  display: grid;
+  grid-template-rows: $navHeight 1fr auto;
+  grid-template-columns: 1fr;
+}
+
+#three-container {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+}
+
+#hover-panel {
+  z-index: 5;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  padding: 0 0.5rem 0.2rem 0;
+  grid-row: 3 / 4;
+  grid-column: 1 / 2;
 }
 
-.viewer {
-  padding: 0rem 2rem;
-  margin: 0rem 0rem;
-  width: 100%;
+#hover-panel img {
+  opacity: 1;
+  padding: 0.1rem 0.1rem;
+  background-color: black;
+}
+
+#hover-panel img:hover {
+  cursor: pointer;
+  background-color: white;
+}
+
+#nav {
   display: flex;
-  flex-direction: column;
-}
+  flex-direction: row;
+  background-color: #1e5538; /* #648cb4; */
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  margin: 0 0;
+  padding: 0 1rem 0 3rem;
 
-h2 {
-  padding-top: 1rem;
-}
+  a {
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
 
-@media only screen and (max-width: 640px) {
-  .content {
-    padding: 1rem 1rem;
-    margin-top: 1rem;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    row-gap: 1rem;
+    &.router-link-exact-active {
+      color: white;
+    }
   }
 
-  .address-header {
-    padding-left: 2rem;
+  p {
+    margin: auto 0.5rem auto 0;
+    padding: 0 0;
+    color: #ccc;
+  }
+}
+
+.controls button {
+  margin: auto 0;
+}
+
+.speed-slider {
+  margin: auto 1rem auto 0.25rem;
+  flex: 1;
+}
+
+.my-center {
+  flex: 1;
+  margin: 0 auto;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+}
+
+.left-side {
+  margin-left: 0.5rem;
+  margin-right: auto;
+}
+
+#rview {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+}
+@media only screen and (max-width: 768px) {
+  #nav {
+    padding-left: 1rem;
   }
 }
 </style>
