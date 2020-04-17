@@ -8,3 +8,11 @@ export enum Health {
   InfectedButNotContagious = 'infectedButNotContagious',
   Contagious = 'contagious',
 }
+
+export interface Agent {
+  id: string
+  time: number[]
+  path: [number, number][]
+  disease_time: number[]
+  disease: number[]
+}

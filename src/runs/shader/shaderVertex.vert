@@ -39,7 +39,7 @@ float calculateSize() {
         return 100.0;
     }
 
-    return (myInfectionStatus + 1.0) * 5.0 - 3.0;
+    return (myInfectionStatus + 1.0) * 7.0 - 4.0;
 }
 
 

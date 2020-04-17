@@ -28,7 +28,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import VueSlider from 'vue-slider-component'
 
 import store from '@/store'
-import AnimationView from '@/runs/v3/AnimationView.vue'
+import AnimationView from './AnimationView.vue'
 
 @Component({
   components: {
@@ -36,7 +36,7 @@ import AnimationView from '@/runs/v3/AnimationView.vue'
     VueSlider,
   },
 })
-export default class App extends Vue {
+export default class Shader extends Vue {
   private state = store.state
   private isLoaded = false
 

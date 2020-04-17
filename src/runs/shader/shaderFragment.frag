@@ -9,7 +9,7 @@ vec4 getColor() {
 
     if (myInfectionStatus == 0.0)
 
-        return vec4(0.5, 0.5, 0.0, 0.5);  // susceptible; yellow
+        return vec4(0.5, 0.5, 0.0, 1.0);  // susceptible; yellow
 
     else if (myInfectionStatus == 1.0)
 

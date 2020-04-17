@@ -19,7 +19,7 @@ module.exports = {
           ],
         },
         {
-          test: /\.csv$/,
+          test: /\.(csv|vert|frag)$/,
           use: [
             {
               loader: 'raw-loader',

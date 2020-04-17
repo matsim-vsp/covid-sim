@@ -48,6 +48,11 @@ const routes = [
     path: '/v6/:city/:pm',
     redirect: '/v6/:city',
   },
+  {
+    path: '/shader',
+    name: 'shader',
+    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/Shader.vue'),
+  },
 ]
 
 const router = new VueRouter({
