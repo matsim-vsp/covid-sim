@@ -4,68 +4,89 @@ import * as THREE from 'three'
 import { Agent } from '@/Interfaces'
 
 class AgentPoints extends THREE.BufferGeometry {
-  private tripEndTimes: { [seconds: number]: Set<Agent> } = {}
-
-  getTripEndTimes() {
-    return this.tripEndTimes
-  }
+  private midX: number
+  private midY: number
 
   constructor(agentList: { [id: string]: Agent }, midX: number, midY: number) {
     super()
 
+    this.midX = midX
+    this.midY = midY
+
     const point1: number[] = [] // x,y,time
     const point2: number[] = [] // x,y,time
+
     const infectionTimes: number[] = []
     const infectionTypes: number[] = []
-
-    let totalTimePoints = 0
 
     for (const id of Object.keys(agentList)) {
       const agent = agentList[id]
 
-      totalTimePoints += agent.time.length
-
-      point1.push(...AgentPoints.getWaypoint1(agent, midX, midY))
-      point2.push(...AgentPoints.getWaypoint2(agent, midX, midY))
-
-      infectionTimes.push(...AgentPoints.buildInfectionTimes(agent))
-      infectionTypes.push(...AgentPoints.buildInfectionTypes(agent))
-
-      // save trip completion times so we know when it's time to update
-      if (agent.time.length > 1) {
-        const endTime = agent.time[1]
-
-        if (!this.tripEndTimes[endTime]) this.tripEndTimes[endTime] = new Set()
-
-        this.tripEndTimes[endTime].add(agent)
-      }
+      this.buildWaypoints(agent, point1, point2, infectionTimes, infectionTypes)
     }
 
-    console.log('---- total time points', totalTimePoints)
     this.setAttribute('position', new THREE.Float32BufferAttribute(point1, 3))
     this.setAttribute('position2', new THREE.Float32BufferAttribute(point2, 3))
 
     this.setAttribute('infectionTime', new THREE.Float32BufferAttribute(infectionTimes, 3))
     this.setAttribute('infectionStatus', new THREE.Float32BufferAttribute(infectionTypes, 3))
+
+    const ram = 2 * 3 * point1.length + 2 * 3 * infectionTimes.length
+    console.log('######## GPU RAM:', ram)
   }
 
-  private static getWaypoint1(agent: Agent, midX: number, midY: number) {
-    const x = agent.path[0][0] - midX
-    const y = agent.path[0][1] - midY
-    const t = agent.time[0]
+  private buildWaypoints(
+    agent: Agent,
+    point1: number[],
+    point2: number[],
+    infectionTimes: number[],
+    infectionTypes: number[]
+  ) {
+    const numWaypoints = agent.time.length
+    if (numWaypoints < 2) return // skip empty trips!
 
-    return [x, y, t] // x,y,time. we deal with z-level in the vertex shader
-  }
+    const infectTimes = AgentPoints.buildInfectionTimes(agent)
+    const infectTypes = AgentPoints.buildInfectionTypes(agent)
 
-  private static getWaypoint2(agent: Agent, midX: number, midY: number) {
-    // if there is only one point: use first point again
-    const index = agent.path[1] ? 1 : 0
-    const t = index ? agent.time[1] : -1 // -1 signifies no 2nd time point
+    // if first trip starts at nonzero, start them at zero anyway
+    if (agent.time[0] !== 0.0) {
+      const x = agent.path[0][0] - this.midX
+      const y = agent.path[0][1] - this.midY
+      const t = agent.time[0]
+      point1.push(x, y, 0)
+      point2.push(x, y, t)
 
-    const x = agent.path[index][0] - midX
-    const y = agent.path[index][1] - midY
+      infectionTimes.push(...infectTimes)
+      infectionTypes.push(...infectTypes)
+    }
 
-    return [x, y, t] // x,y,time. we deal with z-level in the vertex shader
+    // create trips for all waypoint combos
+    for (let i = 0; i < numWaypoints - 1; i++) {
+      const x = agent.path[i][0] - this.midX
+      const y = agent.path[i][1] - this.midY
+      const t = agent.time[i]
+      point1.push(x, y, t)
+
+      const x2 = agent.path[i + 1][0] - this.midX
+      const y2 = agent.path[i + 1][1] - this.midY
+      const t2 = agent.time[i + 1]
+      point2.push(x2, y2, t2)
+
+      infectionTimes.push(...infectTimes)
+      infectionTypes.push(...infectTypes)
+    }
+
+    // keep person on map at end of day
+    if (agent.time[numWaypoints - 1] !== 86400.0) {
+      const x = agent.path[numWaypoints - 1][0] - this.midX
+      const y = agent.path[numWaypoints - 1][1] - this.midY
+      const t = agent.time[numWaypoints - 1]
+      point1.push(x, y, t)
+      point2.push(x, y, 86400.0)
+
+      infectionTimes.push(...infectTimes)
+      infectionTypes.push(...infectTypes)
+    }
   }
 
   /**
@@ -102,77 +123,5 @@ class AgentPoints extends THREE.BufferGeometry {
     }
   }
 }
-
-/*
-  createAgentBufferAttribute(name: string, itemSize: number) {
-    let attribute = new BufferAttribute(new Float32Array([]), itemSize)
-    let agentLayer = this.scene.getObjectByName('BufferHolder.AGENT_LAYER()')
-    agentLayer.geometry.addAttribute(name, attribute)
-  }
-
-  updateAgentBufferAttribute(name: string, array: any[]) {
-    let agentLayer = this.scene.getObjectByName(BufferHolder.AGENT_LAYER())
-    let attribute = agentLayer.geometry.getAttribute(name)
-    attribute.setArray(array)
-    attribute.needsUpdate = true
-  }
-
-  updateAgentBufferUniform(name: string, value: any) {
-    let agentLayer = this.scene.getObjectByName(BufferHolder.AGENT_LAYER())
-    agentLayer.material.uniforms[name].value = value
-  }
-
-  loadAgentBuffer() {
-    if (this.hasLayer(BufferHolder.AGENT_LAYER())) return
-
-    let shaderMaterial = new ShaderMaterial({
-      vertexShader: vertShader,
-      fragmentShader: fragShader,
-      uniforms: {
-        timestepFraction: { value: 0.0 },
-        size: { value: 10.0 * window.devicePixelRatio },
-        selectedId: { value: -1 },
-
-        color: { value: new Color(this._config.colors.agents) },
-        selectedColor: { value: new Color(this._config.colors.selectedAgent) },
-        triangle: { value: this.createTexture(triangle) },
-        circle: { value: this.createTexture(circle) },
-      },
-      transparent: true,
-      alphaTest: 0.1,
-    })
-    let points = new Points(new BufferGeometry(), shaderMaterial)
-    points.name = BufferHolder.AGENT_LAYER()
-    points.frustumCulled = false
-    points.position.z = -10
-    this.scene.add(points)
-
-    this.createAgentBufferAttribute('position', 3)
-    this.createAgentBufferAttribute('nextPosition', 3)
-    this.createAgentBufferAttribute('shouldInterpolate', 1)
-    this.createAgentBufferAttribute('id', 1)
-  }
-
-  createTexture(image: string, callback: Function) {
-    let texture
-
-    if (callback) {
-      texture = new TextureLoader().load(image, t => callback())
-    } else {
-      texture = new TextureLoader().load(image)
-    }
-
-    texture.flipY = false
-    texture.magFilter = NearestFilter
-    texture.minFilter = NearestFilter
-    return texture
-  }
-
-  setMeshProperties(mesh: Mesh, name: string, z: number) {
-    mesh.name = name
-    mesh.position.z = z
-    mesh.frustumCulled = false
-  }
-  */
 
 export default AgentPoints

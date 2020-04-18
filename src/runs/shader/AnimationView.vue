@@ -111,6 +111,7 @@ export default class AnimationView extends Vue {
   private allTrips: Trip[] = []
   private currentTrips = new Map()
   private indexOfNextTripToAnimate = 0
+  private allTripsHaveBegun = false
 
   private publicPath = ''
 
@@ -380,6 +381,8 @@ export default class AnimationView extends Vue {
   private agentGeometry?: AgentGeometry
 
   private finishedLoadingAgents() {
+    if (this.agentGeometry) this.agentGeometry.dispose()
+
     this.agentGeometry = new AgentGeometry(this.agentList, this.midpointX, this.midpointY)
 
     this.agentMaterial = new THREE.ShaderMaterial({
@@ -580,6 +583,7 @@ export default class AnimationView extends Vue {
   }
 
   private animate() {
+    // update all the time & clock tickers
     const elapsedTicks = this.clock.getElapsedTime()
 
     const timeDelta =
@@ -603,135 +607,6 @@ export default class AnimationView extends Vue {
     this.cameraControls.update()
 
     if (this.state.isRunning) requestAnimationFrame(this.animate) // endless animation loop
-  }
-
-  /*
-    // update xy for all active trips
-    for (const tripNumber of this.currentTrips.keys()) {
-      const trip = this.currentTrips.get(tripNumber)
-
-      // Handle infection events first:
-      if (trip.status) {
-        this.handleInfectionEvent(trip)
-        this.currentTrips.delete(tripNumber)
-        continue
-      }
-
-      // Remove trips that already finished
-      switch (this.timeDirection) {
-        case 1:
-          if (this.simulationTime > trip.timestamps[1]) {
-            this.currentTrips.delete(tripNumber)
-            continue
-          }
-        case -1:
-          if (this.simulationTime <= trip.timestamps[0]) {
-            this.currentTrips.delete(tripNumber)
-            continue
-          }
-      }
-
-      const tripDuration = trip.timestamps[1] - trip.timestamps[0]
-      const currentProgress = this.simulationTime - trip.timestamps[0]
-      let percentComplete = (1.0 * currentProgress) / tripDuration
-
-      // make sure we bound this trip at the edges
-      if (this.simulationTime < trip.timestamps[0]) percentComplete = 0.0
-      else if (this.simulationTime > trip.timestamps[1]) percentComplete = 1.0
-
-      const worldX =
-        trip.path[0][0] + percentComplete * (trip.path[1][0] - trip.path[0][0]) - this.midpointX
-      const worldY =
-        trip.path[0][1] + percentComplete * (trip.path[1][1] - trip.path[0][1]) - this.midpointY
-
-      this.agents[trip.id].position.setX(worldX)
-      this.agents[trip.id].position.setY(worldY)
-    }
-
-    // if ALL trips have been animation to completion, WE ARE DONE
-    if (this.currentTrips.size === 0 && this.allTripsHaveBegun) this.clock.stop()
-
-    */
-
-  /*
-  private getMeshForInfection(status: string): THREE.Mesh {
-    switch (status) {
-      case 'contagious':
-        return new THREE.Mesh(this.geomBig, this.red)
-      case 'infectedButNotContagious':
-        return new THREE.Mesh(this.geomMed, this.cyan)
-      default:
-        return new THREE.Mesh(this.geomSmall, this.yellow)
-    }
-  }
-  */
-
-  private handleInfectionEvent(event: Trip) {
-    if (!event.status) return
-
-    /*
-    const agent = this.agents[event.id]
-    if (!agent) return
-
-    const infection = this.getMeshForInfection(event.status)
-
-    infection.position.copy(agent.position)
-    if (event.status === 'infectedButNotContagious') {
-      infection.position.setZ(1)
-    }
-    if (event.status === 'contagious') {
-      infection.position.setZ(0)
-    }
-
-    this.scene.remove(agent)
-    this.scene.add(infection)
-    this.agents[event.id] = infection
-    */
-  }
-
-  private allTripsHaveBegun = false
-
-  private addTripsForTimestampToQueue() {
-    // maybe we've added everything already
-    if (
-      this.indexOfNextTripToAnimate >= this.allTrips.length ||
-      this.indexOfNextTripToAnimate < 0
-    ) {
-      this.allTripsHaveBegun = true
-      return
-    }
-
-    const seconds =
-      this.timeDirection === 1 ? Math.floor(this.simulationTime) : Math.ceil(this.simulationTime)
-
-    let nextTrip = this.allTrips[this.indexOfNextTripToAnimate]
-
-    // if time is going forward,  check if trip *starts before* current moment
-    // if time is going backward, check if trip *ends after* current moment
-    let shouldAddNextTrip =
-      this.timeDirection === 1
-        ? nextTrip.timestamps[0] <= seconds
-        : nextTrip.timestamps[1] && nextTrip.timestamps[1] >= seconds
-
-    while (shouldAddNextTrip) {
-      // use trip index as key --> monotonically increases
-      this.currentTrips.set(this.indexOfNextTripToAnimate, nextTrip)
-      this.indexOfNextTripToAnimate = this.indexOfNextTripToAnimate + this.timeDirection
-
-      // if we're at the end of the trip list, we're done
-      if (
-        this.indexOfNextTripToAnimate >= this.allTrips.length ||
-        this.indexOfNextTripToAnimate < 0
-      )
-        continue
-
-      nextTrip = this.allTrips[this.indexOfNextTripToAnimate]
-
-      shouldAddNextTrip =
-        this.timeDirection === 1
-          ? nextTrip.timestamps[0] <= seconds
-          : nextTrip.timestamps[1] && nextTrip.timestamps[1] >= seconds
-    }
   }
 }
 </script>

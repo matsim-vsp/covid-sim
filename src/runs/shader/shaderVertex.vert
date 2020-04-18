@@ -10,9 +10,13 @@ attribute vec3 infectionStatus;
 
 // this gets passed from vertex to fragment shader
 varying float myInfectionStatus;
-
+varying float skip;
+varying float atRest;
 
 float calculateStatus() {
+
+    // are we before the first infection state?
+    if (simulationTime < infectionTime.x) return 0.0;
 
     // is there only one infection state?
     if (infectionStatus.y == -1.0) return infectionStatus.x;
@@ -37,13 +41,18 @@ float calculateSize() {
         return 100.0;
     }
 
-    return (myInfectionStatus + 1.0) * 7.0 - 4.0;
+    return (myInfectionStatus + 1.0) * 5.0 ;
 }
 
 
 float calculateTimestep(in vec3 point1, in vec3 point2) {
 
-    if (point1 == point2) return 0.0;
+    atRest = 0.0;
+
+    if (point1 == point2) {
+        atRest = 1.0;
+        return 0.0;
+    }
 
     // position vars have time in the .z to save some space
     if (simulationTime < position.z) return 0.0;
@@ -79,15 +88,25 @@ void main() {
 
     myInfectionStatus = calculateStatus();
 
-    // unpack coords from position buffers - x,y,time. Deal w/z later
-    vec3 point1 = vec3(position.xy, 2);
-    vec3 point2 = vec3(position2.xy, 2);
+    // don't do anything if this trip is currently out of time bounds
+    if (simulationTime < position.z || simulationTime > position2.z) {
+        gl_PointSize = 0.0;
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+        skip = 1.0;
 
-    float timestepFraction = calculateTimestep(point1, point2);
+    } else {
 
-    vec3 newPosition = interpolate(point1, point2, timestepFraction);
+        // unpack coords from position buffers - x,y,time. Deal w/z later
+        vec3 point1 = vec3(position.xy, 2);
+        vec3 point2 = vec3(position2.xy, 2);
 
-    gl_PointSize = calculateSize();
+        float timestepFraction = calculateTimestep(point1, point2);
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        vec3 newPosition = interpolate(point1, point2, timestepFraction);
+
+        gl_PointSize = calculateSize();
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+
+        skip = 0.0;
+   }
 }

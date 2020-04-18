@@ -3,30 +3,43 @@ uniform float simulationTime;
 
 // passed in from vertex shader:
 varying float myInfectionStatus;
-
+varying float skip;
+varying float atRest;
 
 vec4 getColor() {
 
-    if (myInfectionStatus == 0.0)
+    if (myInfectionStatus == 0.0) {
+       // if (atRest == 1.0) {
+       //     return vec4(0.0, 0, 0.4, 0.3);  // susceptible; not moving
+       // } else {
+            return vec4(0.5, 0.5, 0.0, 1.0);  // susceptible; yellow
+       // }
 
-        return vec4(0.5, 0.5, 0.0, 1.0);  // susceptible; yellow
-
-    else if (myInfectionStatus == 1.0)
+    } else if (myInfectionStatus == 1.0) {
 
         return vec4(0.25, 1.0, 1.0, 1.0);  // infected; cyan
 
-    else if (myInfectionStatus == 2.0)
+    } else if (myInfectionStatus == 2.0) {
 
         return vec4(0.8, 0.0, 0.1, 1.0);  // contagious; red
+
+    }
 
     return vec4(1.0, 0.4, 1.0, 1.0);  // ERROR: grey.
 }
 
 
 void main() {
+    // don't do anything if this trip is currently out of time bounds
+    if (skip == 1.0) {
 
-    gl_FragColor = getColor();
+        gl_FragColor = vec4(0,0,0,0);
 
+    } else {
+
+        gl_FragColor = getColor();
+
+    }
 }
 
 /******
