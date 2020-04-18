@@ -1,8 +1,6 @@
 uniform float simulationTime;
 
-attribute vec3 position2;
-attribute float time1;
-attribute float time2;
+attribute vec3 position2;  // x,y,t
 
 /**
  * First, second, third infection statuses are in .xyz each
@@ -43,116 +41,53 @@ float calculateSize() {
 }
 
 
-float calculateTimestep() {
+float calculateTimestep(in vec3 point1, in vec3 point2) {
 
-    if (position == position2) return 0.0;
+    if (point1 == point2) return 0.0;
 
-    if (simulationTime < time1) return 0.0;
-    if (simulationTime > time2) return 1.0;
+    // position vars have time in the .z to save some space
+    if (simulationTime < position.z) return 0.0;
+    if (simulationTime > position2.z) return 1.0;
 
-    float progress = simulationTime - time1;
-    float duration = time2 - time1;
+    float progress = simulationTime - position.z;
+    float duration = position2.z - position.z;
 
     return progress / duration;
 }
 
 
-vec3 interpolate(in float timestepFraction) {
+vec3 interpolate(in vec3 point1, in vec3 point2, in float timestepFraction) {
 
     if (timestepFraction == 0.0) {
 
-        return position;
+        return point1;
 
     } else if (timestepFraction >= 1.0 ) {
 
-        return position2;
+        return point2;
 
     } else {
 
-        vec3 direction = (position2 - position);
-        return (direction * timestepFraction) + position;
+        vec3 direction = point2 - point1;
 
+        return (direction * timestepFraction) + point1;
     }
 }
 
 
 void main() {
 
-    float timestepFraction = calculateTimestep();
-
-    vec3 newPosition = interpolate(timestepFraction);
-
     myInfectionStatus = calculateStatus();
+
+    // unpack coords from position buffers - x,y,time. Deal w/z later
+    vec3 point1 = vec3(position.xy, 2);
+    vec3 point2 = vec3(position2.xy, 2);
+
+    float timestepFraction = calculateTimestep(point1, point2);
+
+    vec3 newPosition = interpolate(point1, point2, timestepFraction);
 
     gl_PointSize = calculateSize();
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }
-
-
-/******
-attribute vec3 nextPosition;
-attribute float shouldInterpolate;
-attribute float id;
-
-uniform float timestepFraction;
-uniform float size;
-uniform float hitTestThreshold;
-uniform float selectedId;
-
-varying float vRotation;
-varying float vShouldInterpolate;
-varying float vIsSelected;
-varying float vIsHover;
-
-vec3 interpolate(in vec3 pos1, in vec3 pos2, in float timestepFraction, in float shouldInterpolate) {
-
-    if(shouldInterpolate >= 0.0) {
-        vec3 direction = (pos2 - pos1);
-        vRotation = atan(direction.x, direction.y);
-        return (direction * timestepFraction) + pos1;
-    }
-    else {
-        vRotation = 0.0;
-        return pos1;
-    }
-}
-
-float isIdSelected() {
-
-    float result = 0.0;
-
-    if(selectedId == id) {
-        result = 1.0;
-    }
-    return result;
-}
-
-float getSize() {
-    float result = 0.0;
-
-    if (vIsSelected >= 1.0) {
-        result = size * 3.0;
-    } else if (shouldInterpolate < 1.0) {
-        result = size * 0.7;
-    } else {
-        result = size;
-    }
-    return result;
-}
-
-void main() {
-
-    vIsSelected = isIdSelected();
-
-    gl_PointSize = getSize();
-
-    vShouldInterpolate = shouldInterpolate;
-    vec3 interpolated = interpolate(position, nextPosition, timestepFraction, shouldInterpolate);
-
-    if (vIsSelected >= 1.0) {
-        interpolated.z = 1.0;
-    }
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(interpolated, 1.0);
-}
-**/

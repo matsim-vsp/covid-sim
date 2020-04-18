@@ -4,54 +4,68 @@ import * as THREE from 'three'
 import { Agent } from '@/Interfaces'
 
 class AgentPoints extends THREE.BufferGeometry {
+  private tripEndTimes: { [seconds: number]: Set<Agent> } = {}
+
+  getTripEndTimes() {
+    return this.tripEndTimes
+  }
+
   constructor(agentList: { [id: string]: Agent }, midX: number, midY: number) {
     super()
 
-    const vertices: number[] = []
-    const endpoints: number[] = []
-    const time1: number[] = []
-    const time2: number[] = []
+    const point1: number[] = [] // x,y,time
+    const point2: number[] = [] // x,y,time
     const infectionTimes: number[] = []
     const infectionTypes: number[] = []
 
     let totalTimePoints = 0
+
     for (const id of Object.keys(agentList)) {
       const agent = agentList[id]
 
       totalTimePoints += agent.time.length
-      vertices.push(...AgentPoints.buildInitialPositions(agent, midX, midY))
-      endpoints.push(...AgentPoints.buildEndpoints(agent, midX, midY))
 
-      time1.push(agent.time[0])
-      time2.push(agent.time[1] ? agent.time[1] : -1)
+      point1.push(...AgentPoints.getWaypoint1(agent, midX, midY))
+      point2.push(...AgentPoints.getWaypoint2(agent, midX, midY))
 
       infectionTimes.push(...AgentPoints.buildInfectionTimes(agent))
       infectionTypes.push(...AgentPoints.buildInfectionTypes(agent))
+
+      // save trip completion times so we know when it's time to update
+      if (agent.time.length > 1) {
+        const endTime = agent.time[1]
+
+        if (!this.tripEndTimes[endTime]) this.tripEndTimes[endTime] = new Set()
+
+        this.tripEndTimes[endTime].add(agent)
+      }
     }
 
     console.log('---- total time points', totalTimePoints)
-    this.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
-    this.setAttribute('position2', new THREE.Float32BufferAttribute(endpoints, 3))
-    this.setAttribute('time1', new THREE.Float32BufferAttribute(time1, 1))
-    this.setAttribute('time2', new THREE.Float32BufferAttribute(time2, 1))
+    this.setAttribute('position', new THREE.Float32BufferAttribute(point1, 3))
+    this.setAttribute('position2', new THREE.Float32BufferAttribute(point2, 3))
 
     this.setAttribute('infectionTime', new THREE.Float32BufferAttribute(infectionTimes, 3))
     this.setAttribute('infectionStatus', new THREE.Float32BufferAttribute(infectionTypes, 3))
   }
 
-  private static buildInitialPositions(agent: Agent, midX: number, midY: number) {
-    const initialX = agent.path[0][0] - midX
-    const initialY = agent.path[0][1] - midY
+  private static getWaypoint1(agent: Agent, midX: number, midY: number) {
+    const x = agent.path[0][0] - midX
+    const y = agent.path[0][1] - midY
+    const t = agent.time[0]
 
-    return [initialX, initialY, 2]
+    return [x, y, t] // x,y,time. we deal with z-level in the vertex shader
   }
 
-  private static buildEndpoints(agent: Agent, midX: number, midY: number) {
+  private static getWaypoint2(agent: Agent, midX: number, midY: number) {
+    // if there is only one point: use first point again
     const index = agent.path[1] ? 1 : 0
-    const initialX = agent.path[index][0] - midX
-    const initialY = agent.path[index][1] - midY
+    const t = index ? agent.time[1] : -1 // -1 signifies no 2nd time point
 
-    return [initialX, initialY, 2]
+    const x = agent.path[index][0] - midX
+    const y = agent.path[index][1] - midY
+
+    return [x, y, t] // x,y,time. we deal with z-level in the vertex shader
   }
 
   /**
