@@ -5,16 +5,31 @@ import { Agent } from '@/Interfaces'
 
 class AgentPoints extends THREE.BufferGeometry {
   constructor(agentList: { [id: string]: Agent }, midX: number, midY: number) {
-    const vertices = AgentPoints.buildInitialPositions(agentList, midX, midY)
-    const endpoints = AgentPoints.buildEndpoints(agentList, midX, midY)
-    const time1 = AgentPoints.buildTime1(agentList)
-    const time2 = AgentPoints.buildTime2(agentList)
-
-    const infectionTimes = AgentPoints.buildInfectionTimes(agentList)
-    const infectionTypes = AgentPoints.buildInfectionTypes(agentList)
-
     super()
 
+    const vertices: number[] = []
+    const endpoints: number[] = []
+    const time1: number[] = []
+    const time2: number[] = []
+    const infectionTimes: number[] = []
+    const infectionTypes: number[] = []
+
+    let totalTimePoints = 0
+    for (const id of Object.keys(agentList)) {
+      const agent = agentList[id]
+
+      totalTimePoints += agent.time.length
+      vertices.push(...AgentPoints.buildInitialPositions(agent, midX, midY))
+      endpoints.push(...AgentPoints.buildEndpoints(agent, midX, midY))
+
+      time1.push(agent.time[0])
+      time2.push(agent.time[1] ? agent.time[1] : -1)
+
+      infectionTimes.push(...AgentPoints.buildInfectionTimes(agent))
+      infectionTypes.push(...AgentPoints.buildInfectionTypes(agent))
+    }
+
+    console.log('---- total time points', totalTimePoints)
     this.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
     this.setAttribute('position2', new THREE.Float32BufferAttribute(endpoints, 3))
     this.setAttribute('time1', new THREE.Float32BufferAttribute(time1, 1))
@@ -24,60 +39,19 @@ class AgentPoints extends THREE.BufferGeometry {
     this.setAttribute('infectionStatus', new THREE.Float32BufferAttribute(infectionTypes, 3))
   }
 
-  private static buildInitialPositions(
-    agentList: { [id: string]: Agent },
-    midX: number,
-    midY: number
-  ) {
-    const vertices: number[] = []
+  private static buildInitialPositions(agent: Agent, midX: number, midY: number) {
+    const initialX = agent.path[0][0] - midX
+    const initialY = agent.path[0][1] - midY
 
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-      const initialX = agent.path[0][0] - midX
-      const initialY = agent.path[0][1] - midY
-
-      vertices.push(initialX, initialY, 2)
-    }
-
-    return vertices
+    return [initialX, initialY, 2]
   }
 
-  private static buildEndpoints(agentList: { [id: string]: Agent }, midX: number, midY: number) {
-    const vertices: number[] = []
+  private static buildEndpoints(agent: Agent, midX: number, midY: number) {
+    const index = agent.path[1] ? 1 : 0
+    const initialX = agent.path[index][0] - midX
+    const initialY = agent.path[index][1] - midY
 
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-
-      const index = agent.path[1] ? 1 : 0
-      const initialX = agent.path[index][0] - midX
-      const initialY = agent.path[index][1] - midY
-
-      vertices.push(initialX, initialY, 2)
-    }
-
-    return vertices
-  }
-
-  private static buildTime1(agentList: { [id: string]: Agent }) {
-    const times: number[] = []
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-      times.push(agent.time[0])
-    }
-
-    return times
-  }
-
-  private static buildTime2(agentList: { [id: string]: Agent }) {
-    const times: number[] = []
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-
-      const time = agent.time[1] ? agent.time[1] : -1
-      times.push(time)
-    }
-
-    return times
+    return [initialX, initialY, 2]
   }
 
   /**
@@ -86,52 +60,32 @@ class AgentPoints extends THREE.BufferGeometry {
    * add start-day and end-of-day status changes, there is a max of THREE.
    * So we can use a vec3 to push ALL infection events to all agents! Woot.
    */
-  private static buildInfectionTimes(agentList: { [id: string]: Agent }) {
-    const times: number[] = []
-
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-
-      switch (agent.disease_time.length) {
-        case 0:
-          times.push(0.0, -1.0, -1.0)
-          break
-        case 1:
-          times.push(agent.disease_time[0], -1.0, -1.0)
-          break
-        case 2:
-          times.push(agent.disease_time[0], agent.disease_time[1], -1.0)
-          break
-        case 3:
-          times.push(agent.disease_time[0], agent.disease_time[1], agent.disease_time[2])
-          break
-      }
+  private static buildInfectionTimes(agent: Agent) {
+    switch (agent.disease_time.length) {
+      case 0:
+        return [0.0, -1.0, -1.0]
+      case 1:
+        return [agent.disease_time[0], -1.0, -1.0]
+      case 2:
+        return [agent.disease_time[0], agent.disease_time[1], -1.0]
+      case 3:
+      default:
+        return [agent.disease_time[0], agent.disease_time[1], agent.disease_time[2]]
     }
-    return times
   }
 
-  private static buildInfectionTypes(agentList: { [id: string]: Agent }) {
-    const types: number[] = []
-
-    for (const id of Object.keys(agentList)) {
-      const agent = agentList[id]
-
-      switch (agent.disease.length) {
-        case 0: // nothing? assume susceptible
-          types.push(0.0, -1.0, -1.0)
-          break
-        case 1:
-          types.push(agent.disease[0], -1.0, -1.0)
-          break
-        case 2:
-          types.push(agent.disease[0], agent.disease[1], -1.0)
-          break
-        case 3:
-          types.push(agent.disease[0], agent.disease[1], agent.disease[2])
-          break
-      }
+  private static buildInfectionTypes(agent: Agent) {
+    switch (agent.disease.length) {
+      case 0: // nothing? assume susceptible
+        return [0.0, -1.0, -1.0]
+      case 1:
+        return [agent.disease[0], -1.0, -1.0]
+      case 2:
+        return [agent.disease[0], agent.disease[1], -1.0]
+      case 3:
+      default:
+        return [agent.disease[0], agent.disease[1], agent.disease[2]]
     }
-    return types
   }
 }
 

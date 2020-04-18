@@ -28,7 +28,7 @@ float calculateStatus() {
     // are we before the third infection state?
     if (simulationTime < infectionTime.z) return infectionStatus.y;
 
-    // then we must be at the end!
+    // there can only be three infection states, and we are at the end
     return infectionStatus.z;
 }
 

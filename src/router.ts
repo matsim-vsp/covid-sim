@@ -51,7 +51,7 @@ const routes = [
   {
     path: '/shader',
     name: 'shader',
-    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/Shader.vue'),
+    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
   },
 ]
 
