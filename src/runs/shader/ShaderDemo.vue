@@ -5,11 +5,8 @@
   #nav
     p: router-link(to=".") Infection Traces
     p &bullet;
-    p.my-center {{ state.message }}
 
     .controls(v-if="isLoaded")
-      p Speed: {{ speed }}
-      vue-slider.speed-slider(v-model="speed" :data="speedStops" :width="100")
 
       button.button.is-white.is-outlined.is-small(
         v-if="isLoaded"
@@ -20,6 +17,14 @@
       img(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
 
     .right-side
+      p.digital-clock {{ state.message }}
+      vue-slider.speed-slider(v-model="speed"
+        :data="speedStops"
+        tooltip="active"
+        tooltip-placement="left"
+        :tooltip-formatter="val => val + 'x'"
+      )
+      p {{ speed }}x speed
 
 </template>
 
@@ -40,7 +45,7 @@ export default class Shader extends Vue {
   private state = store.state
   private isLoaded = false
 
-  private speedStops = [-10, -5, -2, -1, 0, 1, 2, 5, 10]
+  private speedStops = [-10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10]
   private speed = 1
 
   private toggleSimulation() {
@@ -77,7 +82,7 @@ export default class Shader extends Vue {
   bottom: 0.2rem;
   width: 100%;
   display: grid;
-  grid-template-rows: $navHeight 1fr auto;
+  grid-template-rows: $navHeight auto 1fr;
   grid-template-columns: 1fr;
 }
 
@@ -90,8 +95,8 @@ export default class Shader extends Vue {
   z-index: 5;
   display: flex;
   flex-direction: row;
-  padding: 0 0.5rem 0.2rem 0;
-  grid-row: 3 / 4;
+  padding: 0.5rem 0.5rem 0.2rem 0;
+  grid-row: 2 / 3;
   grid-column: 1 / 2;
 }
 
@@ -137,13 +142,16 @@ export default class Shader extends Vue {
 }
 
 .speed-slider {
-  margin: auto 1rem auto 0.25rem;
+  width: 100%;
+  margin: auto 0rem 0.25rem 0rem;
   flex: 1;
+  background-color: #5361b380;
 }
 
-.my-center {
-  flex: 1;
-  margin: 0 auto;
+.digital-clock {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
 }
 
 .controls {
@@ -154,6 +162,16 @@ export default class Shader extends Vue {
 .left-side {
   margin-left: 0.5rem;
   margin-right: auto;
+}
+
+.right-side {
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
+  text-align: right;
+  padding: 0 0;
+  color: white;
 }
 
 #rview {
