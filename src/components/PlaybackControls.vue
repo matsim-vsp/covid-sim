@@ -1,13 +1,15 @@
 <template lang="pug">
 #vue-component
-  vue-slider.speed-slider(v-model="sliderValue"
+  vue-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
     @drag-start="dragStart"
     @drag-end="dragEnd")
+
   .buttons
-    button.button.is-white.is-outlined.is-small(
-      @click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
+    .playback(@click='toggleSimulation')
+      i.playback-button.fa.fa-1x.fa-pause(v-if="state.isRunning")
+      i.playback-button.fa.fa-1x.fa-play(v-else)
 
 </template>
 
@@ -94,8 +96,32 @@ export default class VueComponent extends Vue {
   flex-direction: column;
 }
 
+.slider {
+  margin-right: 1rem;
+}
+
 .buttons {
   margin: 0.25rem auto 0 auto;
+}
+
+.playback {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  color: #1a3d7e;
+  background-color: #bbb;
+  display: flex;
+  text-align: center;
+  cursor: pointer;
+}
+
+.playback:hover {
+  background-color: white;
+}
+
+.playback-button {
+  margin: auto auto;
 }
 
 @media only screen and (max-width: 640px) {

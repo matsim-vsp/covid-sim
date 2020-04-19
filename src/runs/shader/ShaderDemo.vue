@@ -59,6 +59,7 @@ export default class Shader extends Vue {
     this.$store.commit('setFullScreen', true)
     this.$store.commit('setSimulation', true)
   }
+
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', true)
@@ -97,7 +98,7 @@ export default class Shader extends Vue {
   z-index: 5;
   display: flex;
   flex-direction: row;
-  padding: 0.5rem 0.5rem 0.2rem 0;
+  padding: 0rem 0rem 0.2rem 0;
   grid-row: 2 / 3;
   grid-column: 1 / 2;
   height: 100%;
@@ -105,6 +106,8 @@ export default class Shader extends Vue {
 
 img.theme-button {
   opacity: 1;
+  margin-top: 1rem;
+  margin-left: 0.5rem;
   padding: 0.1rem 0.1rem;
   background-color: black;
 }
@@ -117,9 +120,10 @@ img.theme-button {
 #bottom-hover-panel {
   grid-row: 4 / 5;
   grid-column: 1 / 2;
-  margin: 0 2rem 1rem 2rem;
+  margin: 0 1rem 1rem 2rem;
   display: flex;
   flex-direction: column;
+  z-index: 5;
 }
 
 #nav {
