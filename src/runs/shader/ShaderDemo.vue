@@ -3,8 +3,8 @@
   animation-view(@loaded="toggleLoaded" :speed="speed")
 
   #nav
-    p: router-link(to=".") Infection Traces
-    p &bullet;
+    p: router-link(to=".") Berlin Infection Traces &bullet; Simulated Day 4
+
 
   #top-hover-panel(v-if="isLoaded")
     .left-side
@@ -210,7 +210,12 @@ p.speed-label {
     padding-left: 1rem;
   }
 
+  #bottom-hover-panel {
+    margin-left: 1.5rem;
+  }
+
   .digital-clock {
+    margin-top: 0.5rem;
     font-size: 2rem;
   }
 }

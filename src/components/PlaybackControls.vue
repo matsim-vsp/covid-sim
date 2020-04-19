@@ -109,8 +109,8 @@ $themeColor: #550055; /*#3498db;*/
 }
 
 .playback {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   color: white;
   background-color: #3498db;
@@ -139,7 +139,7 @@ $themeColor: #550055; /*#3498db;*/
 }
 
 .buttons {
-  margin: 0.25rem 0 0 1rem;
+  margin: 0.25rem 0 0 2rem;
 }
 
 @media only screen and (max-width: 640px) {
@@ -154,7 +154,7 @@ $themeColor: #550055; /*#3498db;*/
   }
 
   .buttons {
-    margin: 0.25rem 0 0 1rem;
+    margin: 0.25rem 0 0 2rem;
   }
 }
 </style>
