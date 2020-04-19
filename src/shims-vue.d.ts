@@ -10,6 +10,7 @@ declare module 'raw-loader!*' {
   export default content
 }
 
+declare module 'convert-seconds'
 declare module 'vue-slide-bar'
 declare module 'vue-table-component'
 declare module '@statnett/vue-plotly'
