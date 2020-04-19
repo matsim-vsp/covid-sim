@@ -41,7 +41,7 @@ float calculateSize() {
         return 100.0;
     }
 
-    return (myInfectionStatus + 1.0) * 5.0 ;
+    return (myInfectionStatus + 1.0) * 7.0 - 5.0;
 }
 
 
@@ -96,9 +96,11 @@ void main() {
 
     } else {
 
+        float zIndex = 2.0 +  myInfectionStatus;
+
         // unpack coords from position buffers - x,y,time. Deal w/z later
-        vec3 point1 = vec3(position.xy, 2);
-        vec3 point2 = vec3(position2.xy, 2);
+        vec3 point1 = vec3(position.xy, zIndex);
+        vec3 point2 = vec3(position2.xy, zIndex);
 
         float timestepFraction = calculateTimestep(point1, point2);
 

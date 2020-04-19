@@ -30,8 +30,8 @@ export default class AnimationView extends Vue {
   private timeFactor = 600.0
   private timeDirection = 1
 
-  private vertexShader = require('./shaderVertex.vert').default
-  private fragmentShader = require('./shaderFragment.frag').default
+  private vertexShader = require('./vertexShader.vert').default
+  private fragmentShader = require('./fragmentShader.frag').default
 
   private networkFilename = 'network.zip'
 
@@ -138,7 +138,7 @@ export default class AnimationView extends Vue {
       this.clock.start()
       requestAnimationFrame(this.animate)
     } else {
-      this.clock.stop()
+      this.clock.stop() // hi
       this.clock = new THREE.Clock(false)
 
       // Reset animation frame-clock to zero
@@ -301,8 +301,8 @@ export default class AnimationView extends Vue {
     this.initScene()
 
     // let UI know we're about to begin!
+    this.$store.commit('setSimulation', true)
     this.$emit('loaded', true)
-
     this.clock.start()
     this.animate()
   }

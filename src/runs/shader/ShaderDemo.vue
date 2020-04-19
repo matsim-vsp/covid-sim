@@ -15,12 +15,13 @@
       .morestuff(v-if="isLoaded")
         vue-slider.speed-slider(v-model="speed"
           :data="speedStops"
+          :duration="0"
+          :dotSize="16"
           tooltip="active"
           tooltip-placement="left"
           :tooltip-formatter="val => val + 'x'"
-          :duration="0"
         )
-        p {{ speed }}x speed
+        p.speed-label {{ speed }}x speed
         // img.logo(src="@/assets/images/tu-logo.png" width=120)
 
   #bottom-hover-panel(v-if="isLoaded")
@@ -156,7 +157,7 @@ img.theme-button {
   width: 100%;
   margin: auto 0rem 0.25rem 0rem;
   flex: 1;
-  background-color: #5361b380;
+  /*background-color: #5361b380; */
 }
 
 .digital-clock {
@@ -195,6 +196,10 @@ img.theme-button {
   margin-bottom: none;
 }
 
+p.speed-label {
+  text-shadow: 2px 2px 1px black;
+}
+
 #rview {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
@@ -203,6 +208,10 @@ img.theme-button {
 @media only screen and (max-width: 768px) {
   #nav {
     padding-left: 1rem;
+  }
+
+  .digital-clock {
+    font-size: 2rem;
   }
 }
 </style>

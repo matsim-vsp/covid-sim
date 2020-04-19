@@ -9,12 +9,15 @@ varying float atRest;
 vec4 getColor() {
 
     if (myInfectionStatus == 0.0) {
-       // if (atRest == 1.0) {
-       //     return vec4(0.0, 0, 0.4, 0.3);  // susceptible; not moving
-       // } else {
-            return vec4(0.5, 0.5, 0.0, 1.0);  // susceptible; yellow
-       // }
-
+        return vec4(1.0, 1.0, 0.2, 0.5);  // susceptible; not moving
+        /*
+        if (atRest == 1.0) {
+            return vec4(0.1, 0.0, 0.1, 0.25);  // susceptible; not moving
+        } else {
+            return vec4(0.1, 0.0, 0.1, 0.25);  // susceptible; not moving
+            // return vec4(1.0, 1.0, 0.0, 1.0);  // susceptible; yellow
+        }
+        */
     } else if (myInfectionStatus == 1.0) {
 
         return vec4(0.25, 1.0, 1.0, 1.0);  // infected; cyan

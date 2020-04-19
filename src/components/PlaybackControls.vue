@@ -91,6 +91,10 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+/* vue-slider colors */
+$themeColor: #550055; /*#3498db;*/
+@import '~vue-slider-component/lib/theme/default.scss';
+
 #vue-component {
   display: flex;
   flex-direction: column;
@@ -108,22 +112,49 @@ export default class VueComponent extends Vue {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  border: 1px solid #eee;
-  color: #1a3d7e;
-  background-color: #bbb;
+  color: white;
+  background-color: #3498db;
   display: flex;
   text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
 
 .playback:hover {
-  background-color: white;
+  background-color: #39a8f1;
 }
 
 .playback-button {
   margin: auto auto;
 }
 
+#vue-component {
+  display: flex;
+  flex-direction: row;
+}
+
+.slider {
+  flex: 1;
+  margin: auto 0rem;
+}
+
+.buttons {
+  margin: 0.25rem 0 0 1rem;
+}
+
 @media only screen and (max-width: 640px) {
+  #vue-component {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .slider {
+    flex: 1;
+    margin: auto 0rem;
+  }
+
+  .buttons {
+    margin: 0.25rem 0 0 1rem;
+  }
 }
 </style>
