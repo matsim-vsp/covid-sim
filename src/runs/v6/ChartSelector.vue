@@ -77,7 +77,6 @@ export default class SectionViewer extends Vue {
 
   private MAX_DAYS = 200
   private plusminus = '-5'
-  private simStart = { year: 2020, month: 2, day: 16 } // ('20200216', 'YYYYMMDD')
 
   @Watch('city') private switchCity() {
     this.loadedSeriesData = {}

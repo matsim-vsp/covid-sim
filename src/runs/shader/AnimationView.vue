@@ -108,9 +108,6 @@ export default class AnimationView extends Vue {
   private agents: { [id: string]: THREE.Mesh } = {}
   private agentList: { [id: string]: Agent } = {}
 
-  private allTrips: Trip[] = []
-  private currentTrips = new Map()
-  private indexOfNextTripToAnimate = 0
   private allTripsHaveBegun = false
 
   private publicPath = ''
@@ -124,8 +121,6 @@ export default class AnimationView extends Vue {
     this.clock = new THREE.Clock(false)
 
     this.timeDirection = newDirection
-
-    this.sortAllTrips()
 
     this.clock.start()
     this.animationTimeSinceUnpaused = 0
@@ -223,11 +218,8 @@ export default class AnimationView extends Vue {
     this.clock = new THREE.Clock(false)
     this.simulationTime = 0
     this.nextClockUpdateTime = 0
-    this.indexOfNextTripToAnimate = 0
     this.timeDirection = 1
 
-    this.currentTrips.clear()
-    this.allTrips = []
     this.agents = {}
 
     while (this.scene.children.length) {
@@ -484,49 +476,6 @@ export default class AnimationView extends Vue {
     }
   }
   */
-
-  private sortAllTrips() {
-    console.log('sorting trips')
-
-    if (this.timeDirection === 1) {
-      this.allTrips = this.allTrips.sort((a, b) => (a.timestamps[0] < b.timestamps[0] ? -1 : 1))
-    } else {
-      this.allTrips = this.allTrips.sort((a: Trip, b: Trip) => {
-        // use status time if it exists, else use end-time
-        const t1 = a.status ? a.timestamps[0] : a.timestamps[1]
-        const t2 = b.status ? b.timestamps[0] : b.timestamps[1]
-        return a < b ? 1 : -1
-      })
-    }
-
-    this.indexOfNextTripToAnimate = this.calculateFirstNextTrip()
-
-    console.log(this.allTrips.length, 'trips sorted')
-    console.log({ trips: this.allTrips })
-    console.log({ nextTrim: this.indexOfNextTripToAnimate })
-  }
-
-  private calculateFirstNextTrip() {
-    const forward = this.timeDirection === 1
-
-    if (forward) {
-      for (let i = 0; i < this.allTrips.length; i++) {
-        if (this.allTrips[i].timestamps[0] > this.simulationTime) {
-          return i
-        }
-      }
-      return this.allTrips.length - 1
-    } else {
-      for (let i = this.allTrips.length - 1; i >= 0; i--) {
-        const timepoint = this.allTrips[i].status ? 0 : 1
-        if (this.allTrips[i].timestamps[timepoint] < this.simulationTime) {
-          return i
-        }
-      }
-      console.log('nuthin')
-      return 0
-    }
-  }
 
   private initScene() {
     console.log('hereee 5-----')
