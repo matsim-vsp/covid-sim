@@ -12,6 +12,7 @@ import * as THREE from 'three'
 import store from '@/store'
 import { Agent, ColorScheme, Health } from '@/Interfaces'
 import AgentGeometry from './AgentGeometry'
+import EventBus from '@/EventBus.vue'
 
 interface Trip {
   id: number
@@ -212,8 +213,29 @@ export default class AnimationView extends Vue {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
     this.setup()
+    this.setupDragListener()
 
     window.addEventListener('resize', this.onWindowResize, false)
+  }
+
+  private wasSimulationRunning = true
+
+  private setupDragListener() {
+    const parent = this
+    EventBus.$on(EventBus.DRAG, function(seconds: number) {
+      if (seconds === -1) {
+        // start drag
+        parent.wasSimulationRunning = parent.state.isRunning
+        parent.$store.commit('setSimulation', false)
+      } else if (seconds === -2) {
+        // end drag
+        parent.$store.commit('setSimulation', parent.wasSimulationRunning)
+      } else {
+        // dragging
+        parent.simulationTime = parent.nextClockUpdateTime = seconds
+        parent.animate()
+      }
+    })
   }
 
   private exitSimulation() {
@@ -234,11 +256,11 @@ export default class AnimationView extends Vue {
     this.exitSimulation()
 
     window.removeEventListener('resize', this.onWindowResize)
+    EventBus.$off(EventBus.DRAG)
 
     // Some types of THREE objects must be manually destroyed
     // https://threejs.org/docs/index.html#manual/en/introduction/How-to-dispose-of-objects
     if (this.networkMesh) this.networkMesh.geometry.dispose()
-
     if (this.agentMaterial) this.agentMaterial.dispose()
     if (this.agentGeometry) this.agentGeometry.dispose()
 
@@ -550,17 +572,18 @@ export default class AnimationView extends Vue {
       this.simulationTime = 0
     } else if (this.simulationTime > 86400) {
       this.$store.commit('setSimulation', false)
-      this.simulationTime = 86400
+      this.simulationTime = 86400 - 1
     }
 
     // tell agents to move their butts
     if (this.agentMaterial)
       this.agentMaterial.uniforms['simulationTime'].value = this.simulationTime
 
-    // update statusbar clock
+    // update statusbar, clocks, etc
     if (this.simulationTime * this.timeDirection >= this.nextClockUpdateTime * this.timeDirection) {
       this.setVisibleClock()
-      this.nextClockUpdateTime += 300 * this.timeDirection
+      this.nextClockUpdateTime += 60 * this.timeDirection
+      EventBus.$emit(EventBus.SIMULATION_PERCENT, this.simulationTime / 86400)
     }
 
     if (this.camera) this.renderer.render(this.scene, this.camera)

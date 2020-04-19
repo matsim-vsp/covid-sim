@@ -6,25 +6,25 @@
     p: router-link(to=".") Infection Traces
     p &bullet;
 
-    .controls(v-if="isLoaded")
-
-      button.button.is-white.is-outlined.is-small(
-        v-if="isLoaded"
-        @click='toggleSimulation') {{ state.isRunning ? 'Pause' : 'Start'}}
-
-  #hover-panel(v-if="isLoaded")
+  #top-hover-panel(v-if="isLoaded")
     .left-side
-      img(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
+      img.theme-button(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
 
     .right-side
       p.digital-clock {{ state.message }}
-      vue-slider.speed-slider(v-model="speed"
-        :data="speedStops"
-        tooltip="active"
-        tooltip-placement="left"
-        :tooltip-formatter="val => val + 'x'"
-      )
-      p {{ speed }}x speed
+      .morestuff(v-if="isLoaded")
+        vue-slider.speed-slider(v-model="speed"
+          :data="speedStops"
+          tooltip="active"
+          tooltip-placement="left"
+          :tooltip-formatter="val => val + 'x'"
+          :duration="0"
+        )
+        p {{ speed }}x speed
+        // img.logo(src="@/assets/images/tu-logo.png" width=120)
+
+  #bottom-hover-panel(v-if="isLoaded")
+    playback-controls(@click='toggleSimulation')
 
 </template>
 
@@ -34,10 +34,12 @@ import VueSlider from 'vue-slider-component'
 
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
+import PlaybackControls from '@/components/PlaybackControls.vue'
 
 @Component({
   components: {
     AnimationView,
+    PlaybackControls,
     VueSlider,
   },
 })
@@ -82,7 +84,7 @@ export default class Shader extends Vue {
   bottom: 0.2rem;
   width: 100%;
   display: grid;
-  grid-template-rows: $navHeight auto 1fr;
+  grid-template-rows: $navHeight auto 1fr auto;
   grid-template-columns: 1fr;
 }
 
@@ -91,24 +93,33 @@ export default class Shader extends Vue {
   grid-column: 1 / 2;
 }
 
-#hover-panel {
+#top-hover-panel {
   z-index: 5;
   display: flex;
   flex-direction: row;
   padding: 0.5rem 0.5rem 0.2rem 0;
   grid-row: 2 / 3;
   grid-column: 1 / 2;
+  height: 100%;
 }
 
-#hover-panel img {
+img.theme-button {
   opacity: 1;
   padding: 0.1rem 0.1rem;
   background-color: black;
 }
 
-#hover-panel img:hover {
+#top-hover-panel img.theme-button:hover {
   cursor: pointer;
   background-color: white;
+}
+
+#bottom-hover-panel {
+  grid-row: 4 / 5;
+  grid-column: 1 / 2;
+  margin: 0 2rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
 }
 
 #nav {
@@ -137,10 +148,6 @@ export default class Shader extends Vue {
   }
 }
 
-.controls button {
-  margin: auto 0;
-}
-
 .speed-slider {
   width: 100%;
   margin: auto 0rem 0.25rem 0rem;
@@ -160,6 +167,8 @@ export default class Shader extends Vue {
 }
 
 .left-side {
+  display: flex;
+  flex-direction: column;
   margin-left: 0.5rem;
   margin-right: auto;
 }
@@ -172,12 +181,21 @@ export default class Shader extends Vue {
   text-align: right;
   padding: 0 0;
   color: white;
+  height: 100%;
+}
+
+.logo {
+  flex: 1;
+  margin-top: auto;
+  margin-left: auto;
+  margin-bottom: none;
 }
 
 #rview {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
 }
+
 @media only screen and (max-width: 768px) {
   #nav {
     padding-left: 1rem;
