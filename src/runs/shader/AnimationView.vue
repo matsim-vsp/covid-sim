@@ -113,6 +113,8 @@ export default class AnimationView extends Vue {
   private publicPath = ''
 
   @Watch('speed') speedChanged() {
+    this.$store.commit('setSimulation', true)
+
     const newDirection = this.speed < 0 ? -1 : 1
     if (newDirection === this.timeDirection) return
 
@@ -541,6 +543,15 @@ export default class AnimationView extends Vue {
     this.animationTimeSinceUnpaused = elapsedTicks
 
     this.simulationTime = this.simulationTime + timeDelta
+
+    // are we done?
+    if (this.simulationTime < 0.0) {
+      this.$store.commit('setSimulation', false)
+      this.simulationTime = 0
+    } else if (this.simulationTime > 86400) {
+      this.$store.commit('setSimulation', false)
+      this.simulationTime = 86400
+    }
 
     // tell agents to move their butts
     if (this.agentMaterial)
