@@ -42,7 +42,7 @@ export default class App extends Vue {
   }
 
   private get cities() {
-    return ['Berlin']
+    return ['Berlin', 'Munich']
   }
 
   private readme: any = {

@@ -18,6 +18,9 @@
 import matsim
 import ndjson
 
+day = 8
+sample_rate = 10
+
 # disease status numeric codes
 disease_code = {
     "susceptible": 0,
@@ -26,16 +29,13 @@ disease_code = {
 }
 
 #outfile hard-coded for now
-outfile = '008-infections.json'
+outfile = '00' + str(day) + '-infections.json'
 
 # magic_seconds = 691100 # day 8
-magic_seconds = 345600
-
-# sample rate -- because we can barely handle 2000 agents in the browswer
-sample_rate = 25
+magic_seconds = day * 86400 # 345600 # 691200 # 345600
 
 events = matsim.event_reader(
-    "day_004.xml.gz", types="episimPersonStatus,actstart,actend"
+    "day_00" + str(day) + ".xml.gz", types="episimPersonStatus,actstart,actend"
 )
 
 # lookups by person's health status, coords, and timepoints
@@ -130,3 +130,4 @@ with open(outfile, "w") as f:
         writer.writerow(agent)
 
 print(len(agents), "agents")
+
