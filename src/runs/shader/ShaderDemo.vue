@@ -127,6 +127,7 @@ img.theme-button {
   border-radius: 50%;
   border: 2px solid #648cb4;
   width: 3rem;
+  height: 3rem;
 }
 
 img.theme-button:hover {
