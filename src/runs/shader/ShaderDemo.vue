@@ -1,9 +1,13 @@
 <template lang="pug">
 #v3-app
-  animation-view(@loaded="toggleLoaded" :speed="speed")
+  animation-view(@loaded="toggleLoaded" :speed="speed" :day="newDay")
 
   #nav
-    p: router-link(to=".") Berlin Infection Traces &bullet; Simulated Day 4
+    p: router-link(to="#?day=4") Day 4
+    p: router-link(to="#?day=5" :day="5") Day 5
+    p: router-link(to="#?day=6" :day="6") Day 6
+    p: router-link(to="#?day=7" :day="7") Day 7
+    p: router-link(to="#?day=8" :day="8") Day 8
 
   #top-hover-panel(v-if="isLoaded")
     .left-side
@@ -34,13 +38,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import VueSlider from 'vue-slider-component'
 
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
 import { ColorScheme } from '../../Interfaces'
+import { Route } from 'vue-router'
 
 @Component({
   components: {
@@ -50,6 +55,8 @@ import { ColorScheme } from '../../Interfaces'
   },
 })
 export default class Shader extends Vue {
+  private newDay: number = 0
+
   private state = store.state
   private isLoaded = false
 
@@ -87,6 +94,15 @@ export default class Shader extends Vue {
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', true)
+  }
+
+  @Watch('$route') routeChanged(to: Route, from: Route) {
+    console.log({ to })
+    if (to.hash) {
+      const day = parseInt(to.hash.substring(to.hash.length - 1))
+      console.log(day)
+      this.newDay = day
+    }
   }
 
   private toggleLoaded(loaded: boolean) {

@@ -20,6 +20,8 @@ export default class AnimationView extends Vue {
 
   @Prop({ required: true }) private speed!: number
 
+  @Prop({ required: true }) private day!: number
+
   private timeFactor = 600.0
   private timeDirection = 1
 
@@ -99,7 +101,6 @@ export default class AnimationView extends Vue {
   private midpointX = 4595000
   private midpointY = 5820000
 
-  private agents: { [id: string]: THREE.Mesh } = {}
   private agentList: { [id: string]: Agent } = {}
 
   private allTripsHaveBegun = false
@@ -174,6 +175,12 @@ export default class AnimationView extends Vue {
     }
   }
 
+  @Watch('day') async dayChanged() {
+    console.log('------------------ DAY', this.day)
+
+    this.loadAgents()
+  }
+
   private mounted() {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
@@ -214,8 +221,6 @@ export default class AnimationView extends Vue {
     this.simulationTime = 0
     this.nextClockUpdateTime = 0
     this.timeDirection = 1
-
-    this.agents = {}
 
     while (this.scene.children.length) {
       this.scene.remove(this.scene.children[0])
@@ -317,11 +322,16 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents and infections')
 
+    const dayString = this.day ? '00' + this.day : '004'
+    const zpath = this.publicPath + dayString + '-infections.json'
+
     // we're going to do this async and streamy!
-    const response = await fetch(this.publicPath + '008-infections.json')
+    const response = await fetch(zpath)
     if (!response.body) return
 
     this.tempStreamBuffer = ''
+    this.agentList = {}
+
     const decoder = new TextDecoder('utf-8')
     const reader = response.body.getReader()
 
@@ -370,28 +380,37 @@ export default class AnimationView extends Vue {
 
   private finishedLoadingAgents() {
     if (this.agentGeometry) this.agentGeometry.dispose()
+    // if (this.agentMaterial) this.agentMaterial.dispose()
 
     this.agentGeometry = new AgentGeometry(this.agentList, this.midpointX, this.midpointY)
 
-    this.agentMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        simulationTime: { value: 0.0 },
-        colorLinks: { value: new THREE.Color(this.colors.links) },
-        colorSusceptible: { value: new THREE.Color(this.colors.susceptible) },
-        colorContagious: { value: new THREE.Color(this.colors.contagious) },
-        colorInfectedButNotContagious: {
-          value: new THREE.Color(this.colors.infectedButNotContagious),
+    if (!this.agentMaterial)
+      this.agentMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          simulationTime: { value: 0.0 },
+          colorLinks: { value: new THREE.Color(this.colors.links) },
+          colorSusceptible: { value: new THREE.Color(this.colors.susceptible) },
+          colorContagious: { value: new THREE.Color(this.colors.contagious) },
+          colorInfectedButNotContagious: {
+            value: new THREE.Color(this.colors.infectedButNotContagious),
+          },
         },
-      },
-      vertexShader: this.vertexShader,
-      fragmentShader: this.fragmentShader,
-      blending: THREE.NoBlending,
-      depthTest: true,
-      transparent: true,
-    })
+        vertexShader: this.vertexShader,
+        fragmentShader: this.fragmentShader,
+        blending: THREE.NoBlending,
+        depthTest: true,
+        transparent: true,
+      })
 
     const points = new THREE.Points(this.agentGeometry, this.agentMaterial)
+    points.name = 'agents'
+
+    // zap the old points, if we have them
+    const agentLayer = this.scene.getObjectByName('agents')
+    if (agentLayer) this.scene.remove(agentLayer)
+
     this.scene.add(points)
+    this.agentList = {}
 
     console.log('added points')
   }
