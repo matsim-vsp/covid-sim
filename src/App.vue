@@ -56,7 +56,7 @@ html {
 }
 
 html {
-  background-color: #333;
+  background-color: #222;
 }
 
 h1,

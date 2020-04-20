@@ -10,16 +10,9 @@ import ZipLoader from 'zip-loader'
 import * as THREE from 'three'
 
 import store from '@/store'
-import { Agent, ColorScheme, Health } from '@/Interfaces'
+import { Agent, ColorScheme, ColorSet, Health } from '@/Interfaces'
 import AgentGeometry from './AgentGeometry'
 import EventBus from '@/EventBus.vue'
-
-interface Trip {
-  id: number
-  timestamps: number[]
-  path?: number[]
-  status?: string
-}
 
 @Component
 export default class AnimationView extends Vue {
@@ -35,20 +28,20 @@ export default class AnimationView extends Vue {
 
   private networkFilename = 'network.zip'
 
-  private lightMode = {
-    background: 0xdddde4,
+  private lightMode: ColorSet = {
+    background: 0xeeeef4,
     links: 0x9999aa,
     susceptible: 0x333333,
     infectedButNotContagious: 0x0077ff,
     contagious: 0xbb0044,
   }
 
-  private darkMode = {
+  private darkMode: ColorSet = {
     background: 0x181518,
     links: 0x223355,
     susceptible: 0xffff00,
     infectedButNotContagious: 0x00ffff,
-    contagious: 0xff33cc,
+    contagious: 0xff2299,
   }
   private state = store.state
 
@@ -151,31 +144,21 @@ export default class AnimationView extends Vue {
   private switchColorScheme(scheme: ColorScheme) {
     this.colors = scheme == ColorScheme.LightMode ? this.lightMode : this.darkMode
 
+    // background
     this.scene.background = new THREE.Color(this.colors.background)
 
-    setTimeout(() => {
-      //  this.bgSwapColors()
-    }, 50)
-  }
+    // agents
+    if (this.agentMaterial) {
+      this.agentMaterial.uniforms['colorSusceptible'].value = new THREE.Color(
+        this.colors.susceptible
+      )
+      this.agentMaterial.uniforms['colorInfectedButNotContagious'].value = new THREE.Color(
+        this.colors.infectedButNotContagious
+      )
+      this.agentMaterial.uniforms['colorContagious'].value = new THREE.Color(this.colors.contagious)
+    }
 
-  /*
-  private bgSwapColors() {
-    const oldRed = this.red
-    const oldYellow = this.yellow
-    const oldCyan = this.cyan
-
-    this.red = new THREE.MeshBasicMaterial({
-      color: this.colors.contagious,
-      transparent: true,
-      opacity: 0.8,
-    })
-    this.yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
-    this.cyan = new THREE.MeshBasicMaterial({
-      color: this.colors.infectedButNotContagious,
-      transparent: true,
-      opacity: 0.8,
-    })
-
+    // road network
     // rebuild the streets
     const net = this.scene.getObjectByName('network')
     if (net) this.scene.remove(net)
@@ -188,26 +171,7 @@ export default class AnimationView extends Vue {
       this.networkMesh.name = 'network'
       this.scene.add(this.networkMesh)
     }
-
-    // rebuild every agent
-    for (const id of Object.keys(this.agents)) {
-      const agent = this.agents[id]
-      if (!agent) return
-
-      // get infection status
-      let healthStatus = Health.Susceptible
-      if (agent.material === oldRed) healthStatus = Health.Contagious
-      if (agent.material === oldCyan) healthStatus = Health.InfectedButNotContagious
-
-      const facelift = this.getMeshForInfection(healthStatus)
-      facelift.position.copy(agent.position)
-
-      this.scene.remove(agent)
-      this.scene.add(facelift)
-      this.agents[id] = facelift
-    }
   }
-  */
 
   private mounted() {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
@@ -411,12 +375,18 @@ export default class AnimationView extends Vue {
     this.agentMaterial = new THREE.ShaderMaterial({
       uniforms: {
         simulationTime: { value: 0.0 },
+        colorLinks: { value: new THREE.Color(this.colors.links) },
+        colorSusceptible: { value: new THREE.Color(this.colors.susceptible) },
+        colorContagious: { value: new THREE.Color(this.colors.contagious) },
+        colorInfectedButNotContagious: {
+          value: new THREE.Color(this.colors.infectedButNotContagious),
+        },
       },
       vertexShader: this.vertexShader,
       fragmentShader: this.fragmentShader,
-      blending: THREE.AdditiveBlending,
-      depthTest: false,
-      transparent: false,
+      blending: THREE.NoBlending,
+      depthTest: true,
+      transparent: true,
     })
 
     const points = new THREE.Points(this.agentGeometry, this.agentMaterial)

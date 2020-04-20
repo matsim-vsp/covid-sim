@@ -5,13 +5,13 @@
   #nav
     p: router-link(to=".") Berlin Infection Traces &bullet; Simulated Day 4
 
-
   #top-hover-panel(v-if="isLoaded")
     .left-side
-      img.theme-button(src="@/assets/images/darkmode.jpg" width=40 @click='rotateColors')
 
     .right-side
-      p.digital-clock {{ state.message }}
+      p.digital-clock(
+        :style="{'color': textColor.text, 'background-color': textColor.bg}") {{ state.message }}
+
       .morestuff(v-if="isLoaded")
         vue-slider.speed-slider(v-model="speed"
           :data="speedStops"
@@ -21,10 +21,11 @@
           tooltip-placement="left"
           :tooltip-formatter="val => val + 'x'"
         )
-        p.speed-label {{ speed }}x speed
+        p.speed-label(:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ speed }}x speed
         // img.logo(src="@/assets/images/tu-logo.png" width=120)
 
   #bottom-hover-panel(v-if="isLoaded")
+    img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
     playback-controls(@click='toggleSimulation')
 
 </template>
@@ -36,6 +37,7 @@ import VueSlider from 'vue-slider-component'
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
+import { ColorScheme } from '../../Interfaces'
 
 @Component({
   components: {
@@ -51,8 +53,21 @@ export default class Shader extends Vue {
   private speedStops = [-10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10]
   private speed = 1
 
+  private get textColor() {
+    const lightmode = {
+      text: '#3498db',
+      bg: '#eeeef480',
+    }
+
+    const darkmode = {
+      text: 'white',
+      bg: '#181518aa',
+    }
+
+    return this.state.colorScheme === ColorScheme.DarkMode ? darkmode : lightmode
+  }
+
   private toggleSimulation() {
-    console.log('halt!')
     this.$store.commit('setSimulation', !store.state.isRunning)
   }
 
@@ -107,10 +122,15 @@ export default class Shader extends Vue {
 
 img.theme-button {
   opacity: 1;
-  margin-top: 1rem;
-  margin-left: 0.5rem;
-  padding: 0.1rem 0.1rem;
+  margin: 1rem 0 1rem auto;
   background-color: black;
+  border-radius: 50%;
+  border: 2px solid #648cb4;
+  width: 3rem;
+}
+
+img.theme-button:hover {
+  border: 2px solid white;
 }
 
 #top-hover-panel img.theme-button:hover {
@@ -161,9 +181,10 @@ img.theme-button {
 }
 
 .digital-clock {
+  margin-top: 1rem;
   font-size: 3rem;
+  line-height: 3rem;
   font-weight: bold;
-  color: white;
 }
 
 .controls {
@@ -194,10 +215,6 @@ img.theme-button {
   margin-top: auto;
   margin-left: auto;
   margin-bottom: none;
-}
-
-p.speed-label {
-  text-shadow: 2px 2px 1px black;
 }
 
 #rview {

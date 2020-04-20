@@ -7,7 +7,7 @@
     @drag-end="dragEnd")
 
   .buttons
-    .playback(@click='toggleSimulation')
+    .playpause(@click='toggleSimulation')
       i.playback-button.fa.fa-1x.fa-pause(v-if="state.isRunning")
       i.playback-button.fa.fa-1x.fa-play(v-else)
 
@@ -51,12 +51,8 @@ export default class VueComponent extends Vue {
       const minutes = ('00' + hms.minutes).slice(-2)
       return `${hms.hours}:${minutes}`
     } catch (e) {
-      return '0:00'
+      return '00:00'
     }
-  }
-
-  @Watch('sliderValue') sliderChanged() {
-    // this.sliderOptions['tooltip-placement'] = this.sliderValue > 1000 ? 'left' : 'right'
   }
 
   private dragStart() {
@@ -114,7 +110,7 @@ export default class VueComponent extends Vue {
   margin: 0.25rem auto 0 auto;
 }
 
-.playback {
+.playpause {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
@@ -126,8 +122,9 @@ export default class VueComponent extends Vue {
   cursor: pointer;
 }
 
-.playback:hover {
+.playpause:hover {
   background-color: #39a8f1;
+  border: 2px solid white;
 }
 
 .playback-button {

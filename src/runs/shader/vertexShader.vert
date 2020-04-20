@@ -96,7 +96,7 @@ void main() {
 
     } else {
 
-        float zIndex = 2.0 +  myInfectionStatus;
+        float zIndex = 2.0 - myInfectionStatus;
 
         // unpack coords from position buffers - x,y,time. Deal w/z later
         vec3 point1 = vec3(position.xy, zIndex);

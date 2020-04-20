@@ -3,6 +3,14 @@ export enum ColorScheme {
   DarkMode = 'dark',
 }
 
+export interface ColorSet {
+  background: number
+  links: number
+  susceptible: number
+  infectedButNotContagious: number
+  contagious: number
+}
+
 export enum Health {
   Susceptible = 'susceptible',
   InfectedButNotContagious = 'infectedButNotContagious',
@@ -15,4 +23,11 @@ export interface Agent {
   path: [number, number][]
   disease_time: number[]
   disease: number[]
+}
+
+export interface Trip {
+  id: number
+  timestamps: number[]
+  path?: number[]
+  status?: string
 }
