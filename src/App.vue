@@ -36,7 +36,7 @@ export default {
 @import '~bulma/css/bulma.css';
 
 /* vue-slider colors */
-@import '~vue-slider-component/lib/theme/antd.scss';
+// @import '~vue-slider-component/lib/theme/antd.scss';
 
 html {
   box-sizing: border-box;

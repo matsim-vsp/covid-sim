@@ -29,7 +29,7 @@ export default class AnimationView extends Vue {
   private networkFilename = 'network.zip'
 
   private lightMode: ColorSet = {
-    background: 0xddddcc,
+    background: 0xddddd0,
     links: 0xffffff,
     susceptible: 0x999900,
     infectedButNotContagious: 0x0077ff,
@@ -126,12 +126,13 @@ export default class AnimationView extends Vue {
 
   @Watch('state.isRunning')
   private playPauseSim() {
-    // endless animation loop
     if (this.state.isRunning) {
+      // pressed play.
       this.clock.start()
       requestAnimationFrame(this.animate)
     } else {
-      this.clock.stop() // hi
+      // pressed pause
+      this.clock.stop()
       this.clock = new THREE.Clock(false)
 
       // Reset animation frame-clock to zero

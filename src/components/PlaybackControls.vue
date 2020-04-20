@@ -31,6 +31,7 @@ export default class VueComponent extends Vue {
   private sliderOptions = {
     min: 0,
     max: this.maxSliderVal - 1,
+    clickable: false,
     dotSize: 20,
     duration: 0,
     lazy: true,
@@ -100,9 +101,6 @@ export default class VueComponent extends Vue {
 
 <style scoped lang="scss">
 @import '@/styles.scss';
-
-/* vue-slider colors */
-@import '~vue-slider-component/lib/theme/default.scss';
 
 #vue-component {
   display: flex;

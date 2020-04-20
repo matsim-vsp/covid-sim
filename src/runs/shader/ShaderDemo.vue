@@ -71,7 +71,12 @@ export default class Shader extends Vue {
   }
 
   private toggleSimulation() {
-    this.$store.commit('setSimulation', !store.state.isRunning)
+    this.$store.commit('setSimulation', !this.state.isRunning)
+
+    // ok so, many times I mashed the play/pause wondering why things wouldn't
+    // start moving. Turns out a 0x speed is not very helpful! Help the user
+    // out and switch the speed up if they press play.
+    if (this.state.isRunning && this.speed === 0.0) this.speed = 1.0
   }
 
   private mounted() {
@@ -131,6 +136,7 @@ img.theme-button {
   border: 2px solid #648cb4;
   width: 3rem;
   height: 3rem;
+  cursor: pointer;
 }
 
 img.theme-button:hover {
