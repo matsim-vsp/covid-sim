@@ -102,6 +102,7 @@ export default class AnimationView extends Vue {
   private midpointY = 5820000
 
   private agentList: { [id: string]: Agent } = {}
+  private agentCache: { [day: number]: any } = {}
 
   private allTripsHaveBegun = false
 
@@ -178,7 +179,16 @@ export default class AnimationView extends Vue {
   @Watch('day') async dayChanged() {
     console.log('------------------ DAY', this.day)
 
+    // pause the clock
+    this.clock.stop()
+    this.animationTimeSinceUnpaused = 0
+    this.clock = new THREE.Clock(false)
+
     this.loadAgents()
+
+    // and let er go again
+    this.clock.start()
+    requestAnimationFrame(this.animate)
   }
 
   private mounted() {
@@ -322,6 +332,13 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents and infections')
 
+    // already cached it?
+    if (this.agentCache[this.day]) {
+      this.agentList = this.agentCache[this.day]
+      this.finishedLoadingAgents()
+      return
+    }
+
     const dayString = this.day ? '00' + this.day : '004'
     const zpath = this.publicPath + dayString + '-infections.json'
 
@@ -410,7 +427,7 @@ export default class AnimationView extends Vue {
     if (agentLayer) this.scene.remove(agentLayer)
 
     this.scene.add(points)
-    this.agentList = {}
+    this.agentCache[this.day] = this.agentList
 
     console.log('added points')
   }

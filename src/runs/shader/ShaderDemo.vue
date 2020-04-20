@@ -248,7 +248,7 @@ img.theme-button:hover {
   grid-column: 1 / 2;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 640px) {
   #nav {
     padding-left: 1rem;
   }
