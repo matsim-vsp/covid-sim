@@ -54,8 +54,8 @@ export default class App extends Vue {
 
   @Watch('$route') async routeChanged(to: any, from: any) {
     console.log(to)
-    await this.loadDataInBackground()
     this.city = to.params.city
+    await this.loadDataInBackground()
   }
 
   private get topNotes() {
@@ -79,6 +79,7 @@ export default class App extends Vue {
   }
 
   private berlinCSV = require('@/assets/berlin-cases.csv').default
+  private munichCSV = require('@/assets/munich-cases.csv').default
 
   private city = ''
   private plusminus = '-5'
@@ -102,7 +103,9 @@ export default class App extends Vue {
     // Our simulation start date is 2020.02.16 based on school closures 13.March
     // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
     // Thus we begin Berlin data with 2 cases.
-    const data = Papa.parse(this.berlinCSV, {
+    const csvContents = this.city === 'berlin' ? this.berlinCSV : this.munichCSV
+
+    const data = Papa.parse(csvContents, {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -126,7 +129,7 @@ export default class App extends Vue {
     }
 
     const series = {
-      name: 'Berlin Infections (RKI)',
+      name: this.city === 'berlin' ? 'Berlin Infections (RKI)' : 'Munich Infections (RKI)',
       x: dates,
       y: cases,
       line: {

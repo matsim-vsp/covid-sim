@@ -6,7 +6,7 @@ Here we depict the effects of reopening society at various levels for work, scho
 
 - The simulations refer to either the **Berlin** or **Munich** regions (each city plus some surroundings).
 - Berlin real-world infections are from [Robert Koch Institute (RKI)](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0). For many cases, a delay between infection and reporting may occur.
-- After **March 13**, 10% of leisure acts are banned (corresponding to the closure of theaters, etc.). Also, schools / kindergarten / universities are closed. 10 percent of kita and primary-aged children still go to kita / primary schools (Notbetrieb).
+- On **March 14**, 10% of leisure acts are banned (corresponding to the closure of theaters, etc.). Also, schools / kindergarten / universities are closed. 10 percent of kita and primary-aged children still go to kita / primary schools (Notbetrieb).
 - On **March 23**, work, shopping, errands and business are reduced, corresponding to the currently valid "Kontaktsperre"; the percentage of work, leisure, shopping, errands and business activities still occuring after **March 23** can be set.
 - Educational facilities can be reopened on **April 20**.
 

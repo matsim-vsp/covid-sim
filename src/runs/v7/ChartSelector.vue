@@ -346,7 +346,8 @@ export default class SectionViewer extends Vue {
     }
 
     // Add Berlin "Reported Cases"
-    if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+    // if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+    serieses.push(this.state.berlinCases)
 
     return serieses
   }
