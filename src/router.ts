@@ -49,6 +49,19 @@ const routes = [
     redirect: '/v6/:city',
   },
   {
+    path: '/v7',
+    redirect: '/v7/berlin',
+  },
+  {
+    path: '/v7/:city',
+    name: 'V7',
+    component: () => import(/* webpackChunkName: "V7" */ '@/runs/v7/V7.vue'),
+  },
+  {
+    path: '/v7/:city/:pm',
+    redirect: '/v7/:city',
+  },
+  {
     path: '/shader',
     name: 'shader',
     component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
