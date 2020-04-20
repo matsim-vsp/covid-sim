@@ -74,16 +74,23 @@ export default class VueComponent extends Vue {
     EventBus.$emit(EventBus.DRAG, seconds)
   }
 
+  private onKeyPressed(ev: KeyboardEvent) {
+    if (ev.code === 'Space') this.toggleSimulation()
+  }
+
   mounted() {
     const parent = this
 
     EventBus.$on(EventBus.SIMULATION_PERCENT, function(time: number) {
       parent.sliderValue = Math.floor(10000 * time)
     })
+
+    window.addEventListener('keyup', this.onKeyPressed)
   }
 
   beforeDestroy() {
     EventBus.$off(EventBus.SIMULATION_PERCENT)
+    window.removeEventListener('keyup', this.onKeyPressed)
   }
 }
 </script>
@@ -92,7 +99,6 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 /* vue-slider colors */
-$themeColor: #550055; /*#3498db;*/
 @import '~vue-slider-component/lib/theme/default.scss';
 
 #vue-component {

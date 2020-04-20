@@ -216,6 +216,12 @@ export default class AnimationView extends Vue {
     this.setupDragListener()
 
     window.addEventListener('resize', this.onWindowResize, false)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange, false)
+  }
+
+  private handleVisibilityChange() {
+    console.log('window visibility changed!! hidden:', document.hidden)
+    this.$store.commit('setSimulation', document.hidden ? false : true)
   }
 
   private wasSimulationRunning = true
@@ -256,6 +262,7 @@ export default class AnimationView extends Vue {
     this.exitSimulation()
 
     window.removeEventListener('resize', this.onWindowResize)
+    document.removeEventListener('visibilityChange', this.handleVisibilityChange)
     EventBus.$off(EventBus.DRAG)
 
     // Some types of THREE objects must be manually destroyed
