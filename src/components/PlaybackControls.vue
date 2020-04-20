@@ -26,9 +26,11 @@ export default class VueComponent extends Vue {
   private state = store.state
   private sliderValue = 0
 
+  private maxSliderVal = 10000
+
   private sliderOptions = {
     min: 0,
-    max: 10000,
+    max: this.maxSliderVal - 1,
     dotSize: 20,
     duration: 0,
     lazy: true,
@@ -44,7 +46,7 @@ export default class VueComponent extends Vue {
   }
 
   private convertSecondsToClockTimeMinutes(index: number) {
-    const seconds = (index / 10000) * 86400
+    const seconds = this.getSecondsFromSlider(index)
 
     try {
       const hms = timeConvert(seconds)
@@ -66,19 +68,24 @@ export default class VueComponent extends Vue {
   }
 
   private dragging(value: any) {
-    const seconds = (value / 10000) * 86400
-    EventBus.$emit(EventBus.DRAG, seconds)
+    EventBus.$emit(EventBus.DRAG, this.getSecondsFromSlider(value))
   }
 
   private onKeyPressed(ev: KeyboardEvent) {
     if (ev.code === 'Space') this.toggleSimulation()
   }
 
+  private getSecondsFromSlider(oneToTenThousand: number) {
+    let seconds = (oneToTenThousand / this.maxSliderVal) * 86400
+    if (seconds === 86400) seconds = 86400 - 1
+    return seconds
+  }
+
   mounted() {
     const parent = this
 
     EventBus.$on(EventBus.SIMULATION_PERCENT, function(time: number) {
-      parent.sliderValue = Math.floor(10000 * time)
+      parent.sliderValue = Math.floor(parent.maxSliderVal * time)
     })
 
     window.addEventListener('keyup', this.onKeyPressed)
