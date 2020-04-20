@@ -29,9 +29,9 @@ export default class AnimationView extends Vue {
   private networkFilename = 'network.zip'
 
   private lightMode: ColorSet = {
-    background: 0xeeeef4,
-    links: 0x9999aa,
-    susceptible: 0x333333,
+    background: 0xddddcc,
+    links: 0xffffff,
+    susceptible: 0x999900,
     infectedButNotContagious: 0x0077ff,
     contagious: 0xbb0044,
   }
@@ -39,7 +39,7 @@ export default class AnimationView extends Vue {
   private darkMode: ColorSet = {
     background: 0x181518,
     links: 0x223355,
-    susceptible: 0xffff00,
+    susceptible: 0xbbbb44,
     infectedButNotContagious: 0x00ffff,
     contagious: 0xff2299,
   }
@@ -505,7 +505,7 @@ export default class AnimationView extends Vue {
     this.cameraControls.enableZoom = true
     this.cameraControls.enableRotate = false
 
-    this.camera.position.set(0, 0, 3000)
+    this.camera.position.set(0, 0, 2000)
     this.camera.lookAt(0, 0, -1)
 
     this.cameraControls.update()

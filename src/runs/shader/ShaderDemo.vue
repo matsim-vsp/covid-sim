@@ -10,7 +10,8 @@
 
     .right-side
       p.digital-clock(
-        :style="{'color': textColor.text, 'background-color': textColor.bg}") {{ state.message }}
+        :style="{'color': textColor.text}") {{ state.message }}
+        //:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ state.message }}
 
       .morestuff(v-if="isLoaded")
         vue-slider.speed-slider(v-model="speed"
@@ -21,7 +22,9 @@
           tooltip-placement="left"
           :tooltip-formatter="val => val + 'x'"
         )
-        p.speed-label(:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ speed }}x speed
+        p.speed-label(
+          :style="{'color': textColor.text}") {{ speed }}x speed
+          //:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ speed }}x speed
         // img.logo(src="@/assets/images/tu-logo.png" width=120)
 
   #bottom-hover-panel(v-if="isLoaded")
