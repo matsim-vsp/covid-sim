@@ -320,7 +320,10 @@ export default class SectionViewer extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    const startDay = this.plusminus === '-5' ? '2020-02-22' : '2020-02-12'
+    let startDay = '2020-02-20'
+    if (this.plusminus === '-3') startDay = '2020-02-23'
+    if (this.plusminus === '-6') startDay = '2020-02-26'
+
     const date = moment(startDay)
       .add(day, 'days')
       .format('YYYY-MM-DD')
