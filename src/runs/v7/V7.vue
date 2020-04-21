@@ -42,15 +42,22 @@ export default class App extends Vue {
   }
 
   private get cities() {
-    return ['Berlin', 'Munich']
+    return ['Berlin', 'Munich', 'Heinsberg']
   }
 
   private readme: any = {
     berlin: require('@/assets/v7-notes.md'),
     munich: require('@/assets/v7-notes.md'),
+    heinsberg: require('@/assets/v7-notes.md'),
   }
 
   private plotTag = '{{PLOTS}}'
+
+  private capitalizeCity: any = {
+    berlin: 'Berlin',
+    munich: 'Munich',
+    heinsberg: 'Heinsberg',
+  }
 
   @Watch('$route') async routeChanged(to: any, from: any) {
     console.log(to)
@@ -78,11 +85,14 @@ export default class App extends Vue {
     return notes.substring(i + this.plotTag.length)
   }
 
-  private berlinCSV = require('@/assets/berlin-cases.csv').default
-  private munichCSV = require('@/assets/munich-cases.csv').default
+  private cityCSV: any = {
+    berlin: require('@/assets/berlin-cases.csv').default,
+    munich: require('@/assets/munich-cases.csv').default,
+    heinsberg: require('@/assets/heinsberg-cases.csv').default,
+  }
 
   private city = ''
-  private plusminus = '-5'
+  private plusminus = '0'
 
   public async mounted() {
     console.log({ route: this.$route })
@@ -103,7 +113,7 @@ export default class App extends Vue {
     // Our simulation start date is 2020.02.16 based on school closures 13.March
     // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
     // Thus we begin Berlin data with 2 cases.
-    const csvContents = this.city === 'berlin' ? this.berlinCSV : this.munichCSV
+    const csvContents = this.cityCSV[this.city]
 
     const data = Papa.parse(csvContents, {
       header: true,
@@ -117,7 +127,7 @@ export default class App extends Vue {
     const cases: any = []
     let cumulative = 0
 
-    console.log('fetched berlin data:', data.length)
+    console.log('fetched city data:', data.length)
 
     // pull the cases field out of the CSV
     for (const datapoint of data) {
@@ -129,7 +139,7 @@ export default class App extends Vue {
     }
 
     const series = {
-      name: this.city === 'berlin' ? 'Berlin Infections (RKI)' : 'Munich Infections (RKI)',
+      name: this.capitalizeCity[this.city] + ' Infections (RKI)',
       x: dates,
       y: cases,
       line: {

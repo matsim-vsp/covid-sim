@@ -15,35 +15,52 @@
             :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
 
         .selection-widgets(:class="{'totally-disabled': isBase}")
-          .g1
-            h6.title March 14:
-              br
-              | Leisure activities limited
-            p.subhead Percent still occurring (%)
+          .heinsberg(v-if="city==='heinsberg'")
+            .g1
+              h6.title February 26:
+                br
+                | Activities limited
+              p.subhead By type and percent (%)
+              .myslider(v-if="Object.keys(state.measures).length"
+                v-for="measure in ['remainingFractionWork', 'remainingFractionLeisure1', 'remainingFractionShoppingBusinessErrands']"
+                :key="measure")
+                my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+            .g1
+              h6.title April 20:
+                br
+                | Reopening of educational facilities
+              p.subhead Students Returning (%):
+              .myslider(v-if="Object.keys(state.measures).length"
+                v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
+                my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-            .myslider(v-if="Object.keys(state.measures).length" v-for="measure in ['remainingFractionLeisure1']" :key="measure")
-              my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+          .berlin-munich(v-else)
+            .g1
+              h6.title March 14:
+                br
+                | Leisure activities limited
+              p.subhead Percent still occurring (%)
+              .myslider(v-if="Object.keys(state.measures).length" v-for="measure in ['remainingFractionLeisure1']" :key="measure")
+                my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-          .g1
-            h6.title March 23:
-              br
-              | Out-of-home activities limited
-            p.subhead By type and percent (%)
+            .g1
+              h6.title March 23:
+                br
+                | Out-of-home activities limited
+              p.subhead By type and percent (%)
+              .myslider(v-if="Object.keys(state.measures).length"
+                v-for="measure in ['remainingFractionWork', 'remainingFractionLeisure2', 'remainingFractionShoppingBusinessErrands']"
+                :key="measure")
+                my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-            .myslider(v-if="Object.keys(state.measures).length"
-              v-for="measure in ['remainingFractionWork', 'remainingFractionLeisure2', 'remainingFractionShoppingBusinessErrands']"
-              :key="measure")
-              my-slider(:measure="measure" :state="state" @changed="sliderChanged")
-
-          .g1
-            h6.title April 20:
-              br
-              | Reopening of educational facilities
-            p.subhead Students Returning (%):
-
-            .myslider(v-if="Object.keys(state.measures).length"
-              v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
-              my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+            .g1
+              h6.title April 20:
+                br
+                | Reopening of educational facilities
+              p.subhead Students Returning (%):
+              .myslider(v-if="Object.keys(state.measures).length"
+                v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
+                my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
         h5.cumulative Cumulative Infected by September 2020
         p.infected {{ prettyInfected }}
@@ -81,7 +98,7 @@
                 @click="setPlusMinus('6')") +6
 
         .linear-plot
-          h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
+          h5 {{ cityCap }} Simulated Health Outcomes Over Time
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
@@ -230,6 +247,7 @@ export default class SectionViewer extends Vue {
     } else {
       // load the zip from file
       const filepath = this.state.publicPath + 'v7-data-' + this.city + '.zip'
+      console.log('---loading', filepath)
       this.zipLoader = new ZipLoader(filepath)
       await this.zipLoader.load()
       console.log('zip loaded!')
@@ -333,13 +351,11 @@ export default class SectionViewer extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    let startDay = '2020-02-20'
-    if (this.plusminus === '-3') startDay = '2020-02-23'
-    if (this.plusminus === '-6') startDay = '2020-02-26'
-    if (this.plusminus === '3') startDay = '2020-02-17'
-    if (this.plusminus === '6') startDay = '2020-02-14'
+    let startDay = this.city === 'heinsberg' ? '2020-02-15' : '2020-02-20'
+    const shift = parseInt(this.plusminus)
 
     const date = moment(startDay)
+      .subtract(shift, 'days')
       .add(day, 'days')
       .format('YYYY-MM-DD')
     return date
@@ -451,7 +467,6 @@ p.subhead {
 
 .myslider {
   width: 100%;
-  margin-left: 0.5rem;
 }
 
 .plot {
@@ -497,7 +512,7 @@ p.subhead {
 }
 
 .g1 {
-  padding: 0rem 1rem 1rem 0.5rem;
+  padding: 0rem 0.5rem 1rem 0.5rem;
   margin-bottom: 2rem;
   border: 1px solid #aaa;
   border-radius: 4px;

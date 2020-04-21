@@ -32,21 +32,17 @@ export default class VueComponent extends Vue {
   }
 
   /**
-   * We are calculated a four day running R-value as our best guess.
+   * We are calculating a four day running R-value as our best guess.
    * Starting on day 4,
-   * - numerator:  past four days of "newly infected", which is the difference in Susceptible
-   * - denominator: divide by the newly infected number from four days ago
-   *
+   * - numerator:  past four days of "newly infected", which is the difference in Susceptible;
+   * - denominator: divide by the "newly infected" number from four days ago
    */
   private calculateRvalues() {
-    console.log('CALCULATION R')
-
     if (this.data.length === 0) return
 
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 
-    const newlyInfected = [0, 0, 0, 0]
-
+    const newlyInfected = []
     const rValues = []
 
     for (let i = this.lagDays; i < susceptible.y.length; i++) {
@@ -64,7 +60,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Estimated R Value',
-        x: susceptible.x.slice(8),
+        x: susceptible.x.slice(this.lagDays * 2),
         y: rValues,
         line: {
           width: 2,
@@ -73,8 +69,6 @@ export default class VueComponent extends Vue {
         },
       },
     ]
-
-    console.log({ rValues })
   }
 
   private reformatDate(day: string) {

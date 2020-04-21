@@ -102,11 +102,12 @@ export default class SectionViewer extends Vue {
 }
 
 .button-choices {
+  margin-left: 0;
   margin-top: 1rem;
 }
 
 .button-choices button {
-  margin-right: 0.25rem;
+  margin-right: 0.2rem;
 }
 
 @media only screen and (max-width: 768px) {
