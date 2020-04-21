@@ -13,6 +13,7 @@ import moment from 'moment'
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
+  @Prop({ required: true }) private logScale!: boolean
 
   private berlinHospitalCSV = require('@/assets/LaGeSo.csv').default
 
@@ -30,6 +31,10 @@ export default class VueComponent extends Vue {
   private mounted() {
     this.prepareHospitalData()
     this.updateModelData()
+  }
+
+  @Watch('logScale') updateScale() {
+    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
   private prepareHospitalData() {
@@ -84,9 +89,9 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
-      type: 'log',
+      type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Population (log scale)',
+      title: 'Number of Hospitalizations',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

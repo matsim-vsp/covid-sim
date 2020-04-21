@@ -3,19 +3,6 @@
   .preamble
     h3.select-scenario Select Scenario:
 
-    .variation
-      b Variation
-      .variation-choices.buttons.has-addons
-        button.button.is-small(
-          :class="{'is-link': plusminus === '-6', 'is-selected': plusminus === '-6'}"
-          @click="setPlusMinus('-6')") -6
-        button.button.is-small(
-          :class="{'is-link': plusminus === '-3', 'is-selected': plusminus === '-3'}"
-          @click="setPlusMinus('-3')") -3
-        button.button.is-small(
-          :class="{'is-link': plusminus === '0', 'is-selected': plusminus === '0'}"
-          @click="setPlusMinus('0')") +0
-
   #main-section
     .pieces
       .sliders
@@ -61,15 +48,41 @@
         h5.cumulative Cumulative Infected
         p.infected {{ prettyInfected }}
 
-      .log-plot
-        h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
-        p Log scale
-        vue-plotly.plotsize(:data="data" :layout="loglayout" :options="options")
+      .all-plots
 
-      .linear-plot
-        h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
-        p Linear scale
-        vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
+        .plot-options
+          .scale-options
+            b Scale
+            .variation-choices.buttons.has-addons
+              button.button.is-small(
+                :class="{'is-link': !logScale, 'is-selected': !logScale}"
+                @click="logScale = !logScale") Linear
+              button.button.is-small(
+                :class="{'is-link': logScale, 'is-selected': logScale}"
+                @click="logScale = !logScale") Log
+
+          .variation
+            b Variation
+            .variation-choices.buttons.has-addons
+              button.button.is-small(
+                :class="{'is-link': plusminus === '-6', 'is-selected': plusminus === '-6'}"
+                @click="setPlusMinus('-6')") -6
+              button.button.is-small(
+                :class="{'is-link': plusminus === '-3', 'is-selected': plusminus === '-3'}"
+                @click="setPlusMinus('-3')") -3
+              button.button.is-small(
+                :class="{'is-link': plusminus === '0', 'is-selected': plusminus === '0'}"
+                @click="setPlusMinus('0')") +0
+
+        .linear-plot
+          h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
+
+        .linear-plot
+          h5 {{ cityCap }} Hospitalization Rate Comparison
+          p Log scale
+          hospitalization-plot.plotsize(:data="data" :logScale="logScale")
 
 </template>
 
@@ -82,9 +95,11 @@ import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
 import MySlider from './SelectWidget.vue'
+import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 
 @Component({
   components: {
+    HospitalizationPlot,
     MySlider,
     VuePlotly,
   },
@@ -96,6 +111,7 @@ export default class SectionViewer extends Vue {
 
   private MAX_DAYS = 200
   private plusminus = '0'
+  private logScale = true
 
   @Watch('city') private switchCity() {
     this.loadedSeriesData = {}
@@ -107,35 +123,16 @@ export default class SectionViewer extends Vue {
     this.showPlotForCurrentSituation()
   }
 
+  @Watch('logScale') updateScale() {
+    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+  }
+
   private isBase = false
   private currentRun: any = {}
 
   private data: any[] = []
 
   private layout = {
-    autosize: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { l: 50, t: 10, r: 10, b: 0 },
-    yaxis: {
-      title: 'Population',
-      autorange: true,
-    },
-    xaxis: {
-      range: ['2020-02-16', '2020-08-31'],
-      type: 'date',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private loglayout = {
     autosize: true,
     showlegend: true,
     legend: {
@@ -152,9 +149,9 @@ export default class SectionViewer extends Vue {
       type: 'date',
     },
     yaxis: {
-      type: 'log',
+      type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Population (log scale)',
+      title: 'Population (' + (this.logScale ? 'log scale)' : 'Linear scale)'),
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
@@ -356,7 +353,7 @@ export default class SectionViewer extends Vue {
 // ###########################################################################
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 #main-section {
   display: flex;
   flex-direction: row;
@@ -394,13 +391,19 @@ h5 {
   flex-direction: column;
 }
 
+.all-plots {
+  margin-left: 1rem;
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
+}
+
 .log-plot {
   background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
   margin: 0 0 1rem 1rem;
   text-align: center;
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
   display: flex;
   flex-direction: column;
   border: 1px solid #ccc;
@@ -409,10 +412,8 @@ h5 {
 .linear-plot {
   background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  margin: 1rem 0 1rem 1rem;
+  margin: 0rem 0 2rem 1rem;
   text-align: center;
-  grid-column: 2 / 3;
-  grid-row: 3 / 4;
   display: flex;
   flex-direction: column;
   border: 1px solid #ccc;
@@ -439,6 +440,12 @@ p.subhead {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
   padding: 1rem 0rem;
+}
+
+.plot-options {
+  display: flex;
+  flex-direction: row;
+  margin-left: 1rem;
 }
 
 .infected {
@@ -494,7 +501,7 @@ p.subhead {
   flex-direction: column;
   margin-left: auto;
   margin-bottom: 0.3rem;
-  text-align: center;
+  text-align: right;
 }
 
 .variation-choices {
