@@ -8,7 +8,6 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
-import moment from 'moment'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {

@@ -81,8 +81,13 @@
 
         .linear-plot
           h5 {{ cityCap }} Hospitalization Rate Comparison
-          p Log scale
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           hospitalization-plot.plotsize(:data="data" :logScale="logScale")
+
+        .linear-plot
+          h5 {{ cityCap }} Estimated R-Values
+          p Based on four-day new infections
+          r-value-plot.plotsize(:data="data" :logScale="false")
 
 </template>
 
@@ -96,11 +101,13 @@ import moment from 'moment'
 
 import MySlider from './SelectWidget.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
+import RValuePlot from '@/components/RValuePlot.vue'
 
 @Component({
   components: {
     HospitalizationPlot,
     MySlider,
+    RValuePlot,
     VuePlotly,
   },
 })
