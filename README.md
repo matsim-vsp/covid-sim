@@ -19,6 +19,15 @@ The following VS Code plugins are used:
 - Vetur, for Vuejs support. This site is a [Vue](https://vuejs.org) SPA.
 - Shader languages support
 
+## Foundational technologies
+
+You will need to know this tech in order to hack on this website:
+
+- [TypeScript](https://typescriptlang.org) - typesafe JavaScript
+- [Vue](https://vuejs.org) - the glue that connects UI elements to code. Similar to React but lightweight and awesome
+- [ThreeJS](https://threejs.org) - WebGL library for the fancy animations.
+- [Pug](https://pugjs.org) - the template language used in Vue files. Pug uses Python-style indentation instead of open/close XML tags, which makes it far easier to read than bare HTML.
+
 ## First time install
 
 One line fetches everything from the npm database:
@@ -62,11 +71,13 @@ Travis-CI is configured to automatically build the site with **every push to mas
 - `/src`: all TypeScript and Vue files go here
 - `/src/assets`: images, .csvs, etc that get packaged by webpack
 - `/src/components`: shared Vue components go here
-- `/src/HomeIndex.vue`: Is the front page. Add new thumbnails for pages or other content here.
-- `/runs`: Each page has its own folder under the `/runs` folder.
-  - Connect up your new pages by adding a new folder here, and also adding a new URL to `/router.ts` -- and probably also to `/components/TopBar.vue` if you want the page on the top navvar.
+- `/src/HomeIndex.vue`: the front page. Add new thumbnails for pages or other content here.
+- `/src/runs`: Each page has its own folder under the `/src/runs` folder.
+  - Connect up your new pages by adding a new folder here, and also adding a new URL to `/src/router.ts`. Anyone who knows the URL can then see the page. When you are ready for the public to also find it, add a link to `/src/components/TopBar.vue` and to the homepage.
   - Each run should use a `readme.md` file under `/src/assets` so that researchers can add notes without having to learn the build system.
 - `/scripts`: Python scripts go here, which are used for preprocessing EpiSim results
 - `/public`: large .zip files, project notes, etc go in public. These files are pushed as-is by webpack; i.e. they are not packaged in any way
+
+## Thank you!
 
 Good luck and thanks for the help! -- [Billy](https://github.com/billyc)
