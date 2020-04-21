@@ -45,7 +45,7 @@
               v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
               my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
-        h5.cumulative Cumulative Infected
+        h5.cumulative Cumulative Infected by September 2020
         p.infected {{ prettyInfected }}
 
       .all-plots
