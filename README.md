@@ -1,7 +1,6 @@
 # COVID Episim Website
 
-<div class="with-bg-size" style="background-image: url('https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v3-thumb.png');  width: 100%; height:8rem; background-position: center; background-size: cover;">
-</div>
+<img src="https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v3-thumb.png" alt="EpiSim" width="100%" height="5rem">
 
 This repo contains the visualization website for MATSim/EpiSim, available at https://matsim-vsp.github.io/covid-sim. See that website for information on the use of MATSim for COVID-19 disease propagation, given various measures for combating its spread.
 
