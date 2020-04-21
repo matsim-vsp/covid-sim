@@ -15,12 +15,10 @@
 
           h2 Method: Mobility traces and the spreading of COVID-19
           p The virus spreading dynamics model is described in this paper:&nbsp;
+            a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835 .
 
-          a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835 .
-
-        p The code is open source:&nbsp;
-
-          a(href="https://github.com/matsim-org/matsim-episim") https://github.com/matsim-org/matsim-episim .
+          p The code is open source:&nbsp;
+            a(href="https://github.com/matsim-org/matsim-episim") https://github.com/matsim-org/matsim-episim .
 
         .readme(v-html="readme")
 
