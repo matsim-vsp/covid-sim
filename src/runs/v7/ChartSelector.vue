@@ -73,6 +73,12 @@
               button.button.is-small(
                 :class="{'is-link': plusminus === '0', 'is-selected': plusminus === '0'}"
                 @click="setPlusMinus('0')") +0
+              button.button.is-small(v-if="city==='berlin'"
+                :class="{'is-link': plusminus === '3', 'is-selected': plusminus === '3'}"
+                @click="setPlusMinus('3')") +3
+              button.button.is-small(v-if="city==='berlin'"
+                :class="{'is-link': plusminus === '6', 'is-selected': plusminus === '6'}"
+                @click="setPlusMinus('6')") +6
 
         .linear-plot
           h5 {{ cityCap }} Simulated Population Health Outcomes Over Time
@@ -121,6 +127,9 @@ export default class SectionViewer extends Vue {
   private logScale = true
 
   @Watch('city') private switchCity() {
+    // Munich doesn't have +3 / +6
+    if (this.city !== 'berlin' && parseInt(this.plusminus) > 0) this.plusminus = '0'
+
     this.loadedSeriesData = {}
     this.loadZipData()
   }
@@ -327,6 +336,8 @@ export default class SectionViewer extends Vue {
     let startDay = '2020-02-20'
     if (this.plusminus === '-3') startDay = '2020-02-23'
     if (this.plusminus === '-6') startDay = '2020-02-26'
+    if (this.plusminus === '3') startDay = '2020-02-17'
+    if (this.plusminus === '6') startDay = '2020-02-14'
 
     const date = moment(startDay)
       .add(day, 'days')
