@@ -20,7 +20,7 @@
               h6.title February 26:
                 br
                 | Activities limited
-              p.subhead By type and percent (%)
+              p.subhead Percent still occurring (%)
               .myslider(v-if="Object.keys(state.measures).length"
                 v-for="measure in ['remainingFractionWork', 'remainingFractionLeisure1', 'remainingFractionShoppingBusinessErrands']"
                 :key="measure")
@@ -29,7 +29,7 @@
               h6.title April 20:
                 br
                 | Reopening of educational facilities
-              p.subhead Students Returning (%):
+              p.subhead Students returning (%):
               .myslider(v-if="Object.keys(state.measures).length"
                 v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
                 my-slider(:measure="measure" :state="state" @changed="sliderChanged")
@@ -57,7 +57,7 @@
               h6.title April 20:
                 br
                 | Reopening of educational facilities
-              p.subhead Students Returning (%):
+              p.subhead Students returning (%):
               .myslider(v-if="Object.keys(state.measures).length"
                 v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
                 my-slider(:measure="measure" :state="state" @changed="sliderChanged")
@@ -135,7 +135,7 @@ import RValuePlot from '@/components/RValuePlot.vue'
   },
 })
 export default class SectionViewer extends Vue {
-  @Prop() private state!: any
+  @Prop({ required: true }) private state!: any
 
   @Prop({ required: true }) private city!: string
 

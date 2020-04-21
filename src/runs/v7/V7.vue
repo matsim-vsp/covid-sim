@@ -61,8 +61,9 @@ export default class App extends Vue {
 
   @Watch('$route') async routeChanged(to: any, from: any) {
     console.log(to)
-    this.city = to.params.city
-    await this.loadDataInBackground()
+    const newCity = to.params.city
+    await this.loadDataInBackground(newCity)
+    this.city = newCity // switch city AFTER new data is loaded. Things @watch the city
   }
 
   private get topNotes() {
@@ -98,22 +99,22 @@ export default class App extends Vue {
     console.log({ route: this.$route })
     this.city = this.$route.params.city
 
-    await this.loadDataInBackground()
+    await this.loadDataInBackground(this.city)
   }
 
-  private async loadDataInBackground() {
-    this.state.berlinCases = this.prepareBerlinData()
+  private async loadDataInBackground(newCity: string) {
+    this.state.berlinCases = this.prepareBerlinData(newCity)
 
-    const filepath = this.state.publicPath + 'v7-info-' + this.city + '.txt'
+    const filepath = this.state.publicPath + 'v7-info-' + newCity + '.txt'
     const parsed = await this.loadCSVData(filepath)
-    const matrix = await this.generateScenarioMatrix(parsed)
+    await this.generateScenarioMatrix(parsed)
   }
 
-  private prepareBerlinData() {
+  private prepareBerlinData(newCity: string) {
     // Our simulation start date is 2020.02.16 based on school closures 13.March
     // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
     // Thus we begin Berlin data with 2 cases.
-    const csvContents = this.cityCSV[this.city]
+    const csvContents = this.cityCSV[newCity]
 
     const data = Papa.parse(csvContents, {
       header: true,
@@ -139,7 +140,7 @@ export default class App extends Vue {
     }
 
     const series = {
-      name: this.capitalizeCity[this.city] + ' Infections (RKI)',
+      name: this.capitalizeCity[newCity] + ' Infections (RKI)',
       x: dates,
       y: cases,
       line: {
