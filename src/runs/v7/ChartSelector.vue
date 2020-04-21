@@ -139,8 +139,12 @@ export default class SectionViewer extends Vue {
 
   @Prop({ required: true }) private city!: string
 
+  private startDay = this.city === 'heinsberg' ? '2020-02-16' : '2020-02-20'
+
   private MAX_DAYS = 200
+
   private plusminus = '0'
+
   private logScale = true
 
   @Watch('city') private switchCity() {
@@ -152,7 +156,6 @@ export default class SectionViewer extends Vue {
   }
 
   @Watch('plusminus') private switchPlusMinus() {
-    console.log('now we are', this.plusminus)
     this.showPlotForCurrentSituation()
   }
 
@@ -351,10 +354,9 @@ export default class SectionViewer extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    let startDay = this.city === 'heinsberg' ? '2020-02-15' : '2020-02-20'
     const shift = parseInt(this.plusminus)
 
-    const date = moment(startDay)
+    const date = moment(this.startDay)
       .subtract(shift, 'days')
       .add(day, 'days')
       .format('YYYY-MM-DD')
