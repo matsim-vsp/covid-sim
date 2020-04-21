@@ -26,7 +26,7 @@ export default class VueComponent extends Vue {
   private state = store.state
   private sliderValue = 0
 
-  private maxSliderVal = 10000
+  private maxSliderVal = 100000.0
 
   private sliderOptions = {
     min: 0,
@@ -109,6 +109,7 @@ export default class VueComponent extends Vue {
 
 .slider {
   margin-right: 1rem;
+  pointer-events: auto;
 }
 
 .buttons {
@@ -125,6 +126,7 @@ export default class VueComponent extends Vue {
   text-align: center;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .playpause:hover {

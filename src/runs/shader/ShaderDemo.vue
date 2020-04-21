@@ -142,6 +142,7 @@ export default class Shader extends Vue {
   grid-row: 2 / 3;
   grid-column: 1 / 2;
   height: 100%;
+  pointer-events: none;
 }
 
 img.theme-button {
@@ -153,6 +154,7 @@ img.theme-button {
   width: 3rem;
   height: 3rem;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 img.theme-button:hover {
@@ -171,6 +173,7 @@ img.theme-button:hover {
   display: flex;
   flex-direction: column;
   z-index: 5;
+  pointer-events: none;
 }
 
 #nav {
@@ -200,10 +203,10 @@ img.theme-button:hover {
 }
 
 .speed-slider {
+  flex: 1;
   width: 100%;
   margin: auto 0rem 0.25rem 0rem;
-  flex: 1;
-  /*background-color: #5361b380; */
+  pointer-events: auto;
 }
 
 .digital-clock {
