@@ -62,8 +62,8 @@ const routes = [
     redirect: '/v7/:city',
   },
   {
-    path: '/shader',
-    name: 'shader',
+    path: '/multiday',
+    name: 'multiday',
     component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
   },
 ]
