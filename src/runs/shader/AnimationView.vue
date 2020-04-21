@@ -276,36 +276,37 @@ export default class AnimationView extends Vue {
   }
 
   private async setup() {
-    this.$store.commit('setMessage', 'loading agents')
-    await this.loadAgents()
-
-    this.$store.commit('setMessage', 'loading network')
-    this.networkMesh = await this.loadNetworkMeshFromFile()
-    this.networkMesh.name = 'network'
-    this.scene.add(this.networkMesh)
-
-    this.$store.commit('setMessage', 'done')
     this.initScene()
 
+    this.$store.commit('setMessage', 'loading agents')
+
+    await this.loadAgents()
+
+    // this can happen in the background
+    await this.addNetworkToScene()
+
+    this.$store.commit('setMessage', 'done')
+  }
+
+  private startSimulation() {
     // let UI know we're about to begin!
-    this.$store.commit('setSimulation', true)
     this.$emit('loaded', true)
+    this.$store.commit('setSimulation', true)
     this.clock.start()
     this.animate()
   }
 
   private networkMesh?: THREE.LineSegments
 
-  private async loadNetworkMeshFromFile() {
+  private async addNetworkToScene() {
     console.log('loading network', this.networkFilename)
-
+    this.$store.commit('setMessage', 'loading network')
     // load zipfile
     const zipLoader = new ZipLoader(this.publicPath + this.networkFilename)
     await zipLoader.load()
 
     // extract json
-    const json = zipLoader.extractAsText('network.json')
-    const network = JSON.parse(json)
+    const network = zipLoader.extractAsJSON('network.json') // extractAsText('network.json')
 
     // eslint-disable-next-line
     const nodes: any = {}
@@ -326,7 +327,12 @@ export default class AnimationView extends Vue {
     const mergedLines = BufferGeometryUtils.mergeBufferGeometries(links)
     this.networkMesh = new THREE.LineSegments(mergedLines, this.linkMaterial)
 
-    return this.networkMesh
+    this.networkMesh.name = 'network'
+    this.scene.add(this.networkMesh)
+
+    mergedLines.dispose()
+
+    this.startSimulation()
   }
 
   private async loadAgents() {

@@ -1,3 +1,5 @@
+// vertex shader: agent positions
+
 uniform float simulationTime;
 
 attribute vec3 position2;  // x,y,t
@@ -98,7 +100,7 @@ void main() {
 
         float zIndex = 2.0 - myInfectionStatus;
 
-        // unpack coords from position buffers - x,y,time. Deal w/z later
+        // unpack coords from position buffers - x,y,time. Deal w/ z later
         vec3 point1 = vec3(position.xy, zIndex);
         vec3 point2 = vec3(position2.xy, zIndex);
 

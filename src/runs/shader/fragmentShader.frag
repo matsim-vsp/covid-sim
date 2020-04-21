@@ -1,4 +1,5 @@
 // fragment shader: pixel colors
+
 uniform float simulationTime;
 uniform vec3 colorSusceptible;
 uniform vec3 colorInfectedButNotContagious;
@@ -9,6 +10,7 @@ uniform vec3 colorContagious;
 varying float myInfectionStatus;
 varying float skip;
 varying float atRest;
+
 
 vec4 getColor() {
 

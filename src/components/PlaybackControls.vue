@@ -24,8 +24,8 @@ import EventBus from '@/EventBus.vue'
 @Component({ components: { VueSlider }, props: {} })
 export default class VueComponent extends Vue {
   private state = store.state
-  private sliderValue = 0
 
+  private sliderValue = 0
   private maxSliderVal = 100000.0
 
   private sliderOptions = {
