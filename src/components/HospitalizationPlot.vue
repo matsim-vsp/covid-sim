@@ -34,7 +34,7 @@ export default class VueComponent extends Vue {
       fromCSV: ['Stationäre Behandlung', 'Intensivmedizin'],
       csvLineNames: [
         'Reported: Berlin Hospitalized (Senate)',
-        'Reported: Berlin Hospitalized (Senate)',
+        'Reported: Berlin Intensive Care (Senate)',
       ],
       dateFormatter: this.reformatDateBerlin,
       dateColumn: 'Datum',
@@ -79,14 +79,23 @@ export default class VueComponent extends Vue {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
     modelData = modelData.map(item => {
+      // we are going to mutate the line color (!!!) to ensure all plots on the screen
+      // have the same color for these metrics.
       const color = this.colors[item.name]
-      item.name = 'Model: ' + item.name
       item.line = {
         dash: 'solid',
         width: 2,
         color: color,
       }
-      return item
+
+      const trace = {
+        name: 'Model: ' + item.name,
+        x: item.x,
+        y: item.y,
+        line: item.line,
+      }
+
+      return trace
     })
 
     this.dataLines = modelData
