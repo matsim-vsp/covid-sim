@@ -33,7 +33,6 @@ export default class VizThumbnail extends Vue {
 
   private get thumbnail() {
     const zimg = require(`../assets/images${this.viz.url}-thumb.png`)
-
     return zimg
   }
 }

@@ -9,7 +9,7 @@
     .content
       .main
         .top
-          p.headline We build advanced human mobility models, to which we attach virus infection dynamics taken from recent literature and publications.
+          p.headline We build advanced human mobility models, and attach virus infection dynamics taken from recent literature and publications.
             br
             | This results in a virus spreading dynamics model.
 
@@ -73,35 +73,35 @@ export default {
       modelruns: [
         {
           url: '/v7',
-          date: 'Released 22 April 2020',
+          date: 'Released: 22 April 2020',
           title: 'School Reopening Options (3)',
           subtitle:
             'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
         },
         {
           url: '/v5',
-          date: 'Updated 6 April 2020',
+          date: 'Updated: 6 April 2020',
           title: 'School Reopening Options (2)',
           subtitle:
             'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
         },
         {
           url: '/v4',
-          date: 'Released 1 April 2020',
+          date: 'Released: 1 April 2020',
           title: 'School Reopening Options (1)',
           subtitle:
             'Explore re-opening of kindergarten, primary and secondary school, and universities.',
         },
         {
           url: '/v2',
-          date: 'Updated 28 March 2020',
+          date: 'Updated: 28 March 2020',
           title: 'Adherence Rates',
           subtitle:
             'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions.',
         },
         {
           url: '/v1',
-          date: 'Updated 25 March 2020',
+          date: 'Updated: 25 March 2020',
           title: 'Intervention Strategies',
           subtitle: 'Exploring the effects of several stay-at-home interventions..',
         },
