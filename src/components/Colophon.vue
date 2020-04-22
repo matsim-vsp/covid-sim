@@ -20,7 +20,7 @@
 
   .team Contact
 
-  p: a(href="mailto:info@vsp.tu-berlin.de") info@vsp.tu&#8209;berlin.de
+  p.nonbreak: a(href="mailto:covid19@vsp.tu-berlin.de") covid19@vsp.tu-berlin.de
 
   .team Partners
 
@@ -48,7 +48,7 @@ export default {
 
 .colophon .professor {
   width: max-content;
-  margin: 1rem 0;
+  margin: 1rem 0 1rem auto;
   font-weight: bold;
   color: $bannerHighlight;
 }
@@ -66,6 +66,11 @@ export default {
 
 .colophon a {
   font-size: 0.85rem;
+}
+
+.nonbreak {
+  width: max-content;
+  margin-left: auto;
 }
 
 @media only screen and (max-width: 640px) {
