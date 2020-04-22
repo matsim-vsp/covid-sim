@@ -4,9 +4,9 @@ Here we describe the effects of reopening society at various levels for work, sc
 
 - The simulations refer to the **Berlin** region (Berlin city plus some surroundings).
 - Berlin Reported Cases are from [RKI](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0). For many cases, a delay between infection and reporting may occur.
-- On **day 26**, 10% of leisure acts are banned (corresponding to the closure of theaters, etc.). Also, schools / kindergarten / universities are closed. 10 percent of kita and primary-aged children still go to kita / primary schools (Notbetrieb).
-- On **day 35**, work, shopping, errands and business are reduced, corresponding to the currently valid "Kontaktsperre"; the percentage of work, leisure, shopping, errands and business activities still occuring after **day 35** can be set.
-- Educational facilities can be reopened on **day 63** (corresonding to the 20th of April).
+- On **day 26** (ca. sat/14/mar), 10% of leisure acts are banned (corresponding to the closure of theaters, etc.). Also, schools / kindergarten / universities are closed. 10 percent of kita and primary-aged children still go to kita / primary schools (Notbetrieb).
+- On **day 35** (ca. mon/23/mar), work, shopping, errands and business are reduced, corresponding to the currently valid "Kontaktsperre"; the percentage of work, leisure, shopping, errands and business activities still occuring after **day 35** can be set.
+- Educational facilities can be reopened on **day 63** (ca. mon/20/apr).
 
 [Google COVID-19 Mobility report](https://google.com/covid19/mobility) shows for Berlin after day 35:
 
