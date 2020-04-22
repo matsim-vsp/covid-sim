@@ -51,7 +51,7 @@ export default class App extends Vue {
   private readme: any = {
     berlin: require('@/assets/v7-notes.md'),
     munich: require('@/assets/v7-notes.md'),
-    heinsberg: require('@/assets/v7-notes.md'),
+    heinsberg: require('@/assets/v7-notes-heinsberg.md'),
   }
 
   private plotTag = '{{PLOTS}}'
