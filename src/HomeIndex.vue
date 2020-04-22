@@ -6,24 +6,42 @@
 
   .page-area
     colophon.colophon
-
     .content
       .main
         .top
-          p We use human mobility models, for which we are experts, and attach virus infection dynamics taken from recent literature and publications. This results in a virus spreading dynamics model.
-          p This site disseminates COVID-19 research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin.
+          p.headline We build advanced human mobility models, to which we attach virus infection dynamics taken from recent literature and publications.
+            br
+            | This results in a virus spreading dynamics model.
+
+          p This site is the central hub for COVID-19 virus spreading research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin. This research uses the&nbsp;
+            a(href="https://github.com/matsim-org/matsim-episim")
+              b MATSim-Episim
+            | &nbsp;virus spreading model.
 
           h2 Method: Mobility traces and the spreading of COVID-19
-          p The virus spreading dynamics model is described in this paper:&nbsp;
+          p The MATSim-Episim virus spreading dynamics model is described in this paper:
+            br
             a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835 .
 
-          p The code is open source:&nbsp;
+          p The code is freely available and open source:
+            br
             a(href="https://github.com/matsim-org/matsim-episim") https://github.com/matsim-org/matsim-episim .
+
+        h2 Simulations of COVID-19 spreading in Berlin
 
         .readme(v-html="readme")
 
         .viz-cards
-          .one-viz(v-for="viz in links" :key="viz.url")
+          .one-viz(v-for="viz in modelruns" :key="viz.url")
+            router-link(:to="viz.url")
+              viz-card(:viz="viz")
+
+        h2 Interactive Visualizations
+
+        p The following interactive visualizations help to illustrate the method and results which emerge from the model. These are produced directly from simulated model results. Note that due to the advanced nature of the visualizations, only modern versions of recent web browsers are supported.
+
+        .viz-cards
+          .one-viz(v-for="viz in visualizations" :key="viz.url")
             router-link(:to="viz.url")
               viz-card(:viz="viz")
 
@@ -45,44 +63,48 @@ export default {
     return {
       readme,
       readmeBottom: bottom,
-      links: [
-        {
-          url: '/v1',
-          title: 'Intervention Strategies',
-          subtitle:
-            'Exploring the effects of several stay-at-home interventions (results from 24-25/mar).',
-        },
-        {
-          url: '/v2',
-          title: 'Adherence Rates',
-          subtitle:
-            'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions (results from 27-28/mar).',
-        },
+      visualizations: [
         {
           url: '/v3',
           title: 'Infection Traces',
           subtitle: 'Animation of infection spreading through the population.',
         },
+      ],
+      modelruns: [
         {
-          url: '/v4',
-          title: 'School Reopening Options (1)',
+          url: '/v7',
+          date: 'Released 22 April 2020',
+          title: 'School Reopening Options (3)',
           subtitle:
-            'Explore re-opening of kindergarten, primary and secondary school, and universities (results from 1/apr).',
+            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
         },
         {
           url: '/v5',
+          date: 'Updated 6 April 2020',
           title: 'School Reopening Options (2)',
           subtitle:
-            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities (results from 3-6/apr).',
+            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
         },
-        /*
         {
-          url: '/v6',
-          title: 'Berlin and Munich: Reopening Options (3)',
+          url: '/v4',
+          date: 'Released 1 April 2020',
+          title: 'School Reopening Options (1)',
           subtitle:
-            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities (results from 3-6/apr).',
+            'Explore re-opening of kindergarten, primary and secondary school, and universities.',
         },
-        */
+        {
+          url: '/v2',
+          date: 'Updated 28 March 2020',
+          title: 'Adherence Rates',
+          subtitle:
+            'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions.',
+        },
+        {
+          url: '/v1',
+          date: 'Updated 25 March 2020',
+          title: 'Intervention Strategies',
+          subtitle: 'Exploring the effects of several stay-at-home interventions..',
+        },
       ],
     }
   },
@@ -104,20 +126,32 @@ export default {
 }
 
 .banner {
-  padding: 1.75rem 3rem 2rem 3rem;
-  background-color: $bannerHighlight;
+  display: flex;
+  flex-direction: column;
+  padding: 4rem 3rem 1rem 3rem;
+  background-color: #1e1f2c;
   color: white;
+  background: url(assets/images/banner.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .banner h2 {
   margin-bottom: 0rem;
   font-size: 1.6rem;
+  background-color: #1e1f2c;
+  width: max-content;
 }
 
 .banner h3 {
   font-size: 1.3rem;
   font-weight: normal;
   margin-top: 0px;
+  margin-bottom: 0;
+  line-height: 1.3rem;
+  padding-bottom: 0.25rem;
+  background-color: #1e1f2c;
+  width: max-content;
 }
 
 a {
@@ -126,12 +160,19 @@ a {
 }
 
 .readme {
-  margin-top: 3rem;
+  margin-top: 1rem;
   margin-bottom: 3rem;
   flex: 1;
 }
 
+.main h2 {
+  margin-top: 3rem;
+  font-weight: normal;
+  color: $bannerHighlight;
+}
+
 .viz-cards {
+  padding-bottom: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: 2rem;
@@ -167,6 +208,12 @@ a {
 .page-area {
   display: flex;
   flex-direction: row-reverse;
+}
+
+.headline {
+  font-size: 2rem;
+  padding: 1rem 0;
+  color: $bannerHighlight;
 }
 
 @media only screen and (max-width: 640px) {

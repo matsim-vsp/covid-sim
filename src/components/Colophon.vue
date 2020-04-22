@@ -43,6 +43,7 @@ export default {
 @import '@/styles.scss';
 
 #colophon-content {
+  padding-top: 2rem;
   width: min-content;
 }
 

@@ -48,13 +48,6 @@ export default class SectionViewer extends Vue {
 
     for (const x of this.state.measures[this.measure]) {
       let label = '' + x * 100 + '%'
-      /*
-      if (x === 0) label = '0%'
-      if (x === 0.2) label = '20%'
-      if (x === 0.4) label = '40%'
-      if (x === 0.6) label = '60%'
-      if (x === 0.8) label = '80%'
-      */
 
       this.value = label // select first choice
       this.showButtons = true
@@ -62,7 +55,7 @@ export default class SectionViewer extends Vue {
       experiments.push(label)
     }
 
-    this.stops = experiments // experiments.map(x => (x <= 1 ? x * 100 : x))
+    this.stops = experiments
   }
 
   private get measureTitle() {
@@ -73,23 +66,6 @@ export default class SectionViewer extends Vue {
   private valueChanged() {
     let answer = this.value.substring(0, this.value.length - 1)
     answer = parseFloat(answer) / 100.0
-
-    /*
-    if (answer === '0%') {
-      answer = 0.0
-    } else if (answer === '20%') {
-      answer = 0.2
-    } else if (answer === '40%') {
-      answer = 0.4
-    } else if (answer === '60%') {
-      answer = 0.6
-    } else if (answer === '80%') {
-      answer = 0.8
-    } else if (!isNaN(answer)) {
-      answer = 0.01 * answer
-    }
-    */
-    console.log(answer)
     this.$emit('changed', this.measure, answer)
   }
 }

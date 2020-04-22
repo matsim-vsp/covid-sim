@@ -9,6 +9,8 @@
 
   .card-subtitle {{ viz.subtitle }}
 
+  .card-date {{ viz.date }}
+
 </template>
 
 <script lang="ts">
@@ -101,13 +103,24 @@ export default class VizThumbnail extends Vue {
 }
 
 .card-subtitle {
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   grid-column: 1 / 2;
   padding: 0.5rem 0.5rem;
   color: $bannerHighlight;
   background-color: #f4f4f4;
   font-size: 0.9rem;
   line-height: 1.3rem;
+}
+
+.card-date {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+  padding: 0.25rem 0.5rem 0rem 0.5rem;
+  color: $bannerHighlight;
+  background-color: #f4f4f4;
+  font-size: 0.9rem;
+  line-height: 1.3rem;
+  font-style: italic;
 }
 
 .thumbnail-pic {
