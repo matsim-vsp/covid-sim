@@ -139,7 +139,11 @@ export default class SectionViewer extends Vue {
 
   @Prop({ required: true }) private city!: string
 
-  private startDay = this.city === 'heinsberg' ? '2020-02-16' : '2020-02-20'
+  private startDay: any = {
+    berlin: '2020-02-20',
+    munich: '2020-02-20',
+    heinsberg: '2020-02-16',
+  }
 
   private MAX_DAYS = 200
 
@@ -356,7 +360,7 @@ export default class SectionViewer extends Vue {
   private calculateDatefromSimulationDay(day: number) {
     const shift = parseInt(this.plusminus)
 
-    const date = moment(this.startDay)
+    const date = moment(this.startDay[this.city])
       .subtract(shift, 'days')
       .add(day, 'days')
       .format('YYYY-MM-DD')
