@@ -11,10 +11,12 @@
   router-link.space(to="/v4") V4
   | |
   router-link.space(to="/v5") V5
+  | |
+  router-link.space(to="/v7") V7
+  // | |
+  // router-link.space(to="/multiday") Multiday
   // | |
   // router-link.space(to="/v6") V6
-  // | |
-  // router-link.space(to="/v7") V7
 
 </template>
 

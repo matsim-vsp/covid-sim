@@ -66,12 +66,11 @@ const routes = [
     name: 'multiday',
     component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
   },
-  /*{
+  {
     // catch-all back to home page
     path: '*',
     redirect: '/',
   },
-  */
 ]
 
 const router = new VueRouter({
