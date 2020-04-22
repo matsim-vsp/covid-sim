@@ -404,6 +404,10 @@ h5 {
   font-size: 18px;
 }
 
+h6 {
+  font-size: 1.1rem;
+}
+
 .pieces {
   padding: 0rem 0rem;
   display: grid;
@@ -491,7 +495,7 @@ p.subhead {
   padding-left: 0rem;
   font-weight: bold;
   font-size: 2rem;
-  margin-top: -1rem;
+  margin-top: 0rem;
   margin-left: 1rem;
   color: rgb(151, 71, 34);
 }

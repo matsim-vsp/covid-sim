@@ -9,9 +9,10 @@
   .content
     .readme(v-html="topNotes")
 
-    .view-section
-      section-viewer.viewer(v-if="city" :state="state" :city="city")
+  .view-section
+    section-viewer.viewer(v-if="city" :state="state" :city="city")
 
+  .content
     .bottom(v-if="bottomNotes")
       h3 Further Notes
       .readme(v-html="bottomNotes")
@@ -223,7 +224,9 @@ export default class App extends Vue {
 }
 
 .view-section {
+  background: white;
   width: 100%;
+  padding: 0 3rem;
 }
 
 .viewer {
@@ -262,7 +265,7 @@ a.selected {
 }
 
 .bottom {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 @media only screen and (max-width: 640px) {
@@ -274,6 +277,9 @@ a.selected {
     row-gap: 1rem;
   }
 
+  .view-section {
+    padding: 0 1rem;
+  }
   .which-city {
     padding: 0.5rem 1rem;
   }
