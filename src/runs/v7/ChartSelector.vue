@@ -102,10 +102,10 @@
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
-        .linear-plot(v-if="city==='berlin'")
+        .linear-plot(v-if="city!=='heinsberg'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          hospitalization-plot.plotsize(:data="data" :logScale="logScale")
+          hospitalization-plot.plotsize(:data="data" :logScale="logScale" :city="city")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values

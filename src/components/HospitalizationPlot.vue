@@ -9,65 +9,123 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 
+interface City {
+  title: string
+  fromModel: string[]
+  fromCSV: string[]
+  dateFormatter: Function
+  dateColumn: string
+}
+
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
+  @Prop({ required: true }) private city!: string
 
-  private berlinHospitalCSV = require('@/assets/LaGeSo.csv').default
+  private csvData: any = {
+    berlin: require('@/assets/LaGeSo.csv').default,
+    munich: require('@/assets/munich-hospital.csv').default,
+  }
 
-  private relevantStats = new Set(['Seriously Sick', 'Critical'])
+  private dataDetails: { [id: string]: City } = {
+    berlin: {
+      title: 'Hospitalized: Berlin Reported (Senate)',
+      fromModel: ['Seriously Sick', 'Critical'],
+      fromCSV: ['Stationäre Behandlung', 'Intensivmedizin'],
+      dateFormatter: this.reformatDateBerlin,
+      dateColumn: 'Datum',
+    },
+    munich: {
+      title: 'Hospitalized: Munich Reported (Source?)',
+      fromModel: ['Seriously Sick'],
+      fromCSV: ['Stationär'],
+      dateFormatter: this.reformatDateMunich,
+      dateColumn: 'Tag',
+    },
+  }
 
-  private colors = {
+  private colors: any = {
     'Seriously Sick': '#44f',
     Critical: '#707',
   }
 
   private dataLines: any[] = []
-
   private hospitalSeries: any[] = []
+  private cityDetails: City = this.dataDetails.berlin
 
   private mounted() {
+    this.buildPlot()
+  }
+
+  private buildPlot() {
+    this.cityDetails = this.dataDetails[this.city]
     this.prepareHospitalData()
     this.updateModelData()
+  }
+
+  @Watch('city') private switchCity() {
+    this.buildPlot()
   }
 
   @Watch('logScale') updateScale() {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
-  private prepareHospitalData() {
-    const hospData = Papa.parse(this.berlinHospitalCSV, { header: true, dynamicTyping: true }).data
+  @Watch('data') private updateModelData() {
+    let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
-    this.hospitalSeries = [
-      {
-        name: 'Hospitalized: Berlin Reported (Senate)',
-        x: hospData.map(day => this.reformatDate(day.Datum)),
-        y: hospData.map(day => day['Stationäre Behandlung']),
-        line: {
-          dash: 'dot',
-          width: 2,
-          color: this.colors['Seriously Sick'],
-        },
-      },
-      {
-        name: 'Intensive Care: Berlin Reported (Senate)',
-        x: hospData.map(day => this.reformatDate(day.Datum)),
-        y: hospData.map(day => day['Intensivmedizin']),
-        line: {
-          dash: 'dot',
-          width: 2,
-          color: this.colors['Critical'],
-        },
-      },
-    ]
+    modelData = modelData.map(item => {
+      item.line = {
+        dash: 'solid',
+        width: 2,
+        color: this.colors[item.name],
+      }
+      return item
+    })
 
+    this.dataLines = modelData
     this.dataLines.push(...this.hospitalSeries)
+
+    console.log({ dataLines: this.dataLines })
   }
 
-  private reformatDate(day: string) {
+  private prepareHospitalData() {
+    const hospData = Papa.parse(this.csvData[this.city], {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
+
+    console.log({ hospData })
+    this.hospitalSeries = []
+
+    for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
+      const column = this.cityDetails.fromCSV[i]
+
+      this.hospitalSeries.push({
+        name: this.cityDetails.title,
+        x: hospData.map(day => this.cityDetails.dateFormatter(day[this.cityDetails.dateColumn])),
+        y: hospData.map(day => day[column]),
+        line: {
+          dash: 'dot',
+          width: 2,
+          color: this.colors[this.cityDetails.fromModel[i]],
+        },
+      })
+    }
+  }
+
+  private reformatDateBerlin(day: string) {
     const pieces = day.split('.')
     const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
+    return date
+  }
+
+  private reformatDateMunich(day: string) {
+    const pieces = day.split('-')
+    const date = '20' + pieces[2] + '-' + pieces[1] + '-' + pieces[0]
+    console.log(date)
     return date
   }
 
@@ -99,23 +157,6 @@ export default class VueComponent extends Vue {
   private options = {
     displayModeBar: false,
     responsive: true,
-  }
-
-  @Watch('data') private updateModelData() {
-    let modelData = this.data.filter(item => this.relevantStats.has(item.name))
-    modelData = modelData.map(item => {
-      item.line = {
-        dash: 'solid',
-        width: 2,
-        color:
-          item.name === 'Seriously Sick' ? this.colors['Seriously Sick'] : this.colors['Critical'],
-      }
-      return item
-    })
-
-    this.dataLines = modelData
-    this.dataLines.push(...this.hospitalSeries)
-    console.log({ dataLines: this.dataLines })
   }
 }
 </script>

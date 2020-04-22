@@ -10,7 +10,7 @@
     .readme(v-html="topNotes")
 
     .view-section
-      section-viewer.viewer(:state="state" :city="city")
+      section-viewer.viewer(v-if="city" :state="state" :city="city")
 
     .bottom(v-if="bottomNotes")
       h3 Further Notes
@@ -41,6 +41,9 @@ export default class App extends Vue {
     publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
 
+  private city: string = ''
+  private plusminus = '0'
+
   private get cities() {
     return ['Berlin', 'Munich', 'Heinsberg']
   }
@@ -67,6 +70,7 @@ export default class App extends Vue {
   }
 
   private get topNotes() {
+    if (!this.city) return ''
     const notes = this.readme[this.city]
     if (!notes) return ''
 
@@ -77,6 +81,7 @@ export default class App extends Vue {
   }
 
   private get bottomNotes() {
+    if (!this.city) return ''
     const notes = this.readme[this.city]
     if (!notes) return ''
 
@@ -91,9 +96,6 @@ export default class App extends Vue {
     munich: require('@/assets/munich-cases.csv').default,
     heinsberg: require('@/assets/heinsberg-cases.csv').default,
   }
-
-  private city = ''
-  private plusminus = '0'
 
   public async mounted() {
     console.log({ route: this.$route })
