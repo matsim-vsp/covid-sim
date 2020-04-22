@@ -10,9 +10,9 @@ import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 
 interface City {
-  title: string
   fromModel: string[]
   fromCSV: string[]
+  csvLineNames: string[]
   dateFormatter: Function
   dateColumn: string
 }
@@ -30,16 +30,19 @@ export default class VueComponent extends Vue {
 
   private dataDetails: { [id: string]: City } = {
     berlin: {
-      title: 'Hospitalized: Berlin Reported (Senate)',
       fromModel: ['Seriously Sick', 'Critical'],
       fromCSV: ['Stationäre Behandlung', 'Intensivmedizin'],
+      csvLineNames: [
+        'Reported: Berlin Hospitalized (Senate)',
+        'Reported: Berlin Hospitalized (Senate)',
+      ],
       dateFormatter: this.reformatDateBerlin,
       dateColumn: 'Datum',
     },
     munich: {
-      title: 'Hospitalized: Munich Reported (Source?)',
       fromModel: ['Seriously Sick'],
       fromCSV: ['Stationär'],
+      csvLineNames: ['Reported: Munich Hospitalized'],
       dateFormatter: this.reformatDateMunich,
       dateColumn: 'Tag',
     },
@@ -76,10 +79,12 @@ export default class VueComponent extends Vue {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
     modelData = modelData.map(item => {
+      const color = this.colors[item.name]
+      item.name = 'Model: ' + item.name
       item.line = {
         dash: 'solid',
         width: 2,
-        color: this.colors[item.name],
+        color: color,
       }
       return item
     })
@@ -104,7 +109,7 @@ export default class VueComponent extends Vue {
       const column = this.cityDetails.fromCSV[i]
 
       this.hospitalSeries.push({
-        name: this.cityDetails.title,
+        name: this.cityDetails.csvLineNames[i],
         x: hospData.map(day => this.cityDetails.dateFormatter(day[this.cityDetails.dateColumn])),
         y: hospData.map(day => day[column]),
         line: {
