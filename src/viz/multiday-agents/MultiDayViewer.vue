@@ -11,7 +11,7 @@
   )
 
   #nav
-    p Berlin &bullet; Multiday Simulation
+    p: b Berlin &bullet; Multiday Simulation
 
   #top-hover-panel(v-if="isLoaded")
     .day-button-grid
