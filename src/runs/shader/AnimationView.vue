@@ -10,7 +10,7 @@ import ZipLoader from 'zip-loader'
 import * as THREE from 'three'
 
 import store from '@/store'
-import { Agent, ColorScheme, ColorSet, Health } from '@/Interfaces'
+import { Agent, ColorScheme, ColorSet, Infection, Health } from '@/Interfaces'
 import AgentGeometry from './AgentGeometry'
 import EventBus from '@/EventBus.vue'
 
@@ -102,6 +102,7 @@ export default class AnimationView extends Vue {
   private midpointY = 5820000
 
   private agentList: { [id: string]: Agent } = {}
+  private infectionList: { [id: string]: Infection } = {}
   private agentCache: { [day: number]: any } = {}
 
   private allTripsHaveBegun = false
@@ -184,7 +185,7 @@ export default class AnimationView extends Vue {
     this.animationTimeSinceUnpaused = 0
     this.clock = new THREE.Clock(false)
 
-    this.loadAgents()
+    this.updateAgentAttributesForDay(this.day)
 
     // and let er go again
     this.clock.start()
@@ -345,8 +346,8 @@ export default class AnimationView extends Vue {
       return
     }
 
-    const dayString = this.day ? ('00' + this.day).slice(-3) : '004'
-    const zpath = this.publicPath + 'v3-anim/' + dayString + '-infections.json'
+    // const dayString = this.day ? ('00' + this.day).slice(-3) : '004'
+    const zpath = this.publicPath + 'v3-anim/trips.json'
 
     console.log(zpath)
     // we're going to do this async and streamy!
@@ -360,10 +361,10 @@ export default class AnimationView extends Vue {
     const reader = response.body.getReader()
 
     // no need to await - will run in background
-    this.loopReader(reader, decoder)
+    this.loopTripReader(reader, decoder)
   }
 
-  private loopReader(reader: ReadableStreamDefaultReader, decoder: TextDecoder) {
+  private loopTripReader(reader: ReadableStreamDefaultReader, decoder: TextDecoder) {
     reader.read().then(({ value, done }) => {
       if (done) {
         if (this.tempStreamBuffer) this.processNewlyReadAgent(this.tempStreamBuffer)
@@ -373,9 +374,60 @@ export default class AnimationView extends Vue {
         this.processNDJSONchunk(value, decoder)
 
         // go back for another chunk
-        this.loopReader(reader, decoder)
+        this.loopTripReader(reader, decoder)
       }
     })
+  }
+
+  private async updateAgentAttributesForDay(day: number) {
+    console.log('loading infections for day', day)
+
+    // already cached it?
+    if (this.agentCache[this.day]) {
+      this.agentList = this.agentCache[this.day]
+      this.finishedLoadingInfections()
+      return
+    }
+
+    const dayString = this.day ? ('00' + this.day).slice(-3) : '000'
+    const zpath = this.publicPath + 'v3-anim/' + dayString + '-infections.json'
+
+    console.log(zpath)
+    // we're going to do this async and streamy!
+    const response = await fetch(zpath)
+    if (!response.body) return
+
+    this.tempStreamBuffer = ''
+    this.infectionList = {}
+
+    const decoder = new TextDecoder('utf-8')
+    const reader = response.body.getReader()
+
+    // no need to await - will run in background
+    this.loopInfectionReader(reader, decoder)
+  }
+
+  private loopInfectionReader(reader: ReadableStreamDefaultReader, decoder: TextDecoder) {
+    reader.read().then(({ value, done }) => {
+      if (done) {
+        if (this.tempStreamBuffer) this.processNewlyReadInfection(this.tempStreamBuffer)
+        console.log('Done reading agents: ')
+        this.finishedLoadingInfections()
+      } else {
+        this.processNDJSONInfectionChunk(value, decoder)
+
+        // go back for another chunk
+        this.loopInfectionReader(reader, decoder)
+      }
+    })
+  }
+
+  private processNewlyReadInfection(ndjson: string) {
+    const inf: Infection = JSON.parse(ndjson)
+    // I THINK we don't need this?
+    // if (inf.path.length === 0) return
+
+    this.infectionList[inf.id] = inf
   }
 
   private tempStreamBuffer = ''
@@ -391,15 +443,36 @@ export default class AnimationView extends Vue {
     this.tempStreamBuffer = parts[parts.length - 1]
   }
 
+  private processNDJSONInfectionChunk(
+    value: Uint8Array,
+    decoder: TextDecoder,
+    splitOn: string = '\n'
+  ) {
+    const chunk = decoder.decode(value)
+    this.tempStreamBuffer += chunk
+    const parts = this.tempStreamBuffer.split(splitOn)
+
+    parts.slice(0, -1).forEach(ndjson => {
+      this.processNewlyReadInfection(ndjson)
+    })
+    this.tempStreamBuffer = parts[parts.length - 1]
+  }
+
   private processNewlyReadAgent(ndjson: string) {
     const agent: Agent = JSON.parse(ndjson)
-    if (agent.path.length === 0) return
+    //if (agent.path.length === 0) return
 
     this.agentList[agent.id] = agent
   }
 
   private agentMaterial?: THREE.ShaderMaterial
   private agentGeometry?: AgentGeometry
+
+  private finishedLoadingInfections() {
+    if (!this.agentGeometry) return
+
+    this.agentGeometry.updateInfections(this.infectionList)
+  }
 
   private finishedLoadingAgents() {
     if (this.agentGeometry) this.agentGeometry.dispose()

@@ -1,11 +1,12 @@
 // Custom GLSL Shader for 1000x performance, we hope!
 import * as THREE from 'three'
 
-import { Agent } from '@/Interfaces'
+import { Agent, Infection } from '@/Interfaces'
 
-class AgentPoints extends THREE.BufferGeometry {
+class AgentGeometry extends THREE.BufferGeometry {
   private midX: number
   private midY: number
+  private tripsPerAgent: { [id: string]: number } = {}
 
   constructor(agentList: { [id: string]: Agent }, midX: number, midY: number) {
     super()
@@ -35,6 +36,30 @@ class AgentPoints extends THREE.BufferGeometry {
     console.log('######## GPU RAM:', ram)
   }
 
+  updateInfections(infections: { [id: string]: Infection }) {
+    console.log('updating infections!')
+    console.log('infections:', Object.keys(infections).length)
+
+    const infectionTimes: number[] = []
+    const infectionTypes: number[] = []
+
+    for (const id of Object.keys(infections)) {
+      const agent = infections[id]
+
+      const numTrips = this.tripsPerAgent[agent.id]
+
+      for (let i = 0; i < numTrips; i++) {
+        infectionTimes.push(...agent.dtime)
+        infectionTypes.push(...agent.d)
+      }
+    }
+
+    this.setAttribute('infectionTime', new THREE.Float32BufferAttribute(infectionTimes, 3))
+    this.setAttribute('infectionStatus', new THREE.Float32BufferAttribute(infectionTypes, 3))
+    // this.attributes.infectionTime.needsUpdate = true
+    // this.attributes.infectionType.needsUpdate = true
+  }
+
   private buildWaypoints(
     agent: Agent,
     point1: number[],
@@ -45,8 +70,10 @@ class AgentPoints extends THREE.BufferGeometry {
     const numWaypoints = agent.time.length
     if (numWaypoints < 2) return // skip empty trips!
 
-    const infectTimes = AgentPoints.buildInfectionTimes(agent)
-    const infectTypes = AgentPoints.buildInfectionTypes(agent)
+    const infectTimes = AgentGeometry.buildInfectionTimes(agent)
+    const infectTypes = AgentGeometry.buildInfectionTypes(agent)
+
+    let numTrips = 0
 
     // if first trip starts at nonzero, start them at zero anyway
     if (agent.time[0] !== 0.0) {
@@ -58,6 +85,7 @@ class AgentPoints extends THREE.BufferGeometry {
 
       infectionTimes.push(...infectTimes)
       infectionTypes.push(...infectTypes)
+      numTrips++
     }
 
     // create trips for all waypoint combos
@@ -74,6 +102,8 @@ class AgentPoints extends THREE.BufferGeometry {
 
       infectionTimes.push(...infectTimes)
       infectionTypes.push(...infectTypes)
+
+      numTrips++
     }
 
     // keep person on map at end of day
@@ -86,7 +116,11 @@ class AgentPoints extends THREE.BufferGeometry {
 
       infectionTimes.push(...infectTimes)
       infectionTypes.push(...infectTypes)
+
+      numTrips++
     }
+
+    this.tripsPerAgent[agent.id] = numTrips
   }
 
   /**
@@ -95,33 +129,33 @@ class AgentPoints extends THREE.BufferGeometry {
    * add start-day and end-of-day status changes, there is a max of THREE.
    * So we can use a vec3 to push ALL infection events to all agents! Woot.
    */
-  private static buildInfectionTimes(agent: Agent) {
-    switch (agent.disease_time.length) {
+  private static buildInfectionTimes(agent: Agent | Infection) {
+    switch (agent.dtime.length) {
       case 0:
         return [0.0, -1.0, -1.0]
       case 1:
-        return [agent.disease_time[0], -1.0, -1.0]
+        return [agent.dtime[0], -1.0, -1.0]
       case 2:
-        return [agent.disease_time[0], agent.disease_time[1], -1.0]
+        return [agent.dtime[0], agent.dtime[1], -1.0]
       case 3:
       default:
-        return [agent.disease_time[0], agent.disease_time[1], agent.disease_time[2]]
+        return [agent.dtime[0], agent.dtime[1], agent.dtime[2]]
     }
   }
 
-  private static buildInfectionTypes(agent: Agent) {
-    switch (agent.disease.length) {
+  private static buildInfectionTypes(agent: Agent | Infection) {
+    switch (agent.d.length) {
       case 0: // nothing? assume susceptible
         return [0.0, -1.0, -1.0]
       case 1:
-        return [agent.disease[0], -1.0, -1.0]
+        return [agent.d[0], -1.0, -1.0]
       case 2:
-        return [agent.disease[0], agent.disease[1], -1.0]
+        return [agent.d[0], agent.d[1], -1.0]
       case 3:
       default:
-        return [agent.disease[0], agent.disease[1], agent.disease[2]]
+        return [agent.d[0], agent.d[1], agent.d[2]]
     }
   }
 }
 
-export default AgentPoints
+export default AgentGeometry

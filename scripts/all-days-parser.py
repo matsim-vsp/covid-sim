@@ -18,7 +18,7 @@
 import matsim
 import ndjson
 
-sample_rate = 1
+sample_rate = 3
 
 # persistent memory of agent health status
 persistent = {}
@@ -28,26 +28,52 @@ disease_code = {
     "susceptible": 0,
     "infectedButNotContagious": 1,
     "contagious": 2,
+    "showingSymptoms": 3,
+    "seriouslySick": 4,
+    "critical": 5,
+    "recovered": 6,
 }
 
 code_disease = [
     "susceptible",
     "infectedButNotContagious",
-    "contagious"
+    "contagious",
+    "showingSymptoms",
+    "seriouslySick",
+    "critical",
+    "recovered",
 ]
 
-for day in range(4, 9):
+
+def build_disease_codes(diseaseList):
+    if len(diseaseList) == 0:
+        return [0.0, -1.0, -1.0]
+
+    if len(diseaseList) == 1:
+        return [diseaseList[0], -1.0, -1.0]
+
+    if len(diseaseList) == 2:
+        return [diseaseList[0], agent.dtime[1], -1.0]
+
+    return [diseaseList[0], diseaseList[1], diseaseList[2]]
+
+
+for day in range(0, 92):
     print(f"Processing day {day}")
 
     # outfile hard-coded for now
-    outfile = f"{day:03d}-infections.json"
+    fTrips = "trips.json"
+    fInfections = f"{day:03d}-infections.json"
 
     # magic_seconds = 691100 # day 8
     magic_seconds = (day) * 86400  # 345600 # 691200 # 345600
 
-    events = matsim.event_reader(
-        f"day_{day:03d}.xml.gz", types="episimPersonStatus,actstart,actend"
-    )
+    # trips are identical across all days; so only read them once.
+    whichEvents = "episimPersonStatus,actstart,actend"
+    # if day == 0:
+    #     whichEvents = whichEvents + ",actstart,actend"
+
+    events = matsim.event_reader(f"day_{day:03d}.xml.gz", types=whichEvents)
 
     # lookups by person's health status, coords, and timepoints
     agents = {}
@@ -73,7 +99,7 @@ for day in range(4, 9):
 
         # inject previous day's health at time 0, if we have it
         if person_id in persistent and len(person["health"]) == 0:
-            #print('person',person_id,'is already',code_disease[persistent[person_id]])
+            # print('person',person_id,'is already',code_disease[persistent[person_id]])
             person["health"].append((0, persistent[person_id]))
 
         # deal with this event
@@ -84,11 +110,15 @@ for day in range(4, 9):
             disease = event["diseaseStatus"]
             code = disease_code[disease]
 
-            # save infection event
-            person["health"].append((time, code))
+            # save infection event - overwrite previous day
+            # if we're starting w a new status
+            if time == 0:
+                person["health"] = [(time, code)]
+            else:
+                person["health"].append((time, code))
 
-            if person_id not in persistent:
-                print (person_id, 'is newly', code_disease[code])
+            # if person_id not in persistent:
+            #    print (person_id, 'is newly', code_disease[code])
             persistent[person_id] = code
 
         if event["type"] == "actend":
@@ -127,7 +157,12 @@ for day in range(4, 9):
     agents = [
         p
         for p in agents.values()
-        if (len(p['trips']) > 0 and (p["id"] in persistent) or (int(p["id"][:-2]) % sample_rate == 0))
+        if (
+            len(p["trips"]) > 0
+            and (p["id"] in persistent)
+            or (int(p["id"][:-2]) % sample_rate == 0)
+        )
+        # if (len(p['trips']) > 0 and (p["id"] in persistent) or (int(p["id"][:-2]) % sample_rate == 0))
     ]
 
     # get everything sorted
@@ -135,8 +170,12 @@ for day in range(4, 9):
         # sort the health(time,code) array
         person["health"] = sorted(person["health"], key=lambda k: k[0])
         # and break it out into two separate arrays for time and health-code
-        person["disease_time"] = [t[0] for t in person["health"]]
-        person["disease"] = [t[1] for t in person["health"]]
+        person["dtime"] = [t[0] for t in person["health"]]
+        person["d"] = [t[1] for t in person["health"]]
+        # convert to three-element array for each agent
+        person["dtime_array"] = build_disease_codes(person["dtime"])
+        person["d_array"] = build_disease_codes(person["d"])
+
         del person["health"]
 
         person["trips"] = sorted(person["trips"], key=lambda k: k[0])
@@ -146,10 +185,31 @@ for day in range(4, 9):
 
     print(f"--{len(persistent.keys())} total infected")
 
-    # write it out
-    with open(outfile, "w") as f:
-        writer = ndjson.writer(f, separators=(",", ":"))
+    # write out the trips - just once
+    # includes everything, so ui can start up with alles
+    if day == 0:
+        with open(fTrips, "w") as f:
+            writer = ndjson.writer(f, separators=(",", ":"))  # nospace
+            for agent in agents:
+                row = {
+                    "id": agent["id"],
+                    "trips": agent["time"],
+                    "time": agent["time"],
+                    "path": agent["path"],
+                    "dtime": agent["dtime"],
+                    "d": agent["d"],
+                }
+                writer.writerow(row)
+
+    # write out the infections - every day
+    with open(fInfections, "w") as f:
+        writer = ndjson.writer(f, separators=(",", ":"))  # nospace
         for agent in agents:
-            writer.writerow(agent)
+            row = {
+                "id": agent["id"],
+                "dtime": agent["dtime_array"],
+                "d": agent["d_array"],
+            }
+            writer.writerow(row)
 
 print(f"DONE!")

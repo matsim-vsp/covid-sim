@@ -21,8 +21,14 @@ export interface Agent {
   id: string
   time: number[]
   path: [number, number][]
-  disease_time: number[]
-  disease: number[]
+  dtime: number[]
+  d: number[]
+}
+
+export interface Infection {
+  id: string
+  dtime: number[]
+  d: number[]
 }
 
 export interface Trip {

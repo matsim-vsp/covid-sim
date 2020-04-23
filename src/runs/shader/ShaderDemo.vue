@@ -9,7 +9,7 @@
     .day-button-grid
       .ten-day-set(v-for="dec of tenDaySets" :key="dec")
         .day-button(v-for="cube of Array.from(Array(10).keys())"
-                    :class="{dark: isDarkMode}"
+                    :class="{currentday: newDay == cubeLookup[cube] + dec*10, dark: isDarkMode}"
                     :key="cube+10*dec" @click="switchDay(cube,dec)") {{ cubeLookup[cube] + dec*10 }}
 
     .right-side
@@ -304,6 +304,7 @@ img.theme-button:hover {
   background-color: white;
   border: 2px solid #44f;
   font-weight: bold;
+  padding-top: 1px;
 }
 
 .day-button.dark {
@@ -317,6 +318,11 @@ img.theme-button:hover {
   background-color: black;
   border: 2px solid $themeColor;
   font-weight: bold;
+}
+
+.day-button.currentday {
+  padding-top: 1px;
+  border: 3px solid #c00;
 }
 
 @media only screen and (max-width: 640px) {
