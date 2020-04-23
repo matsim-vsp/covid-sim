@@ -23,7 +23,7 @@ const routes = [
   {
     path: '/v3',
     name: 'V3',
-    component: () => import(/* webpackChunkName: "V3" */ '@/runs/v3/V3.vue'),
+    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
   },
   {
     path: '/v4',
@@ -62,9 +62,12 @@ const routes = [
     redirect: '/v7/:city',
   },
   {
+    path: '/shader',
+    redirect: '/v3',
+  },
+  {
     path: '/multiday',
-    name: 'multiday',
-    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
+    redirect: '/v3',
   },
   {
     // catch-all back to home page
