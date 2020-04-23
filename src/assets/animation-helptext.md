@@ -1,65 +1,73 @@
-# hello!
+<img src="./images/banner.jpg" height=50 >
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+# Episim: COVID-19 virus spreading dynamics
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+This animation illustrates how the MATSIM-Episim model simulates the spread of COVID-19 disease through Berlin, Germany and the surrounding area.
 
-The model is under intense development. The following versions have been released:
+### What am I looking at?
 
-# hello!
+Each colored dot represents a person as they go about their day. The colors show their disease status, as they contract and develop the disease in stages:
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+<div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(200,200,0)">&nbsp;&nbsp;&nbsp;&nbsp;</span> Susceptible and healthy</p>
 
-The model is under intense development. The following versions have been released:
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(48,255,255)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Infected but not contagious</p>
 
-# hello!
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(200,0,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Contagious</p>
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(255,0,255)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Showing Symptoms</p>
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(128,0,128)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Seriously Sick</p>
 
-The model is under intense development. The following versions have been released:
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(50,50,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Critical</p>
 
-# hello!
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(160,250,160)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    Recovered</p>
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+</div>
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+You can select **different days** to see how the population's health shifts over time, or watch the daily interactions as each individual day progresses and people perform their daily activities and travel.
 
-The model is under intense development. The following versions have been released:
+This is a "Base Case" simulation for illustrative purposes. It shows what would have happened in Berlin if there had been no social distancing measures, no closing of schools and workplaces, etc.
 
-# hello!
+This illustration shows only a small sample of the total tripmaking in Berlin; while MATSim-Episim can model each agent individually, it is too much data to show on one screen in disaggregate form.
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+### How does the simulation work?
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+The method used by MATSIM-Episim is available on the front page at <https://matsim-vsp.github.io>. It is based on advanced human mobility models and virus infection dynamics taken from recent literature and publications.
 
-The model is under intense development. The following versions have been released:
+### For more information
 
-# hello!
+Please email us at [covid19@vsp.tu-berlin.de](mailto:covid19@vsp.tu-berlin.de) for more information.
 
-Hundreds of scenario combinations are run to produce the following "What if?" estimates of viral propagation under different conditions.
+The main website is at [matsim-vsp.github.io](https://matsim-vsp.github.io) is under heavy development as we build new versions of the Episim model.
 
-- "v1" contains the strategies discussed in the paper.
-- "v3" contains a visual illustration of the method.
-- All others contain strategies that were in the public discussion after the above paper was made available.
-- "v5" was used in part to brief the BMBF on Apr/9 about school re-opening options.
+MATSim-Episim is freely available and open source, and can be downloaded at <https://github.com/matsim-org/matsim-episim>.
 
-The model is under intense development. The following versions have been released:
+### Acknowledgements
+
+This site and the MATSim-Episim model are developed at Technische Universität Berlin, by the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin. Professor Kai Nagel leads the team.
+
+This research supported by the [Bundesministerium für Bildung und Forschung](https://bmbf.de) at the German Federal Goverment.
+
+Website and visulations built using [Vue](https://vuejs.org) and [Three.js](https://threejs.org).
+
+<hr>
+
+<img src="./images/matsim-logo-blue.png" width="40%">
+
+<br/>
+<br/>
+
+<img src="./images/tu-logo.png" width="40%">
+
+<br/>
+<br/>
+<br/>
+<br/>
