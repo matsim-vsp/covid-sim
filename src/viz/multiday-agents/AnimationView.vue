@@ -692,7 +692,7 @@ export default class AnimationView extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-$navHeight: 2.5rem;
+@import '@/styles.scss';
 
 #anim-container {
   margin: 0 0;
@@ -700,6 +700,7 @@ $navHeight: 2.5rem;
   position: absolute;
   width: 100%;
   top: $navHeight;
-  bottom: 0.25rem;
+  bottom: 0rem;
+  z-index: -1;
 }
 </style>

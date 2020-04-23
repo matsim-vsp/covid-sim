@@ -1,50 +1,47 @@
 <template lang="pug">
 #v3-app
-  animation-view(@loaded="toggleLoaded" :speed="speed" :day="newDay")
+  animation-view.anim(@loaded="toggleLoaded" :speed="speed" :day="newDay")
 
   modal-markdown-dialog#help-dialog(
-    title='What is this?'
+    title='Episim: COVID-19 virus spreading dynamics'
     md='@/assets/animation-helptext.md'
     :buttons="[`Let's go!`]"
     :class="{'is-active': showHelp}"
     @click="clickedCloseHelp()"
   )
 
-  #nav
-    p: b Berlin &bullet; Multiday Simulation
+  .nav
+    p: b Berlin Simulation &bullet;
 
-  #top-hover-panel(v-if="isLoaded")
-    .day-button-grid
-      .ten-day-set(v-for="dec of tenDaySets" :key="dec")
-        .day-button(v-for="cube of Array.from(Array(10).keys())"
-                    :class="{currentday: newDay == cubeLookup[cube] + dec*10, dark: isDarkMode}"
-                    :key="cube+10*dec" @click="switchDay(cube,dec)") {{ cubeLookup[cube] + dec*10 }}
+  .day-button-grid
+    .ten-day-set(v-for="dec of tenDaySets" :key="dec")
+      .day-button(v-for="cube of Array.from(Array(10).keys())"
+                  :class="{currentday: newDay == cubeLookup[cube] + dec*10, dark: isDarkMode}"
+                  :key="cube+10*dec" @click="switchDay(cube,dec)") {{ cubeLookup[cube] + dec*10 }}
 
-    .right-side
-      p.digital-clock(
-        :style="{'color': textColor.text}") {{ state.message }}
+  .right-side
+    p.digital-clock(
+      :style="{'color': textColor.text}") {{ state.message }}
 
-      .morestuff(v-if="isLoaded")
-        vue-slider.speed-slider(v-model="speed"
-          :data="speedStops"
-          :duration="0"
-          :dotSize="16"
-          tooltip="active"
-          tooltip-placement="left"
-          :tooltip-formatter="val => val + 'x'"
-        )
-        p.speed-label(
-          :style="{'color': textColor.text}") {{ speed }}x speed
+    .morestuff(v-if="isLoaded")
+      vue-slider.speed-slider(v-model="speed"
+        :data="speedStops"
+        :duration="0"
+        :dotSize="16"
+        tooltip="active"
+        tooltip-placement="left"
+        :tooltip-formatter="val => val + 'x'"
+      )
+      p.speed-label(
+        :style="{'color': textColor.text}") {{ speed }}x speed
 
 
-  #bottom-hover-panel(v-if="isLoaded")
+  playback-controls.playback-stuff(v-if="isLoaded" @click='toggleSimulation')
 
+  .extra-buttons(v-if="isLoaded")
     .help-button(@click='clickedHelp')
       i.help-button-text.fa.fa-1x.fa-question
-
     img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
-
-    playback-controls(@click='toggleSimulation')
 
 </template>
 
@@ -173,32 +170,31 @@ export default class VueComponent extends Vue {
 #v3-app {
   position: absolute;
   top: $navHeight;
-  bottom: 0.2rem;
-  width: 100%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
   display: grid;
-  grid-template-rows: $navHeight auto 1fr auto;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: $navHeight auto 1fr auto auto;
+  grid-template-areas:
+    'hd             hd'
+    'days    rightside'
+    'days            .'
+    'days extrabuttons'
+    'playback playback';
 }
 
 #help-dialog {
+  padding: 5rem 0rem;
   grid-row: 2 / 4;
   grid-column: 1 / 2;
-}
-
-#top-hover-panel {
-  z-index: 5;
-  display: flex;
-  flex-direction: row;
-  padding: 0rem 0rem 0.2rem 0;
-  grid-row: 2 / 3;
-  grid-column: 1 / 2;
-  height: 100%;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 img.theme-button {
   opacity: 1;
-  margin: 1rem 0 1rem auto;
+  margin: 1rem 0 0rem auto;
   background-color: black;
   border-radius: 50%;
   border: 2px solid #648cb4;
@@ -218,22 +214,11 @@ img.theme-button:hover {
   background-color: white;
 }
 
-#bottom-hover-panel {
-  grid-row: 4 / 5;
-  grid-column: 1 / 2;
-  margin: 0 2rem 1rem 2rem;
-  display: flex;
-  flex-direction: column;
-  z-index: 5;
-  pointer-events: none;
-}
-
-#nav {
+.nav {
+  grid-area: hd;
   display: flex;
   flex-direction: row;
   background-color: #1e5538; /* #648cb4; */
-  grid-row: 1 / 2;
-  grid-column: 1 / 2;
   margin: 0 0;
   padding: 0 1rem 0 3rem;
 
@@ -281,6 +266,8 @@ img.theme-button:hover {
 }
 
 .right-side {
+  grid-area: rightside;
+  pointer-events: auto;
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
@@ -289,7 +276,6 @@ img.theme-button:hover {
   text-align: right;
   padding: 0 0;
   color: white;
-  height: 100%;
 }
 
 .logo {
@@ -299,17 +285,14 @@ img.theme-button:hover {
   margin-bottom: none;
 }
 
-#rview {
-  grid-row: 2 / 3;
-  grid-column: 1 / 2;
-}
-
 .day-button-grid {
+  grid-area: days;
   padding: 0.5rem 2rem 0 0.5rem;
   display: flex;
   flex-wrap: wrap;
   margin: 0 0;
   align-content: flex-start;
+  pointer-events: none;
 }
 
 .ten-day-set {
@@ -387,14 +370,33 @@ img.theme-button:hover {
   margin: auto auto;
 }
 
+.playback-stuff {
+  grid-area: playback;
+  padding: 0rem 2rem 1rem 2rem;
+  pointer-events: auto;
+}
+
+.extra-buttons {
+  margin-left: auto;
+  margin-right: 2rem;
+  padding-bottom: 0.5rem;
+  grid-area: extrabuttons;
+}
+
+.anim {
+  grid-column: 1 / 3;
+  grid-row: 1 / 6;
+  pointer-events: auto;
+}
+
 @media only screen and (max-width: 640px) {
-  #nav {
+  .nav {
     padding-left: 1rem;
   }
 
-  #bottom-hover-panel {
-    margin-left: 1.5rem;
-    margin-right: 1rem;
+  #help-dialog {
+    padding: 0 0;
+    margin: 3rem 1rem 5rem 1rem;
   }
 
   .right-side {
@@ -404,6 +406,13 @@ img.theme-button:hover {
   .digital-clock {
     margin-top: 0.5rem;
     font-size: 2rem;
+  }
+
+  .extra-buttons {
+    margin-right: 1rem;
+  }
+  .playback-stuff {
+    padding-right: 1rem;
   }
 }
 </style>

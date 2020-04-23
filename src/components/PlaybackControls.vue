@@ -109,7 +109,6 @@ export default class VueComponent extends Vue {
 
 .slider {
   margin-right: 1rem;
-  pointer-events: auto;
 }
 
 .buttons {
