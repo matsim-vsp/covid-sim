@@ -39,13 +39,15 @@ float calculateStatus() {
 
 float calculateSize() {
 
-    if (myInfectionStatus != 0.0 && myInfectionStatus != 1.0 && myInfectionStatus != 2.0) {
-        return 100.0;
-    }
+    float small = 3.0;
+    float med = 3.0;
+    float big = 3.0;
 
-    return (myInfectionStatus + 1.0) * 7.0 - 5.0;
+    if (myInfectionStatus == 0.0) return small;
+    else if (myInfectionStatus == 1.0) return med;
+    else if (myInfectionStatus < 6.0) return big;
+    return small;
 }
-
 
 float calculateTimestep(in vec3 point1, in vec3 point2) {
 

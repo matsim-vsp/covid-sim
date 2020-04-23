@@ -16,14 +16,7 @@ vec4 getColor() {
 
     if (myInfectionStatus == 0.0) {
         return vec4(colorSusceptible, 1.0);  // susceptible; not moving
-        /*
-        if (atRest == 1.0) {
-            return vec4(0.1, 0.0, 0.1, 0.25);  // susceptible; not moving
-        } else {
-            return vec4(0.1, 0.0, 0.1, 0.25);  // susceptible; not moving
-            // return vec4(1.0, 1.0, 0.0, 1.0);  // susceptible; yellow
-        }
-        */
+
     } else if (myInfectionStatus == 1.0) {
 
         return vec4(colorInfectedButNotContagious, 1.0);  // infected; cyan
@@ -32,9 +25,16 @@ vec4 getColor() {
 
         return vec4(colorContagious, 1.0);  // contagious; red
 
-    }
+    } else if (myInfectionStatus == 3.0) {
+        return vec4(1.0, 0.0, 1.0, 1.0);
 
-    return vec4(1.0, 1.0, 1.0, 0.25);  // ERROR: grey.
+    } else if (myInfectionStatus == 4.0) {
+        return vec4(0.5, 0.0, 0.5, 1.0);
+
+    } else if (myInfectionStatus == 5.0) {
+        return vec4(0.1, 0.1, 0.1, 1.0);
+    }
+    return vec4(0.7, 1.0, 0.7, 1.0);
 }
 
 

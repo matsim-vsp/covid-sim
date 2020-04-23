@@ -345,9 +345,10 @@ export default class AnimationView extends Vue {
       return
     }
 
-    const dayString = this.day ? '00' + this.day : '004'
-    const zpath = this.publicPath + dayString + '-infections.json'
+    const dayString = this.day ? ('00' + this.day).slice(-3) : '004'
+    const zpath = this.publicPath + 'v3-anim/' + dayString + '-infections.json'
 
+    console.log(zpath)
     // we're going to do this async and streamy!
     const response = await fetch(zpath)
     if (!response.body) return
@@ -388,7 +389,6 @@ export default class AnimationView extends Vue {
       this.processNewlyReadAgent(ndjson)
     })
     this.tempStreamBuffer = parts[parts.length - 1]
-    console.log('agents:', Object.keys(this.agentList).length)
   }
 
   private processNewlyReadAgent(ndjson: string) {
@@ -534,7 +534,7 @@ export default class AnimationView extends Vue {
     this.container.appendChild(this.renderer.domElement)
 
     const near = 1
-    const far = 50000
+    const far = 100000
 
     this.camera = new THREE.PerspectiveCamera(
       170,

@@ -3,14 +3,14 @@
   animation-view(@loaded="toggleLoaded" :speed="speed" :day="newDay")
 
   #nav
-    p: router-link(to="#?day=4") Day 4
-    p: router-link(to="#?day=5" :day="5") Day 5
-    p: router-link(to="#?day=6" :day="6") Day 6
-    p: router-link(to="#?day=7" :day="7") Day 7
-    p: router-link(to="#?day=8" :day="8") Day 8
+    p Berlin &bullet; Multiday Simulation
 
   #top-hover-panel(v-if="isLoaded")
-    .left-side
+    .day-button-grid
+      .ten-day-set(v-for="dec of tenDaySets" :key="dec")
+        .day-button(v-for="cube of Array.from(Array(10).keys())"
+                    :class="{dark: isDarkMode}"
+                    :key="cube+10*dec" @click="switchDay(cube,dec)") {{ cubeLookup[cube] + dec*10 }}
 
     .right-side
       p.digital-clock(
@@ -44,7 +44,7 @@ import VueSlider from 'vue-slider-component'
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
-import { ColorScheme } from '../../Interfaces'
+import { ColorScheme } from '@/Interfaces'
 import { Route } from 'vue-router'
 
 @Component({
@@ -57,11 +57,21 @@ import { Route } from 'vue-router'
 export default class Shader extends Vue {
   private newDay: number = 0
 
+  private numDays = 90
+  private tenDaySets = Array.from(Array(Math.ceil(this.numDays / 10)).keys()) // [0,9]
+  private cubeLookup = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]
+
   private state = store.state
   private isLoaded = false
 
+  private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
+
   private speedStops = [-10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10]
   private speed = 1
+
+  @Watch('state.colorScheme') private swapTheme() {
+    this.isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
+  }
 
   private get textColor() {
     const lightmode = {
@@ -94,6 +104,12 @@ export default class Shader extends Vue {
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', true)
+  }
+
+  private switchDay(cube: number, dec: number) {
+    console.log(cube, dec)
+    this.newDay = dec * 10 + this.cubeLookup[cube]
+    console.log(this.newDay)
   }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
@@ -169,7 +185,7 @@ img.theme-button:hover {
 #bottom-hover-panel {
   grid-row: 4 / 5;
   grid-column: 1 / 2;
-  margin: 0 1rem 1rem 2rem;
+  margin: 0 2rem 1rem 2rem;
   display: flex;
   flex-direction: column;
   z-index: 5;
@@ -222,8 +238,8 @@ img.theme-button:hover {
 }
 
 .left-side {
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  background-color: green;
   margin-left: 0.5rem;
   margin-right: auto;
 }
@@ -232,7 +248,8 @@ img.theme-button:hover {
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
-  margin-right: 1rem;
+  margin-right: 2rem;
+  margin-left: auto;
   text-align: right;
   padding: 0 0;
   color: white;
@@ -251,6 +268,57 @@ img.theme-button:hover {
   grid-column: 1 / 2;
 }
 
+.day-button-grid {
+  padding: 0.5rem 2rem 0 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0;
+  align-content: flex-start;
+}
+
+.ten-day-set {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 0 0;
+  align-content: flex-start;
+  width: 7.6rem;
+  height: 3.15rem;
+}
+
+.day-button {
+  margin: 1px 1px;
+  background-color: #eeeeeedd;
+  border: 1px solid white;
+  font-size: 0.7rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  text-align: center;
+  padding-top: 2px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.day-button:hover,
+.day-button:active {
+  background-color: white;
+  border: 2px solid #44f;
+  font-weight: bold;
+}
+
+.day-button.dark {
+  background-color: #222222cc;
+  color: #bbb;
+  border: 1px solid black;
+}
+
+.day-button.dark:hover,
+.day-button.dark:active {
+  background-color: black;
+  border: 2px solid $themeColor;
+  font-weight: bold;
+}
+
 @media only screen and (max-width: 640px) {
   #nav {
     padding-left: 1rem;
@@ -258,6 +326,11 @@ img.theme-button:hover {
 
   #bottom-hover-panel {
     margin-left: 1.5rem;
+    margin-right: 1rem;
+  }
+
+  .right-side {
+    margin-right: 1rem;
   }
 
   .digital-clock {
