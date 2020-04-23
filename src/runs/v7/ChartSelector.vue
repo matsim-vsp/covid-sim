@@ -90,10 +90,10 @@
               button.button.is-small(
                 :class="{'is-link': plusminus === '0', 'is-selected': plusminus === '0'}"
                 @click="setPlusMinus('0')") +0
-              button.button.is-small(v-if="city==='berlin'"
+              button.button.is-small(v-if="city !== 'munich'"
                 :class="{'is-link': plusminus === '3', 'is-selected': plusminus === '3'}"
                 @click="setPlusMinus('3')") +3
-              button.button.is-small(v-if="city==='berlin'"
+              button.button.is-small(v-if="city !== 'munich'"
                 :class="{'is-link': plusminus === '6', 'is-selected': plusminus === '6'}"
                 @click="setPlusMinus('6')") +6
 

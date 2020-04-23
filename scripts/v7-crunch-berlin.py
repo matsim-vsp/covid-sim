@@ -13,7 +13,7 @@ import pandas as pd
 from dfply import *
 
 for infile in sys.argv[1:]:
-    out_filename = infile[: infile.find("txt")] + "csv"
+    out_filename = "b" + infile[: infile.find("txt")] + "csv"
 
     try:
         info = pd.read_csv(infile, sep="\t")
