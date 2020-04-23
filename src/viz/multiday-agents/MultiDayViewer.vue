@@ -2,6 +2,14 @@
 #v3-app
   animation-view(@loaded="toggleLoaded" :speed="speed" :day="newDay")
 
+  modal-markdown-dialog#help-dialog(
+    title='What is this?'
+    md='@/assets/animation-helptext.md'
+    :buttons="['OK']"
+    :class="{'is-active': showHelp}"
+    @click="showHelp = false"
+  )
+
   #nav
     p Berlin &bullet; Multiday Simulation
 
@@ -15,7 +23,6 @@
     .right-side
       p.digital-clock(
         :style="{'color': textColor.text}") {{ state.message }}
-        //:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ state.message }}
 
       .morestuff(v-if="isLoaded")
         vue-slider.speed-slider(v-model="speed"
@@ -28,11 +35,15 @@
         )
         p.speed-label(
           :style="{'color': textColor.text}") {{ speed }}x speed
-          //:style="{'color': textColor.text, 'background-color': textColor.bg}") {{ speed }}x speed
-        // img.logo(src="@/assets/images/tu-logo.png" width=120)
+
 
   #bottom-hover-panel(v-if="isLoaded")
+
+    .help-button(@click='clickedHelp')
+      i.help-button-text.fa.fa-1x.fa-question
+
     img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
+
     playback-controls(@click='toggleSimulation')
 
 </template>
@@ -43,6 +54,7 @@ import VueSlider from 'vue-slider-component'
 
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
+import ModalMarkdownDialog from '@/components/ModalMarkdownDialog.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
 import { ColorScheme } from '@/Interfaces'
 import { Route } from 'vue-router'
@@ -50,6 +62,7 @@ import { Route } from 'vue-router'
 @Component({
   components: {
     AnimationView,
+    ModalMarkdownDialog,
     PlaybackControls,
     VueSlider,
   },
@@ -125,6 +138,13 @@ export default class VueComponent extends Vue {
     this.isLoaded = loaded
   }
 
+  private showHelp = false
+
+  private clickedHelp() {
+    console.log('HEEELP!')
+    this.showHelp = true
+  }
+
   private rotateColors() {
     this.$store.commit('rotateColors')
   }
@@ -145,8 +165,8 @@ export default class VueComponent extends Vue {
   grid-template-columns: 1fr;
 }
 
-#three-container {
-  grid-row: 2 / 3;
+#help-dialog {
+  grid-row: 2 / 4;
   grid-column: 1 / 2;
 }
 
@@ -167,6 +187,7 @@ img.theme-button {
   background-color: black;
   border-radius: 50%;
   border: 2px solid #648cb4;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
   width: 3rem;
   height: 3rem;
   cursor: pointer;
@@ -325,6 +346,30 @@ img.theme-button:hover {
   background-color: $themeColor;
   font-weight: bold;
   color: white;
+}
+
+.help-button {
+  margin-bottom: 0.5rem;
+  margin-left: auto;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  color: white;
+  background-color: #3498db;
+  display: flex;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.help-button:hover {
+  background-color: #39a8f1;
+  border: 2px solid white;
+}
+
+.help-button-text {
+  margin: auto auto;
 }
 
 @media only screen and (max-width: 640px) {
