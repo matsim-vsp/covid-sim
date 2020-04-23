@@ -213,7 +213,7 @@ export default class App extends Vue {
 
 .content {
   padding: 0rem 3rem;
-  margin: 2rem 0 4rem 0;
+  margin: 2rem 0 2rem 0;
   max-width: 70em;
   display: flex;
   flex-direction: column;

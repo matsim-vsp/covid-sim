@@ -1,4 +1,4 @@
-## Re-opening Scenarios (v7)
+## MATSim-Episim Version 7: Re-opening Scenarios
 
 _Published 22 April 2020_
 
