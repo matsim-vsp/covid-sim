@@ -302,7 +302,7 @@ img.theme-button:hover {
 .day-button:hover,
 .day-button:active {
   background-color: white;
-  border: 2px solid #44f;
+  border: 2px solid $themeColor;
   font-weight: bold;
   padding-top: 1px;
 }
@@ -321,8 +321,10 @@ img.theme-button:hover {
 }
 
 .day-button.currentday {
-  padding-top: 1px;
-  border: 3px solid #c00;
+  padding-top: 2px;
+  background-color: $themeColor;
+  font-weight: bold;
+  color: white;
 }
 
 @media only screen and (max-width: 640px) {

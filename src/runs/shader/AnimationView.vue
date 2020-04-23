@@ -506,7 +506,7 @@ export default class AnimationView extends Vue {
     if (agentLayer) this.scene.remove(agentLayer)
 
     this.scene.add(points)
-    this.agentCache[this.day] = this.agentList
+    // this.agentCache[this.day] = this.agentList
 
     console.log('added points')
   }
