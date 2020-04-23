@@ -23,7 +23,8 @@ const routes = [
   {
     path: '/v3',
     name: 'V3',
-    component: () => import(/* webpackChunkName: "Shader" */ '@/runs/shader/ShaderDemo.vue'),
+    component: () =>
+      import(/* webpackChunkName: "Shader" */ '@/viz/multiday-agents/MultiDayViewer.vue'),
   },
   {
     path: '/v4',

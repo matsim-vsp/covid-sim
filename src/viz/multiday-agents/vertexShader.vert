@@ -40,8 +40,8 @@ float calculateStatus() {
 float calculateSize() {
 
     float small = 2.0;
-    float med = 2.5;
-    float big = 2.5;
+    float med = 3.0;
+    float big = 3.0;
 
     if (myInfectionStatus == 0.0) return small;
     else if (myInfectionStatus == 1.0) return med;

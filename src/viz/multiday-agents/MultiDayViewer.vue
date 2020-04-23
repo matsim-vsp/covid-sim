@@ -54,7 +54,7 @@ import { Route } from 'vue-router'
     VueSlider,
   },
 })
-export default class Shader extends Vue {
+export default class VueComponent extends Vue {
   private newDay: number = 0
 
   private numDays = 90
