@@ -79,23 +79,23 @@
                 @click="logScale = !logScale") Log
 
           .variation
-            b Variation
+            b Shift Start Date
             .variation-choices.buttons.has-addons
-              button.button.is-small(
-                :class="{'is-link': plusminus === '-6', 'is-selected': plusminus === '-6'}"
-                @click="setPlusMinus('-6')") -6
-              button.button.is-small(
-                :class="{'is-link': plusminus === '-3', 'is-selected': plusminus === '-3'}"
-                @click="setPlusMinus('-3')") -3
+              button.button.is-small(v-if="city !== 'munich'"
+                :class="{'is-link': plusminus === '6', 'is-selected': plusminus === '6'}"
+                @click="setPlusMinus('6')") -6
+              button.button.is-small(v-if="city !== 'munich'"
+                :class="{'is-link': plusminus === '3', 'is-selected': plusminus === '3'}"
+                @click="setPlusMinus('3')") -3
               button.button.is-small(
                 :class="{'is-link': plusminus === '0', 'is-selected': plusminus === '0'}"
                 @click="setPlusMinus('0')") +0
-              button.button.is-small(v-if="city !== 'munich'"
-                :class="{'is-link': plusminus === '3', 'is-selected': plusminus === '3'}"
-                @click="setPlusMinus('3')") +3
-              button.button.is-small(v-if="city !== 'munich'"
-                :class="{'is-link': plusminus === '6', 'is-selected': plusminus === '6'}"
-                @click="setPlusMinus('6')") +6
+              button.button.is-small(
+                :class="{'is-link': plusminus === '-3', 'is-selected': plusminus === '-3'}"
+                @click="setPlusMinus('-3')") +3
+              button.button.is-small(
+                :class="{'is-link': plusminus === '-6', 'is-selected': plusminus === '-6'}"
+                @click="setPlusMinus('-6')") +6
 
         .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
