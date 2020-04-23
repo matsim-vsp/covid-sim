@@ -286,15 +286,18 @@ export default class AnimationView extends Vue {
     // this can happen in the background
     await this.addNetworkToScene()
 
-    this.$store.commit('setMessage', 'done')
+    this.$store.commit('setMessage', '')
   }
 
   private startSimulation() {
     // let UI know we're about to begin!
     this.$emit('loaded', true)
-    this.$store.commit('setSimulation', true)
-    this.clock.start()
-    this.animate()
+
+    if (!this.state.isShowingHelp) {
+      this.clock.start()
+      this.animate()
+      this.$store.commit('setSimulation', true)
+    }
   }
 
   private networkMesh?: THREE.LineSegments

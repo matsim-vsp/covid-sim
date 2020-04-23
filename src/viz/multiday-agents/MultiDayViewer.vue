@@ -5,9 +5,9 @@
   modal-markdown-dialog#help-dialog(
     title='What is this?'
     md='@/assets/animation-helptext.md'
-    :buttons="['OK']"
+    :buttons="[`Let's go!`]"
     :class="{'is-active': showHelp}"
-    @click="showHelp = false"
+    @click="clickedCloseHelp()"
   )
 
   #nav
@@ -77,6 +77,8 @@ export default class VueComponent extends Vue {
   private state = store.state
   private isLoaded = false
 
+  private showHelp = false
+
   private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
 
   private speedStops = [-10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10]
@@ -111,11 +113,31 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.$store.commit('setFullScreen', true)
-    this.$store.commit('setSimulation', true)
+
+    this.showHelp = !this.state.sawAgentAnimationHelp
+    this.$store.commit('setShowingHelp', this.showHelp)
+
+    // start the sim right away if the dialog isn't showing
+    this.$store.commit('setSimulation', !this.showHelp)
   }
 
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
+    this.$store.commit('setSimulation', false)
+  }
+
+  private clickedHelp() {
+    console.log('HEEELP!')
+    this.$store.commit('setSimulation', false)
+    this.showHelp = true
+    this.$store.commit('setShowingHelp', this.showHelp)
+  }
+
+  private clickedCloseHelp() {
+    this.showHelp = false
+    this.$store.commit('setShowingHelp', this.showHelp)
+    // only show the help once
+    this.$store.commit('setSawAgentAnimationHelp', true)
     this.$store.commit('setSimulation', true)
   }
 
@@ -136,13 +158,6 @@ export default class VueComponent extends Vue {
 
   private toggleLoaded(loaded: boolean) {
     this.isLoaded = loaded
-  }
-
-  private showHelp = false
-
-  private clickedHelp() {
-    console.log('HEEELP!')
-    this.showHelp = true
   }
 
   private rotateColors() {

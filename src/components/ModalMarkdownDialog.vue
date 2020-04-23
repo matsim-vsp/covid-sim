@@ -1,32 +1,18 @@
-<template>
-  <div class="modal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">{{ title }}</p>
-        <button class="delete" aria-label="close" @click="clicked('close')"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="content">
-          <div v-html="html" />
-        </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button
-          v-if="buttons.length == 1"
-          class="button is-link"
-          @click="clicked(buttons[0])"
-        >{{ buttons[0] }}</button>
+<template lang="pug">
+.modal
+  .modal-background
+  .modal-card
+    header.modal-card-head
+      p.modal-card-title {{ title }}
+      button.delete(aria-label="close" @click="clicked('close')")
 
-        <button
-          v-for="msg in buttons.slice(1)"
-          :key="msg"
-          class="button"
-          @click="clicked(msg)"
-        >{{ msg }}</button>
-      </footer>
-    </div>
-  </div>
+    section.modal-card-body
+      .content
+        .my-html(v-html="html")
+
+    footer.modal-card-foot
+      button(v-if="buttons.length == 1" class="button is-link" @click="clicked(buttons[0])") {{ buttons[0] }}
+      button(v-for="msg in buttons.slice(1)" :key="msg" class="button" @click="clicked(msg)") {{ msg }}
 </template>
 
 <script lang="ts">
