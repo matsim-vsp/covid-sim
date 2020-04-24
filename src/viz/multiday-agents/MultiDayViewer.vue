@@ -11,13 +11,16 @@
   )
 
   .nav
-    p: b Berlin Simulation &bullet;
+    p: b Berlin Simulation &bullet; COVID-19
 
-  .day-button-grid
-    .ten-day-set(v-for="dec of tenDaySets" :key="dec")
-      .day-button(v-for="cube of Array.from(Array(10).keys())"
-                  :class="{currentday: newDay == cubeLookup[cube] + dec*10, dark: isDarkMode}"
-                  :key="cube+10*dec" @click="switchDay(cube,dec)") {{ cubeLookup[cube] + dec*10 }}
+  .side-section
+    p.digital-clock(
+      :style="{'color': textColor.text}")  Day {{ newDay+1 }}
+    .day-button-grid
+      .day-button(v-for="day of Array.from(Array(92).keys()).slice(1)"
+                  :style="{borderBottom: '2px solid ' + colorLookup(day-1)}"
+                  :class="{currentday: newDay == day-1, dark: isDarkMode}"
+                  :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
 
   .right-side
     p.digital-clock(
@@ -39,7 +42,7 @@
   playback-controls.playback-stuff(v-if="isLoaded" @click='toggleSimulation')
 
   .extra-buttons(v-if="isLoaded")
-    .help-button(@click='clickedHelp')
+    .help-button(@click='clickedHelp' title="info")
       i.help-button-text.fa.fa-1x.fa-question
     img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
 
@@ -47,6 +50,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import Papaparse from 'papaparse'
 import VueSlider from 'vue-slider-component'
 
 import store from '@/store'
@@ -69,16 +73,15 @@ export default class VueComponent extends Vue {
 
   private numDays = 90
   private tenDaySets = Array.from(Array(Math.ceil(this.numDays / 10)).keys()) // [0,9]
-  private cubeLookup = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]
 
   private state = store.state
+  private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
   private isLoaded = false
-
   private showHelp = false
 
-  private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
+  private totalInfections = require('./totalInfections.csv').default
 
-  private speedStops = [-10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10]
+  private speedStops = [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10]
   private speed = 1
 
   @Watch('state.colorScheme') private swapTheme() {
@@ -116,11 +119,77 @@ export default class VueComponent extends Vue {
 
     // start the sim right away if the dialog isn't showing
     this.$store.commit('setSimulation', !this.showHelp)
+
+    // make cubes nice colors
+    this.setCubeColors()
   }
 
   private beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', false)
+  }
+
+  private dayColors: { [day: number]: string } = {}
+
+  private async setCubeColors() {
+    const dailyTotals = Papaparse.parse(this.totalInfections, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
+
+    const careAbout = [
+      'nInfectedButNotContagious',
+      'nContagious',
+      'nShowingSymptoms',
+      'nSeriouslySick',
+      'nCritical',
+      'nRecovered',
+    ]
+    for (const row of dailyTotals) {
+      let count = 0
+      let largestCol = 'nix'
+
+      for (const col of careAbout) {
+        if (row[col] > count) {
+          count = row[col]
+          largestCol = col
+        }
+      }
+
+      const zeroDay = row.day - 1
+
+      switch (largestCol) {
+        case 'nSusceptible':
+          this.dayColors[zeroDay] = '#ffff00'
+          break
+        case 'nInfectedButNotContagious':
+          this.dayColors[zeroDay] = '#00ffff'
+          break
+        case 'nContagious':
+          this.dayColors[zeroDay] = '#cc0000'
+          break
+        case 'nShowingSymptoms':
+          this.dayColors[zeroDay] = '#cc00cc'
+          break
+        case 'nSeriouslySick':
+          this.dayColors[zeroDay] = '#4444ff'
+          break
+        case 'nCritical':
+          this.dayColors[zeroDay] = '#550055'
+          break
+        case 'nRecovered':
+          this.dayColors[zeroDay] = '#88ff88'
+          break
+        default:
+          this.dayColors[zeroDay] = '#dddddd'
+          break
+      }
+    }
+  }
+
+  private colorLookup(day: number): string {
+    return this.dayColors[day]
   }
 
   private clickedHelp() {
@@ -138,10 +207,8 @@ export default class VueComponent extends Vue {
     this.$store.commit('setSimulation', true)
   }
 
-  private switchDay(cube: number, dec: number) {
-    console.log(cube, dec)
-    this.newDay = dec * 10 + this.cubeLookup[cube]
-    console.log(this.newDay)
+  private switchDay(day: number) {
+    this.newDay = day
   }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
@@ -178,18 +245,19 @@ export default class VueComponent extends Vue {
   grid-template-columns: 1fr auto;
   grid-template-rows: $navHeight auto 1fr auto auto;
   grid-template-areas:
-    'hd             hd'
-    'days    rightside'
-    'days            .'
-    'days extrabuttons'
+    'hd              hd'
+    'days     rightside'
+    'days             .'
+    'days  extrabuttons'
     'playback playback';
 }
 
 #help-dialog {
   padding: 5rem 0rem;
-  grid-row: 2 / 4;
+  grid-row: 3 / 4;
   grid-column: 1 / 2;
   pointer-events: auto;
+  z-index: 20;
 }
 
 img.theme-button {
@@ -250,6 +318,7 @@ img.theme-button:hover {
   margin-top: 1rem;
   font-size: 3rem;
   line-height: 3rem;
+  text-shadow: 0 0 0.5px white;
   font-weight: bold;
 }
 
@@ -271,7 +340,7 @@ img.theme-button:hover {
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
-  margin-right: 2rem;
+  margin-right: 1rem;
   margin-left: auto;
   text-align: right;
   padding: 0 0;
@@ -285,35 +354,30 @@ img.theme-button:hover {
   margin-bottom: none;
 }
 
-.day-button-grid {
+.side-section {
   grid-area: days;
-  padding: 0.5rem 2rem 0 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 0;
-  align-content: flex-start;
-  pointer-events: none;
+  margin: 0 auto auto 0;
+  padding: 0rem 1rem 0 0.75rem;
 }
 
-.ten-day-set {
+.day-button-grid {
+  margin: 1rem auto 0 0;
+  margin-right: auto;
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
-  margin: 0 0;
-  align-content: flex-start;
-  width: 7.6rem;
-  height: 3.15rem;
+  padding: 1px 1px;
+  width: 4.4rem;
 }
 
 .day-button {
   margin: 1px 1px;
   background-color: #eeeeeedd;
-  border: 1px solid white;
+  // border: 1px solid white;
   font-size: 0.7rem;
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 1.2rem;
+  height: 1.2rem;
   text-align: center;
-  padding-top: 2px;
+  //padding-top: 2px;
   cursor: pointer;
   pointer-events: auto;
 }
@@ -321,9 +385,9 @@ img.theme-button:hover {
 .day-button:hover,
 .day-button:active {
   background-color: white;
-  border: 2px solid $themeColor;
+  border: 2px solid white;
   font-weight: bold;
-  padding-top: 1px;
+  margin-top: -2px;
 }
 
 .day-button.dark {
@@ -340,14 +404,13 @@ img.theme-button:hover {
 }
 
 .day-button.currentday {
-  padding-top: 2px;
   background-color: $themeColor;
   font-weight: bold;
   color: white;
 }
 
 .help-button {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   margin-left: auto;
   width: 3rem;
   height: 3rem;
@@ -372,21 +435,29 @@ img.theme-button:hover {
 
 .playback-stuff {
   grid-area: playback;
-  padding: 0rem 2rem 1rem 2rem;
+  padding: 0rem 1rem 1rem 2rem;
   pointer-events: auto;
 }
 
 .extra-buttons {
   margin-left: auto;
-  margin-right: 2rem;
+  margin-right: 1rem;
   padding-bottom: 0.5rem;
   grid-area: extrabuttons;
 }
 
 .anim {
   grid-column: 1 / 3;
-  grid-row: 1 / 6;
+  grid-row: 1 / 7;
   pointer-events: auto;
+}
+
+.label {
+  margin-right: 1rem;
+  color: white;
+  text-align: left;
+  line-height: 1.1rem;
+  width: min-content;
 }
 
 @media only screen and (max-width: 640px) {
@@ -406,6 +477,7 @@ img.theme-button:hover {
   .digital-clock {
     margin-top: 0.5rem;
     font-size: 2rem;
+    text-shadow: none;
   }
 
   .extra-buttons {
@@ -413,6 +485,24 @@ img.theme-button:hover {
   }
   .playback-stuff {
     padding-right: 1rem;
+  }
+
+  .day-button {
+    color: transparent;
+    background-color: #eeeeeedd;
+    font-size: 0.7rem;
+    width: 1rem;
+    height: 0.5rem;
+    text-align: center;
+    //padding-top: 2px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .day-button.dark {
+    color: transparent;
+    background-color: #222222cc;
+    border: 1px solid black;
   }
 }
 </style>

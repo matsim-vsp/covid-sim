@@ -1,8 +1,8 @@
 <img src="./images/banner.jpg" height=50 >
 
-# Episim: COVID-19 virus spreading dynamics
+### Episim: COVID-19 virus spreading dynamics
 
-This animation illustrates how the MATSIM-Episim model simulates the spread of COVID-19 disease through Berlin, Germany and the surrounding area.
+This animation illustrates how the [MATSIM-Episim model](https://matsim-vsp.github.io) simulates the spread of COVID-19 disease through Berlin, Germany and the surrounding area.
 
 ### What am I looking at?
 

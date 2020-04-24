@@ -39,7 +39,7 @@ float calculateStatus() {
 
 float calculateSize() {
 
-    float small = 2.0;
+    float small = 3.0;
     float med = 3.0;
     float big = 3.0;
 

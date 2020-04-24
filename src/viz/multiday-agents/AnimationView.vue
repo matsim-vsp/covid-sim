@@ -103,7 +103,6 @@ export default class AnimationView extends Vue {
 
   private agentList: { [id: string]: Agent } = {}
   private infectionList: { [id: string]: Infection } = {}
-  private agentCache: { [day: number]: any } = {}
 
   private allTripsHaveBegun = false
 
@@ -342,13 +341,6 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents and infections')
 
-    // already cached it?
-    if (this.agentCache[this.day]) {
-      this.agentList = this.agentCache[this.day]
-      this.finishedLoadingAgents()
-      return
-    }
-
     // const dayString = this.day ? ('00' + this.day).slice(-3) : '004'
     const zpath = this.publicPath + 'v3-anim/trips.json'
 
@@ -384,13 +376,6 @@ export default class AnimationView extends Vue {
 
   private async updateAgentAttributesForDay(day: number) {
     console.log('loading infections for day', day)
-
-    // already cached it?
-    if (this.agentCache[this.day]) {
-      this.agentList = this.agentCache[this.day]
-      this.finishedLoadingInfections()
-      return
-    }
 
     const dayString = this.day ? ('00' + this.day).slice(-3) : '000'
     const zpath = this.publicPath + 'v3-anim/' + dayString + '-infections.json'
@@ -513,89 +498,6 @@ export default class AnimationView extends Vue {
 
     console.log('added points')
   }
-
-  /*
-    const allEvents = await response.json()
-
-    for (const event of allEvents) {
-      const id = event.id
-
-      // first trip for this agent? Save as start-point
-      if (!this.agents[id] && event.path) {
-        const circle = new THREE.Mesh(this.geomSmall, this.yellow)
-        const initialX = event.path[0][0]
-        const initialY = event.path[0][1]
-        circle.position.set(initialX, initialY, 2)
-        this.agents[id] = circle
-      }
-
-      // record range of coords (for non-Berlin use later)
-      if (event.path) {
-        for (const point of event.path) {
-          this.xRange = [Math.min(this.xRange[0], point[0]), Math.max(this.xRange[1], point[0])]
-          this.yRange = [Math.min(this.yRange[0], point[1]), Math.max(this.yRange[1], point[1])]
-        }
-      }
-    }
-    this.allTrips = allEvents
-
-    // normalize the xy now that we know the full map extent
-    // berlin: not gonna cuz its hardcode up above
-    if (!this.midpointX) this.midpointX = (this.xRange[0] + this.xRange[1]) / 2
-    if (!this.midpointY) this.midpointY = (this.yRange[0] + this.yRange[1]) / 2
-
-    // center the dots on 0,0
-    for (const id of Object.keys(this.agents)) {
-      const agent = this.agents[id]
-      agent.position.setX(agent.position.x - this.midpointX)
-      agent.position.setY(agent.position.y - this.midpointY)
-      this.scene.add(agent)
-    }
-    */
-
-  /*
-  private async loadAgents() {
-    console.log('loading agents and infections')
-
-    const response = await fetch(this.publicPath + '008-infections.json')
-    const allEvents = await response.json()
-
-    for (const event of allEvents) {
-      const id = event.id
-
-      // first trip for this agent? Save as start-point
-      if (!this.agents[id] && event.path) {
-        const circle = new THREE.Mesh(this.geomSmall, this.yellow)
-        const initialX = event.path[0][0]
-        const initialY = event.path[0][1]
-        circle.position.set(initialX, initialY, 2)
-        this.agents[id] = circle
-      }
-
-      // record range of coords (for non-Berlin use later)
-      if (event.path) {
-        for (const point of event.path) {
-          this.xRange = [Math.min(this.xRange[0], point[0]), Math.max(this.xRange[1], point[0])]
-          this.yRange = [Math.min(this.yRange[0], point[1]), Math.max(this.yRange[1], point[1])]
-        }
-      }
-    }
-    this.allTrips = allEvents
-
-    // normalize the xy now that we know the full map extent
-    // berlin: not gonna cuz its hardcode up above
-    if (!this.midpointX) this.midpointX = (this.xRange[0] + this.xRange[1]) / 2
-    if (!this.midpointY) this.midpointY = (this.yRange[0] + this.yRange[1]) / 2
-
-    // center the dots on 0,0
-    for (const id of Object.keys(this.agents)) {
-      const agent = this.agents[id]
-      agent.position.setX(agent.position.x - this.midpointX)
-      agent.position.setY(agent.position.y - this.midpointY)
-      this.scene.add(agent)
-    }
-  }
-  */
 
   private initScene() {
     console.log('hereee 5-----')
