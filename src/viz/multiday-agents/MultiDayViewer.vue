@@ -14,8 +14,9 @@
     p: b Berlin Simulation &bullet; COVID-19
 
   .side-section
-    p.digital-clock(
-      :style="{'color': textColor.text}")  Day {{ newDay+1 }}
+
+    p.digital-clock Day {{ newDay+1 }}
+
     .day-button-grid
       .day-button(v-for="day of Array.from(Array(92).keys()).slice(1)"
                   :style="{borderBottom: newDay == day-1 ? 'none' : '2px solid ' + colorLookup(day-1)}"
@@ -23,8 +24,7 @@
                   :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
 
   .right-side
-    p.digital-clock(
-      :style="{'color': textColor.text}") {{ state.message }}
+    p.digital-clock {{ state.message }}
 
     .morestuff(v-if="isLoaded")
       vue-slider.speed-slider(v-model="speed"
@@ -243,9 +243,8 @@ export default class VueComponent extends Vue {
   pointer-events: none;
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: $navHeight auto 1fr auto auto;
+  grid-template-rows: auto 1fr auto auto;
   grid-template-areas:
-    'hd              hd'
     'days     rightside'
     'days             .'
     'days  extrabuttons'
@@ -284,7 +283,7 @@ img.theme-button:hover {
 
 .nav {
   grid-area: hd;
-  display: flex;
+  display: none;
   flex-direction: row;
   background-color: #1e5538; /* #648cb4; */
   margin: 0 0;
@@ -315,11 +314,17 @@ img.theme-button:hover {
 }
 
 .digital-clock {
+  background-color: $themeColor;
+  color: white;
+  opacity: 0.92;
+  padding: 0rem 0.5rem;
   margin-top: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 3rem;
-  line-height: 3rem;
-  text-shadow: 0 0 0.5px white;
+  line-height: 3.75rem;
   font-weight: bold;
+  // border: 2px solid white;
+  // border-radius: 5px;
 }
 
 .controls {
@@ -414,7 +419,7 @@ img.theme-button:hover {
   height: 3rem;
   border-radius: 50%;
   color: white;
-  background-color: #3498db;
+  background-color: $themeColor;
   display: flex;
   text-align: center;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
@@ -475,7 +480,6 @@ img.theme-button:hover {
   .digital-clock {
     margin-top: 0.5rem;
     font-size: 2rem;
-    text-shadow: none;
   }
 
   .extra-buttons {

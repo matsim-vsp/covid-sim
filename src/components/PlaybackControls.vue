@@ -120,7 +120,7 @@ export default class VueComponent extends Vue {
   height: 3rem;
   border-radius: 50%;
   color: white;
-  background-color: #3498db;
+  background-color: $themeColor;
   display: flex;
   text-align: center;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
@@ -129,7 +129,7 @@ export default class VueComponent extends Vue {
 }
 
 .playpause:hover {
-  background-color: #39a8f1;
+  background-color: $themeColor;
   border: 2px solid white;
 }
 

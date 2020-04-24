@@ -31,7 +31,7 @@ export default class AnimationView extends Vue {
   private networkFilename = 'network.zip'
 
   private lightMode: ColorSet = {
-    background: 0xddddd0,
+    background: 0xccccc4,
     links: 0xffffff,
     susceptible: 0x999900,
     infectedButNotContagious: 0x0077ff,
@@ -40,7 +40,7 @@ export default class AnimationView extends Vue {
 
   private darkMode: ColorSet = {
     background: 0x181518,
-    links: 0x223355,
+    links: 0x445577,
     susceptible: 0xbbbb44,
     infectedButNotContagious: 0x00ffff,
     contagious: 0xff2299,
@@ -601,8 +601,8 @@ export default class AnimationView extends Vue {
   padding: 0 0;
   position: absolute;
   width: 100%;
-  top: $navHeight;
-  bottom: 0rem;
+  top: 0;
+  bottom: 0;
   z-index: -1;
 }
 </style>
