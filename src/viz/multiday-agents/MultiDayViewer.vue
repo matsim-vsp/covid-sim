@@ -18,7 +18,7 @@
       :style="{'color': textColor.text}")  Day {{ newDay+1 }}
     .day-button-grid
       .day-button(v-for="day of Array.from(Array(92).keys()).slice(1)"
-                  :style="{borderBottom: '2px solid ' + colorLookup(day-1)}"
+                  :style="{borderBottom: newDay == day-1 ? 'none' : '2px solid ' + colorLookup(day-1)}"
                   :class="{currentday: newDay == day-1, dark: isDarkMode}"
                   :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
 
@@ -385,9 +385,7 @@ img.theme-button:hover {
 .day-button:hover,
 .day-button:active {
   background-color: white;
-  border: 2px solid white;
   font-weight: bold;
-  margin-top: -2px;
 }
 
 .day-button.dark {
@@ -503,6 +501,11 @@ img.theme-button:hover {
     color: transparent;
     background-color: #222222cc;
     border: 1px solid black;
+  }
+
+  .day-button.currentday {
+    color: transparent;
+    background-color: $themeColor;
   }
 }
 </style>
