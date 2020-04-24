@@ -13,7 +13,7 @@
             br
             | This results in a virus spreading dynamics model.
 
-          p This site is the central hub for COVID-19 virus spreading research from the Transport Systems Planning and Transport Telematics group, Institute for Land and Sea Transport (ILS) at TU Berlin. This research uses the&nbsp;
+          p This site is the central hub for COVID-19 virus spreading research from the Transport Systems Planning and Transport Telematics group (VSP), Institute for Land and Sea Transport at TU Berlin. This research uses the&nbsp;
             a(href="https://github.com/matsim-org/matsim-episim")
               b MATSim-Episim
             | &nbsp;virus spreading model.
@@ -141,13 +141,14 @@ export default {
   font-size: 1.6rem;
   background-color: #1e1f2c;
   line-height: 1.6rem;
+  margin-right: auto;
 }
 
 .banner h3 {
   font-size: 1.3rem;
   font-weight: normal;
   margin-bottom: 0;
-  line-height: 1.3rem;
+  line-height: 1.4rem;
   padding-bottom: 0.25rem;
   background-color: #1e1f2c;
   width: max-content;

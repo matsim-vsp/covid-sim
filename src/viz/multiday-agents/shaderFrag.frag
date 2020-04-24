@@ -1,10 +1,13 @@
 // fragment shader: pixel colors
 
 uniform float simulationTime;
-uniform vec3 colorSusceptible;
-uniform vec3 colorInfectedButNotContagious;
-uniform vec3 colorContagious;
-
+uniform vec3 cSusceptible;
+uniform vec3 cInfectedButNotContagious;
+uniform vec3 cContagious;
+uniform vec3 cSymptomatic;
+uniform vec3 cSeriouslyIll;
+uniform vec3 cCritical;
+uniform vec3 cRecovered;
 
 // passed in from vertex shader:
 varying float myInfectionStatus;
@@ -15,26 +18,29 @@ varying float atRest;
 vec4 getColor() {
 
     if (myInfectionStatus == 0.0) {
-        return vec4(colorSusceptible, 0.7);  // susceptible; not moving
+        return vec4(cSusceptible, 1.0);  // susceptible; not moving
 
     } else if (myInfectionStatus == 1.0) {
 
-        return vec4(colorInfectedButNotContagious, 1.0);  // infected; cyan
+        return vec4(cInfectedButNotContagious, 1.0);  // infected; cyan
 
     } else if (myInfectionStatus == 2.0) {
 
-        return vec4(colorContagious, 1.0);  // contagious; red
+        return vec4(cContagious, 1.0);  // contagious; red
 
     } else if (myInfectionStatus == 3.0) {
-        return vec4(1.0, 0.0, 1.0, 1.0);
+
+        return vec4(cSymptomatic, 1.0);
 
     } else if (myInfectionStatus == 4.0) {
-        return vec4(0.5, 0.0, 0.5, 1.0);
+
+        return vec4(cSeriouslyIll, 1.0);
 
     } else if (myInfectionStatus == 5.0) {
-        return vec4(0.1, 0.1, 0.1, 1.0);
+
+        return vec4(cCritical, 1.0);
     }
-    return vec4(0.7, 1.0, 0.7, 0.7);
+    return vec4(cRecovered, 1.0);
 }
 
 

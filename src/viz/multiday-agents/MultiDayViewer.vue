@@ -3,7 +3,7 @@
   animation-view.anim(@loaded="toggleLoaded" :speed="speed" :day="newDay")
 
   modal-markdown-dialog#help-dialog(
-    title='Episim: COVID-19 virus spreading dynamics'
+    title='COVID-19 virus spreading'
     md='@/assets/animation-helptext.md'
     :buttons="[`Let's go!`]"
     :class="{'is-active': showHelp}"
@@ -11,28 +11,28 @@
   )
 
   .nav
-    p: b Berlin Simulation &bullet; COVID-19
+
+    p.big.day Berlin: Outbreak Day {{ newDay+1 }}
+
+    p.big.time {{ state.message }}
 
   .side-section
 
-    p.digital-clock Day {{ newDay+1 }}
-
     .day-button-grid
-      .day-button(v-for="day of Array.from(Array(92).keys()).slice(1)"
+      .day-button(v-for="day of Array.from(Array(91).keys()).slice(1)"
                   :style="{borderBottom: newDay == day-1 ? 'none' : '2px solid ' + colorLookup(day-1)}"
                   :class="{currentday: newDay == day-1, dark: isDarkMode}"
                   :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
 
   .right-side
-    p.digital-clock {{ state.message }}
 
     .morestuff(v-if="isLoaded")
       vue-slider.speed-slider(v-model="speed"
         :data="speedStops"
         :duration="0"
-        :dotSize="16"
+        :dotSize="20"
         tooltip="active"
-        tooltip-placement="left"
+        tooltip-placement="bottom"
         :tooltip-formatter="val => val + 'x'"
       )
       p.speed-label(
@@ -46,6 +46,9 @@
       i.help-button-text.fa.fa-1x.fa-question
     img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
 
+  .legend(:class="{dark: isDarkMode}")
+    p(v-for="status in legendBits" :key="status.label" :style="{color: status.color}") {{ status.label }}
+
 </template>
 
 <script lang="ts">
@@ -57,7 +60,7 @@ import store from '@/store'
 import AnimationView from './AnimationView.vue'
 import ModalMarkdownDialog from '@/components/ModalMarkdownDialog.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
-import { ColorScheme } from '@/Interfaces'
+import { ColorScheme, LIGHT_MODE, DARK_MODE } from '@/Globals'
 import { Route } from 'vue-router'
 
 @Component({
@@ -84,8 +87,27 @@ export default class VueComponent extends Vue {
   private speedStops = [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10]
   private speed = 1
 
+  private legendBits: any[] = []
+
   @Watch('state.colorScheme') private swapTheme() {
     this.isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
+    this.updateLegendColors()
+    this.setCubeColors()
+  }
+
+  private updateLegendColors() {
+    const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+
+    this.legendBits = [
+      { label: 'Legend:', color: theme.text },
+      { label: 'uninfected', color: theme.susceptible },
+      { label: 'infected', color: theme.infectedButNotContagious },
+      { label: 'contagious', color: theme.contagious },
+      { label: 'symptomatic', color: theme.symptomatic },
+      { label: 'seriously ill', color: theme.seriouslyIll },
+      { label: 'critical', color: theme.critical },
+      { label: 'recovered', color: theme.recovered },
+    ]
   }
 
   private get textColor() {
@@ -112,6 +134,7 @@ export default class VueComponent extends Vue {
   }
 
   private mounted() {
+    console.log('DARK MODE:', this.isDarkMode)
     this.$store.commit('setFullScreen', true)
 
     this.showHelp = !this.state.sawAgentAnimationHelp
@@ -120,8 +143,9 @@ export default class VueComponent extends Vue {
     // start the sim right away if the dialog isn't showing
     this.$store.commit('setSimulation', !this.showHelp)
 
-    // make cubes nice colors
+    // make nice colors
     this.setCubeColors()
+    this.updateLegendColors()
   }
 
   private beforeDestroy() {
@@ -158,28 +182,29 @@ export default class VueComponent extends Vue {
       }
 
       const zeroDay = row.day - 1
+      const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
 
       switch (largestCol) {
         case 'nSusceptible':
-          this.dayColors[zeroDay] = '#ffff00'
+          this.dayColors[zeroDay] = theme.susceptible
           break
         case 'nInfectedButNotContagious':
-          this.dayColors[zeroDay] = '#00ffff'
+          this.dayColors[zeroDay] = theme.infectedButNotContagious
           break
         case 'nContagious':
-          this.dayColors[zeroDay] = '#cc0000'
+          this.dayColors[zeroDay] = theme.contagious
           break
         case 'nShowingSymptoms':
-          this.dayColors[zeroDay] = '#cc00cc'
+          this.dayColors[zeroDay] = theme.symptomatic
           break
         case 'nSeriouslySick':
-          this.dayColors[zeroDay] = '#4444ff'
+          this.dayColors[zeroDay] = theme.seriouslyIll
           break
         case 'nCritical':
-          this.dayColors[zeroDay] = '#550055'
+          this.dayColors[zeroDay] = theme.critical
           break
         case 'nRecovered':
-          this.dayColors[zeroDay] = '#88ff88'
+          this.dayColors[zeroDay] = theme.recovered
           break
         default:
           this.dayColors[zeroDay] = '#dddddd'
@@ -242,26 +267,26 @@ export default class VueComponent extends Vue {
   right: 0;
   pointer-events: none;
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-columns: 1fr 6rem;
+  grid-template-rows: auto auto 1fr auto;
   grid-template-areas:
+    'hd              hd'
     'days     rightside'
     'days             .'
     'days  extrabuttons'
-    'playback playback';
+    'playback  playback'
+    'legend      legend';
 }
 
 #help-dialog {
-  padding: 5rem 0rem;
-  grid-row: 3 / 4;
-  grid-column: 1 / 2;
+  padding: 2rem 2rem;
   pointer-events: auto;
   z-index: 20;
 }
 
 img.theme-button {
   opacity: 1;
-  margin: 1rem 0 0rem auto;
+  margin: 1rem 0 0.5rem auto;
   background-color: black;
   border-radius: 50%;
   border: 2px solid #648cb4;
@@ -283,11 +308,11 @@ img.theme-button:hover {
 
 .nav {
   grid-area: hd;
-  display: none;
+  display: flex;
   flex-direction: row;
-  background-color: #1e5538; /* #648cb4; */
   margin: 0 0;
-  padding: 0 1rem 0 3rem;
+  padding: 0 0.5rem 0 1rem;
+  background-color: #228855dd;
 
   a {
     font-weight: bold;
@@ -302,29 +327,45 @@ img.theme-button:hover {
   p {
     margin: auto 0.5rem auto 0;
     padding: 0 0;
-    color: #ccc;
+    color: white;
   }
+}
+
+.legend {
+  grid-area: legend;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  font-size: 0.9rem;
+  justify-content: space-evenly;
+  background-color: #ddc;
+}
+
+.legend.dark {
+  background-color: #181518;
 }
 
 .speed-slider {
   flex: 1;
   width: 100%;
-  margin: auto 0rem 0.25rem 0rem;
+  margin: 0.5rem 0rem 0.25rem 0;
   pointer-events: auto;
+  font-weight: bold;
 }
 
-.digital-clock {
-  background-color: $themeColor;
-  color: white;
-  opacity: 0.92;
-  padding: 0rem 0.5rem;
+.big {
+  color: red;
+  opacity: 0.85;
+  padding: 0rem 0;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  font-size: 3rem;
+  font-size: 2rem;
   line-height: 3.75rem;
   font-weight: bold;
-  // border: 2px solid white;
-  // border-radius: 5px;
+}
+
+.day {
+  flex: 1;
 }
 
 .controls {
@@ -341,15 +382,14 @@ img.theme-button:hover {
 
 .right-side {
   grid-area: rightside;
-  pointer-events: auto;
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
   margin-right: 1rem;
-  margin-left: auto;
   text-align: right;
   padding: 0 0;
   color: white;
+  pointer-events: auto;
 }
 
 .logo {
@@ -376,7 +416,7 @@ img.theme-button:hover {
 
 .day-button {
   margin: 1px 1px;
-  background-color: #eeeeeedd;
+  background-color: #eeeeeeee;
   // border: 1px solid white;
   font-size: 0.7rem;
   width: 1.2rem;
@@ -394,7 +434,7 @@ img.theme-button:hover {
 }
 
 .day-button.dark {
-  background-color: #222222cc;
+  background-color: #222222ee;
   color: #bbb;
   border: 1px solid black;
 }
@@ -413,8 +453,6 @@ img.theme-button:hover {
 }
 
 .help-button {
-  margin-bottom: 0.25rem;
-  margin-left: auto;
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
@@ -423,6 +461,7 @@ img.theme-button:hover {
   display: flex;
   text-align: center;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
+  margin: 0 0 0 auto;
   cursor: pointer;
   pointer-events: auto;
 }
@@ -445,7 +484,6 @@ img.theme-button:hover {
 .extra-buttons {
   margin-left: auto;
   margin-right: 1rem;
-  padding-bottom: 0.5rem;
   grid-area: extrabuttons;
 }
 
@@ -463,27 +501,55 @@ img.theme-button:hover {
   width: min-content;
 }
 
+.speed-label {
+  font-weight: bold;
+}
+
 @media only screen and (max-width: 640px) {
   .nav {
-    padding-left: 1rem;
-  }
-
-  #help-dialog {
-    padding: 0 0;
-    margin: 3rem 1rem 5rem 1rem;
+    padding: 0rem 0.5rem;
   }
 
   .right-side {
     margin-right: 1rem;
   }
 
-  .digital-clock {
-    padding: 0 0.5rem;
+  .big {
+    padding: 0 0rem;
     margin-top: 0.5rem;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     line-height: 2rem;
   }
 
+  .legend {
+    font-size: 0.4rem;
+  }
+
+  /*
+
+    #v3-app {
+    grid-template-areas:
+      'hd              hd'
+      'days     rightside'
+      'days        legend'
+      'days  extrabuttons'
+      'playback  playback';
+  }
+
+
+  .legend {
+    font-size: 0.7rem;
+    margin: auto 0 auto auto;
+    flex-direction: column;
+    text-align: right;
+    justify-content: inherit;
+    background-color: #ffffff40;
+  }
+
+  .legend.dark {
+    background-color: #00000040;
+  }
+  */
   .extra-buttons {
     margin-right: 1rem;
   }

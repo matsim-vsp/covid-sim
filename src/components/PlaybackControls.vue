@@ -8,8 +8,8 @@
 
   .buttons
     .playpause(@click='toggleSimulation')
-      i.playback-button.fa.fa-1x.fa-pause(v-if="state.isRunning")
-      i.playback-button.fa.fa-1x.fa-play(v-else)
+      i.button-icon.fa.fa-1x.fa-pause(v-if="state.isRunning")
+      i.button-icon.fa.fa-1x.fa-play(v-else)
 
 </template>
 
@@ -104,15 +104,17 @@ export default class VueComponent extends Vue {
 
 #vue-component {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .slider {
-  margin-right: 1rem;
+  margin: auto 0;
+  flex: 1;
+  font-weight: bold;
 }
 
 .buttons {
-  margin: 0.25rem auto 0 auto;
+  margin: 0 0 0 2rem;
 }
 
 .playpause {
@@ -123,32 +125,18 @@ export default class VueComponent extends Vue {
   background-color: $themeColor;
   display: flex;
   text-align: center;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
+  // box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
   cursor: pointer;
   pointer-events: auto;
 }
 
 .playpause:hover {
-  background-color: $themeColor;
+  background-color: #39a8f1;
   border: 2px solid white;
 }
 
-.playback-button {
+.button-icon {
   margin: auto auto;
-}
-
-#vue-component {
-  display: flex;
-  flex-direction: row;
-}
-
-.slider {
-  flex: 1;
-  margin: auto 0rem;
-}
-
-.buttons {
-  margin: 0.25rem 0 0 2rem;
 }
 
 @media only screen and (max-width: 640px) {

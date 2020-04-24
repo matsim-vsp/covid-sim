@@ -10,7 +10,7 @@ import ZipLoader from 'zip-loader'
 import * as THREE from 'three'
 
 import store from '@/store'
-import { Agent, ColorScheme, ColorSet, Infection, Health } from '@/Interfaces'
+import { Agent, ColorScheme, ColorSet, Infection, Health, DARK_MODE, LIGHT_MODE } from '@/Globals'
 import AgentGeometry from './AgentGeometry'
 import EventBus from '@/EventBus.vue'
 
@@ -25,29 +25,14 @@ export default class AnimationView extends Vue {
   private timeFactor = 600.0
   private timeDirection = 1
 
-  private vertexShader = require('./vertexShader.vert').default
-  private fragmentShader = require('./fragmentShader.frag').default
+  private vertexShader = require('./shaderVert.vert').default
+  private fragmentShader = require('./shaderFrag.frag').default
 
   private networkFilename = 'network.zip'
 
-  private lightMode: ColorSet = {
-    background: 0xccccc4,
-    links: 0xffffff,
-    susceptible: 0x999900,
-    infectedButNotContagious: 0x0077ff,
-    contagious: 0xbb0044,
-  }
-
-  private darkMode: ColorSet = {
-    background: 0x181518,
-    links: 0x445577,
-    susceptible: 0xbbbb44,
-    infectedButNotContagious: 0x00ffff,
-    contagious: 0xff2299,
-  }
   private state = store.state
 
-  private colors = this.state.colorScheme == ColorScheme.DarkMode ? this.darkMode : this.lightMode
+  private colors = this.state.colorScheme == ColorScheme.DarkMode ? DARK_MODE : LIGHT_MODE
 
   // keep track of time - current time in the simulation itself
   private simulationTime = 0
@@ -77,22 +62,6 @@ export default class AnimationView extends Vue {
   private geomBig = new THREE.CircleBufferGeometry(300, 30)
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
-
-  private yellow = new THREE.MeshBasicMaterial({ color: this.colors.susceptible })
-  /*
-
-  private red = new THREE.MeshBasicMaterial({
-    color: this.colors.contagious,
-    transparent: true,
-    opacity: 0.8,
-  })
-
-  private cyan = new THREE.MeshBasicMaterial({
-    color: this.colors.infectedButNotContagious,
-    transparent: true,
-    opacity: 0.8,
-  })
-  */
 
   private xRange = [1e25, -1e25]
   private yRange = [1e25, -1e25]
@@ -145,20 +114,22 @@ export default class AnimationView extends Vue {
 
   @Watch('state.colorScheme')
   private switchColorScheme(scheme: ColorScheme) {
-    this.colors = scheme == ColorScheme.LightMode ? this.lightMode : this.darkMode
+    this.colors = scheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
 
     // background
     this.scene.background = new THREE.Color(this.colors.background)
 
     // agents
     if (this.agentMaterial) {
-      this.agentMaterial.uniforms['colorSusceptible'].value = new THREE.Color(
-        this.colors.susceptible
-      )
-      this.agentMaterial.uniforms['colorInfectedButNotContagious'].value = new THREE.Color(
+      this.agentMaterial.uniforms['cSusceptible'].value = new THREE.Color(this.colors.susceptible)
+      this.agentMaterial.uniforms['cInfectedButNotContagious'].value = new THREE.Color(
         this.colors.infectedButNotContagious
       )
-      this.agentMaterial.uniforms['colorContagious'].value = new THREE.Color(this.colors.contagious)
+      this.agentMaterial.uniforms['cContagious'].value = new THREE.Color(this.colors.contagious)
+      this.agentMaterial.uniforms['cSymptomatic'].value = new THREE.Color(this.colors.symptomatic)
+      this.agentMaterial.uniforms['cSeriouslyIll'].value = new THREE.Color(this.colors.seriouslyIll)
+      this.agentMaterial.uniforms['cCritical'].value = new THREE.Color(this.colors.critical)
+      this.agentMaterial.uniforms['cRecovered'].value = new THREE.Color(this.colors.recovered)
     }
 
     // road network
@@ -253,11 +224,6 @@ export default class AnimationView extends Vue {
 
     this.linkMaterial.dispose()
 
-    /*
-    this.yellow.dispose()
-    this.red.dispose()
-    this.cyan.dispose()
-    */
     this.geomSmall.dispose()
     this.geomBig.dispose()
     this.scene.dispose()
@@ -341,7 +307,6 @@ export default class AnimationView extends Vue {
   private async loadAgents() {
     console.log('loading agents and infections')
 
-    // const dayString = this.day ? ('00' + this.day).slice(-3) : '004'
     const zpath = this.publicPath + 'v3-anim/trips.json'
 
     console.log(zpath)
@@ -377,7 +342,7 @@ export default class AnimationView extends Vue {
   private async updateAgentAttributesForDay(day: number) {
     console.log('loading infections for day', day)
 
-    const dayString = this.day ? ('00' + this.day).slice(-3) : '000'
+    const dayString = ('00' + this.day).slice(-3)
     const zpath = this.publicPath + 'v3-anim/' + dayString + '-infections.json'
 
     console.log(zpath)
@@ -473,10 +438,23 @@ export default class AnimationView extends Vue {
         uniforms: {
           simulationTime: { value: 0.0 },
           colorLinks: { value: new THREE.Color(this.colors.links) },
-          colorSusceptible: { value: new THREE.Color(this.colors.susceptible) },
-          colorContagious: { value: new THREE.Color(this.colors.contagious) },
-          colorInfectedButNotContagious: {
+
+          cSusceptible: { value: new THREE.Color(this.colors.susceptible) },
+          cContagious: { value: new THREE.Color(this.colors.contagious) },
+          cInfectedButNotContagious: {
             value: new THREE.Color(this.colors.infectedButNotContagious),
+          },
+          cSymptomatic: {
+            value: new THREE.Color(this.colors.symptomatic),
+          },
+          cSeriouslyIll: {
+            value: new THREE.Color(this.colors.seriouslyIll),
+          },
+          cCritical: {
+            value: new THREE.Color(this.colors.critical),
+          },
+          cRecovered: {
+            value: new THREE.Color(this.colors.recovered),
           },
         },
         vertexShader: this.vertexShader,
@@ -526,10 +504,12 @@ export default class AnimationView extends Vue {
     this.cameraControls.enableZoom = true
     this.cameraControls.enableRotate = false
 
-    this.camera.position.set(0, 0, 2000)
+    this.camera.position.set(0, 0, 1500)
     this.camera.lookAt(0, 0, -1)
 
     this.cameraControls.update()
+
+    this.renderer.render(this.scene, this.camera)
 
     console.log('--init complete!')
   }

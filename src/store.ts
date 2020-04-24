@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { ColorScheme } from '@/Interfaces'
+import { ColorScheme } from '@/Globals'
 
 Vue.use(Vuex)
 

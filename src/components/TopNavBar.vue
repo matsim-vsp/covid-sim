@@ -37,7 +37,7 @@ export default {
 
 #nav a {
   font-weight: bold;
-  color: #043b26;
+  color: $bannerHighlight;
 }
 
 #nav a.router-link-active.home {

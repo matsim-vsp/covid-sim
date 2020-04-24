@@ -1,12 +1,10 @@
-<img src="./images/banner.jpg" height=50 >
+<img src="./images/banner.jpg" >
 
 ### Episim: COVID-19 virus spreading dynamics
 
-This animation illustrates how the [MATSIM-Episim model](https://matsim-vsp.github.io) simulates the spread of COVID-19 disease through Berlin, Germany and the surrounding area.
+This animation illustrates the [MATSIM-Episim model](https://matsim-vsp.github.io) as it simulates the spread of COVID-19 disease through **Berlin, Germany** and the surrounding area.
 
-### What am I looking at?
-
-Each colored dot represents a person as they go about their day. The colors show their disease status, as they contract and develop the disease in stages:
+Each dot depicts a person, going about their day. The colors represent their disease status:
 
 <div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
 
@@ -32,11 +30,18 @@ Each colored dot represents a person as they go about their day. The colors show
 
 </div>
 
-You can select **different days** to see how the population's health shifts over time, or watch the daily interactions as each individual day progresses and people perform their daily activities and travel.
+You can select different days to see how the population's health shifts over time.
 
 This is a "Base Case" simulation for illustrative purposes. It shows what would have happened in Berlin if there had been no social distancing measures, no closing of schools and workplaces, etc.
 
 This illustration shows only a small sample of the total tripmaking in Berlin; while MATSim-Episim can model each agent individually, it is too much data to show on one screen in disaggregate form.
+
+### Interesting things to explore
+
+- By day 14, new infections <span style="background-color: rgb(48,230,240)">&nbsp;&nbsp;&nbsp;&nbsp;</span> are quite noticeable throughout Berlin, and by day 18 they are everywhere in the city
+
+- By day 33, many recovered people <span style="background-color: rgb(30,120,70)">&nbsp;&nbsp;&nbsp;&nbsp;</span> are apparent
+- By day 40, most of the new infections occur far outside the central urban area of Berlin.
 
 ### How does the simulation work?
 

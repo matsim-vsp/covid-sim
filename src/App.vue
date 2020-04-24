@@ -1,6 +1,6 @@
 <template lang="pug">
 #app
-  my-nav-bar#nav
+  my-nav-bar#nav(:style="{paddingLeft: state.isFullScreen ? '0rem':''}" )
 
   router-view
 
@@ -116,5 +116,9 @@ h3 {
 .footer img {
   margin: 1rem auto;
   padding: 0 1rem;
+}
+
+.vue-slider-rail {
+  background-color: green;
 }
 </style>

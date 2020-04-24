@@ -1,7 +1,7 @@
 // Custom GLSL Shader for 1000x performance, we hope!
 import * as THREE from 'three'
 
-import { Agent, Infection } from '@/Interfaces'
+import { Agent, Infection } from '@/Globals'
 
 class AgentGeometry extends THREE.BufferGeometry {
   private midX: number
