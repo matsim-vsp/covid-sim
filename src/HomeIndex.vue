@@ -140,13 +140,12 @@ export default {
   margin-bottom: 0rem;
   font-size: 1.6rem;
   background-color: #1e1f2c;
-  width: max-content;
+  line-height: 1.6rem;
 }
 
 .banner h3 {
   font-size: 1.3rem;
   font-weight: normal;
-  margin-top: 0px;
   margin-bottom: 0;
   line-height: 1.3rem;
   padding-bottom: 0.25rem;
@@ -212,8 +211,9 @@ a {
 
 .headline {
   font-size: 2rem;
+  line-height: 2.7rem;
   padding: 1rem 0;
-  color: $bannerHighlight;
+  color: $themeColor;
 }
 
 @media only screen and (max-width: 640px) {
@@ -228,6 +228,12 @@ a {
 
   .colophon {
     display: none;
+  }
+
+  .headline {
+    padding: 0rem 0rem 1rem 0rem;
+    font-size: 1.5rem;
+    line-height: 1.8rem;
   }
 }
 </style>
