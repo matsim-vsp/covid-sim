@@ -52,8 +52,12 @@ html {
   overflow-y: auto;
 }
 
+canvas {
+  display: block;
+}
+
 html {
-  background-color: #222;
+  background-color: #ccc;
 }
 
 h1,
