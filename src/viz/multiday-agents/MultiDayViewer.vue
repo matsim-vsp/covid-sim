@@ -478,8 +478,10 @@ img.theme-button:hover {
   }
 
   .digital-clock {
+    padding: 0 0.5rem;
     margin-top: 0.5rem;
-    font-size: 2rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 
   .extra-buttons {
