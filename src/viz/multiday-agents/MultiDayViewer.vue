@@ -18,8 +18,16 @@
 
   .side-section
 
+    .day-switchers
+      .day-button.switchers(:class="{dark: isDarkMode}"
+                   @click="dayStep(-1)" title="Previous day")
+                   i.fa.fa-1x.fa-arrow-left
+      .day-button.switchers(:class="{dark: isDarkMode}"
+                   @click="dayStep(1)" title="Next day")
+                   i.fa.fa-1x.fa-arrow-right
+
     .day-button-grid
-      .day-button(v-for="day of Array.from(Array(91).keys()).slice(1)"
+      .day-button(v-for="day of Array.from(Array(numDays+1).keys()).slice(1)"
                   :style="{borderBottom: newDay == day-1 ? 'none' : '2px solid ' + colorLookup(day-1)}"
                   :class="{currentday: newDay == day-1, dark: isDarkMode}"
                   :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
@@ -243,6 +251,16 @@ export default class VueComponent extends Vue {
     this.newDay = day
   }
 
+  private dayStep(step: number) {
+    let day = this.newDay + step
+
+    // don't be stupid
+    if (day < 0) return
+    if (day > this.numDays) return
+
+    this.switchDay(day)
+  }
+
   @Watch('$route') routeChanged(to: Route, from: Route) {
     console.log({ to })
     if (to.hash) {
@@ -344,7 +362,7 @@ img.theme-button:hover {
   display: flex;
   flex-direction: row;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background-color: #ddc;
 }
 
@@ -416,12 +434,12 @@ img.theme-button:hover {
 
 .side-section {
   grid-area: days;
-  margin: 0 auto auto 0;
-  padding: 0rem 1rem 0 0.75rem;
+  margin: 0.6rem auto auto 0.5rem;
+  padding: 0rem 1rem 0 0.5rem;
 }
 
 .day-button-grid {
-  margin: 1rem auto 0 0;
+  margin: 0.5rem auto 0 0;
   margin-right: auto;
   display: flex;
   flex-wrap: wrap;
@@ -520,6 +538,19 @@ img.theme-button:hover {
   font-weight: bold;
 }
 
+.day-switchers {
+  display: flex;
+  flex-direction: row;
+}
+
+.switchers {
+  margin-right: 0.3rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding-top: 0.2rem;
+  font-size: 1rem;
+}
+
 @media only screen and (max-width: 640px) {
   .nav {
     padding: 0rem 0.5rem;
@@ -552,31 +583,10 @@ img.theme-button:hover {
     font-size: 0.7rem;
   }
 
-  /*
-
-    #v3-app {
-    grid-template-areas:
-      'hd              hd'
-      'days     rightside'
-      'days        legend'
-      'days  extrabuttons'
-      'playback  playback';
+  .side-section {
+    margin-left: 0;
   }
 
-
-  .legend {
-    font-size: 0.7rem;
-    margin: auto 0 auto auto;
-    flex-direction: column;
-    text-align: right;
-    justify-content: inherit;
-    background-color: #ffffff40;
-  }
-
-  .legend.dark {
-    background-color: #00000040;
-  }
-  */
   .extra-buttons {
     margin-right: 1rem;
   }
@@ -604,7 +614,17 @@ img.theme-button:hover {
 
   .day-button.currentday {
     color: transparent;
-    background-color: $themeColor;
+    background-color: white;
+  }
+
+  .switchers {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: black;
+  }
+  .switchers.dark {
+    color: white;
+    background-color: #223;
   }
 }
 </style>

@@ -273,7 +273,7 @@ export default class AnimationView extends Vue {
   private networkLayers: THREE.LineSegments[] = []
 
   private async networkLayerAdder(nodes: any[], netlinks: any[], index: number) {
-    const batchSize = 10000
+    const batchSize = 20000
 
     if (index > netlinks.length) {
       this.$store.commit('setStatusMessage', '')

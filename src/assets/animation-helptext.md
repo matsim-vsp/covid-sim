@@ -16,16 +16,16 @@ Each dot depicts a person, going about their day. The colors represent their dis
 <p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(200,0,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Contagious</p>
 
-<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(255,0,255)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(255,85,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Showing Symptoms</p>
 
-<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(128,0,128)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(110,40,120)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Seriously Sick</p>
 
-<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(50,50,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(20,20,20)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Critical</p>
 
-<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(160,250,160)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(26,122,44)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Recovered</p>
 
 </div>
