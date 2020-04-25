@@ -163,7 +163,10 @@ export default class AnimationView extends Vue {
 
     // and let er go again
     this.clock.start()
-    requestAnimationFrame(this.animate)
+
+    // requestAnimationFrame(this.animate)
+    // ^^^^ this was a bug! added an extra animate() call per frame, every
+    // time user switched days.  Compounded misery!
   }
 
   private mounted() {
