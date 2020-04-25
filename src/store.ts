@@ -6,7 +6,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    message: 'loading',
+    statusMessage: 'loading',
+    clock: '',
     isRunning: true,
     isFullScreen: false,
     isShowingHelp: false,
@@ -23,8 +24,11 @@ export default new Vuex.Store({
     setFullScreen(state, value: boolean) {
       state.isFullScreen = value
     },
-    setMessage(state, value: string) {
-      state.message = value
+    setStatusMessage(state, value: string) {
+      state.statusMessage = value
+    },
+    setClock(state, value: string) {
+      state.clock = value
     },
     setSimulation(state, value: boolean) {
       state.isRunning = value

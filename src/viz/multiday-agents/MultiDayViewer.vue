@@ -12,9 +12,9 @@
 
   .nav
 
-    p.big.day Berlin: Outbreak Day {{ newDay+1 }}
-
-    p.big.time {{ state.message }}
+    p.big.time(v-if="!state.statusMessage") Berlin: Outbreak Day {{ newDay+1 }}
+    p.big.day {{ state.statusMessage }}
+    p.big.time {{ state.clock }}
 
   .side-section
 
@@ -47,7 +47,9 @@
     img.theme-button(src="@/assets/images/darkmode.jpg" @click='rotateColors' title="dark/light theme")
 
   .legend(:class="{dark: isDarkMode}")
-    p(v-for="status in legendBits" :key="status.label" :style="{color: status.color}") {{ status.label }}
+    p(:style="{color: isDarkMode ? '#fff' : '#000'}") Legend:
+    .legend-items
+      p(v-for="status in legendBits" :key="status.label" :style="{color: status.color}") {{ status.label }}
 
 </template>
 
@@ -99,7 +101,6 @@ export default class VueComponent extends Vue {
     const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
 
     this.legendBits = [
-      { label: 'Legend:', color: theme.text },
       { label: 'uninfected', color: theme.susceptible },
       { label: 'infected', color: theme.infectedButNotContagious },
       { label: 'contagious', color: theme.contagious },
@@ -332,13 +333,21 @@ img.theme-button:hover {
 }
 
 .legend {
+  margin-left: 1rem;
   grid-area: legend;
   display: flex;
   flex-direction: row;
   font-weight: bold;
   font-size: 0.9rem;
-  justify-content: space-evenly;
   background-color: #ddc;
+}
+
+.legend-items {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  margin-left: 2rem;
+  justify-content: space-evenly;
 }
 
 .legend.dark {
@@ -522,7 +531,19 @@ img.theme-button:hover {
   }
 
   .legend {
-    font-size: 0.4rem;
+    margin-left: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    font-size: 0.7rem;
+  }
+
+  .legend-items {
+    flex: 1;
+    margin-left: 2rem;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, auto);
+    font-size: 0.7rem;
   }
 
   /*

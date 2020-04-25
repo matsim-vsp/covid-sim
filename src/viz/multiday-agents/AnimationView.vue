@@ -140,10 +140,14 @@ export default class AnimationView extends Vue {
     this.linkMaterial.dispose()
     this.linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
 
-    if (this.networkMesh) {
-      this.networkMesh = new THREE.LineSegments(this.networkMesh.geometry, this.linkMaterial)
-      this.networkMesh.name = 'network'
-      this.scene.add(this.networkMesh)
+    for (const networkLayer of this.networkLayers) {
+      const name = networkLayer.name
+      const mesh = this.scene.getObjectByName(name)
+      if (mesh) this.scene.remove(mesh)
+
+      const newLayer = new THREE.LineSegments(networkLayer.geometry, this.linkMaterial)
+      newLayer.name = name
+      this.scene.add(newLayer)
     }
   }
 
@@ -218,9 +222,12 @@ export default class AnimationView extends Vue {
 
     // Some types of THREE objects must be manually destroyed
     // https://threejs.org/docs/index.html#manual/en/introduction/How-to-dispose-of-objects
-    if (this.networkMesh) this.networkMesh.geometry.dispose()
     if (this.agentMaterial) this.agentMaterial.dispose()
     if (this.agentGeometry) this.agentGeometry.dispose()
+
+    for (const networkLayer of this.networkLayers) {
+      networkLayer.geometry.dispose()
+    }
 
     this.linkMaterial.dispose()
 
@@ -244,14 +251,12 @@ export default class AnimationView extends Vue {
   private async setup() {
     this.initScene()
 
-    this.$store.commit('setMessage', 'loading agents')
+    this.$store.commit('setStatusMessage', 'loading agents')
 
     await this.loadAgents()
 
     // this can happen in the background
-    await this.addNetworkToScene()
-
-    this.$store.commit('setMessage', '')
+    this.addNetworkToScene()
   }
 
   private startSimulation() {
@@ -265,27 +270,23 @@ export default class AnimationView extends Vue {
     }
   }
 
-  private networkMesh?: THREE.LineSegments
+  private networkLayers: THREE.LineSegments[] = []
 
-  private async addNetworkToScene() {
-    console.log('loading network', this.networkFilename)
-    this.$store.commit('setMessage', 'loading network')
-    // load zipfile
-    const zipLoader = new ZipLoader(this.publicPath + this.networkFilename)
-    await zipLoader.load()
+  private async networkLayerAdder(nodes: any[], netlinks: any[], index: number) {
+    const batchSize = 10000
 
-    // extract json
-    const network = zipLoader.extractAsJSON('network.json') // extractAsText('network.json')
-
-    // eslint-disable-next-line
-    const nodes: any = {}
-    const links: THREE.BufferGeometry[] = []
-
-    for (const node of network.nodes) {
-      nodes[node.node_id] = { x: node.x - this.midpointX, y: node.y - this.midpointY }
+    if (index > netlinks.length) {
+      this.$store.commit('setStatusMessage', '')
+      this.startSimulation()
+      return
     }
 
-    for (const link of network.links) {
+    const links: THREE.BufferGeometry[] = []
+    const start = index
+    const end = index + batchSize > netlinks.length ? netlinks.length : index + batchSize
+
+    for (let i = start; i < end; i++) {
+      const link = netlinks[i]
       const from = new THREE.Vector3(nodes[link.from_node].x, nodes[link.from_node].y, -5)
       const to = new THREE.Vector3(nodes[link.to_node].x, nodes[link.to_node].y, -5)
       const segment = new THREE.BufferGeometry().setFromPoints([from, to])
@@ -294,14 +295,44 @@ export default class AnimationView extends Vue {
     }
 
     const mergedLines = BufferGeometryUtils.mergeBufferGeometries(links)
-    this.networkMesh = new THREE.LineSegments(mergedLines, this.linkMaterial)
+    const networkMesh = new THREE.LineSegments(mergedLines, this.linkMaterial)
 
-    this.networkMesh.name = 'network'
-    this.scene.add(this.networkMesh)
+    networkMesh.name = 'network' + index
 
+    this.scene.add(networkMesh)
+    if (this.camera) this.renderer.render(this.scene, this.camera)
+
+    this.networkLayers.push(networkMesh)
     mergedLines.dispose()
 
-    this.startSimulation()
+    // start the next batch. 1ms timeout required so UI doesn't freeze
+    const nextIndex = index + batchSize
+    setTimeout(() => {
+      this.networkLayerAdder(nodes, netlinks, nextIndex)
+    }, 1)
+  }
+
+  private async addNetworkToScene() {
+    console.log('loading network', this.networkFilename)
+    this.networkLayers = []
+
+    // load zipfile
+    const zipLoader = new ZipLoader(this.publicPath + this.networkFilename)
+    await zipLoader.load()
+
+    // extract json
+    const network = zipLoader.extractAsJSON('network.json')
+
+    // eslint-disable-next-line
+    const nodes: any = {}
+    for (const node of network.nodes) {
+      nodes[node.node_id] = { x: node.x - this.midpointX, y: node.y - this.midpointY }
+    }
+
+    console.log('network has links:', network.links.length)
+
+    this.networkLayerAdder(nodes, network.links, 0)
+    // this.startSimulation()
   }
 
   private async loadAgents() {
@@ -472,7 +503,8 @@ export default class AnimationView extends Vue {
     if (agentLayer) this.scene.remove(agentLayer)
 
     this.scene.add(points)
-    // this.agentCache[this.day] = this.agentList
+    if (this.camera) this.renderer.render(this.scene, this.camera)
+    this.$store.commit('setStatusMessage', 'loading network')
 
     console.log('added points')
   }
@@ -528,7 +560,7 @@ export default class AnimationView extends Vue {
     const hour = Math.floor(this.simulationTime / 3600)
     const minute = Math.floor(this.simulationTime / 60) % 60
     this.$store.commit(
-      'setMessage',
+      'setClock',
       (hour < 10 ? '0' : '') + hour + (minute < 10 ? ':0' : ':') + minute
     )
   }
