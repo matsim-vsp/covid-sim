@@ -171,6 +171,13 @@ export default class VueComponent extends Vue {
       'nCritical',
       'nRecovered',
     ]
+
+    const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+
+    // loop for each row in infection summary data
+    // -- which doesn't have for day 0! But obviously no one is infected yet
+    this.dayColors[0] = theme.infectedButNotContagious
+
     for (const row of dailyTotals) {
       let count = 0
       let largestCol = 'nix'
@@ -182,33 +189,32 @@ export default class VueComponent extends Vue {
         }
       }
 
-      const zeroDay = row.day - 1
-      const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+      const day = row.day
 
       switch (largestCol) {
         case 'nSusceptible':
-          this.dayColors[zeroDay] = theme.susceptible
+          this.dayColors[day] = theme.susceptible
           break
         case 'nInfectedButNotContagious':
-          this.dayColors[zeroDay] = theme.infectedButNotContagious
+          this.dayColors[day] = theme.infectedButNotContagious
           break
         case 'nContagious':
-          this.dayColors[zeroDay] = theme.contagious
+          this.dayColors[day] = theme.contagious
           break
         case 'nShowingSymptoms':
-          this.dayColors[zeroDay] = theme.symptomatic
+          this.dayColors[day] = theme.symptomatic
           break
         case 'nSeriouslySick':
-          this.dayColors[zeroDay] = theme.seriouslyIll
+          this.dayColors[day] = theme.seriouslyIll
           break
         case 'nCritical':
-          this.dayColors[zeroDay] = theme.critical
+          this.dayColors[day] = theme.critical
           break
         case 'nRecovered':
-          this.dayColors[zeroDay] = theme.recovered
+          this.dayColors[day] = theme.recovered
           break
         default:
-          this.dayColors[zeroDay] = '#dddddd'
+          this.dayColors[day] = '#dddddd'
           break
       }
     }
