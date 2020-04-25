@@ -133,6 +133,18 @@ export default class VueComponent extends Vue {
     return this.state.colorScheme === ColorScheme.DarkMode ? darkmode : lightmode
   }
 
+  private setInitialDay() {
+    // set specified day, if we got one
+    const param = '' + this.$route.query.day
+    if (param && parseInt(param) != NaN) {
+      const day = parseInt(param)
+      if (day >= 1 || day < this.numDays) {
+        this.newDay = day - 1 // stupid 0day
+        this.$nextTick()
+      }
+    }
+  }
+
   private toggleSimulation() {
     this.$store.commit('setSimulation', !this.state.isRunning)
 
@@ -143,7 +155,6 @@ export default class VueComponent extends Vue {
   }
 
   private mounted() {
-    console.log('DARK MODE:', this.isDarkMode)
     this.$store.commit('setFullScreen', true)
 
     this.showHelp = !this.state.sawAgentAnimationHelp
@@ -151,6 +162,8 @@ export default class VueComponent extends Vue {
 
     // start the sim right away if the dialog isn't showing
     this.$store.commit('setSimulation', !this.showHelp)
+
+    this.setInitialDay()
 
     // make nice colors
     this.setCubeColors()
@@ -248,6 +261,10 @@ export default class VueComponent extends Vue {
   }
 
   private switchDay(day: number) {
+    const param = '' + (day + 1)
+    this.$router.replace({ query: { day: param } })
+    this.$nextTick()
+
     this.newDay = day
   }
 
@@ -256,11 +273,12 @@ export default class VueComponent extends Vue {
 
     // don't be stupid
     if (day < 0) return
-    if (day > this.numDays) return
+    if (day >= this.numDays) return
 
     this.switchDay(day)
   }
 
+  /*
   @Watch('$route') routeChanged(to: Route, from: Route) {
     console.log({ to })
     if (to.hash) {
@@ -269,6 +287,7 @@ export default class VueComponent extends Vue {
       this.newDay = day
     }
   }
+  */
 
   private toggleLoaded(loaded: boolean) {
     this.isLoaded = loaded

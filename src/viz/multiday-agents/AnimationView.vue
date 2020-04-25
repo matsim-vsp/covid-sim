@@ -169,11 +169,25 @@ export default class AnimationView extends Vue {
   private mounted() {
     this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
-    this.setup()
+    this.setInitialClockTime()
+    this.setupSimulation()
     this.setupDragListener()
 
     window.addEventListener('resize', this.onWindowResize, false)
     document.addEventListener('visibilitychange', this.handleVisibilityChange, false)
+  }
+
+  private setInitialClockTime() {
+    // set specified time, if we got one
+    const secondsParam = '' + this.$route.query.start
+    if (secondsParam && parseInt(secondsParam) != NaN) {
+      const seconds = parseInt(secondsParam)
+      if (seconds >= 0 || seconds < 86400) {
+        this.simulationTime = seconds
+        this.setVisibleClock()
+        this.$nextTick()
+      }
+    }
   }
 
   private handleVisibilityChange() {
@@ -248,7 +262,7 @@ export default class AnimationView extends Vue {
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
   }
 
-  private async setup() {
+  private async setupSimulation() {
     this.initScene()
 
     this.$store.commit('setStatusMessage', 'loading agents')
