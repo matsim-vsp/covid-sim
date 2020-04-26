@@ -23,8 +23,7 @@ const routes = [
   {
     path: '/v3',
     name: 'V3',
-    component: () =>
-      import(/* webpackChunkName: "Shader" */ '@/viz/multiday-agents/MultiDayViewer.vue'),
+    component: () => import(/* webpackChunkName: "V3" */ '@/runs/v3/V3.vue'),
   },
   {
     path: '/v4',
@@ -63,12 +62,13 @@ const routes = [
     redirect: '/v7/:city',
   },
   {
-    path: '/shader',
-    redirect: '/v3',
+    path: '/multiday',
+    component: () =>
+      import(/* webpackChunkName: "multiday" */ '@/viz/multiday-agents/MultiDayViewer.vue'),
   },
   {
-    path: '/multiday',
-    redirect: '/v3',
+    path: '/shader',
+    redirect: '/multiday',
   },
   {
     // catch-all back to home page
