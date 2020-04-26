@@ -34,6 +34,7 @@ disease_code = {
     "recovered": 6,
 }
 
+# and the other way
 code_disease = [
     "susceptible",
     "infectedButNotContagious",
@@ -44,7 +45,9 @@ code_disease = [
     "recovered",
 ]
 
-
+# Each person can have up to three disease events per day.
+# - If person has no disease codes, 0.0 means use yesterday's status
+# -1.0 signifies no further disease events for this day.
 def build_disease_codes(diseaseList):
     if len(diseaseList) == 0:
         return [0.0, -1.0, -1.0]
@@ -53,7 +56,7 @@ def build_disease_codes(diseaseList):
         return [diseaseList[0], -1.0, -1.0]
 
     if len(diseaseList) == 2:
-        return [diseaseList[0], agent.dtime[1], -1.0]
+        return [diseaseList[0], diseaseList[1], -1.0]
 
     return [diseaseList[0], diseaseList[1], diseaseList[2]]
 
