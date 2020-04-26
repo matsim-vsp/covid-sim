@@ -227,7 +227,7 @@ export default class AnimationView extends Vue {
     this.networkMesh.name = 'network'
     this.scene.add(this.networkMesh)
 
-    this.$store.commit('setStatusMessage', 'done')
+    this.$store.commit('setStatusMessage', '')
     this.initScene()
 
     // let UI know we're about to begin!
@@ -379,7 +379,7 @@ export default class AnimationView extends Vue {
       const hour = Math.floor(elapsedSeconds / 3600)
       const minute = Math.floor(elapsedSeconds / 60) % 60
       this.$store.commit(
-        'setStatusMessage',
+        'setClock',
         (hour < 10 ? '0' : '') + hour + (minute < 10 ? ':0' : ':') + minute
       )
       this.nextClockUpdateTime += 300

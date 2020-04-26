@@ -5,7 +5,7 @@
   #nav
     p: router-link(to=".") Infection Traces Example
     p &bullet;
-    p.my-center {{ state.message }}
+    p.my-center {{ state.message }} {{ state.clock }}
 
     button.button.is-white.is-outlined.is-small(
       v-if="isLoaded"

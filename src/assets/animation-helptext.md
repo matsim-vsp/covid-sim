@@ -11,7 +11,7 @@ Each dot depicts a person, going about their day. The colors represent their dis
 <p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(200,200,0)">&nbsp;&nbsp;&nbsp;&nbsp;</span> Susceptible and healthy</p>
 
 <p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(48,255,255)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    Infected but not contagious</p>
+    Latently Infected</p>
 
 <p style="margin-bottom: 0.4rem;"><span style="background-color: rgb(200,0,50)">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     Contagious</p>

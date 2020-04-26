@@ -84,7 +84,7 @@ import { Route } from 'vue-router'
 export default class VueComponent extends Vue {
   private newDay: number = 0
 
-  private numDays = 90
+  private numDays = 18
   private tenDaySets = Array.from(Array(Math.ceil(this.numDays / 10)).keys()) // [0,9]
 
   private state = store.state
@@ -109,8 +109,8 @@ export default class VueComponent extends Vue {
     const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
 
     this.legendBits = [
-      { label: 'uninfected', color: theme.susceptible },
-      { label: 'infected', color: theme.infectedButNotContagious },
+      { label: 'susceptible', color: theme.susceptible },
+      { label: 'latently infected', color: theme.infectedButNotContagious },
       { label: 'contagious', color: theme.contagious },
       { label: 'symptomatic', color: theme.symptomatic },
       { label: 'seriously ill', color: theme.seriouslyIll },

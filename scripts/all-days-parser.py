@@ -18,7 +18,7 @@
 import matsim
 import ndjson
 
-sample_rate = 3
+sample_rate = 1
 
 # persistent memory of agent health status
 persistent = {}
