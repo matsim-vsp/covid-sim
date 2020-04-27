@@ -1,8 +1,8 @@
 ---
 city: berlin
-readme: /test-notes.md
-zip: v7-data-berlin.zip
-indfo: v7-info-berlin.txt
+readme: /masks/1/test-notes.md
+zip: /masks/1/summaries.zip
+info: /masks/1/_info.txt
 timestamp: 2020-04-22
 dayZero: 2020-02-20
 offset:

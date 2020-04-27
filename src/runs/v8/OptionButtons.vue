@@ -19,9 +19,9 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private measure!: { measure: string; title: string }
-  @Prop({ required: true }) private options!: number[]
+  @Prop({ required: true }) private options!: any[]
 
-  private value: any = 0
+  private value: string = ''
   private stops: any[] = []
 
   private showButtons = false
@@ -39,8 +39,13 @@ export default class VueComponent extends Vue {
     const experiments = []
     if (!this.options) return
 
+    let label = ''
     for (const x of this.options) {
-      let label = '' + x * 100 + '%'
+      if (isNaN(x)) {
+        label = '' + x
+      } else {
+        label = '' + x * 100 + '%'
+      }
 
       this.value = label // select first choice
       this.showButtons = true
@@ -54,9 +59,13 @@ export default class VueComponent extends Vue {
 
   @Watch('value')
   private valueChanged() {
-    let answer = this.value.substring(0, this.value.length - 1)
-    answer = parseFloat(answer) / 100.0
-    this.$emit('changed', this.measure.measure, answer)
+    if (this.value.endsWith('%')) {
+      const answer = this.value.substring(0, this.value.length - 1)
+      const v = parseFloat(answer) / 100.0
+      this.$emit('changed', this.measure.measure, v)
+    } else {
+      this.$emit('changed', this.measure.measure, this.value)
+    }
   }
 }
 </script>

@@ -46,8 +46,8 @@
             b Shift Start Date
             .variation-choices.buttons.has-addons
               button.button.is-small(v-for="offset in yaml.offset" :key="offset"
-                :class="{'is-link': plusminus === (-1 * offset), 'is-selected': plusminus === (-1 * offset)}"
-                @click="setPlusMinus(-1 * offset)") {{ strOffset(offset)}}
+                :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
+                @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
         .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
@@ -131,6 +131,7 @@ export default class VueComponent extends Vue {
 
     this.city = this.yaml.city
     this.dayZero = this.yaml.dayZero
+    this.plusminus = this.yaml.offset[0]
 
     await this.loadInfoTxt()
     this.loadZipData()
@@ -235,7 +236,9 @@ export default class VueComponent extends Vue {
   }
 
   private calendarForSimDay(day: number) {
-    return 'Day ' + day
+    if (day >= 0) return 'Day ' + day
+
+    return 'General Options'
   }
 
   private async loadZipData() {
@@ -243,13 +246,15 @@ export default class VueComponent extends Vue {
 
     console.log('loadZipData:', this.city)
 
+    const filepath = this.public_svn + this.runId + '/summaries-filtered.zip'
+
     if (this.zipCache[this.city]) {
       // check cache first!
       console.log('using cached zip for!', this.city)
       this.zipLoader = this.zipCache[this.city]
     } else {
       // load the zip from file
-      const filepath = this.public_svn + this.runId + '/summaries_filtered.zip'
+
       console.log('---loading zip:', filepath)
 
       this.zipLoader = new ZipLoader(filepath)
@@ -287,7 +292,6 @@ export default class VueComponent extends Vue {
     const csvLow: any[] = await this.loadCSV(this.currentRun)
 
     // zip might not yet be loaded
-    console.log({ csvLow })
     if (csvLow.length === 0) return
 
     const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
@@ -352,7 +356,7 @@ export default class VueComponent extends Vue {
     if (!currentRun.RunId) return []
     if (!this.zipLoader) return []
 
-    const filename = currentRun.RunId + '.infections.csv'
+    const filename = currentRun.RunId + '.infections.txt.csv'
     console.log('Extracting', filename)
 
     let text = this.zipLoader.extractAsText(filename)
