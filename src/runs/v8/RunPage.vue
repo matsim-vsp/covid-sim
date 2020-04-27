@@ -24,8 +24,6 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import BatteryViewer from './BatteryViewer.vue'
 import { RunYaml } from '@/Globals'
 
-import { zipTest } from '@/ZipManager'
-
 @Component({
   components: {
     BatteryViewer,
