@@ -71,6 +71,10 @@ const routes = [
     redirect: '/multiday',
   },
   {
+    path: '/run/:runId/:city?',
+    component: () => import(/* webpackChunkName: "runframe" */ '@/runs/v8/RunPage.vue'),
+  },
+  {
     // catch-all back to home page
     path: '*',
     redirect: '/',

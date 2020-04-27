@@ -43,6 +43,26 @@ export interface Trip {
   status?: string
 }
 
+export interface RunYaml {
+  city: string
+  info: string
+  readme: string
+  zip: string
+  offset: number[]
+  dayZero: string
+  timestamp?: string
+  optionGroups: {
+    day: number
+    heading: string
+    subheading?: string
+    measures: {
+      measure: string
+      title: string
+      options?: number[]
+    }[]
+  }[]
+}
+
 export const LIGHT_MODE: ColorSet = {
   text: '#000',
   background: '#ccccc4',
