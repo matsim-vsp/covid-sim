@@ -18,8 +18,8 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
   components: {},
 })
 export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-  @Prop() private measure!: any
+  @Prop({ required: true }) private state!: any
+  @Prop({ required: true }) private measure!: any
 
   private value: any = 0
   private stops: any[] = [0, 1000]
@@ -44,6 +44,10 @@ export default class SectionViewer extends Vue {
   }
 
   private mounted() {
+    this.updateOptions()
+  }
+
+  private updateOptions() {
     const experiments = []
 
     for (const x of this.state.measures[this.measure]) {

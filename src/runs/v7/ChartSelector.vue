@@ -23,7 +23,7 @@
               p.subhead Percent still occurring (%)
               .myslider(v-if="Object.keys(state.measures).length"
                 v-for="measure in ['remainingFractionWork', 'remainingFractionLeisure1', 'remainingFractionShoppingBusinessErrands']"
-                :key="measure")
+                :key="'h' + measure")
                 my-slider(:measure="measure" :state="state" @changed="sliderChanged")
             .g1
               h6.title April 20:
@@ -31,7 +31,7 @@
                 | Reopening of educational facilities
               p.subhead Students returning (%):
               .myslider(v-if="Object.keys(state.measures).length"
-                v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="measure")
+                v-for="measure in ['remainingFractionKiga', 'remainingFractionPrima', 'remainingFractionSecon']" :key="'h' + measure")
                 my-slider(:measure="measure" :state="state" @changed="sliderChanged")
 
           .berlin-munich(v-else)
