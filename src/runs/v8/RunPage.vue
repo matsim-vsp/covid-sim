@@ -68,7 +68,9 @@ export default class VueComponent extends Vue {
   }
 
   private async updateNotes() {
-    const url = this.yaml.readme
+    const url = this.public_svn + this.runId + '/' + this.yaml.readme
+    console.log(url)
+
     const response = await fetch(url)
 
     if (response.status !== 200) return
