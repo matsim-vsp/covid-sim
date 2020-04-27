@@ -4,7 +4,7 @@ readme: /test-notes.md
 zip: v7-data-berlin.zip
 indfo: v7-info-berlin.txt
 timestamp: 2020-04-22
-dayZero: 2020-02-16
+dayZero: 2020-02-20
 offset:
   - -6
   - -3

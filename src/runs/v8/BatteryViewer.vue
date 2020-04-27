@@ -115,6 +115,12 @@ export default class VueComponent extends Vue {
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
+  private cityCSV: any = {
+    berlin: require('@/assets/berlin-cases.csv').default,
+    munich: require('@/assets/munich-cases.csv').default,
+    heinsberg: require('@/assets/heinsberg-cases.csv').default,
+  }
+
   @Watch('yaml') private async switchYaml() {
     console.log('GOT NEW YAML:', this.yaml.city)
     if (!this.yaml.city) return
@@ -272,7 +278,7 @@ export default class VueComponent extends Vue {
       return
     }
 
-    // load both datasets
+    // load run dataset
     const csvLow: any[] = await this.loadCSV(this.currentRun)
 
     // zip might not yet be loaded
@@ -380,7 +386,7 @@ export default class VueComponent extends Vue {
     return serieses
   }
   private async parseInfoTxt(city: string) {
-    // this.state.berlinCases = this.prepareObservedData(newCity)
+    this.observedCases = this.prepareObservedData(this.city)
 
     const filepath = this.publicPath + 'v7-info-' + city + '.txt'
     const parsed = await this.parseCSVFile(filepath)
@@ -388,10 +394,7 @@ export default class VueComponent extends Vue {
   }
 
   private prepareObservedData(newCity: string) {
-    // Our simulation start date is 2020.02.16 based on school closures 13.March
-    // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
-    // Thus we begin Berlin data with 2 cases.
-    const csvContents = 'a' // this.cityCSV[newCity]
+    const csvContents = this.cityCSV[newCity]
 
     const data = Papa.parse(csvContents, {
       header: true,
@@ -417,7 +420,7 @@ export default class VueComponent extends Vue {
     }
 
     const series = {
-      name: 'FAKE', //this.capitalizeCity[newCity] + ' Infections (RKI)',
+      name: this.cityCap + ' Infections (RKI)',
       x: dates,
       y: cases,
       line: {
@@ -427,7 +430,7 @@ export default class VueComponent extends Vue {
       },
     }
 
-    console.log({ berlinSeries: series })
+    console.log({ observedData: series })
     return series
   }
 
@@ -453,7 +456,6 @@ export default class VueComponent extends Vue {
     const ignore = ['Config', 'Output', 'RunId', 'RunScript']
 
     for (const label of Object.keys(infoTxt[0])) {
-      console.log(label)
       if (ignore.indexOf(label) > -1) continue
       measures[label] = new Set()
     }
@@ -480,8 +482,6 @@ export default class VueComponent extends Vue {
       order += measure + '-'
       measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
     }
-    console.log({ ORDER: order })
-    console.log({ measures, runLookup })
 
     this.runLookup = runLookup
     this.measureOptions = measures
