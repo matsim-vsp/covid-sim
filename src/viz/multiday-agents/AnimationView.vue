@@ -16,16 +16,16 @@ import EventBus from '@/EventBus.vue'
 
 @Component
 export default class AnimationView extends Vue {
-  @Prop() private isLoaded!: boolean
-
   @Prop({ required: true }) private speed!: number
 
   @Prop({ required: true }) private day!: number
 
   private timeFactor = 600.0
+
   private timeDirection = 1
 
   private vertexShader = require('./shaderVert.vert').default
+
   private fragmentShader = require('./shaderFrag.frag').default
 
   private networkFilename = 'network.zip'
@@ -70,7 +70,7 @@ export default class AnimationView extends Vue {
   private midpointX = 4595000
   private midpointY = 5820000
 
-  private agentList: { [id: string]: Agent } = {}
+  private tripList: { [id: string]: Agent } = {}
   private infectionList: { [id: string]: Infection } = {}
 
   private allTripsHaveBegun = false
@@ -162,7 +162,7 @@ export default class AnimationView extends Vue {
     this.updateAgentAttributesForDay(this.day)
 
     // and let er go again
-    this.clock.start()
+    // this.clock.start()
 
     // requestAnimationFrame(this.animate)
     // ^^^^ this was a bug! added an extra animate() call per frame, every
@@ -270,7 +270,7 @@ export default class AnimationView extends Vue {
 
     this.$store.commit('setStatusMessage', 'loading agents')
 
-    await this.loadAgents()
+    await this.loadTrips()
 
     // this can happen in the background
     this.addNetworkToScene()
@@ -304,8 +304,8 @@ export default class AnimationView extends Vue {
 
     for (let i = start; i < end; i++) {
       const link = netlinks[i]
-      const from = new THREE.Vector3(nodes[link.from_node].x, nodes[link.from_node].y, -5)
-      const to = new THREE.Vector3(nodes[link.to_node].x, nodes[link.to_node].y, -5)
+      const from = new THREE.Vector3(nodes[link.from_node].x, nodes[link.from_node].y, 0)
+      const to = new THREE.Vector3(nodes[link.to_node].x, nodes[link.to_node].y, 0)
       const segment = new THREE.BufferGeometry().setFromPoints([from, to])
 
       links.push(segment)
@@ -352,39 +352,27 @@ export default class AnimationView extends Vue {
     // this.startSimulation()
   }
 
-  private async loadAgents() {
-    console.log('loading agents and infections')
+  private async loadTrips() {
+    console.log('loading agent trips')
 
     const zpath = this.publicPath + 'v3-anim/trips.json'
 
     console.log(zpath)
-    // we're going to do this async and streamy!
+
     const response = await fetch(zpath)
     if (!response.body) return
 
-    this.tempStreamBuffer = ''
-    this.agentList = {}
+    this.tripList = {}
+    const body = await response.text()
 
-    const decoder = new TextDecoder('utf-8')
-    const reader = response.body.getReader()
-
-    // no need to await - will run in background
-    this.loopTripReader(reader, decoder)
-  }
-
-  private loopTripReader(reader: ReadableStreamDefaultReader, decoder: TextDecoder) {
-    reader.read().then(({ value, done }) => {
-      if (done) {
-        if (this.tempStreamBuffer) this.processNewlyReadAgent(this.tempStreamBuffer)
-        console.log('Done reading agents: ')
-        this.finishedLoadingAgents()
-      } else {
-        this.processNDJSONchunk(value, decoder)
-
-        // go back for another chunk
-        this.loopTripReader(reader, decoder)
+    for (const ndjson of body.split('\n')) {
+      if (!!ndjson) {
+        const agent: Agent = JSON.parse(ndjson)
+        this.tripList[agent.id] = agent
       }
-    })
+    }
+    console.log('--Done reading trips.')
+    this.finishedLoadingTrips()
   }
 
   private async updateAgentAttributesForDay(day: number) {
@@ -412,7 +400,7 @@ export default class AnimationView extends Vue {
     reader.read().then(({ value, done }) => {
       if (done) {
         if (this.tempStreamBuffer) this.processNewlyReadInfection(this.tempStreamBuffer)
-        console.log('Done reading agents: ')
+        console.log('--Done reading infections.')
         this.finishedLoadingInfections()
       } else {
         this.processNDJSONInfectionChunk(value, decoder)
@@ -433,17 +421,6 @@ export default class AnimationView extends Vue {
 
   private tempStreamBuffer = ''
 
-  private processNDJSONchunk(value: Uint8Array, decoder: TextDecoder, splitOn: string = '\n') {
-    const chunk = decoder.decode(value)
-    this.tempStreamBuffer += chunk
-    const parts = this.tempStreamBuffer.split(splitOn)
-
-    parts.slice(0, -1).forEach(ndjson => {
-      this.processNewlyReadAgent(ndjson)
-    })
-    this.tempStreamBuffer = parts[parts.length - 1]
-  }
-
   private processNDJSONInfectionChunk(
     value: Uint8Array,
     decoder: TextDecoder,
@@ -459,13 +436,6 @@ export default class AnimationView extends Vue {
     this.tempStreamBuffer = parts[parts.length - 1]
   }
 
-  private processNewlyReadAgent(ndjson: string) {
-    const agent: Agent = JSON.parse(ndjson)
-    //if (agent.path.length === 0) return
-
-    this.agentList[agent.id] = agent
-  }
-
   private agentMaterial?: THREE.ShaderMaterial
   private agentGeometry?: AgentGeometry
 
@@ -473,13 +443,17 @@ export default class AnimationView extends Vue {
     if (!this.agentGeometry) return
 
     this.agentGeometry.updateInfections(this.infectionList)
+    this.clock.start()
   }
 
-  private finishedLoadingAgents() {
+  private finishedLoadingTrips() {
     if (this.agentGeometry) this.agentGeometry.dispose()
-    // if (this.agentMaterial) this.agentMaterial.dispose()
+    this.agentGeometry = new AgentGeometry(this.tripList, this.midpointX, this.midpointY)
 
-    this.agentGeometry = new AgentGeometry(this.agentList, this.midpointX, this.midpointY)
+    // maybe we already loaded a new day
+    if (Object.keys(this.infectionList).length > 0) {
+      this.agentGeometry.updateInfections(this.infectionList)
+    }
 
     if (!this.agentMaterial)
       this.agentMaterial = new THREE.ShaderMaterial({
@@ -518,8 +492,8 @@ export default class AnimationView extends Vue {
     // zap the old points, if we have them
     const agentLayer = this.scene.getObjectByName('agents')
     if (agentLayer) this.scene.remove(agentLayer)
-
     this.scene.add(points)
+
     if (this.camera) this.renderer.render(this.scene, this.camera)
     this.$store.commit('setStatusMessage', 'loading network')
 

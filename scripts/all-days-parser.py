@@ -5,16 +5,7 @@
 # - Time between actend and actstart is travel time for the trip
 # - Save infection moments separately
 #
-# Produces 00x-infections.json, in NDJSON format:
-# [
-#    { id: string,                   # person_id
-#      time: [number...],            # array of trip time points, in seconds
-#      points: [ (x,y)...],          # array of (x,y) coordinates for time points
-#      disease_time: [number...],    # array of disease event time points
-#      disease: [code...]            # array of disease status codes, see below
-#    }
-# ]
-#
+# Produces 00x-infections.json, in NDJSON format
 import matsim
 import ndjson
 
@@ -47,7 +38,7 @@ code_disease = [
 
 # Each person can have up to three disease events per day.
 # - If person has no disease codes, 0.0 means use yesterday's status
-# -1.0 signifies no further disease events for this day.
+# - -1.0 signifies no further disease events for this day.
 def build_disease_codes(diseaseList):
     if len(diseaseList) == 0:
         return [0.0, -1.0, -1.0]
@@ -68,13 +59,10 @@ for day in range(0, 92):
     fTrips = "trips.json"
     fInfections = f"{day:03d}-infections.json"
 
-    # magic_seconds = 691100 # day 8
-    magic_seconds = (day) * 86400  # 345600 # 691200 # 345600
+    magic_seconds = (day) * 86400
 
     # trips are identical across all days; so only read them once.
     whichEvents = "episimPersonStatus,actstart,actend"
-    # if day == 0:
-    #     whichEvents = whichEvents + ",actstart,actend"
 
     events = matsim.event_reader(f"day_{day:03d}.xml.gz", types=whichEvents)
 
@@ -102,10 +90,9 @@ for day in range(0, 92):
 
         # inject previous day's health at time 0, if we have it
         if person_id in persistent and len(person["health"]) == 0:
-            # print('person',person_id,'is already',code_disease[persistent[person_id]])
             person["health"].append((0, persistent[person_id]))
 
-        # deal with this event
+        # deal with this event:
 
         if event["type"] == "episimPersonStatus":
             # keep track of all infected people
@@ -120,8 +107,6 @@ for day in range(0, 92):
             else:
                 person["health"].append((time, code))
 
-            # if person_id not in persistent:
-            #    print (person_id, 'is newly', code_disease[code])
             persistent[person_id] = code
 
         if event["type"] == "actend":
@@ -137,53 +122,52 @@ for day in range(0, 92):
             if person_id in cur_location:
                 # we have a location/time, create a trip
                 start_loc = cur_location[person_id]
+            else:
+                start_loc = (-1, -1)  # placeholder until the day ends
 
-                coords = [start_loc, end_loc]
+            coords = [start_loc, end_loc]
 
-                # don't save stupid trips
-                saveTrip = True
-                if start_loc[0] == end_loc[0] and start_loc[1] == end_loc[1]:
-                    saveTrip = False
-                if time == act_ends[person_id]:
-                    saveTrip = False
-
-                # save it
-                if saveTrip:
-                    person["trips"].extend(
-                        [(act_ends[person_id], coords[0]), (time, coords[1])]
-                    )
+            # don't save stupid trips
+            if time != act_ends[person_id]:
+                person["trips"].extend(
+                    [(act_ends[person_id], coords[0]), (time, coords[1])]
+                )
 
             # we're at an activity, so park at this location until the next trip
             cur_location[person_id] = end_loc
 
-    # filter out lots of people so it fits in our cute viz
-    agents = [
-        p
-        for p in agents.values()
-        if (
-            len(p["trips"]) > 0
-            and (p["id"] in persistent)
-            or (int(p["id"][:-2]) % sample_rate == 0)
-        )
-        # if (len(p['trips']) > 0 and (p["id"] in persistent) or (int(p["id"][:-2]) % sample_rate == 0))
-    ]
+    # can't filter people
+    agents = agents.values()
 
     # get everything sorted
     for person in agents:
         # sort the health(time,code) array
-        person["health"] = sorted(person["health"], key=lambda k: k[0])
-        # and break it out into two separate arrays for time and health-code
-        person["dtime"] = [t[0] for t in person["health"]]
-        person["d"] = [t[1] for t in person["health"]]
+        person["dtime"] = []
+        person["d"] = []
+
+        if len(person["health"]) > 0:
+            person["health"] = sorted(person["health"], key=lambda k: k[0])
+            # and break it out into two separate arrays for time and health-code
+            person["dtime"] = [t[0] for t in person["health"]]
+            person["d"] = [t[1] for t in person["health"]]
+
         # convert to three-element array for each agent
         person["dtime_array"] = build_disease_codes(person["dtime"])
         person["d_array"] = build_disease_codes(person["d"])
 
         del person["health"]
 
-        person["trips"] = sorted(person["trips"], key=lambda k: k[0])
-        person["time"] = [t[0] for t in person["trips"]]
-        person["path"] = [t[1] for t in person["trips"]]
+        person["time"] = []
+        person["path"] = []
+
+        if len(person["trips"]) > 0:
+            person["trips"] = sorted(person["trips"], key=lambda k: k[0])
+            person["time"] = [t[0] for t in person["trips"]]
+            person["path"] = [t[1] for t in person["trips"]]
+
+            # loop last position into spot 0
+            person["path"][0] = person["path"][len(person["path"]) - 1]
+
         del person["trips"]
 
     print(f"--{len(persistent.keys())} total infected")

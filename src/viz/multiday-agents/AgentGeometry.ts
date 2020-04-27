@@ -37,9 +37,6 @@ class AgentGeometry extends THREE.BufferGeometry {
   }
 
   updateInfections(infections: { [id: string]: Infection }) {
-    console.log('updating infections!')
-    console.log('infections:', Object.keys(infections).length)
-
     const infectionTimes: number[] = []
     const infectionTypes: number[] = []
 

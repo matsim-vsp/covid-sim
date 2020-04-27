@@ -57,7 +57,7 @@
   .legend(:class="{dark: isDarkMode}")
     p(:style="{color: isDarkMode ? '#fff' : '#000'}") Legend:
     .legend-items
-      p(v-for="status in legendBits" :key="status.label" :style="{color: status.color}") {{ status.label }}
+      p.legend-item(v-for="status in legendBits" :key="status.label" :style="{color: status.color}") {{ status.label }}
 
 </template>
 
@@ -82,10 +82,9 @@ import { Route } from 'vue-router'
   },
 })
 export default class VueComponent extends Vue {
-  private newDay: number = 0
+  private numDays = 90
 
-  private numDays = 18
-  private tenDaySets = Array.from(Array(Math.ceil(this.numDays / 10)).keys()) // [0,9]
+  private newDay: number = 0
 
   private state = store.state
   private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
@@ -278,17 +277,6 @@ export default class VueComponent extends Vue {
     this.switchDay(day)
   }
 
-  /*
-  @Watch('$route') routeChanged(to: Route, from: Route) {
-    console.log({ to })
-    if (to.hash) {
-      const day = parseInt(to.hash.substring(to.hash.length - 1))
-      console.log(day)
-      this.newDay = day
-    }
-  }
-  */
-
   private toggleLoaded(loaded: boolean) {
     this.isLoaded = loaded
   }
@@ -391,6 +379,10 @@ img.theme-button:hover {
   flex-direction: row;
   margin-left: 2rem;
   justify-content: space-evenly;
+}
+
+.legend-item {
+  margin-right: 0.25rem;
 }
 
 .legend.dark {

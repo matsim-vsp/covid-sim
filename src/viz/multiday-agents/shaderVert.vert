@@ -41,7 +41,7 @@ float calculateSize() {
 
     float small = 2.0;
     float med = 5.0;
-    float big = 7.0;
+    float big = 8.0;
 
     if (myInfectionStatus == 0.0) return small;
     else if (myInfectionStatus == 1.0) return big;
@@ -101,10 +101,10 @@ void main() {
     } else {
 
         // figure out z-index based on infection status
-        float zIndex = 3.0;
-        if (myInfectionStatus == 0.0) zIndex = 1.0;
-        else if (myInfectionStatus == 1.0) zIndex = 10.0;
-        else if (myInfectionStatus == 2.0) zIndex = 2.0;
+        float zIndex = 0.2;
+        if (myInfectionStatus == 0.0) zIndex = 0.1;
+        else if (myInfectionStatus == 1.0) zIndex = 0.3;
+        else if (myInfectionStatus == 2.0) zIndex = 0.4;
 
         // unpack coords from position buffers - x,y,time. Deal w/ z later
         vec3 point1 = vec3(position.xy, zIndex);
