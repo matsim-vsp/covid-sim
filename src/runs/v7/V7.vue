@@ -33,7 +33,7 @@ import SectionViewer from './ChartSelector.vue'
     SectionViewer,
   },
 })
-export default class App extends Vue {
+export default class V7 extends Vue {
   private state: any = {
     measures: {},
     runLookup: {},
@@ -92,10 +92,13 @@ export default class App extends Vue {
     return notes.substring(i + this.plotTag.length)
   }
 
+  private RKI_URL =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/RKI/'
+
   private cityCSV: any = {
-    berlin: require('@/assets/berlin-cases.csv').default,
-    munich: require('@/assets/munich-cases.csv').default,
-    heinsberg: require('@/assets/heinsberg-cases.csv').default,
+    berlin: this.RKI_URL + 'berlin-cases.csv',
+    munich: this.RKI_URL + 'munich-cases.csv',
+    heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
   }
 
   public async mounted() {
@@ -106,18 +109,16 @@ export default class App extends Vue {
   }
 
   private async loadDataInBackground(newCity: string) {
-    this.state.berlinCases = this.prepareBerlinData(newCity)
+    this.state.berlinCases = await this.prepareBerlinData(newCity)
 
     const filepath = this.state.publicPath + 'v7-info-' + newCity + '.txt'
     const parsed = await this.loadCSVData(filepath)
     await this.generateScenarioMatrix(parsed)
   }
 
-  private prepareBerlinData(newCity: string) {
-    // Our simulation start date is 2020.02.16 based on school closures 13.March
-    // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
-    // Thus we begin Berlin data with 2 cases.
-    const csvContents = this.cityCSV[newCity]
+  private async prepareBerlinData(newCity: string) {
+    const response = await fetch(this.cityCSV[newCity])
+    const csvContents = await response.text()
 
     const data = Papa.parse(csvContents, {
       header: true,

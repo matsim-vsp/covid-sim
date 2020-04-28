@@ -116,13 +116,16 @@ export default class VueComponent extends Vue {
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
+  private PUBLIC_SVN =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
+
+  private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
+  private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
 
   private cityCSV: any = {
-    berlin: require('@/assets/berlin-cases.csv').default,
-    munich: require('@/assets/munich-cases.csv').default,
-    heinsberg: require('@/assets/heinsberg-cases.csv').default,
+    berlin: this.RKI_URL + 'berlin-cases.csv',
+    munich: this.RKI_URL + 'munich-cases.csv',
+    heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
   }
 
   @Watch('yaml') private async switchYaml() {
@@ -132,6 +135,8 @@ export default class VueComponent extends Vue {
     this.city = this.yaml.city
     this.dayZero = this.yaml.dayZero
     this.plusminus = this.yaml.offset[0]
+
+    this.observedCases = await this.prepareObservedData(this.city)
 
     await this.loadInfoTxt()
     this.loadZipData()
@@ -240,7 +245,7 @@ export default class VueComponent extends Vue {
 
     console.log('loadZipData:', this.city)
 
-    const filepath = this.public_svn + this.runId + '/summaries-filtered.zip'
+    const filepath = this.BATTERY_URL + this.runId + '/summaries-filtered.zip'
 
     if (this.zipCache[this.city]) {
       // check cache first!
@@ -392,24 +397,22 @@ export default class VueComponent extends Vue {
       serieses.push({ x, y, name })
     }
 
-    // Add Berlin "Reported Cases"
-    // if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+    // Add Observed Data!
     if (this.observedCases) serieses.push(this.observedCases)
 
     return serieses
   }
 
   private async parseInfoTxt(city: string) {
-    // this.observedCases = this.prepareObservedData(this.city)
-
-    const filepath = this.public_svn + this.runId + '/_info.txt'
+    const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
     console.log(filepath)
     const parsed = await this.parseCSVFile(filepath)
     return parsed
   }
 
-  private prepareObservedData(newCity: string) {
-    const csvContents = this.cityCSV[newCity]
+  private async prepareObservedData(newCity: string) {
+    const response = await fetch(this.cityCSV[newCity])
+    const csvContents = await response.text()
 
     const data = Papa.parse(csvContents, {
       header: true,
