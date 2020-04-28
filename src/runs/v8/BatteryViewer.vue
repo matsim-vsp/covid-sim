@@ -367,8 +367,8 @@ export default class VueComponent extends Vue {
 
   private calculateDatefromSimulationDay(day: number) {
     const date = moment(this.dayZero)
-      .subtract(this.plusminus, 'days')
-      .add(day, 'days')
+      .add(this.plusminus, 'days')
+      .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
       .format('YYYY-MM-DD')
     return date
   }
