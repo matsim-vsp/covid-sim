@@ -235,12 +235,6 @@ export default class VueComponent extends Vue {
     return Number(rounded).toLocaleString()
   }
 
-  private calendarForSimDay(day: number) {
-    if (day >= 0) return 'Day ' + day
-
-    return 'General Options'
-  }
-
   private async loadZipData() {
     this.isZipLoaded = false
 
@@ -363,6 +357,16 @@ export default class VueComponent extends Vue {
     const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
     return z.data
+  }
+
+  private calendarForSimDay(day: number) {
+    if (day === -1) return 'General Options'
+
+    const date = moment(this.dayZero)
+      .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
+      .format('MMM DD')
+
+    return date
   }
 
   private calculateDatefromSimulationDay(day: number) {
