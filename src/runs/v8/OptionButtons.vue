@@ -47,14 +47,14 @@ export default class VueComponent extends Vue {
         label = '' + x * 100 + '%'
       }
 
-      this.value = label // select first choice
       this.showButtons = true
 
       experiments.push(label)
     }
 
+    this.value = experiments[0] // select first choice
+
     this.stops = experiments
-    console.log({ stops: this.stops })
   }
 
   @Watch('value')
