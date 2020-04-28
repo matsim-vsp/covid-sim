@@ -4,7 +4,7 @@
     .readme(v-html="topNotes")
 
   .view-section
-    battery-viewer.viewer(v-if="yaml" :yaml="yaml")
+    battery-viewer.viewer(v-if="yaml" :yaml="yaml" :runId="runId")
 
   .content(v-if="bottomNotes")
     .bottom
@@ -31,6 +31,9 @@ import { RunYaml } from '@/Globals'
 export default class VueComponent extends Vue {
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
+  private public_svn =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
+
   private runId: string = ''
   private city: string = ''
   private plusminus = '0'
@@ -52,9 +55,10 @@ export default class VueComponent extends Vue {
   public async mounted() {
     console.log({ route: this.$route })
 
-    this.runId = this.$route.params.runId
+    this.runId = this.$route.params.pathMatch
 
     console.log('got you: ', this.runId)
+
     this.yaml = await this.loadYaml()
     this.city = this.yaml.city
     this.updateNotes()
@@ -93,7 +97,7 @@ export default class VueComponent extends Vue {
   }
 
   private async loadYaml() {
-    const url = this.publicPath + this.runId + '.yaml'
+    const url = this.public_svn + this.runId + '/metadata.yaml'
     console.log('yaml url:', url)
     const response = await fetch(url)
     const text = await response.text()

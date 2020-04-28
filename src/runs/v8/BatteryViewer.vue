@@ -56,12 +56,12 @@
             p.plotsize(v-if="!isZipLoaded") Loading data...
             vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
-        .linear-plot(v-if="city !=='heinsberg'")
-          h5 {{ cityCap }} Hospitalization Rate Comparison
-          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            hospitalization-plot.plotsize(:data="data" :logScale="logScale" :city="city")
+        //- .linear-plot(v-if="city !=='heinsberg'")
+        //-   h5 {{ cityCap }} Hospitalization Rate Comparison
+        //-   p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+        //-   .plotarea
+        //-     p.plotsize(v-if="!isZipLoaded") Loading data...
+        //-     hospitalization-plot.plotsize(:data="data" :logScale="logScale" :city="city")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
@@ -100,6 +100,7 @@ interface Measure {
 })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private yaml!: RunYaml
+  @Prop({ required: true }) private runId!: string
 
   // convenience from yaml
   private dayZero: string = ''
@@ -114,6 +115,9 @@ export default class VueComponent extends Vue {
   private logScale = true
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
+
+  private public_svn =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
 
   private cityCSV: any = {
     berlin: require('@/assets/berlin-cases.csv').default,
@@ -245,8 +249,9 @@ export default class VueComponent extends Vue {
       this.zipLoader = this.zipCache[this.city]
     } else {
       // load the zip from file
-      const filepath = this.publicPath + 'v7-data-' + this.city + '.zip'
-      console.log('---loading', filepath)
+      const filepath = this.public_svn + this.runId + '/summaries_filtered.zip'
+      console.log('---loading zip:', filepath)
+
       this.zipLoader = new ZipLoader(filepath)
       await this.zipLoader.load()
       console.log('zip loaded!')
@@ -385,10 +390,12 @@ export default class VueComponent extends Vue {
 
     return serieses
   }
-  private async parseInfoTxt(city: string) {
-    this.observedCases = this.prepareObservedData(this.city)
 
-    const filepath = this.publicPath + 'v7-info-' + city + '.txt'
+  private async parseInfoTxt(city: string) {
+    // this.observedCases = this.prepareObservedData(this.city)
+
+    const filepath = this.public_svn + this.runId + '/_info.txt'
+    console.log(filepath)
     const parsed = await this.parseCSVFile(filepath)
     return parsed
   }
