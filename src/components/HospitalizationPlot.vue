@@ -40,7 +40,7 @@ export default class VueComponent extends Vue {
       dateColumn: 'Datum',
     },
     munich: {
-      fromModel: ['Seriously Sick'],
+      fromModel: ['Cumulative Hospitalized'],
       fromCSV: ['Stationär'],
       csvLineNames: ['Reported: Munich Hospitalized'],
       dateFormatter: this.reformatDateMunich,
@@ -50,6 +50,7 @@ export default class VueComponent extends Vue {
 
   private colors: any = {
     'Seriously Sick': '#44f',
+    'Cumulative Hospitalized': '#707',
     Critical: '#707',
   }
 
@@ -139,7 +140,6 @@ export default class VueComponent extends Vue {
   private reformatDateMunich(day: string) {
     const pieces = day.split('-')
     const date = '20' + pieces[2] + '-' + pieces[1] + '-' + pieces[0]
-    console.log(date)
     return date
   }
 

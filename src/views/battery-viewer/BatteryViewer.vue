@@ -56,12 +56,12 @@
             p.plotsize(v-if="!isZipLoaded") Loading data...
             vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
 
-        .linear-plot(v-if="city === 'berlin'")
+        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
-            hospitalization-plot.plotsize(:data="data" :logScale="logScale" :city="city")
+            hospitalization-plot.plotsize(:data="hospitalData" :logScale="logScale" :city="city")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
@@ -225,6 +225,7 @@ export default class VueComponent extends Vue {
     nInfectedCumulative: 'Infected Cumulative',
     nRecovered: 'Recovered',
     nInQuarantine: 'In Quarantine',
+    nHospitalCumulative: 'Cumulative Hospitalized',
   }
 
   private async mounted() {
@@ -267,38 +268,35 @@ export default class VueComponent extends Vue {
     this.runChanged()
   }
 
-  private fillcolors: any = {
-    Susceptible: '#0000ff',
-    'Seriously Sick': '#cc2211',
-    'Showing Symptoms': '#00ffff',
-    'Infected Cumulative': '#f791cf',
-    'Infected, not contagious': '#ee8800',
-    Critical: '#882299',
-    Recovered: '#eedd44',
-    Contagious: '#00aa00',
-    'Total Infected': '#a65628',
-  }
+  private hospitalData: any[] = []
 
   private async runChanged() {
+    const ignoreRow = 'Cumulative Hospitalized'
     // maybe we already did the calcs
     if (this.loadedSeriesData[this.currentRun.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
+      const cache = this.loadedSeriesData[this.currentRun.RunId]
+      this.hospitalData = cache
+      this.data = cache.filter((row: any) => row.name !== ignoreRow)
+
       this.updateTotalInfected()
       return
     }
 
     // load run dataset
-    const csvLow: any[] = await this.loadCSV(this.currentRun)
+    const csv: any[] = await this.loadCSV(this.currentRun)
 
     // zip might not yet be loaded
-    if (csvLow.length === 0) return
+    if (csv.length === 0) return
 
-    const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
+    const timeSerieses = this.generateSeriesFromCSVData(csv)
 
     // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
+    this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
 
-    this.data = timeSeriesesLow
+    // populate the data where we need it
+    console.log({ XXXXX: timeSerieses })
+    this.hospitalData = timeSerieses
+    this.data = timeSerieses.filter(row => row.name !== ignoreRow)
     this.updateTotalInfected()
   }
 
