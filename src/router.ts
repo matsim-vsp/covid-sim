@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeIndex from '@/HomeIndex.vue'
+import HomeIndex from '@/views/HomeIndex.vue'
 
 Vue.use(VueRouter)
 
@@ -72,7 +72,8 @@ const routes = [
   },
   {
     path: '/runs/*',
-    component: () => import(/* webpackChunkName: "runframe" */ '@/runs/v8/RunPage.vue'),
+    component: () =>
+      import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),
   },
   {
     path: '/run/*',

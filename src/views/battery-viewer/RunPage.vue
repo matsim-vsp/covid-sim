@@ -47,12 +47,6 @@ export default class VueComponent extends Vue {
 
   private plotTag = '{{PLOTS}}'
 
-  @Watch('$route') async routeChanged(to: any, from: any) {
-    console.log(to)
-    const newCity = to.params.city
-    this.city = newCity // switch city AFTER new data is loaded. Things @watch the city
-  }
-
   public async mounted() {
     console.log({ route: this.$route })
 

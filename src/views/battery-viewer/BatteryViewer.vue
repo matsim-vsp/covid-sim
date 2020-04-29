@@ -44,7 +44,7 @@
 
           .variation(v-if="yaml.offset")
             b Shift Start Date
-            .variation-choices.buttons.has-addons
+            .variation-choices.buttons.has-addons( style="margin-left: auto;")
               button.button.is-small(v-for="offset in yaml.offset" :key="offset"
                 :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
                 @click="setPlusMinus(offset)") {{ strOffset(offset)}}
@@ -245,7 +245,7 @@ export default class VueComponent extends Vue {
 
     console.log('loadZipData:', this.city)
 
-    const filepath = this.BATTERY_URL + this.runId + '/summaries-filtered.zip'
+    const filepath = this.BATTERY_URL + this.runId + '/' + this.yaml.zip
 
     if (this.zipCache[this.city]) {
       // check cache first!

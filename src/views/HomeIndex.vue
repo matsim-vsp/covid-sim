@@ -131,7 +131,7 @@ export default {
   padding: 4rem 3rem 1rem 3rem;
   background-color: #1e1f2c;
   color: white;
-  background: url(assets/images/banner.jpg);
+  background: url(../assets/images/banner.jpg);
   background-repeat: no-repeat;
   background-size: cover;
 }
