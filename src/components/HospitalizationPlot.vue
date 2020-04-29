@@ -24,7 +24,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private city!: string
 
   private csvData: any = {
-    berlin: require('@/assets/LaGeSo.csv').default,
+    berlin: require('@/assets/berlin-hospital.csv').default,
     munich: require('@/assets/munich-hospital.csv').default,
   }
 
