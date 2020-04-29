@@ -103,7 +103,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private runId!: string
 
   // convenience from yaml
-  private dayZero: string = ''
+  private startDate: string = ''
   private city: string = ''
 
   private MAX_DAYS = 200
@@ -133,7 +133,7 @@ export default class VueComponent extends Vue {
     if (!this.yaml.city) return
 
     this.city = this.yaml.city
-    this.dayZero = this.yaml.dayZero
+    this.startDate = this.yaml.startDate
     this.plusminus = this.yaml.offset[0]
 
     this.observedCases = await this.prepareObservedData(this.city)
@@ -367,7 +367,7 @@ export default class VueComponent extends Vue {
   private calendarForSimDay(day: number) {
     if (day === -1) return 'General Options'
 
-    const date = moment(this.dayZero)
+    const date = moment(this.startDate)
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
       .format('MMM DD')
 
@@ -375,7 +375,7 @@ export default class VueComponent extends Vue {
   }
 
   private calculateDatefromSimulationDay(day: number) {
-    const date = moment(this.dayZero)
+    const date = moment(this.startDate)
       .add(this.plusminus, 'days')
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
       .format('YYYY-MM-DD')

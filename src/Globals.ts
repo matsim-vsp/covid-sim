@@ -49,10 +49,10 @@ export interface RunYaml {
   readme: string
   zip: string
   offset: number[]
-  dayZero: string
+  startDate: string
   timestamp?: string
   optionGroups: {
-    day: number
+    day?: number
     heading: string
     subheading?: string
     measures: {
