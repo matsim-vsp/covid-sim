@@ -3,7 +3,7 @@
   .button-choices(v-if="showButtons")
     button.button.is-small(
       v-for="choice in stops"
-      :class="{'is-link': choice===value}"
+      :class="{'is-link': choice===selectedValue}"
       :key="choice"
       @click='choseButton(choice)') {{ choice }}
 
@@ -21,14 +21,14 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private measure!: { measure: string; title: string }
   @Prop({ required: true }) private options!: any[]
 
-  private value: string = ''
+  private selectedValue: string = ''
   private stops: any[] = []
 
   private showButtons = false
 
   private choseButton(choice: string) {
     console.log(choice)
-    this.value = choice
+    this.selectedValue = choice
   }
 
   private mounted() {
@@ -44,7 +44,7 @@ export default class VueComponent extends Vue {
       if (isNaN(x)) {
         label = '' + x
       } else {
-        label = '' + x * 100 + '%'
+        label = '' + Math.round(x * 100) + '%'
       }
 
       this.showButtons = true
@@ -52,19 +52,18 @@ export default class VueComponent extends Vue {
       experiments.push(label)
     }
 
-    this.value = experiments[0] // select first choice
-
+    this.selectedValue = experiments[0] // select first choice
     this.stops = experiments
   }
 
-  @Watch('value')
+  @Watch('selectedValue')
   private valueChanged() {
-    if (this.value.endsWith('%')) {
-      const answer = this.value.substring(0, this.value.length - 1)
+    if (this.selectedValue.endsWith('%')) {
+      const answer = this.selectedValue.substring(0, this.selectedValue.length - 1)
       const v = parseFloat(answer) / 100.0
       this.$emit('changed', this.measure.measure, v)
     } else {
-      this.$emit('changed', this.measure.measure, this.value)
+      this.$emit('changed', this.measure.measure, this.selectedValue)
     }
   }
 }

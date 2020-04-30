@@ -24,7 +24,7 @@
             p.subhead(v-if="group.subheading") {{ group.subheading }}
 
             .myslider(v-for="m in group.measures" :key="m.measure")
-              option-buttons(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+              button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
         h5.cumulative Cumulative Infected by September 2020
         p.infected {{ prettyInfected }}
@@ -80,7 +80,7 @@ import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
-import OptionButtons from './OptionButtons.vue'
+import ButtonGroup from './ButtonGroup.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import { RunYaml } from '@/Globals'
@@ -93,7 +93,7 @@ interface Measure {
 @Component({
   components: {
     HospitalizationPlot,
-    OptionButtons,
+    ButtonGroup,
     RValuePlot,
     VuePlotly,
   },
@@ -277,7 +277,6 @@ export default class VueComponent extends Vue {
       const cache = this.loadedSeriesData[this.currentRun.RunId]
       this.hospitalData = cache
       this.data = cache.filter((row: any) => row.name !== ignoreRow)
-
       this.updateTotalInfected()
       return
     }
@@ -294,7 +293,6 @@ export default class VueComponent extends Vue {
     this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
 
     // populate the data where we need it
-    console.log({ XXXXX: timeSerieses })
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
     this.updateTotalInfected()
@@ -401,13 +399,6 @@ export default class VueComponent extends Vue {
     return serieses
   }
 
-  private async parseInfoTxt(city: string) {
-    const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
-    console.log(filepath)
-    const parsed = await this.parseCSVFile(filepath)
-    return parsed
-  }
-
   private async prepareObservedData(newCity: string) {
     const response = await fetch(this.cityCSV[newCity])
     const csvContents = await response.text()
@@ -450,8 +441,10 @@ export default class VueComponent extends Vue {
     return series
   }
 
-  private async parseCSVFile(filepath: string) {
-    console.log('fetching data')
+  private async parseInfoTxt(city: string) {
+    const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
+    console.log('fetching info:', filepath)
+
     const response = await fetch(filepath)
     const text = await response.text()
     const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
