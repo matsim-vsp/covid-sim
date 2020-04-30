@@ -1,6 +1,6 @@
 <template lang="pug">
 #vue-component
-  .city-picker
+  .city-picker(v-if="!badPage")
     .which-city(v-for="(run,index) in allRuns"
       :key="run.runId"
       :class="{'selected': run.name === city}"
@@ -12,6 +12,12 @@
       li(v-for="path in allRuns[currentCity].crumbs"
         :class="{isActive: path.isActive}")
         router-link(:to="path.url") {{ path.title}}
+
+  .badpage(v-if="badPage")
+    h3 404 No Page Found
+    p There is nothing available at this URL.
+    p Go back to the&nbsp;
+      router-link(to="/") main page.
 
   .view-section
     single-run-viewer.viewer(v-if="currentCity > -1"
@@ -46,9 +52,10 @@ interface Breadcrumb {
 })
 export default class VueComponent extends Vue {
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
-
   private public_svn =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
+
+  private badPage = false
 
   private runId: string = ''
   private city: string = ''
@@ -66,6 +73,7 @@ export default class VueComponent extends Vue {
   }
 
   private async buildPageForURL() {
+    this.badPage = false
     // console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
@@ -150,12 +158,13 @@ export default class VueComponent extends Vue {
       }
     }
 
-    // console.log({ allRuns: this.allRuns })
+    if (!this.allRuns.length) this.setBadPage()
   }
 
   private setBadPage() {
     console.log('BAD USER! No such URL.', this.runId)
     // add some bad-page helper thingy here
+    this.badPage = true
   }
 
   // this will throw an error if /path/metadata.yaml is not found
@@ -221,6 +230,11 @@ a.selected {
 .breadcrumb {
   margin: 1rem 3rem 0rem 3rem;
   font-size: 0.8rem;
+}
+
+.badpage {
+  padding: 5rem 3rem;
+  color: $bannerHighlight;
 }
 
 @media only screen and (max-width: 640px) {
