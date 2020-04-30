@@ -50,7 +50,7 @@ export default class AnimationView extends Vue {
   private camera?: THREE.PerspectiveCamera
 
   private clock = new THREE.Clock(false) // do not autostart clock!
-  private OrbitControl = require('@/OrbitControl')
+  private OrbitControl = require('@/util/OrbitControl')
 
   // eslint-disable-next-line
   private container: any

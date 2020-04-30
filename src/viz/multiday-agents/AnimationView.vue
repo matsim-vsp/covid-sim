@@ -49,17 +49,13 @@ export default class AnimationView extends Vue {
   private renderer = new THREE.WebGLRenderer({ antialias: true })
   private camera?: THREE.PerspectiveCamera
 
-  private OrbitControl = require('@/OrbitControl')
+  private OrbitControl = require('@/util/OrbitControl')
 
   // eslint-disable-next-line
   private container: any
 
   // eslint-disable-next-line
   private cameraControls: any
-
-  private geomSmall = new THREE.CircleBufferGeometry(100, 4)
-  private geomMed = new THREE.CircleBufferGeometry(275, 5).rotateZ((18.0 * Math.PI) / 180)
-  private geomBig = new THREE.CircleBufferGeometry(300, 30)
 
   private linkMaterial = new THREE.LineBasicMaterial({ color: this.colors.links })
 
@@ -247,9 +243,6 @@ export default class AnimationView extends Vue {
     }
 
     this.linkMaterial.dispose()
-
-    this.geomSmall.dispose()
-    this.geomBig.dispose()
     this.scene.dispose()
   }
 
