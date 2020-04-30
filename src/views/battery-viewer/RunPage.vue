@@ -155,7 +155,7 @@ export default class VueComponent extends Vue {
           this.city = readYaml.city
         }
       } catch (e) {
-        // that folder was a dud, just ignore it
+        // if that folder was a dud, just ignore it
       }
     }
 
