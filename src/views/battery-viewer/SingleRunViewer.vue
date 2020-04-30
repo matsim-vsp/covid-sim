@@ -145,6 +145,8 @@ export default class VueComponent extends Vue {
 
   @Watch('yaml') private async switchYaml() {
     console.log('GOT NEW YAML:', this.yaml.city)
+    console.log({ yaml: this.yaml })
+
     if (!this.yaml.city) return
 
     this.isZipLoaded = false
@@ -267,6 +269,7 @@ export default class VueComponent extends Vue {
     console.log('loadZipData:', this.city)
 
     const filepath = this.BATTERY_URL + this.runId + '/' + this.yaml.zip
+    console.log(filepath)
 
     if (this.zipCache[this.city]) {
       // check cache first!
@@ -293,13 +296,13 @@ export default class VueComponent extends Vue {
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
     // maybe we already did the calcs
-    if (this.loadedSeriesData[this.currentRun.RunId]) {
-      const cache = this.loadedSeriesData[this.currentRun.RunId]
-      this.hospitalData = cache
-      this.data = cache.filter((row: any) => row.name !== ignoreRow)
-      this.updateTotalInfected()
-      return
-    }
+    // if (this.loadedSeriesData[this.currentRun.RunId]) {
+    //   const cache = this.loadedSeriesData[this.currentRun.RunId]
+    //   this.hospitalData = cache
+    //   this.data = cache.filter((row: any) => row.name !== ignoreRow)
+    //   this.updateTotalInfected()
+    //   return
+    // }
 
     // load run dataset
     const csv: any[] = await this.loadCSV(this.currentRun)

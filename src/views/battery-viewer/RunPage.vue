@@ -74,7 +74,7 @@ export default class VueComponent extends Vue {
 
   private async buildPageForURL() {
     this.badPage = false
-    // console.log({ route: this.$route })
+    console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
     this.allRuns = []
@@ -142,7 +142,8 @@ export default class VueComponent extends Vue {
 
     for (const folder of dirs) {
       try {
-        const subfolder = this.runId + '/' + folder
+        let subfolder = this.runId
+        subfolder += subfolder.endsWith('/') ? folder : '/' + folder
         const readYaml = await this.loadYaml(subfolder)
 
         const crumbs = this.buildBreadcrumbs(subfolder)
