@@ -1,5 +1,8 @@
 <template lang="pug">
 #charts
+  .content
+    .readme(v-html="topNotes")
+
   .preamble
     h3.select-scenario Select Scenario:
 
@@ -26,7 +29,9 @@
             .myslider(v-for="m in group.measures" :key="m.measure")
               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
-        h5.cumulative Cumulative Infected by September 2020
+        h5.cumulative Cumulative Infected by
+          br
+          | September 2020
         p.infected {{ prettyInfected }}
 
       .all-plots
@@ -54,27 +59,35 @@
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
-            vue-plotly.plotsize(:data="data" :layout="layout" :options="options")
+            vue-plotly.plotsize(v-else
+              :data="data" :layout="layout" :options="options")
 
         .linear-plot(v-if="city === 'berlin' || city === 'munich'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
-            hospitalization-plot.plotsize(:data="hospitalData" :logScale="logScale" :city="city")
+            hospitalization-plot.plotsize(v-else
+              :data="hospitalData" :logScale="logScale" :city="city")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
           p Based on four-day new infections
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
-            r-value-plot.plotsize(:data="data" :logScale="false")
+            r-value-plot.plotsize(v-else :data="data" :logScale="false")
+
+  .content(v-if="bottomNotes")
+    .bottom
+      h3 Further Notes
+      .readme(v-html="bottomNotes")
 
 </template>
 
 <script lang="ts">
 // ###########################################################################
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import MarkdownIt from 'markdown-it'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
@@ -113,6 +126,8 @@ export default class VueComponent extends Vue {
   private plusminus = 0
 
   private logScale = true
+  private cityMarkdownNotes: string = ''
+  private plotTag = '{{PLOTS}}'
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
@@ -132,14 +147,19 @@ export default class VueComponent extends Vue {
     console.log('GOT NEW YAML:', this.yaml.city)
     if (!this.yaml.city) return
 
+    this.isZipLoaded = false
+    this.$nextTick()
     this.city = this.yaml.city
     this.startDate = this.yaml.startDate
     this.plusminus = this.yaml.offset[0]
 
+    this.updateNotes()
+
     this.observedCases = await this.prepareObservedData(this.city)
 
     await this.loadInfoTxt()
-    this.loadZipData()
+    await this.loadZipData()
+    this.showPlotForCurrentSituation()
   }
 
   @Watch('plusminus') private switchPlusMinus() {
@@ -255,11 +275,11 @@ export default class VueComponent extends Vue {
     } else {
       // load the zip from file
 
-      console.log('---loading zip:', filepath)
+      // console.log('---loading zip:', filepath)
 
       this.zipLoader = new ZipLoader(filepath)
       await this.zipLoader.load()
-      console.log('zip loaded!')
+      console.log('zip loaded!', this.runId, this.yaml.zip)
     }
 
     this.isZipLoaded = true
@@ -304,7 +324,7 @@ export default class VueComponent extends Vue {
   }
 
   private sliderChanged(measure: any, value: any) {
-    console.log(measure, value)
+    // console.log(measure, value)
     this.currentSituation[measure] = value
     this.showPlotForCurrentSituation()
   }
@@ -323,7 +343,7 @@ export default class VueComponent extends Vue {
     const suffix = this.plusminus
     const lookup = lookupKey.replace('undefined', '' + suffix)
 
-    console.log(lookup)
+    // console.log(lookup)
 
     this.currentRun = this.runLookup[lookup]
 
@@ -409,13 +429,13 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
     }).data
 
-    console.log({ data })
+    // console.log({ data })
 
     const dates: any = []
     const cases: any = []
     let cumulative = 0
 
-    console.log('fetched city data:', data.length)
+    // console.log('fetched city data:', data.length)
 
     // pull the cases field out of the CSV
     for (const datapoint of data) {
@@ -437,18 +457,18 @@ export default class VueComponent extends Vue {
       },
     }
 
-    console.log({ observedData: series })
+    // console.log({ observedData: series })
     return series
   }
 
   private async parseInfoTxt(city: string) {
     const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
-    console.log('fetching info:', filepath)
+    console.log('fetching info:', this.runId)
 
     const response = await fetch(filepath)
     const text = await response.text()
     const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
-    console.log({ parsed: parsed.data })
+    // console.log({ parsed: parsed.data })
 
     return parsed.data
   }
@@ -495,6 +515,41 @@ export default class VueComponent extends Vue {
     this.runLookup = runLookup
     this.measureOptions = measures
   }
+
+  private mdParser = new MarkdownIt()
+
+  private async updateNotes() {
+    const url = this.BATTERY_URL + this.runId + '/' + this.yaml.readme
+
+    const response = await fetch(url)
+
+    if (response.status !== 200) return
+
+    const text = await response.text()
+
+    // bad url
+    if (text.startsWith('<!DOCTYPE')) return
+
+    this.cityMarkdownNotes = this.mdParser.render(text)
+  }
+
+  private get topNotes() {
+    if (!this.cityMarkdownNotes) return ''
+
+    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
+
+    if (i < 0) return this.cityMarkdownNotes
+    return this.cityMarkdownNotes.substring(0, i)
+  }
+
+  private get bottomNotes() {
+    if (!this.cityMarkdownNotes) return ''
+
+    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
+
+    if (i < 0) return ''
+    return this.cityMarkdownNotes.substring(i + this.plotTag.length)
+  }
 }
 
 // ###########################################################################
@@ -504,6 +559,8 @@ export default class VueComponent extends Vue {
 #main-section {
   display: flex;
   flex-direction: row;
+  background-color: white;
+  padding: 0rem 3rem 1rem 3rem;
 }
 
 h5 {
@@ -531,6 +588,11 @@ h6 {
   margin: 1rem 1rem 2rem 0rem;
   text-transform: uppercase;
   letter-spacing: 2px;
+}
+
+.content {
+  margin-top: 2rem;
+  padding: 0 3rem;
 }
 
 .option-groups {
@@ -615,7 +677,6 @@ p.subhead {
   font-weight: bold;
   font-size: 2rem;
   margin-top: 0rem;
-  margin-left: 1rem;
   color: rgb(151, 71, 34);
 }
 
@@ -649,13 +710,14 @@ p.subhead {
 
 .cumulative {
   margin-top: 1rem;
-  margin-left: 1rem;
 }
 
 .preamble {
   display: flex;
   flex-direction: row;
-  margin-top: 2rem;
+  margin-top: 1rem;
+  padding: 1rem 3rem;
+  background-color: white;
 }
 
 .variation {
@@ -670,11 +732,31 @@ p.subhead {
   padding: 0 0;
 }
 
+.bottom {
+  margin-bottom: 3rem;
+}
+
 @media only screen and (max-width: 640px) {
   #main-section {
     flex-direction: column;
-    padding: 0 0;
+    padding: 0 1rem;
     margin: 0 0rem;
+  }
+
+  .preamble {
+    padding: 1rem 1rem 0rem 1rem;
+  }
+
+  .content {
+    padding: 0rem 1rem;
+  }
+
+  .all-plots {
+    margin-left: 0;
+  }
+
+  .plot-options {
+    margin-left: 0;
   }
 
   p.infected {
@@ -682,6 +764,7 @@ p.subhead {
   }
 
   .pieces {
+    margin: 0 0;
     padding: 1rem 0rem;
     display: flex;
     flex-direction: column;
@@ -697,7 +780,7 @@ p.subhead {
   }
 
   .option-groups {
-    width: 15rem;
+    width: 18rem;
   }
 }
 </style>

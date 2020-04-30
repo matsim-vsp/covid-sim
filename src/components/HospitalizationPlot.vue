@@ -102,7 +102,7 @@ export default class VueComponent extends Vue {
     this.dataLines = modelData
     this.dataLines.push(...this.hospitalSeries)
 
-    console.log({ dataLines: this.dataLines })
+    // console.log({ dataLines: this.dataLines })
   }
 
   private prepareHospitalData() {
@@ -112,7 +112,7 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
     }).data
 
-    console.log({ hospData })
+    // console.log({ hospData })
     this.hospitalSeries = []
 
     for (let i = 0; i < this.cityDetails.fromModel.length; i++) {

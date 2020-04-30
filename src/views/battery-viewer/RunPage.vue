@@ -1,15 +1,22 @@
 <template lang="pug">
-.component
-  .content
-    .readme(v-html="topNotes")
+#vue-component
+  .city-picker
+    .which-city(v-for="(run,index) in allRuns"
+      :key="run.runId"
+      :class="{'selected': run.name === city}"
+      @click="switchCity(index)" :to="'/runs/' + run.runId")
+      h1 {{ run.name }}
+
+  nav.breadcrumb(aria-label="breadcrumbs" v-if="currentCity == -2")
+    ul
+      li(v-for="path in allRuns[currentCity].crumbs"
+        :class="{isActive: path.isActive}")
+        router-link(:to="path.url") {{ path.title}}
 
   .view-section
-    battery-viewer.viewer(v-if="yaml" :yaml="yaml" :runId="runId")
-
-  .content(v-if="bottomNotes")
-    .bottom
-      h3 Further Notes
-      .readme(v-html="bottomNotes")
+    single-run-viewer.viewer(v-if="currentCity > -1"
+                             :yaml="allRuns[currentCity].yaml"
+                             :runId="allRuns[currentCity].runId")
 
 </template>
 
@@ -17,16 +24,24 @@
 // ###########################################################################
 import YAML from 'yaml'
 import Papa from 'papaparse'
-import * as moment from 'moment'
 import MarkdownIt from 'markdown-it'
+import * as moment from 'moment'
 
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import BatteryViewer from './BatteryViewer.vue'
+import SingleRunViewer from './SingleRunViewer.vue'
 import { RunYaml } from '@/Globals'
+import SVNFileSystem from '@/util/SVNFileSystem'
+import { Route } from 'vue-router'
+
+interface Breadcrumb {
+  title: string
+  url: string
+  isActive?: boolean
+}
 
 @Component({
   components: {
-    BatteryViewer,
+    SingleRunViewer,
   },
 })
 export default class VueComponent extends Vue {
@@ -39,68 +54,118 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private plusminus = '0'
 
-  private markdown = new MarkdownIt()
+  private allRuns: { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[] = []
 
-  private cityMarkdownNotes: string = ''
+  @Watch('$route') routeChanged(to: Route, from: Route) {
+    console.log('ROUTE CHANGEEEEED')
+    this.buildPageForURL()
+  }
 
-  private yaml: any = {}
+  public mounted() {
+    this.buildPageForURL()
+  }
 
-  private plotTag = '{{PLOTS}}'
-
-  public async mounted() {
-    console.log({ route: this.$route })
-
+  private async buildPageForURL() {
+    // console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
-    console.log('got you: ', this.runId)
+    this.allRuns = []
 
-    this.yaml = await this.loadYaml()
-    this.city = this.yaml.city
-    this.updateNotes()
+    // Try to fetch metadata.yaml from the URL.
+    // If it exists, show the run.
+    // If it does not exist, we will try to build a multi-city page
+    try {
+      const readYaml = await this.loadYaml(this.runId)
+      // got something!
+      const crumbs = this.buildBreadcrumbs(this.runId)
+
+      this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
+      this.city = readYaml.city
+      this.currentCity = 0
+    } catch (e) {
+      this.attemptMulticityFromURL()
+    }
   }
 
-  private async updateNotes() {
-    const url = this.public_svn + this.runId + '/' + this.yaml.readme
-    console.log(url)
+  private svnRoot = new SVNFileSystem(this.public_svn)
 
-    const response = await fetch(url)
+  private buildBreadcrumbs(folder: string) {
+    const crumbs: Breadcrumb[] = []
+    const pathElements = folder.split('/')
 
-    if (response.status !== 200) return
+    let url = '/runs/'
 
-    const text = await response.text()
+    for (const p of pathElements) {
+      if (!p) continue
 
-    // bad url
-    if (text.startsWith('<!DOCTYPE')) return
+      url += p + '/'
+      crumbs.push({ title: p, url })
+    }
 
-    this.cityMarkdownNotes = this.markdown.render(text)
+    crumbs[crumbs.length - 1].isActive = true
+    return crumbs
   }
 
-  private get topNotes() {
-    if (!this.cityMarkdownNotes) return ''
+  private async attemptMulticityFromURL() {
+    // We know at this point that the given URL does not contain a run.
+    // We hope that it instead contains subfolders, which each contain a run.
 
-    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
-
-    if (i < 0) return this.cityMarkdownNotes
-    return this.cityMarkdownNotes.substring(0, i)
+    const folderContents = await this.svnRoot.getDirectory(this.runId)
+    if (folderContents.dirs.length) {
+      this.fetchMultiYamls(folderContents.dirs)
+    } else {
+      // User gave a bad URL; maybe tell them.
+      this.setBadPage()
+    }
   }
 
-  private get bottomNotes() {
-    if (!this.cityMarkdownNotes) return ''
+  private currentCity = -1
 
-    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
-
-    if (i < 0) return ''
-    return this.cityMarkdownNotes.substring(i + this.plotTag.length)
+  private switchCity(index: number) {
+    // console.log('switchCity: ', index)
+    this.currentCity = index
+    this.city = this.allRuns[index].name
+    this.$nextTick()
   }
 
-  private async loadYaml() {
-    const url = this.public_svn + this.runId + '/metadata.yaml'
-    console.log('yaml url:', url)
+  // Try to get a yaml for each folder
+  private async fetchMultiYamls(dirs: string[]) {
+    this.allRuns = []
+
+    for (const folder of dirs) {
+      try {
+        const subfolder = this.runId + '/' + folder
+        const readYaml = await this.loadYaml(subfolder)
+
+        const crumbs = this.buildBreadcrumbs(subfolder)
+        this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: subfolder, crumbs })
+
+        // load first one!
+        if (this.currentCity == -1) {
+          this.currentCity = 0
+          this.city = readYaml.city
+        }
+      } catch (e) {
+        // that folder was a dud, just ignore it
+      }
+    }
+
+    // console.log({ allRuns: this.allRuns })
+  }
+
+  private setBadPage() {
+    console.log('BAD USER! No such URL.', this.runId)
+    // add some bad-page helper thingy here
+  }
+
+  // this will throw an error if /path/metadata.yaml is not found
+  private async loadYaml(path: string) {
+    const url = this.public_svn + path + '/metadata.yaml'
+
     const response = await fetch(url)
     const text = await response.text()
     const yml: RunYaml = YAML.parse(text)
 
-    console.log(yml)
     return yml
   }
 }
@@ -111,22 +176,9 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-.content {
-  padding: 0rem 3rem;
-  margin: 2rem 0 2rem 0;
-  max-width: 70em;
-  display: flex;
-  flex-direction: column;
-}
-
-.content h3.select-scenario {
-  margin-bottom: 0;
-}
-
 .view-section {
-  background: white;
+  background: #eee;
   width: 100%;
-  padding: 0 3rem;
 }
 
 .viewer {
@@ -149,10 +201,12 @@ export default class VueComponent extends Vue {
   font-size: 1.2rem;
   font-weight: bold;
   text-transform: capitalize;
+  color: #bbb;
+  cursor: pointer;
 }
 
-a.which-city {
-  color: #bbb;
+.which-city.selected {
+  color: black;
 }
 
 .selected {
@@ -164,22 +218,20 @@ a.selected {
   color: black;
 }
 
-.bottom {
-  margin-top: 1rem;
+.breadcrumb {
+  margin: 1rem 3rem 0rem 3rem;
+  font-size: 0.8rem;
 }
 
 @media only screen and (max-width: 640px) {
-  .content {
-    padding: 1rem 1rem;
-    margin-top: 1rem;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    row-gap: 1rem;
+  .breadcrumb {
+    margin: 1rem 1rem 0rem 1rem;
   }
 
-  .view-section {
-    padding: 0 1rem;
+  .city-picker {
+    padding: 0.3rem 1rem 0 1rem;
   }
+
   .which-city {
     padding: 0.5rem 1rem;
   }
