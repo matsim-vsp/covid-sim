@@ -21,3 +21,7 @@ Human mobility data over the course of the pandemics:
 - http://rocs.hu-berlin.de/covid-19-mobility/
 
 - https://www.infas.de/neuigkeit/die-mobilitaet-und-corona-kaum-oepnv-viel-fahrrad-und-immer-noch-auto/
+
+Other regularly updated information sources:
+
+- https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte
