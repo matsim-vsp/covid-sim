@@ -11,3 +11,11 @@ Many other teams worldwide are working on COVID-19 simulations, here are a few t
 - http://covidsim.eu
 
 - https://neherlab.org/covid19/
+
+Human mobility data over the course of the pandemics:
+
+- https://www.google.com/covid19/mobility/
+
+- https://ivtmobis.ethz.ch/mobis/covid19/
+
+- http://rocs.hu-berlin.de/covid-19-mobility/
