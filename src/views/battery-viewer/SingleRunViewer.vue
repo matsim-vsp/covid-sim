@@ -47,10 +47,10 @@
                 :class="{'is-link': logScale, 'is-selected': logScale}"
                 @click="logScale = !logScale") Log
 
-          .variation(v-if="yaml.offset")
+          .variation(v-if="offset.length")
             b Shift Start Date
             .variation-choices.buttons.has-addons( style="margin-left: auto;")
-              button.button.is-small(v-for="offset in yaml.offset" :key="offset"
+              button.button.is-small(v-for="offset in offset" :key="offset"
                 :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
                 @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
@@ -118,6 +118,7 @@ export default class VueComponent extends Vue {
   // convenience from yaml
   private startDate: string = ''
   private city: string = ''
+  private offset: number[] = []
 
   private MAX_DAYS = 200
   private cumulativeInfected = 0
@@ -152,8 +153,32 @@ export default class VueComponent extends Vue {
     this.isZipLoaded = false
     this.$nextTick()
     this.city = this.yaml.city
-    this.startDate = this.yaml.startDate
-    this.plusminus = this.yaml.offset[0]
+    this.offset = []
+
+    if (this.yaml.startDate) this.startDate = this.yaml.startDate
+    else if (this.yaml.defaultStartDate) this.startDate = this.yaml.defaultStartDate
+    else alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
+
+    if (!this.yaml.offset && !this.yaml.startDates)
+      alert('Uh-oh, YAML file has no offsets AND no startDates!')
+
+    if (!this.yaml.startDates) return
+
+    // build offsets if YAML doesn't have them
+    if (!this.yaml.offset) {
+      const defaultDate = moment(this.yaml.defaultStartDate)
+      for (const d of this.yaml.startDates) {
+        const date = moment(d)
+        console.log({ defaultDate, date })
+        const diff = date.diff(defaultDate, 'days')
+        console.log(diff)
+        this.offset.push(diff)
+        if (date.isSame(d)) this.plusminus = diff
+      }
+    } else {
+      this.offset = this.yaml.offset
+      this.plusminus = this.yaml.offset[0]
+    }
 
     this.updateNotes()
 
@@ -222,7 +247,6 @@ export default class VueComponent extends Vue {
   }
 
   private setPlusMinus(value: string) {
-    console.log('SET PLUS MINUS:', value)
     const shift = parseInt(value)
     console.log('SET PLUS MINUS:', shift)
     this.plusminus = shift
@@ -350,7 +374,10 @@ export default class VueComponent extends Vue {
 
     this.currentRun = this.runLookup[lookup]
 
-    if (!this.currentRun) return
+    if (!this.currentRun) {
+      console.log('Could not find this run in the zip:' + lookup)
+      return
+    }
 
     this.runChanged()
   }
