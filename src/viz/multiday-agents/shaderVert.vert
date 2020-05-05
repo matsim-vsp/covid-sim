@@ -90,6 +90,14 @@ vec3 interpolate(in vec3 point1, in vec3 point2, in float timestepFraction) {
 
 void main() {
 
+    // don't do anything if person is unaffected all day
+    if (infectionStatus.x == 0.0 && infectionStatus.y == -1.0) {
+        gl_PointSize = 0.0;
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+        skip = 1.0;
+        return;
+    }
+
     myInfectionStatus = calculateStatus();
 
     // don't do anything if this trip is currently out of time bounds
@@ -97,6 +105,7 @@ void main() {
         gl_PointSize = 0.0;
         gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
         skip = 1.0;
+        return;
 
     } else {
 
