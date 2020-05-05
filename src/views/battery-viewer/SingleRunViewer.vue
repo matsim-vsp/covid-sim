@@ -155,6 +155,7 @@ export default class VueComponent extends Vue {
     this.city = this.yaml.city
     this.offset = []
 
+    // set start date
     if (this.yaml.startDate) this.startDate = this.yaml.startDate
     else if (this.yaml.defaultStartDate) this.startDate = this.yaml.defaultStartDate
     else {
@@ -162,12 +163,12 @@ export default class VueComponent extends Vue {
       return
     }
 
+    // build offsets
     if (!this.yaml.offset && !this.yaml.startDates) {
       alert('Uh-oh, YAML file has no offsets AND no startDates!')
       return
     }
 
-    // build offsets if YAML doesn't have them
     if (!this.yaml.offset) {
       if (!this.yaml.startDates) {
         alert("Need startDates in YAML if we don't have offsets")
@@ -176,9 +177,7 @@ export default class VueComponent extends Vue {
       const defaultDate = moment(this.yaml.defaultStartDate)
       for (const d of this.yaml.startDates) {
         const date = moment(d)
-        console.log({ defaultDate, date })
         const diff = date.diff(defaultDate, 'days')
-        console.log(diff)
         this.offset.push(diff)
         if (date.isSame(d)) this.plusminus = diff
       }
@@ -194,6 +193,7 @@ export default class VueComponent extends Vue {
 
     await this.loadInfoTxt()
     await this.loadZipData()
+
     this.showPlotForCurrentSituation()
   }
 
@@ -375,10 +375,10 @@ export default class VueComponent extends Vue {
     for (const measure of Object.keys(this.measureOptions))
       lookupKey += this.currentSituation[measure] + '-'
 
-    const suffix = this.plusminus
-    const lookup = lookupKey.replace('undefined', '' + suffix)
+    const offsetPrefix = '' + this.plusminus
+    const lookup = lookupKey.replace('undefined', offsetPrefix)
 
-    // console.log(lookup)
+    console.log(lookup)
 
     this.currentRun = this.runLookup[lookup]
 
