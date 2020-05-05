@@ -48,9 +48,14 @@ export interface RunYaml {
   info: string
   readme: string
   zip: string
-  offset: number[]
-  startDate: string
-  timestamp?: string
+  timestamp: string
+  // these are for old version
+  offset?: number[]
+  startDate?: string
+  // these are for new version
+  defaultStartDate?: string
+  startDates?: string[]
+  // these are for everything
   optionGroups: {
     day?: number
     heading: string
