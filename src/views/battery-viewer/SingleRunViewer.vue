@@ -157,15 +157,22 @@ export default class VueComponent extends Vue {
 
     if (this.yaml.startDate) this.startDate = this.yaml.startDate
     else if (this.yaml.defaultStartDate) this.startDate = this.yaml.defaultStartDate
-    else alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
+    else {
+      alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
+      return
+    }
 
-    if (!this.yaml.offset && !this.yaml.startDates)
+    if (!this.yaml.offset && !this.yaml.startDates) {
       alert('Uh-oh, YAML file has no offsets AND no startDates!')
-
-    if (!this.yaml.startDates) return
+      return
+    }
 
     // build offsets if YAML doesn't have them
     if (!this.yaml.offset) {
+      if (!this.yaml.startDates) {
+        alert("Need startDates in YAML if we don't have offsets")
+        return
+      }
       const defaultDate = moment(this.yaml.defaultStartDate)
       for (const d of this.yaml.startDates) {
         const date = moment(d)
@@ -178,6 +185,7 @@ export default class VueComponent extends Vue {
     } else {
       this.offset = this.yaml.offset
       this.plusminus = this.yaml.offset[0]
+      console.log({ newOffset: this.offset })
     }
 
     this.updateNotes()
