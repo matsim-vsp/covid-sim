@@ -59,6 +59,7 @@
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             vue-plotly.plotsize(v-else
               :data="data" :layout="layout" :options="options")
 
@@ -67,6 +68,7 @@
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             hospitalization-plot.plotsize(v-else
               :data="hospitalData" :logScale="logScale" :city="city")
 
@@ -75,6 +77,7 @@
           p Based on four-day new infections
           .plotarea
             p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             r-value-plot.plotsize(v-else :data="data" :logScale="false")
 
   .content(v-if="bottomNotes")
@@ -124,6 +127,7 @@ export default class VueComponent extends Vue {
   private cumulativeInfected = 0
 
   private isZipLoaded = false
+  private isDataMissing = false
   private plusminus = 0
 
   private logScale = true
@@ -383,10 +387,12 @@ export default class VueComponent extends Vue {
     this.currentRun = this.runLookup[lookup]
 
     if (!this.currentRun) {
+      this.isDataMissing = true
       console.log('Could not find this run in the zip:' + lookup)
       return
     }
 
+    this.isDataMissing = false
     this.runChanged()
   }
 
@@ -505,7 +511,7 @@ export default class VueComponent extends Vue {
 
     const response = await fetch(filepath)
     const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
+    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: false })
     // console.log({ parsed: parsed.data })
 
     return parsed.data
@@ -533,7 +539,8 @@ export default class VueComponent extends Vue {
 
       // note this particular value, for every value
       for (const measure of Object.keys(measures)) {
-        if (row[measure] === 0 || row[measure]) measures[measure].add(row[measure])
+        if (row[measure] === 0 || row[measure]) measures[measure].add('' + row[measure])
+        // measures[measure].add(row[measure])
       }
 
       // store the run in a lookup using all values as the key
@@ -544,6 +551,7 @@ export default class VueComponent extends Vue {
       runLookup[lookupKey] = row
     }
 
+    console.log({ measures })
     let order = ''
     for (const measure of Object.keys(measures)) {
       order += measure + '-'

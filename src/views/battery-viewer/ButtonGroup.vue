@@ -32,6 +32,7 @@ export default class VueComponent extends Vue {
   }
 
   private mounted() {
+    console.log({ measure: this.measure, options: this.options })
     this.updateOptions()
   }
 
@@ -39,16 +40,25 @@ export default class VueComponent extends Vue {
     const experiments = []
     if (!this.options) return
 
-    let label = ''
+    // if the options are (a) all numbers and (b) all 0.0 > x > 1.0, then use %
+    // otherwise treat as text
+    let usePercent = true
     for (const x of this.options) {
       if (isNaN(x)) {
-        label = '' + x
-      } else {
-        label = '' + Math.round(x * 100) + '%'
+        usePercent = false
+        break
       }
+      if (x < 0.0 || x > 1.0) {
+        usePercent = false
+        break
+      }
+    }
+
+    // build labels
+    for (const x of this.options) {
+      let label = usePercent ? '' + Math.round(x * 100) + '%' : '' + x
 
       this.showButtons = true
-
       experiments.push(label)
     }
 
@@ -58,9 +68,17 @@ export default class VueComponent extends Vue {
 
   @Watch('selectedValue')
   private valueChanged() {
+    // don't fire events if we're just building the widget
+    // if (this.isUpdating) {
+    //   console.log('ignoring')
+    //   return
+    // }
+
     if (this.selectedValue.endsWith('%')) {
       const answer = this.selectedValue.substring(0, this.selectedValue.length - 1)
-      const v = parseFloat(answer) / 100.0
+      let v = '' + parseFloat(answer) / 100.0
+      if (v === '0') v = '0.0'
+      if (v === '1') v = '1.0'
       this.$emit('changed', this.measure.measure, v)
     } else {
       this.$emit('changed', this.measure.measure, this.selectedValue)
