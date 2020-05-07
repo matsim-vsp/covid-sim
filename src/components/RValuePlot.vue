@@ -1,6 +1,6 @@
 <template lang="pug">
 #vue-component
-  vue-plotly.plotsize(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly(:data="dataLines" :layout="layout" :options="options")
 
 </template>
 
@@ -78,6 +78,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
+    height: 225,
     autosize: true,
     showlegend: true,
     legend: {

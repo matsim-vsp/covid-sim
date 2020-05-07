@@ -105,12 +105,12 @@
         .linear-plot(v-if="city ==='berlin'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          hospitalization-plot.plotsize(:data="data" :logScale="logScale" :city="city")
+          hospitalization-plot.plotsize.compact(:data="data" :logScale="logScale" :city="city")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
           p Based on four-day new infections
-          r-value-plot.plotsize(:data="data" :logScale="false")
+          r-value-plot.plotsize.compact(:data="data" :logScale="false")
 
 </template>
 
@@ -468,7 +468,11 @@ h5 {
 }
 
 .plotsize {
-  height: 30rem;
+  height: 25rem;
+}
+
+.plotsize.compact {
+  height: 15rem;
 }
 
 p.subhead {

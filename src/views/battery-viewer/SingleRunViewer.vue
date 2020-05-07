@@ -66,7 +66,7 @@
         .linear-plot(v-if="city === 'berlin' || city === 'munich'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
           p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea
+          .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             hospitalization-plot.plotsize(v-else
@@ -75,7 +75,7 @@
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
           p Based on four-day new infections
-          .plotarea
+          .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             r-value-plot.plotsize(v-else :data="data" :logScale="false")
@@ -658,16 +658,6 @@ h6 {
   flex-direction: column;
 }
 
-.log-plot {
-  background-color: #f8f8f8;
-  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  margin: 0 0 1rem 1rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #ccc;
-}
-
 .linear-plot {
   background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
@@ -685,7 +675,11 @@ h5 {
 .plotarea {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 30rem;
+  grid-template-rows: 25rem;
+}
+
+.plotarea.compact {
+  grid-template-rows: 15rem;
 }
 
 .plotsize {
@@ -814,10 +808,6 @@ p.subhead {
     padding: 1rem 0rem;
     display: flex;
     flex-direction: column;
-  }
-
-  .log-plot {
-    margin-left: 0;
   }
 
   .linear-plot {
