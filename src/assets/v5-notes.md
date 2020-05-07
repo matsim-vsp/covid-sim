@@ -28,3 +28,9 @@ If one assumes that the capacity of the Berlin system for critical COVID cases i
 Or alternatively: The currently "blunt" restrictions would need to be replaced by something smarter.
 
 This version was used in part to brief the BMBF on Apr/9 about school re-opening options.
+
+
+What has changed comparing to v4?
+
+- destination (school) choice of school population
+- include school attendees in the whole model area (not only inside Berlin city)

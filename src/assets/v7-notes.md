@@ -31,3 +31,7 @@ The best approximation to this with our options below would be:
 If one assumes that the capacity of the Berlin system for critical COVID cases is about 1000, then one finds that there is scant little room to relax restrictions.
 
 Or alternatively: The currently "blunt" restrictions would need to be replaced by something smarter.
+
+What has changed comparing to v6/v5?
+- Age-dependent disease progression model
+- we now only display results for people living in the corresponding city. Before, results included people travelling to/from the corresponding city.

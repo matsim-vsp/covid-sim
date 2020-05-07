@@ -12,6 +12,8 @@ Many other teams worldwide are working on COVID-19 simulations, here are a few t
 
 - https://neherlab.org/covid19/
 
+- https://ispmbern.github.io/covid-19/swiss-epidemic-model/ 
+
 Human mobility data over the course of the pandemics:
 
 - https://www.google.com/covid19/mobility/
