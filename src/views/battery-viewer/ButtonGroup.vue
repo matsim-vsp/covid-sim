@@ -62,7 +62,7 @@ export default class VueComponent extends Vue {
       experiments.push(label)
     }
 
-    if (!usePercent) experiments.sort()
+    if (experiments[0].startsWith('+')) experiments.sort()
 
     this.selectedValue = experiments[0] // select first choice
     this.stops = experiments
