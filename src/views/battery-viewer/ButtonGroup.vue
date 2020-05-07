@@ -62,6 +62,8 @@ export default class VueComponent extends Vue {
       experiments.push(label)
     }
 
+    if (!usePercent) experiments.sort()
+
     this.selectedValue = experiments[0] // select first choice
     this.stops = experiments
   }
@@ -74,7 +76,7 @@ export default class VueComponent extends Vue {
     //   return
     // }
 
-    if (this.selectedValue.endsWith('%')) {
+    if (this.selectedValue.endsWith('%') && !this.selectedValue.startsWith('+')) {
       const answer = this.selectedValue.substring(0, this.selectedValue.length - 1)
       let v = '' + parseFloat(answer) / 100.0
       if (v === '0') v = '0.0'
