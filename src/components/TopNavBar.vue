@@ -14,11 +14,11 @@
   | |
   router-link.space(to="/v7") V7
   | |
-  router-link.space(to="/v8/masks") V8
+  router-link.space(to="/v8/masks/berlin") V8
   | |
-  router-link.space(to="/v9/masks") V9m
+  router-link.space(to="/v9/masks/berlin") V9m
   | |
-  router-link.space(to="/v9/tracing2") V9t
+  router-link.space(to="/v9/tracing2/berlin") V9t
   // | |
   // router-link.space(to="/multiday") Multiday
   // | |

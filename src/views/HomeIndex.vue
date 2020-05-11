@@ -72,19 +72,19 @@ export default {
       ],
       modelruns: [
         {
-          url: '/v9/masks',
+          url: '/v9/masks/berlin',
           date: 'Released: 11 May 2020',
           title: 'v9: Masks',
           subtitle: 'Impact of different types of masks and their usage levels',
         },
         {
-          url: '/v9/tracing2',
+          url: '/v9/tracing2/berlin',
           date: 'Released: 11 May 2020',
           title: 'v9: Contact Tracing',
           subtitle: 'Part 2: More contact tracing options',
         },
         {
-          url: '/v8',
+          url: '/v8/masks',
           date: 'Released: 11 May 2020',
           title: 'v8: Masks',
           subtitle: 'Impact of different types of masks and their usage levels',
