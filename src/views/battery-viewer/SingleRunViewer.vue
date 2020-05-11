@@ -36,6 +36,13 @@
 
       .all-plots
 
+        .linear-plot.activity(v-if="showActivityLevels")
+          h5 Activity Levels by Type
+          p 0-100% of normal
+          .plotarea.compact
+            activity-levels-plot.plotsize(:city="city" :battery="runId"
+              :currentRun="currentRun" :startDate="startDate" :plusminus="plusminus")
+
         .plot-options
           .scale-options
             b Scale
@@ -96,9 +103,11 @@ import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
+import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
+import SVNFileSystem from '@/util/SVNFileSystem'
 import { RunYaml } from '@/Globals'
 
 interface Measure {
@@ -108,6 +117,7 @@ interface Measure {
 
 @Component({
   components: {
+    ActivityLevelsPlot,
     HospitalizationPlot,
     ButtonGroup,
     RValuePlot,
@@ -133,6 +143,9 @@ export default class VueComponent extends Vue {
   private logScale = true
   private cityMarkdownNotes: string = ''
   private plotTag = '{{PLOTS}}'
+
+  private showActivityLevels = false
+  private zipActivityLevelFileName = 'summaries_restrictions.zip'
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
@@ -322,9 +335,17 @@ export default class VueComponent extends Vue {
     }
 
     this.isZipLoaded = true
-
     this.zipCache[this.city] = this.zipLoader
     this.runChanged()
+
+    this.showActivityLevelPlot()
+  }
+
+  private async showActivityLevelPlot() {
+    const svnRoot = new SVNFileSystem(this.BATTERY_URL)
+    const folderContents = await svnRoot.getDirectory(this.runId)
+
+    this.showActivityLevels = folderContents.files.indexOf(this.zipActivityLevelFileName) !== -1
   }
 
   private hospitalData: any[] = []
@@ -666,6 +687,16 @@ h6 {
   display: flex;
   flex-direction: column;
   border: 1px solid #ccc;
+}
+
+.linear-plot.activity {
+  background-color: #f8f8f800;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  margin: 0rem 0 2rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  border: none;
 }
 
 h5 {
