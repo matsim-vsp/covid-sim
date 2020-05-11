@@ -75,29 +75,19 @@ export default {
           url: '/v9/masks',
           date: 'Released: 11 May 2020',
           title: 'v9: Masks',
-          subtitle:
-            'Impact of different types of masks and their usage levels',
-        },
-        {
-          url: '/v9/tracing1',
-          date: 'Released: 11 May 2020',
-          title: 'Contact Tracing (1)',
-          subtitle:
-            'Part 1: Investigation of different contact tracing options',
+          subtitle: 'Impact of different types of masks and their usage levels',
         },
         {
           url: '/v9/tracing2',
           date: 'Released: 11 May 2020',
-          title: 'Contact Tracing (2)',
-          subtitle:
-            'Part 2: More contact tracing options',
+          title: 'v9: Contact Tracing',
+          subtitle: 'Part 2: More contact tracing options',
         },
         {
           url: '/v8',
           date: 'Released: 11 May 2020',
           title: 'v8: Masks',
-          subtitle:
-            'Impact of different types of masks and their usage levels',
+          subtitle: 'Impact of different types of masks and their usage levels',
         },
         {
           url: '/v7',

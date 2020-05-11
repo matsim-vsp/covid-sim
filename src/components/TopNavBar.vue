@@ -18,9 +18,7 @@
   | |
   router-link.space(to="/v9/masks") V9m
   | |
-  router-link.space(to="/v9/tracing1") V9t1
-  | |
-  router-link.space(to="/v9/tracing2") V9t2
+  router-link.space(to="/v9/tracing2") V9t
   // | |
   // router-link.space(to="/multiday") Multiday
   // | |
