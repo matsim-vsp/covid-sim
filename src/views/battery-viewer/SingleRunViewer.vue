@@ -81,11 +81,13 @@
 
         .linear-plot
           h5 {{ cityCap }} Weekly Infection Rate
-          p Based on seven-day new infections
+          p Seven-day new infections per 100,000
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            new-infections-plot.plotsize(v-else :data="data" :logScale="false")
+            weekly-infections-plot.plotsize(v-else :data="data"
+                                                   :observed="observedCases"
+                                                   :logScale="logScale")
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
@@ -114,7 +116,7 @@ import moment from 'moment'
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
-import NewInfectionsPlot from '@/components/NewInfectionsPlot.vue'
+import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import { RunYaml } from '@/Globals'
@@ -129,7 +131,7 @@ interface Measure {
     ActivityLevelsPlot,
     HospitalizationPlot,
     ButtonGroup,
-    NewInfectionsPlot,
+    WeeklyInfectionsPlot,
     RValuePlot,
     VuePlotly,
   },
@@ -240,7 +242,7 @@ export default class VueComponent extends Vue {
   private measureOptions: any = {}
   private runLookup: any = {}
 
-  private observedCases: any
+  private observedCases: any = {}
 
   private layout = {
     autosize: true,

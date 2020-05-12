@@ -12,6 +12,7 @@ import VuePlotly from '@statnett/vue-plotly'
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
+  @Prop({ required: true }) private observed!: any
 
   private color = ['#094', '#0c4']
 
@@ -31,11 +32,51 @@ export default class VueComponent extends Vue {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
+  private dunkelZifferFactor = 1.0
+
+  private calculateObserved(factor100k: number) {
+    console.log({ observed: this.observed })
+    if (!this.observed) return
+
+    const observedLine: any = {}
+    observedLine.name = 'Detected Infections per 100,000 (RKI)'
+    observedLine.line = this.observed.line
+    observedLine.x = []
+    observedLine.y = []
+
+    // option a: derivative
+    // for (let i = 1; i < this.observed.x.length - 2; i++) {
+    //   const before = this.observed.y[i - 1]
+    //   const after = this.observed.y[i + 1]
+
+    //   const infectionsPerDay = (after - before) / 2
+    //   const sevenDays = 7 * infectionsPerDay
+    //   const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
+    //   const observedRatePer100k =
+    //     Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
+
+    //   observedLine.x.push(this.observed.x[i])
+    //   observedLine.y.push(observedRatePer100k)
+    // }
+
+    // option b: 7-day running total
+    for (let i = 0; i < this.observed.x.length; i++) {
+      const sevenDays = this.observed.y[i] - (i < 7 ? 0 : this.observed.y[i - this.lagDays])
+      const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
+      const observedRatePer100k =
+        Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
+
+      observedLine.x.push(this.observed.x[i])
+      observedLine.y.push(observedRatePer100k)
+    }
+
+    // done
+    this.dataLines.push(observedLine)
+    console.log({ observedLine })
+  }
+
   /**
    * We are calculating a seven day running infection rate.
-   * Starting on day 7,
-   * - numerator:  past four days of "newly infected", which is the difference in Susceptible;
-   * - denominator: divide by the "newly infected" number from four days ago
    */
   private calculateValues() {
     if (this.data.length === 0) return
@@ -57,38 +98,30 @@ export default class VueComponent extends Vue {
     }
 
     this.dataLines = [
-      // {
-      //   name: 'Number of Infections',
-      //   x: susceptible.x.slice(this.lagDays),
-      //   y: newlyInfected,
-      //   line: {
-      //     width: 2,
-      //     color: this.color[0],
-      //     shape: 'spline',
-      //   },
-      // },
+      {
+        name: 'Simulated Infections per 100,000',
+        x: susceptible.x.slice(this.lagDays),
+        y: infectionRate,
+        fill: 'tozeroy',
+        line: {
+          width: 1.5,
+          color: '#329',
+          shape: 'hvh',
+        },
+      },
       {
         name: 'Target: 50 per 100,000',
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50.0, 50.0],
         fill: 'tozeroy',
         line: {
-          width: 2.0,
-          color: '#44995544',
-        },
-      },
-      {
-        name: 'Infections per 100,000',
-        x: susceptible.x.slice(this.lagDays),
-        y: infectionRate,
-        fill: 'tozeroy',
-        line: {
           width: 1.0,
-          color: '#a05',
-          shape: 'hvh',
+          color: '#886666',
         },
       },
     ]
+
+    this.calculateObserved(factor100k)
   }
 
   private reformatDate(day: string) {
@@ -116,8 +149,9 @@ export default class VueComponent extends Vue {
     },
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
-      autorange: true,
-      title: 'Weekly Infections / 100,000',
+      autorange: true, // this.logScale ? false : true,
+      // range: [0, 5],
+      title: 'Infections / 100,000',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
