@@ -68,24 +68,24 @@ export default class VueComponent extends Vue {
       //   },
       // },
       {
-        name: 'Infections per 100,000',
-        x: susceptible.x.slice(this.lagDays),
-        y: infectionRate,
-        type: 'bar',
-        marker: { color: '#096' },
-        line: {
-          width: 0.5,
-          color: this.color[0],
-          shape: 'spline',
-        },
-      },
-      {
         name: 'Target: 50 per 100,000',
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50.0, 50.0],
+        fill: 'tozeroy',
         line: {
           width: 2.0,
-          color: '#aa44ffcc',
+          color: '#44995544',
+        },
+      },
+      {
+        name: 'Infections per 100,000',
+        x: susceptible.x.slice(this.lagDays),
+        y: infectionRate,
+        fill: 'tozeroy',
+        line: {
+          width: 1.0,
+          color: '#a05',
+          shape: 'hvh',
         },
       },
     ]
