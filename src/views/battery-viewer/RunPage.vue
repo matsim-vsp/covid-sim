@@ -64,7 +64,7 @@ export default class VueComponent extends Vue {
   private allRuns: { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[] = []
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
-    console.log('ROUTE CHANGEEEEED')
+    console.log('ROUTE CHANGED', to)
     this.buildPageForURL()
   }
 
@@ -77,6 +77,7 @@ export default class VueComponent extends Vue {
     console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
+    this.currentCity = -1
     this.allRuns = []
 
     // Try to fetch metadata.yaml from the URL.
