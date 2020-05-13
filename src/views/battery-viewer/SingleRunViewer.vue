@@ -167,6 +167,8 @@ export default class VueComponent extends Vue {
   private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
   private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
 
+  private isUsingRealDates = false
+
   private cityCSV: any = {
     berlin: this.RKI_URL + 'berlin-cases.csv',
     munich: this.RKI_URL + 'munich-cases.csv',
@@ -180,6 +182,7 @@ export default class VueComponent extends Vue {
     if (!this.yaml.city) return
 
     this.isZipLoaded = false
+    this.isUsingRealDates = false
     this.$nextTick()
     this.city = this.yaml.city
     this.offset = []
@@ -203,6 +206,7 @@ export default class VueComponent extends Vue {
         alert("Need startDates in YAML if we don't have offsets")
         return
       }
+      this.isUsingRealDates = true
       const defaultDate = moment(this.yaml.defaultStartDate)
       for (const d of this.yaml.startDates) {
         const date = moment(d)
@@ -412,16 +416,24 @@ export default class VueComponent extends Vue {
     for (const measure of Object.keys(this.measureOptions))
       lookupKey += this.currentSituation[measure] + '-'
 
-    const offsetPrefix = '' + this.plusminus
-    const lookup = lookupKey.replace('undefined', offsetPrefix)
+    // determine: use offset numeral, or offset date?
+    if (this.isUsingRealDates) {
+      const defaultDate = moment(this.yaml.defaultStartDate)
+      const diff = defaultDate.add(this.plusminus, 'days')
+      console.log(diff)
+      lookupKey = lookupKey.replace('undefined', diff.format('YYYY-MM-DD'))
+    } else {
+      const offsetPrefix = '' + this.plusminus
+      lookupKey = lookupKey.replace('undefined', offsetPrefix)
+    }
 
-    console.log(lookup)
+    console.log(lookupKey)
 
-    this.currentRun = this.runLookup[lookup]
+    this.currentRun = this.runLookup[lookupKey]
 
     if (!this.currentRun) {
       this.isDataMissing = true
-      console.log('Could not find this run in the zip:' + lookup)
+      console.log('Could not find this run in the zip:' + lookupKey)
       return
     }
 
@@ -573,7 +585,6 @@ export default class VueComponent extends Vue {
       // note this particular value, for every value
       for (const measure of Object.keys(measures)) {
         if (row[measure] === 0 || row[measure]) measures[measure].add('' + row[measure])
-        // measures[measure].add(row[measure])
       }
 
       // store the run in a lookup using all values as the key
@@ -593,6 +604,7 @@ export default class VueComponent extends Vue {
 
     this.runLookup = runLookup
     this.measureOptions = measures
+    console.log({ RUNLOOKUP: this.runLookup })
   }
 
   private mdParser = new MarkdownIt()
