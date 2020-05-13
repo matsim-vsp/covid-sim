@@ -14,7 +14,7 @@
   | |
   router-link.space(to="/v7") V7
   | |
-  router-link.space(to="/v8/masks/berlin") V8
+  router-link.space(to="/v8/masks") V8
   | |
   router-link.space(to="/v9/masks/berlin") V9m
   | |
