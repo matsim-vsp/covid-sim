@@ -16,7 +16,7 @@ export default class VueComponent extends Vue {
 
   private color = ['#094', '#0c4']
 
-  private lagDays = 7
+  private lagDays = 1
 
   private dataLines: any[] = []
 
@@ -61,10 +61,11 @@ export default class VueComponent extends Vue {
 
     // option b: 7-day running total
     for (let i = 0; i < this.observed.x.length; i++) {
-      const sevenDays = this.observed.y[i] - (i < 7 ? 0 : this.observed.y[i - this.lagDays])
+      const sevenDays =
+        this.observed.y[i] - (i < this.lagDays ? 0 : this.observed.y[i - this.lagDays])
       const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
       const observedRatePer100k =
-        Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
+        (7.0 * Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k)) / 10.0
 
       observedLine.x.push(this.observed.x[i])
       observedLine.y.push(observedRatePer100k)
@@ -93,7 +94,7 @@ export default class VueComponent extends Vue {
       const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
       newlyInfected.push(diffSusceptible)
       // infections per 100,000
-      const rate = Math.round((10.0 * diffSusceptible) / factor100k) / 10.0
+      const rate = (7.0 * Math.round((10.0 * diffSusceptible) / factor100k)) / 10.0
       infectionRate.push(rate)
     }
 
