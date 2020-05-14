@@ -23,7 +23,8 @@ const routes = [
   {
     path: '/v3',
     name: 'V3',
-    component: () => import(/* webpackChunkName: "V3" */ '@/runs/v3/V3.vue'),
+    component: () =>
+      import(/* webpackChunkName: "V3" */ '@/viz/multiday-agents/MultiDayViewer.vue'),
   },
   {
     path: '/v4',
