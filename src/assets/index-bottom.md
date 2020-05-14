@@ -2,11 +2,9 @@
 
 The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bilding und Forschung). These reports are written in German.
 
-- [Report, 07 May 2020](https://drive.google.com/open?id=19uzRaij0xPoAR56cw8gJruXHulIK0YSV54u1pUvJXnc)
-- [Report, 24 April 2020](https://drive.google.com/open?id=1IIAJ9d2GX5tY_68wWKf2lZTUl_gvglstKy_oOlCNEaA)
-- [Report, 08 April 2020](https://drive.google.com/open?id=10mYY4htSxHZoQY8uGG9SwCkNLcHvCXpnepL-TcosKKU)
-
-These links connect to online versions of the documents on Google Drive. No Google account or login is required to view them.
+- [Report, 07 May 2020](https://doi.org/10.14279/depositonce-10018)
+- [Report, 24 April 2020](https://doi.org/10.14279/depositonce-10017)
+- [Report, 08 April 2020](https://doi.org/10.14279/depositonce-10016)
 
 ## Other COVID-19 scenario simulations on the web
 
