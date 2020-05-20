@@ -65,7 +65,7 @@ export default {
       readmeBottom: bottom,
       visualizations: [
         {
-          url: '/v3',
+          url: '/v3?day=5',
           title: 'Infection Traces',
           subtitle: 'Animation of infection spreading through the population.',
         },

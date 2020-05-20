@@ -21,22 +21,21 @@
       .navbar-start
 
         router-link.navbar-item(to="/v9/masks/berlin") v9:Masks
-
         router-link.navbar-item(to="/v9/tracing2/berlin") v9:Tracing
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
-            a.navbar-item(href="/covid-sim/v8/masks") v8 Masks
-            a.navbar-item(href="/covid-sim/v7") v7
-            a.navbar-item(href="/covid-sim/norun") v6
-            a.navbar-item(href="/covid-sim/v5") v5
-            a.navbar-item(href="/covid-sim/v4") v4
-            a.navbar-item(href="/covid-sim/norun") v3
-            a.navbar-item(href="/covid-sim/v2") v2
-            a.navbar-item(href="/covid-sim/v1") v1
+            a.navbar-item(:href="root+'/v8/masks'") v8 Masks
+            a.navbar-item(:href="root+'/v7'") v7
+            a.navbar-item(:href="root+'/norun'") v6
+            a.navbar-item(:href="root+'/v5'") v5
+            a.navbar-item(:href="root+'/v4'") v4
+            a.navbar-item(:href="root+'/norun'") v3
+            a.navbar-item(:href="root+'/v2'") v2
+            a.navbar-item(:href="root+'/v1'") v1
 
-        a.navbar-item(href="/covid-sim/v3?day=9") Visualizations
+        router-link.navbar-item(to="/v3?day=5") Visualizations
 
 </template>
 
@@ -47,9 +46,15 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 export default class VueComponent extends Vue {
   private isBurgerActive = false
   private isDropdownActive = false
+  private root = ''
+
   private clickedBurger() {
     console.log('clicked!')
     this.isBurgerActive = !this.isBurgerActive
+  }
+
+  private mounted() {
+    if (process.env.NODE_ENV === 'production') this.root = '/covid-sim'
   }
 
   @Watch('$route') private routeChanged(to: any, from: any) {
