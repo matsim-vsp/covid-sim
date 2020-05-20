@@ -35,51 +35,18 @@
 
         router-link.navbar-item(to="/v3") Visualizations
 
-
-  //- router-link.space(to="/v1") V1
-  //- | |
-  //- router-link.space(to="/v2") V2
-  //- | |
-  //- router-link.space(to="/v3") V3
-  //- | |
-  //- router-link.space(to="/v4") V4
-  //- | |
-  //- router-link.space(to="/v5") V5
-  //- | |
-  //- router-link.space(to="/v7") V7
-  //- | |
-  //- | |
-  // | |
-  // router-link.space(to="/multiday") Multiday
-  // | |
-  // router-link.space(to="/v6") V6
-
-
-
-      .navbar-end
-        .navbar-item
-          //- .buttons
-          //-   a.button.is-primary
-          //-     strong Sign up
-          //-   a.button.is-light Log in
-
 </template>
 
-<script lang="ts" scoped>
-export default {
-  name: 'TopNavBar',
-  components: {},
-  data: function() {
-    return {
-      isBurgerActive: false,
-    }
-  },
-  methods: {
-    clickedBurger: function() {
-      console.log('clicked!')
-      this.isBurgerActive = !this.isBurgerActive
-    },
-  },
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator'
+
+@Component({})
+export default class VueComponent extends Vue {
+  private isBurgerActive = false
+  private clickedBurger() {
+    console.log('clicked!')
+    this.isBurgerActive = !this.isBurgerActive
+  }
 }
 </script>
 
