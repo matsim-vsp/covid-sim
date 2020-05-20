@@ -27,16 +27,16 @@
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
-            a.navbar-item(href="/v8/masks") v8 Masks
-            a.navbar-item(href="/v7") v7
-            a.navbar-item(href="/norun") v6
-            a.navbar-item(href="/v5") v5
-            a.navbar-item(href="/v4") v4
-            a.navbar-item(href="/norun") v3
-            a.navbar-item(href="/v2") v2
-            a.navbar-item(href="/v1") v1
+            a.navbar-item(href="/covid-sim/v8/masks") v8 Masks
+            a.navbar-item(href="/covid-sim/v7") v7
+            a.navbar-item(href="/covid-sim/norun") v6
+            a.navbar-item(href="/covid-sim/v5") v5
+            a.navbar-item(href="/covid-sim/v4") v4
+            a.navbar-item(href="/covid-sim/norun") v3
+            a.navbar-item(href="/covid-sim/v2") v2
+            a.navbar-item(href="/covid-sim/v1") v1
 
-        a.navbar-item(href="/v3?day=9") Visualizations
+        a.navbar-item(href="/covid-sim/v3?day=9") Visualizations
 
 </template>
 
