@@ -1,7 +1,7 @@
 <template lang="pug">
   nav.navbar.is-link(role="navigation" aria-label="main navigation")
     .navbar-brand
-      a.navbar-item.home-link(href="/") Episim Home
+      router-link.home-link.navbar-item(to="/") Home
         //- img(src="https://bulma.io/images/bulma-logo.png" width="112" height="28")
 
       a.navbar-burger.burger(
@@ -19,35 +19,43 @@
       :class="{'is-active': isBurgerActive}"
       @click='clickedBurger')
       .navbar-start
+
         router-link.navbar-item(to="/v9/masks/berlin") v9:Masks
 
         router-link.navbar-item(to="/v9/tracing2/berlin") v9:Tracing
 
-        .navbar-item.has-dropdown.is-hoverable
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
-            router-link(to="/v8/masks"): a.navbar-item v8 Masks
-            router-link(to="/v7"): a.navbar-item v7
-            router-link(to="/norun"): a.navbar-item v6
-            router-link(to="/v5"): a.navbar-item v5
-            router-link(to="/v4"): a.navbar-item v4
-            router-link(to="/norun"): a.navbar-item v3
-            router-link(to="/v2"): a.navbar-item v2
-            router-link(to="/v1"): a.navbar-item v1
+            a.navbar-item(href="/v8/masks") v8 Masks
+            a.navbar-item(href="/v7") v7
+            a.navbar-item(href="/norun") v6
+            a.navbar-item(href="/v5") v5
+            a.navbar-item(href="/v4") v4
+            a.navbar-item(href="/norun") v3
+            a.navbar-item(href="/v2") v2
+            a.navbar-item(href="/v1") v1
 
-        router-link.navbar-item(to="/v3") Visualizations
+        a.navbar-item(href="/v3?day=9") Visualizations
 
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 
 @Component({})
 export default class VueComponent extends Vue {
   private isBurgerActive = false
+  private isDropdownActive = false
   private clickedBurger() {
     console.log('clicked!')
     this.isBurgerActive = !this.isBurgerActive
+  }
+
+  @Watch('$route') private routeChanged(to: any, from: any) {
+    console.log(this.$route)
+    this.isBurgerActive = false
+    this.isDropdownActive = false
   }
 }
 </script>
@@ -64,12 +72,12 @@ export default class VueComponent extends Vue {
 }
 
 .home-link {
-  padding-left: 3rem;
+  margin-left: 2.25rem;
 }
 
 @media only screen and (max-width: 640px) {
   .home-link {
-    padding-left: 1rem;
+    margin-left: 0.25rem;
   }
 
   .space {

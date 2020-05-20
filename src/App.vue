@@ -91,10 +91,6 @@ h3 {
   background-color: $paleBackground;
 }
 
-#nav {
-  z-index: 32767;
-}
-
 #nav a.router-link-exact-active {
   color: #ffffff;
 }
