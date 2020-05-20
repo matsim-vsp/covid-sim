@@ -2,7 +2,8 @@
 #app
   top-nav-bar#nav(:style="{paddingLeft: state.isFullScreen ? '0rem':''}" )
 
-  router-view
+  .thing
+    router-view
 
   .footer(v-if="!state.isFullScreen")
     a(href="https://vsp.tu-berlin.de")
@@ -60,6 +61,10 @@ html {
   background-color: #ccc;
 }
 
+.bury-me {
+  z-index: -5;
+}
+
 h1,
 h2,
 h3,
@@ -89,6 +94,12 @@ h3 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: $paleBackground;
+}
+
+#nav {
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
 
 #nav a.router-link-exact-active {

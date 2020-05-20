@@ -133,6 +133,7 @@ export default {
 @import '@/styles.scss';
 
 #home {
+  margin-top: $navHeight;
   background-color: $paleBackground;
 }
 
