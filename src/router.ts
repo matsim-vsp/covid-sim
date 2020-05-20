@@ -63,6 +63,11 @@ const routes = [
     redirect: '/v7/:city',
   },
   {
+    path: '/norun',
+    name: 'norun',
+    component: () => import(/* webpackChunkName: "norun" */ '@/views/MessagePage.vue'),
+  },
+  {
     path: '/multiday',
     component: () =>
       import(/* webpackChunkName: "multiday" */ '@/viz/multiday-agents/MultiDayViewer.vue'),

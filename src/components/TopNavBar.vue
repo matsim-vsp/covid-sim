@@ -27,10 +27,11 @@
           a.navbar-link  Older Versions
           .navbar-dropdown
             router-link(to="/v8/masks"): a.navbar-item v8 Masks
-            hr.navbar-divider
             router-link(to="/v7"): a.navbar-item v7
+            router-link(to="/norun"): a.navbar-item v6
             router-link(to="/v5"): a.navbar-item v5
             router-link(to="/v4"): a.navbar-item v4
+            router-link(to="/norun"): a.navbar-item v3
             router-link(to="/v2"): a.navbar-item v2
             router-link(to="/v1"): a.navbar-item v1
 
