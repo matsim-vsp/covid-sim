@@ -102,6 +102,10 @@ h3 {
   width: 100%;
 }
 
+.thing {
+  padding-top: $navHeight;
+}
+
 #nav a.router-link-exact-active {
   color: #ffffff;
 }

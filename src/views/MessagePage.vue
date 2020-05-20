@@ -45,7 +45,7 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .content {
-  margin-top: 6rem;
+  margin-top: 4rem;
   margin-bottom: 2rem;
   padding: 0 3rem;
 }
