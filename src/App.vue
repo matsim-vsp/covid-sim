@@ -1,6 +1,6 @@
 <template lang="pug">
 #app
-  my-nav-bar#nav(:style="{paddingLeft: state.isFullScreen ? '0rem':''}" )
+  top-nav-bar#nav(:style="{paddingLeft: state.isFullScreen ? '0rem':''}" )
 
   router-view
 
@@ -17,12 +17,12 @@
 </template>
 
 <script lang="ts">
-import MyNavBar from '@/components/TopNavBar.vue'
+import TopNavBar from '@/components/TopNavBar.vue'
 import store from '@/store'
 
 export default {
   name: 'App',
-  components: { MyNavBar },
+  components: { TopNavBar },
   data: function() {
     return {
       state: store.state,
