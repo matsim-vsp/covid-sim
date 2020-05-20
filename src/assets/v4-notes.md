@@ -1,4 +1,4 @@
-## School Reopening Scenarios (1)
+## v4: School Reopening Scenarios (1)
 
 V4 attempts to replay the development so far, and explores results of various school attendance scenarios and two levels of restrictions on non-school activity:
 
@@ -14,7 +14,6 @@ The **base doubling time is approx. 3 days**. It corresponds to the German growt
 The **doubling time of "Type A" is approx. 13 days**, which is _more optimistic_ than what we currently measure (approx. 9 days).
 
 "Type B" is even more optimistic.
-
 
 What has changed compring to v2?
 

@@ -16,7 +16,8 @@
         span(aria-hidden="true")
 
     #navbarBasicExample.navbar-menu(
-      :class="{'is-active': isBurgerActive}")
+      :class="{'is-active': isBurgerActive}"
+      @click='clickedBurger')
       .navbar-start
         router-link.navbar-item(to="/v9/masks/berlin") v9:Masks
 
@@ -55,6 +56,10 @@ export default class VueComponent extends Vue {
 
 #nav {
   background-color: $matsimBlue;
+}
+
+#nav a.router-link-exact-active {
+  font-weight: bold;
 }
 
 .home-link {

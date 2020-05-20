@@ -1,4 +1,4 @@
-## School Reopening Options (2)
+## v5: School Reopening Options (2)
 
 Here we describe the effects of reopening society at various levels for work, school, leisure and other activities.
 
@@ -28,7 +28,6 @@ If one assumes that the capacity of the Berlin system for critical COVID cases i
 Or alternatively: The currently "blunt" restrictions would need to be replaced by something smarter.
 
 This version was used in part to brief the BMBF on Apr/9 about school re-opening options.
-
 
 What has changed comparing to v4?
 

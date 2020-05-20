@@ -1,4 +1,4 @@
-## Examining adherence rates for stay-at-home orders
+## v2: Examining adherence rates for stay-at-home orders
 
 The interventions below depict disease spread following various levels of adherence with stay-at-home policies.
 

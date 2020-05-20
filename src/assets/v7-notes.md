@@ -1,4 +1,4 @@
-## MATSim-Episim Version 7: Re-opening Scenarios
+## v7: Re-opening Scenarios
 
 _Published 22 April 2020_
 
@@ -33,5 +33,6 @@ If one assumes that the capacity of the Berlin system for critical COVID cases i
 Or alternatively: The currently "blunt" restrictions would need to be replaced by something smarter.
 
 What has changed comparing to v6/v5?
+
 - Age-dependent disease progression model
 - we now only display results for people living in the corresponding city. Before, results included people travelling to/from the corresponding city.

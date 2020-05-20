@@ -1,4 +1,4 @@
-## School Reopening Scenarios (3)
+## v6: School Reopening Scenarios (3)
 
 Here we depict the effects of reopening society at various levels for work, school, leisure and other activities.
 
