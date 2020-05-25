@@ -20,6 +20,8 @@ export default class AnimationView extends Vue {
 
   @Prop({ required: true }) private day!: number
 
+  @Prop({ required: true }) private showSusceptible!: boolean
+
   private timeFactor = 600.0
 
   private timeDirection = 1
@@ -187,6 +189,15 @@ export default class AnimationView extends Vue {
         this.$nextTick()
       }
     }
+  }
+
+  @Watch('showSusceptible') toggleSusceptible() {
+    if (!this.agentGeometry) return
+    if (!this.agentMaterial) return
+
+    const show = this.showSusceptible ? 1.0 : 0.0
+    this.agentMaterial.uniforms['showSusceptible'].value = show
+    this.agentMaterial.uniformsNeedUpdate = true
   }
 
   private handleVisibilityChange() {
@@ -452,6 +463,7 @@ export default class AnimationView extends Vue {
       this.agentMaterial = new THREE.ShaderMaterial({
         uniforms: {
           simulationTime: { value: 0.0 },
+          showSusceptible: { value: this.showSusceptible },
           colorLinks: { value: new THREE.Color(this.colors.links) },
 
           cSusceptible: { value: new THREE.Color(this.colors.susceptible) },

@@ -53,8 +53,6 @@ class AgentGeometry extends THREE.BufferGeometry {
 
     this.setAttribute('infectionTime', new THREE.Float32BufferAttribute(infectionTimes, 3))
     this.setAttribute('infectionStatus', new THREE.Float32BufferAttribute(infectionTypes, 3))
-    // this.attributes.infectionTime.needsUpdate = true
-    // this.attributes.infectionType.needsUpdate = true
   }
 
   private buildWaypoints(

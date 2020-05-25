@@ -1,6 +1,6 @@
 <template lang="pug">
 #v3-app
-  animation-view.anim(@loaded="toggleLoaded" :speed="speed" :day="newDay")
+  animation-view.anim(@loaded="toggleLoaded" :speed="speed" :day="newDay" :showSusceptible="showSusceptible")
 
   modal-markdown-dialog#help-dialog(
     title='COVID-19 virus spreading'
@@ -46,6 +46,16 @@
       p.speed-label(
         :style="{'color': textColor.text}") {{ speed }}x speed
 
+      toggle-button(@change="toggleSusceptible"
+                    :value="showSusceptible"
+                    :sync="true"
+                    :labels="true"
+                    color="#4b7cc4"
+                    :speed="150")
+
+      p.speed-label(
+        :style="{color: textColor.text}") Show susceptible
+
 
   playback-controls.playback-stuff(v-if="isLoaded" @click='toggleSimulation')
 
@@ -65,6 +75,7 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import Papaparse from 'papaparse'
 import VueSlider from 'vue-slider-component'
+import { ToggleButton } from 'vue-js-toggle-button'
 
 import store from '@/store'
 import AnimationView from './AnimationView.vue'
@@ -79,6 +90,7 @@ import { Route } from 'vue-router'
     ModalMarkdownDialog,
     PlaybackControls,
     VueSlider,
+    ToggleButton,
   },
 })
 export default class VueComponent extends Vue {
@@ -89,7 +101,9 @@ export default class VueComponent extends Vue {
   private state = store.state
   private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
   private isLoaded = false
+
   private showHelp = false
+  private showSusceptible = true
 
   private totalInfections = require('./totalInfections.csv').default
 
@@ -257,6 +271,10 @@ export default class VueComponent extends Vue {
     // only show the help once
     this.$store.commit('setSawAgentAnimationHelp', true)
     this.$store.commit('setSimulation', true)
+  }
+
+  private toggleSusceptible() {
+    this.showSusceptible = !this.showSusceptible
   }
 
   private switchDay(day: number) {
@@ -547,6 +565,8 @@ img.theme-button:hover {
 
 .speed-label {
   font-weight: bold;
+  margin-bottom: 1rem;
+  margin-top: 0.25rem;
 }
 
 .day-switchers {

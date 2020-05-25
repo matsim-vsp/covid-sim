@@ -1,6 +1,7 @@
 // vertex shader: agent positions
 
 uniform float simulationTime;
+uniform float showSusceptible;
 
 attribute vec3 position2;  // x,y,t
 
@@ -91,7 +92,7 @@ vec3 interpolate(in vec3 point1, in vec3 point2, in float timestepFraction) {
 void main() {
 
     // don't do anything if person is unaffected all day
-    if (infectionStatus.x == 0.0 && infectionStatus.y == -1.0) {
+    if (showSusceptible == 0.0 && infectionStatus.x == 0.0 && infectionStatus.y == -1.0) {
         gl_PointSize = 0.0;
         gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
         skip = 1.0;
