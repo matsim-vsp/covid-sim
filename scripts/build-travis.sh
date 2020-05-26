@@ -7,7 +7,7 @@ IFS=$'\n\t'
 RKI_FILE=https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data
 
 wget -O rki.csv $RKI_FILE
-python3 scripts/rki-update.py rki.csv
+python scripts/rki-update.py rki.csv
 cp *cases* src/assets
 
 yarn run build && yarn run test:unit
