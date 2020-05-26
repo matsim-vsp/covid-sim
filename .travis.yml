@@ -17,7 +17,7 @@ branches:
 
 # build the webapp into ./dist
 script:
-  - scripts/build-travis.sh
+  - bash scripts/build-travis.sh
 
 # the script statement for each deploy refer to the deploy.sh script because the script tag in the deploy section
 # only supports one command...
