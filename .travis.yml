@@ -3,6 +3,11 @@ dist: trusty
 node_js:
   - '10'
 
+python:
+  - '3.7'
+before_install:
+  - apt install wget && pip install pandas dfply
+
 addons:
 
 branches:
@@ -11,7 +16,7 @@ branches:
 
 # build the webapp into ./dist
 script:
-  - yarn run build && yarn run test:unit
+  - scripts/build-travis.sh
 
 # the script statement for each deploy refer to the deploy.sh script because the script tag in the deploy section
 # only supports one command...
