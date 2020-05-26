@@ -6,7 +6,7 @@ node_js:
 python:
   - '3.7'
 before_install:
-  - pip install pandas dfply
+  - sudo pip3 install pandas dfply
 
 addons:
 
