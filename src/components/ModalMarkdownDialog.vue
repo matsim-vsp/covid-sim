@@ -39,6 +39,10 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+.modal {
+  margin-top: 3rem;
+}
+
 @media only screen and (max-width: 640px) {
 }
 </style>

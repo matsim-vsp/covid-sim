@@ -11,7 +11,7 @@ IFS=$'\n\t'
 
 RKI_FILE=https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data
 
-wget -q -O rki.csv $RKI_FILE
+wget -nv -O rki.csv $RKI_FILE
 
 # create the [city]-cases.csv files
 python3 scripts/rki-update.py rki.csv

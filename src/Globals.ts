@@ -30,6 +30,18 @@ export interface Agent {
   d: number[]
 }
 
+export interface AgentProgessingThroughDisease {
+  id: string
+  x: number
+  y: number
+  infectedButNotContagious: number
+  contagious: number
+  showingSymptoms: number
+  seriouslySick: number
+  critical: number
+  recovered: number
+}
+
 export interface Infection {
   id: string
   dtime: number[]

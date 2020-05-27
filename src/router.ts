@@ -73,6 +73,10 @@ const routes = [
       import(/* webpackChunkName: "multiday" */ '@/viz/multiday-agents/MultiDayViewer.vue'),
   },
   {
+    path: '/timelapse',
+    component: () => import(/* webpackChunkName: "multiday" */ '@/viz/time-lapse/TimeLapseViz.vue'),
+  },
+  {
     path: '/shader',
     redirect: '/multiday',
   },
