@@ -104,8 +104,30 @@ export default class VueComponent extends Vue {
   }
 
   private options = {
-    displayModeBar: false,
+    displayModeBar: true,
+    displaylogo: false,
     responsive: true,
+    modeBarButtonsToRemove: [
+      'pan2d',
+      'zoom2d',
+      'select2d',
+      'lasso2d',
+      'zoomIn2d',
+      'zoomOut2d',
+      'autoScale2d',
+      'hoverClosestCartesian',
+      'hoverCompareCartesian',
+      'resetScale2d',
+      'toggleSpikelines',
+      'resetViewMapbox',
+    ],
+    toImageButtonOptions: {
+      format: 'svg', // one of png, svg, jpeg, webp
+      filename: 'custom_image',
+      width: 800,
+      height: 600,
+      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+    },
   }
 }
 </script>
