@@ -96,6 +96,11 @@ h3 {
   background-color: $paleBackground;
 }
 
+.modebar-group {
+  top: -1.2rem;
+  right: -1rem;
+}
+
 #nav {
   position: absolute;
   top: 0;
