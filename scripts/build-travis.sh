@@ -24,6 +24,6 @@ cp *cases* src/assets
 cp *cases* RKI
 
 TIMESTAMP=`date`
-svn commit --username $SVN_USER --password $SVN_PASSWORD -m "RKI autobuild: $TIMESTAMP" RKI
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "RKI autobuild: $TIMESTAMP" RKI
 
 yarn run build && yarn run test:unit
