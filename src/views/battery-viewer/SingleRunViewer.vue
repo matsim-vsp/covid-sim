@@ -267,7 +267,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Population (' + (this.logScale ? 'log scale)' : 'Linear scale)'),
+      title: 'Population',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
