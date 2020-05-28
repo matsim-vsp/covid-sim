@@ -297,7 +297,7 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'custom_image',
+      filename: 'covid-plot',
       width: 800,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
