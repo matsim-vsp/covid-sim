@@ -170,7 +170,7 @@ export default class VueComponent extends Vue {
   }
 
   private options = {
-    displayModeBar: true,
+    // displayModeBar: true,
     displaylogo: false,
     responsive: true,
     modeBarButtonsToRemove: [

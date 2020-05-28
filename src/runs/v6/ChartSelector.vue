@@ -141,7 +141,7 @@ export default class SectionViewer extends Vue {
   }
 
   private options = {
-    displayModeBar: true,
+    // displayModeBar: true,
     displaylogo: false,
     responsive: true,
     modeBarButtonsToRemove: [
