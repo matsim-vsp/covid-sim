@@ -30,18 +30,7 @@ Each dot depicts a person, going about their day. The colors represent their dis
 
 </div>
 
-You can select different days to see how the population's health shifts over time.
-
-This is a "Base Case" simulation for illustrative purposes. It shows what would have happened in Berlin if there had been no social distancing measures, no closing of schools and workplaces, etc.
-
-This illustration shows only a small sample of the total tripmaking in Berlin; while MATSim-Episim can model each agent individually, it is too much data to show on one screen in disaggregate form.
-
-### Interesting things to explore
-
-- By day 14, new infections <span style="background-color: rgb(48,230,240)">&nbsp;&nbsp;&nbsp;&nbsp;</span> are quite noticeable throughout Berlin, and by day 18 they are everywhere in the city
-
-- By day 33, many recovered people <span style="background-color: rgb(30,120,70)">&nbsp;&nbsp;&nbsp;&nbsp;</span> are apparent
-- By day 40, most of the new infections occur far outside the central urban area of Berlin.
+(to be added)
 
 ### How does the simulation work?
 

@@ -29,8 +29,8 @@ float calculateStatus() {
 float calculateSize() {
 
     float small = 2.0;
-    float med = 4.0;
-    float big = 7.0;
+    float med = 5.0;
+    float big = 5.0;
 
     if (myInfectionStatus == 0.0) return small;
     else if (myInfectionStatus == 1.0) return big;
@@ -42,11 +42,18 @@ void main() {
 
     myInfectionStatus = calculateStatus();
 
+    if (showSusceptible == 0.0 && myInfectionStatus == 0.0) {
+        skip = 1.0;
+        gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+        gl_PointSize = 0.0;
+        return;
+    }
+
     // figure out z-index based on infection status
-    float zIndex = 0.2;
-    if (myInfectionStatus == 0.0) zIndex = 0.1;
-    else if (myInfectionStatus == 1.0) zIndex = 0.3;
-    else if (myInfectionStatus == 2.0) zIndex = 0.4;
+    float zIndex = 2.0;
+    if (myInfectionStatus == 0.0) zIndex = 1.0;
+    else if (myInfectionStatus == 1.0) zIndex = 3.0;
+    else if (myInfectionStatus == 2.0) zIndex = 4.0;
 
     // unpack coords from position buffers - x,y,time. Deal w/ z later
     vec3 point1 = vec3(position.xy, zIndex);

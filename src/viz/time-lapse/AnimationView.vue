@@ -284,7 +284,9 @@ export default class AnimationView extends Vue {
   private async networkLayerAdder(nodes: any[], netlinks: any[], index: number) {
     const batchSize = 20000
 
+    // if we're done loading network, start the simulation
     if (index > netlinks.length) {
+      this.startSimulation()
       return
     }
 
@@ -392,7 +394,7 @@ export default class AnimationView extends Vue {
       },
       vertexShader: this.vertexShader,
       fragmentShader: this.fragmentShader,
-      blending: THREE.NoBlending,
+      blending: THREE.AdditiveBlending,
       depthTest: true,
       transparent: true,
     })
@@ -409,7 +411,6 @@ export default class AnimationView extends Vue {
     this.$store.commit('setStatusMessage', 'loading network')
 
     console.log('added points')
-    this.startSimulation()
   }
 
   private initScene() {

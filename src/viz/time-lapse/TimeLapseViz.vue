@@ -4,7 +4,7 @@
 
   modal-markdown-dialog#help-dialog(
     title='COVID-19 time lapse'
-    md='@/viz/timelapse-helptext.md'
+    md='@/viz/time-lapse/timelapse-helptext.md'
     :buttons="['OK']"
     :class="{'is-active': showHelp}"
     @click="clickedCloseHelp()"
@@ -86,7 +86,7 @@ export default class VueComponent extends Vue {
   private isLoaded = false
 
   private showHelp = false
-  private showSusceptible = true
+  private showSusceptible = false
 
   private totalInfections = require('./totalInfections.csv').default
 

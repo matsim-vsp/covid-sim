@@ -15,30 +15,32 @@ varying float skip;
 
 vec4 getColor() {
 
+    float opacity = 0.3;
+
     if (myInfectionStatus == 0.0) {
-        return vec4(cSusceptible, 1.0);  // susceptible; not moving
+        return vec4(cSusceptible, opacity);  // susceptible; not moving
 
     } else if (myInfectionStatus == 1.0) {
 
-        return vec4(cInfectedButNotContagious, 1.0);  // infected; cyan
+        return vec4(cInfectedButNotContagious, opacity);  // infected; cyan
 
     } else if (myInfectionStatus == 2.0) {
 
-        return vec4(cContagious, 1.0);  // contagious; red
+        return vec4(cContagious, opacity);  // contagious; red
 
     } else if (myInfectionStatus == 3.0) {
 
-        return vec4(cSymptomatic, 1.0);
+        return vec4(cSymptomatic, opacity);
 
     } else if (myInfectionStatus == 4.0) {
 
-        return vec4(cSeriouslyIll, 1.0);
+        return vec4(cSeriouslyIll, opacity);
 
     } else if (myInfectionStatus == 5.0) {
 
-        return vec4(cCritical, 1.0);
+        return vec4(cCritical, opacity);
     }
-    return vec4(cRecovered, 1.0);
+    return vec4(cRecovered, opacity);
 }
 
 
