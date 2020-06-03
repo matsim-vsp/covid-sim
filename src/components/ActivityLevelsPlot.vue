@@ -1,6 +1,9 @@
 <template lang="pug">
 #vue-component
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
+
+  .row-labels
+    p(v-for="row in dataLines" :key="row.name") {{ row.name}}
 
 </template>
 
@@ -100,7 +103,7 @@ export default class VueComponent extends Vue {
         autotick: true,
         showticklabels: false,
         ticks: '',
-        title: i == 1 + Math.floor(this.dataLines.length / 2) ? 'Activity Level,  0-100%' : '',
+        title: '', // i == 1 + Math.floor(this.dataLines.length / 2) ? 'Activity Level,  0-100%' : '',
       }
     }
   }
@@ -111,7 +114,7 @@ export default class VueComponent extends Vue {
     { col: 'shopping', title: 'Other Activities' },
     { col: 'educ_kiga', title: 'Educ: Kindergarten' },
     { col: 'educ_primary', title: 'Educ: Primary' },
-    { col: 'educ_secondary', title: 'Educ: Secondary/Univ' },
+    { col: 'educ_secondary', title: 'Educ: Second/Univ' },
 
     { col: 'educ_tertiary', title: 'Educ: Tertiary' },
     { col: 'educ_higher', title: 'Educ: Higher' },
@@ -121,8 +124,6 @@ export default class VueComponent extends Vue {
     { col: 'visit', title: 'Visits' },
     { col: 'errands', title: 'Errands' },
     { col: 'business', title: 'Pers. Business' },
-    { col: 'home', title: 'Home' },
-    { col: 'quarantine_home', title: 'Quarantine Home' },
   ]
 
   private generateSeriesFromCSVData(data: any[]) {
@@ -188,7 +189,7 @@ export default class VueComponent extends Vue {
     },
     height: 500,
     autosize: true,
-    showlegend: true,
+    showlegend: false,
     legend: {
       orientation: 'h',
     },
@@ -251,6 +252,36 @@ export default class VueComponent extends Vue {
 
 <style scoped lang="scss">
 @import '@/styles.scss';
+
+#vue-component {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr;
+}
+
+.activity-plot {
+  grid-column: 1 / 3;
+  grid-row: 1 / 1;
+}
+
+.row-labels {
+  grid-column: 1 / 2;
+  grid-row: 1 / 1;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  margin-left: -1rem;
+  margin-top: 0.5rem;
+}
+
+.row-labels p {
+  font-size: 0.8rem;
+  text-align: right;
+  margin: auto 0 auto auto;
+  line-height: 0.8rem;
+  width: min-content;
+  height: 1.6rem;
+}
 
 @media only screen and (max-width: 640px) {
 }
