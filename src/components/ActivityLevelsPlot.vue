@@ -44,7 +44,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('battery') private updateModelData() {
-    this.buildActivityLevels()
+    // this.buildActivityLevels()
   }
 
   @Watch('currentRun') private runWasSwitched() {
