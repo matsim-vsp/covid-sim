@@ -39,9 +39,10 @@
         .linear-plot.activity(v-if="showActivityLevels")
           h5 Activity Levels by Type
           p 0-100% of normal
-          .plotarea.compact
+          .plotarea(style="height: 500px")
             activity-levels-plot.plotsize(:city="city" :battery="runId"
-              :currentRun="currentRun" :startDate="startDate" :plusminus="plusminus")
+              :currentRun="currentRun" :startDate="startDate" :plusminus="plusminus"
+              :zipContent="zipLoader")
 
         .plot-options
           .scale-options
@@ -157,7 +158,7 @@ export default class VueComponent extends Vue {
   private plotTag = '{{PLOTS}}'
 
   private showActivityLevels = false
-  private zipActivityLevelFileName = 'summaries_restrictions.zip'
+  private zipActivityLevelFileName = 'XX.zip'
 
   private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
 
@@ -321,7 +322,7 @@ export default class VueComponent extends Vue {
 
   private currentSituation: any = {}
   private loadedSeriesData: any = {}
-  private zipLoader: any
+  private zipLoader: any = {}
 
   private labels: any = {
     nSusceptible: 'Susceptible',
@@ -380,10 +381,7 @@ export default class VueComponent extends Vue {
   }
 
   private async showActivityLevelPlot() {
-    const svnRoot = new SVNFileSystem(this.BATTERY_URL)
-    const folderContents = await svnRoot.getDirectory(this.runId)
-
-    this.showActivityLevels = folderContents.files.indexOf(this.zipActivityLevelFileName) !== -1
+    this.showActivityLevels = true
   }
 
   private hospitalData: any[] = []
@@ -480,7 +478,7 @@ export default class VueComponent extends Vue {
 
   private async loadCSV(currentRun: any) {
     if (!currentRun.RunId) return []
-    if (!this.zipLoader) return []
+    if (this.zipLoader === {}) return []
 
     const filename = currentRun.RunId + '.infections.txt.csv'
     console.log('Extracting', filename)

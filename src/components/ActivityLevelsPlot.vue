@@ -19,6 +19,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private currentRun!: any
   @Prop({ required: true }) private startDate!: string
   @Prop({ required: true }) private plusminus!: number
+  @Prop({ required: true }) private zipContent!: any
 
   private dataLines: any[] = []
 
@@ -32,9 +33,14 @@ export default class VueComponent extends Vue {
 
   private MAX_DAYS = 200
 
-  private zipFileName = 'summaries_restrictions.zip'
   private mounted() {
-    this.buildActivityLevels()
+    // if results were passed in, then we don't need to unzip.
+    if (this.zipContent.extractAsText) {
+      this.zipLoader = this.zipContent
+      this.zipCache[this.city] = this.zipLoader
+      this.isZipLoaded = true
+      this.runChanged()
+    }
   }
 
   @Watch('battery') private updateModelData() {
@@ -45,35 +51,21 @@ export default class VueComponent extends Vue {
     this.runChanged()
   }
 
-  private async loadZipData() {
-    this.isZipLoaded = false
-
-    const filepath = this.BATTERY_URL + this.battery + '/' + this.zipFileName
-    console.log(filepath)
-
-    if (this.zipCache[this.city]) {
-      // check cache first!
-      console.log('using cached zip for!', this.city)
-      this.zipLoader = this.zipCache[this.city]
-    } else {
-      this.zipLoader = new ZipLoader(filepath)
-      await this.zipLoader.load()
-      console.log('zip loaded!', filepath)
-    }
-
-    this.isZipLoaded = true
-    this.zipCache[this.city] = this.zipLoader
+  @Watch('zipContent') private zipContentChanged() {
+    console.log('ZIP CONTENT CHANGED', this.zipContent)
   }
 
   private async loadCSV(currentRun: any) {
     if (!currentRun.RunId) return []
     if (!this.zipLoader) return []
+    if (this.zipLoader === {}) return []
 
     const filename = currentRun.RunId + '.restrictions.txt.csv'
     console.log('Extracting', filename)
 
     let text = this.zipLoader.extractAsText(filename)
     const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+    console.log('Got it!', filename)
 
     return z.data
   }
@@ -120,6 +112,17 @@ export default class VueComponent extends Vue {
     { col: 'educ_kiga', title: 'Educ: Kindergarten' },
     { col: 'educ_primary', title: 'Educ: Primary' },
     { col: 'educ_secondary', title: 'Educ: Secondary/Univ' },
+
+    { col: 'educ_tertiary', title: 'Educ: Tertiary' },
+    { col: 'educ_higher', title: 'Educ: Higher' },
+    { col: 'educ_other', title: 'Educ: Other' },
+    { col: 'shop_daily', title: 'Shopping: Daily' },
+    { col: 'shop_other', title: 'Shopping: Other' },
+    { col: 'visit', title: 'Visits' },
+    { col: 'errands', title: 'Errands' },
+    { col: 'business', title: 'Pers. Business' },
+    { col: 'home', title: 'Home' },
+    { col: 'quarantine_home', title: 'Quarantine Home' },
   ]
 
   private generateSeriesFromCSVData(data: any[]) {
@@ -131,11 +134,15 @@ export default class VueComponent extends Vue {
     let yaxis = 0
     for (const field of this.fields) {
       const name = field.title
-      const y: number[] = this.unpack(data, field.col)
-      yaxis++
-      const trace: any = { x, y, name, type: 'scatter', fill: 'tozeroy' }
-      if (yaxis > 1) trace.yaxis = 'y' + yaxis
-      serieses.push(trace)
+      try {
+        const y: number[] = this.unpack(data, field.col)
+        yaxis++
+        const trace: any = { x, y, name, type: 'scatter', fill: 'tozeroy' }
+        if (yaxis > 1) trace.yaxis = 'y' + yaxis
+        serieses.push(trace)
+      } catch {
+        // skip columns that don't exist
+      }
     }
 
     return serieses
@@ -166,22 +173,6 @@ export default class VueComponent extends Vue {
     return v
   }
 
-  private async buildActivityLevels() {
-    // first see if zip exists
-    const svnRoot = new SVNFileSystem(this.BATTERY_URL)
-    const folderContents = await svnRoot.getDirectory(this.battery)
-    if (folderContents.files.indexOf(this.zipFileName) == -1) {
-      console.log('ACTIVITY LEVELS:  NO ZIP FILE!')
-      return
-    }
-
-    // load zip
-    await this.loadZipData()
-
-    // build
-    this.runChanged()
-  }
-
   private reformatDate(day: string) {
     const pieces = day.split('.')
     const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
@@ -195,7 +186,7 @@ export default class VueComponent extends Vue {
       pattern: 'coupled',
       roworder: 'top to bottom',
     },
-    height: 225,
+    height: 500,
     autosize: true,
     showlegend: true,
     legend: {
