@@ -34,7 +34,7 @@ export default class VueComponent extends Vue {
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
   private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
 
-  private MAX_DAYS = 200
+  private MAX_DAYS = 500
 
   private mounted() {
     // if results were passed in, then we don't need to unzip.
@@ -201,7 +201,7 @@ export default class VueComponent extends Vue {
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
       zeroline: true,
-      range: ['2020-02-09', '2020-08-31'],
+      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
       showgrid: false,
       showline: false,

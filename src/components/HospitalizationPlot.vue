@@ -157,7 +157,7 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      range: ['2020-02-09', '2020-08-31'],
+      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {

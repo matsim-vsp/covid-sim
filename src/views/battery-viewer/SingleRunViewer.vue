@@ -39,7 +39,7 @@
         .linear-plot.activity(v-if="showActivityLevels")
           h5 Activity Levels by Type
           p 0-100% of normal
-          .plotarea(style="height: 500px")
+          .plotarea.compact
             activity-levels-plot.plotsize(:city="city" :battery="runId"
               :currentRun="currentRun" :startDate="startDate" :plusminus="plusminus"
               :zipContent="zipLoader")
@@ -146,7 +146,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private MAX_DAYS = 200
+  private MAX_DAYS = 500
   private cumulativeInfected = 0
 
   private isZipLoaded = false
@@ -262,7 +262,7 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      range: ['2020-02-09', '2020-08-31'],
+      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {
