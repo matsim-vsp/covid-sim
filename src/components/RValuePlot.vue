@@ -65,7 +65,7 @@ export default class VueComponent extends Vue {
         line: {
           width: 2,
           color: this.color,
-          shape: 'spline',
+          shape: 'linear',
         },
       },
     ]
