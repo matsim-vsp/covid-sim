@@ -112,18 +112,18 @@ export default class VueComponent extends Vue {
     { col: 'work', title: 'Work' },
     { col: 'leisure', title: 'Leisure' },
     { col: 'shopping', title: 'Other Activities' },
-    { col: 'educ_kiga', title: 'Educ: Kindergarten' },
-    { col: 'educ_primary', title: 'Educ: Primary' },
-    { col: 'educ_secondary', title: 'Educ: Second/Univ' },
+    { col: 'educ_kiga', title: 'Kindergarten' },
+    { col: 'educ_primary', title: 'Primary Education' },
+    { col: 'educ_secondary', title: 'Secondary Education' },
 
-    { col: 'educ_tertiary', title: 'Educ: Tertiary' },
-    { col: 'educ_higher', title: 'Educ: Higher' },
-    { col: 'educ_other', title: 'Educ: Other' },
-    { col: 'shop_daily', title: 'Shopping: Daily' },
-    { col: 'shop_other', title: 'Shopping: Other' },
-    { col: 'visit', title: 'Visits' },
-    { col: 'errands', title: 'Errands' },
-    { col: 'business', title: 'Pers. Business' },
+    // { col: 'educ_tertiary', title: 'Educ: Tertiary' },
+    // { col: 'educ_higher', title: 'Educ: Higher' },
+    { col: 'educ_other', title: 'Other Education' },
+    { col: 'shop_daily', title: 'Other Non-Home' },
+    // { col: 'shop_other', title: 'Shopping: Other' },
+    // { col: 'visit', title: 'Visits' },
+    // { col: 'errands', title: 'Errands' },
+    // { col: 'business', title: 'Pers. Business' },
   ]
 
   private generateSeriesFromCSVData(data: any[]) {
@@ -187,7 +187,7 @@ export default class VueComponent extends Vue {
       pattern: 'coupled',
       roworder: 'top to bottom',
     },
-    height: 500,
+    height: 250,
     autosize: true,
     showlegend: false,
     legend: {
@@ -271,7 +271,7 @@ export default class VueComponent extends Vue {
   display: flex;
   flex-direction: column;
   margin-left: -1rem;
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
 }
 
 .row-labels p {
