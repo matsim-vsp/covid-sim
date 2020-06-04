@@ -80,28 +80,33 @@ export default class VueComponent extends Vue {
    * We are calculating a seven day running infection rate.
    */
   private calculateValues() {
+    console.log('------ CALCULATE VALUES')
     if (this.data.length === 0) return
 
-    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+    const xsusceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+    const nShowSymptomsCum = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
 
-    const totalPopulation = susceptible.y[0]
+    console.log({ nShowSymptomsCum })
+
+    const totalPopulation = xsusceptible.y[0]
     const factor100k = totalPopulation / 100000.0
 
-    const newlyInfected = []
     const infectionRate = []
 
-    for (let i = this.lagDays; i < susceptible.y.length; i++) {
-      const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
-      newlyInfected.push(diffSusceptible)
+    const oneWeek = 7
+
+    for (let i = oneWeek; i < nShowSymptomsCum.y.length; i++) {
+      const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - oneWeek]
       // infections per 100,000
-      const rate = (7.0 * Math.round((10.0 * diffSusceptible) / factor100k)) / 10.0
+      const rate = Math.round((10.0 * diff) / factor100k) / 10.0
       infectionRate.push(rate)
     }
 
+    console.log({ WEEKLY_INFECTIONS: infectionRate })
     this.dataLines = [
       {
         name: 'Simulated Infections per 100,000',
-        x: susceptible.x.slice(this.lagDays),
+        x: xsusceptible.x.slice(oneWeek),
         y: infectionRate,
         fill: 'tozeroy',
         line: {
@@ -112,7 +117,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'Target: 50 per 100,000',
-        x: [0, susceptible.x[susceptible.x.length - 1]],
+        x: [0, xsusceptible.x[xsusceptible.x.length - 1]],
         y: [50.0, 50.0],
         fill: 'tozeroy',
         line: {
