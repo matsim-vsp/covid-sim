@@ -83,30 +83,39 @@ export default class VueComponent extends Vue {
     console.log('------ CALCULATE VALUES')
     if (this.data.length === 0) return
 
-    const xsusceptible = this.data.filter(item => item.name === 'Susceptible')[0]
-    const nShowSymptomsCum = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 
-    console.log({ nShowSymptomsCum })
-
-    const totalPopulation = xsusceptible.y[0]
+    const totalPopulation = susceptible.y[0]
     const factor100k = totalPopulation / 100000.0
 
     const infectionRate = []
 
     const oneWeek = 7
 
-    for (let i = oneWeek; i < nShowSymptomsCum.y.length; i++) {
-      const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - oneWeek]
-      // infections per 100,000
-      const rate = Math.round((10.0 * diff) / factor100k) / 10.0
-      infectionRate.push(rate)
+    let nShowSymptomsCum: any = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
+    console.log({ nShowSymptomsCum })
+
+    if (nShowSymptomsCum.y[0] !== undefined) {
+      for (let i = oneWeek; i < nShowSymptomsCum.y.length; i++) {
+        const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - oneWeek]
+        // infections per 100,000
+        const rate = Math.round((10.0 * diff) / factor100k) / 10.0
+        infectionRate.push(rate)
+      }
+    } else {
+      for (let i = this.lagDays; i < susceptible.y.length; i++) {
+        const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
+        // infections per 100,000
+        const rate = (7.0 * Math.round((10.0 * diffSusceptible) / factor100k)) / 10.0
+        infectionRate.push(rate)
+      }
     }
 
     console.log({ WEEKLY_INFECTIONS: infectionRate })
     this.dataLines = [
       {
         name: 'Simulated Infections per 100,000',
-        x: xsusceptible.x.slice(oneWeek),
+        x: susceptible.x.slice(oneWeek),
         y: infectionRate,
         fill: 'tozeroy',
         line: {
@@ -117,12 +126,12 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'Target: 50 per 100,000',
-        x: [0, xsusceptible.x[xsusceptible.x.length - 1]],
+        x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50.0, 50.0],
         fill: 'tozeroy',
         line: {
           width: 1.0,
-          color: '#886666',
+          color: '#aa8888',
         },
       },
     ]
