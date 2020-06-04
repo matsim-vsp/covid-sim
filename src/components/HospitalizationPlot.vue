@@ -79,6 +79,13 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
+    // For Berlin we need to *combine* the seriouslySick and critical into one line.
+    if (this.city === 'berlin') {
+      for (let i = 0; i < modelData[0].y.length; i++) {
+        modelData[0].y[i] += modelData[1].y[i]
+      }
+    }
+
     modelData = modelData.map(item => {
       // we are going to mutate the line color (!!!) to ensure all plots on the screen
       // have the same color for these metrics.
@@ -98,6 +105,8 @@ export default class VueComponent extends Vue {
 
       return trace
     })
+
+    if (this.city === 'berlin') modelData[0].name = 'Model: Should be Hospitalized'
 
     this.dataLines = modelData
     this.dataLines.push(...this.hospitalSeries)
