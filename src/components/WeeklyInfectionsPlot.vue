@@ -90,16 +90,16 @@ export default class VueComponent extends Vue {
 
     const infectionRate = []
 
-    const oneWeek = 7
+    const averagingPeriod = 1
 
     let nShowSymptomsCum: any = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
     console.log({ nShowSymptomsCum })
 
     if (nShowSymptomsCum.y[0] !== undefined) {
-      for (let i = oneWeek; i < nShowSymptomsCum.y.length; i++) {
-        const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - oneWeek]
-        // infections per 100,000
-        const rate = Math.round((10.0 * diff) / factor100k) / 10.0
+      for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
+        const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - averagingPeriod]
+        // infections per 100,000 per seven days
+        const rate = Math.round((10.0 * diff) / factor100k) / 10.0 * 7 / averagingPeriod
         infectionRate.push(rate)
       }
     } else {
@@ -115,7 +115,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Simulated Infections per 100,000',
-        x: susceptible.x.slice(oneWeek),
+        x: susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         fill: 'tozeroy',
         line: {
