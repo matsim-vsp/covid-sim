@@ -369,8 +369,9 @@ export default class VueComponent extends Vue {
 
       // console.log('---loading zip:', filepath)
 
-      this.zipLoader = new ZipLoader(filepath)
-      await this.zipLoader.load()
+      const zl = new ZipLoader(filepath)
+      await zl.load()
+      this.zipLoader = zl
       console.log('zip loaded!', this.runId, this.yaml.zip)
     }
 

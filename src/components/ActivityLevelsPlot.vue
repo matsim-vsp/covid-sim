@@ -54,8 +54,17 @@ export default class VueComponent extends Vue {
     this.runChanged()
   }
 
+  @Watch('city') private changedCity() {
+    console.log('CITY CHANGED')
+    this.zipLoader = this.zipContent
+    this.zipCache[this.city] = this.zipLoader
+    this.isZipLoaded = true
+    this.runChanged()
+  }
+
   @Watch('zipContent') private zipContentChanged() {
     console.log('ZIP CONTENT CHANGED', this.zipContent)
+    this.changedCity()
   }
 
   private async loadCSV(currentRun: any) {
