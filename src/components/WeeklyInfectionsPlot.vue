@@ -91,6 +91,7 @@ export default class VueComponent extends Vue {
 
     const totalPopulation = susceptible.y[0]
     const factor100k = totalPopulation / 100000.0
+    const scaleFactor100k = 1.0 // factor100k
 
     const infectionRate = []
 
@@ -103,24 +104,26 @@ export default class VueComponent extends Vue {
       for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
         const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - averagingPeriod]
         // infections per 100,000 per seven days
-        const rate = ((Math.round((10.0 * diff) / factor100k) / 10.0) * 7) / averagingPeriod
+        const rate = ((Math.round((10.0 * diff) / scaleFactor100k) / 10.0) * 7) / averagingPeriod
         infectionRate.push(rate)
       }
     } else {
       for (let i = this.lagDays; i < susceptible.y.length; i++) {
         const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
         // infections per 100,000
-        const rate = (7.0 * Math.round((10.0 * diffSusceptible) / factor100k)) / 10.0
+        const rate = (7.0 * Math.round((10.0 * diffSusceptible) / scaleFactor100k)) / 10.0
         infectionRate.push(rate)
       }
     }
 
     console.log({ WEEKLY_INFECTIONS: infectionRate })
+
+    const grenz = 50.0 * factor100k
     this.dataLines = [
       {
-        name: 'Target: 50 per 100,000',
+        name: 'Target: 50 per 100,000 (scaled)',
         x: [0, susceptible.x[susceptible.x.length - 1]],
-        y: [50.0, 50.0],
+        y: [grenz, grenz],
         fill: 'tozeroy',
         line: {
           width: 1.0,
@@ -128,7 +131,7 @@ export default class VueComponent extends Vue {
         },
       },
       {
-        name: 'Simulated Infections per 100,000',
+        name: 'Simulated Infections',
         x: susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         type: 'scatter',
@@ -142,7 +145,7 @@ export default class VueComponent extends Vue {
       },
     ]
 
-    this.calculateObserved(factor100k)
+    this.calculateObserved(scaleFactor100k)
   }
 
   private reformatDate(day: string) {

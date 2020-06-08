@@ -82,7 +82,7 @@
 
         .linear-plot
           h5 {{ cityCap }} Weekly Infection Rate
-          p Seven-day new infections per 100,000
+          p Seven-day new infections
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
