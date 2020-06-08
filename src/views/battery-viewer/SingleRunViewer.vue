@@ -81,8 +81,8 @@
               :data="hospitalData" :logScale="logScale" :city="city")
 
         .linear-plot
-          h5 {{ cityCap }} Weekly Infection Rate
-          p Seven-day new infections
+          h5 {{ cityCap }} Infection Rate
+          p Daily new infections
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found

@@ -69,7 +69,7 @@ export default class VueComponent extends Vue {
         this.observed.y[i] - (i < this.lagDays ? 0 : this.observed.y[i - this.lagDays])
       const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
       const observedRatePer100k =
-        (7.0 * Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k)) / 10.0
+        Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
 
       observedLine.x.push(this.observed.x[i])
       observedLine.y.push(observedRatePer100k)
@@ -104,7 +104,7 @@ export default class VueComponent extends Vue {
       for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
         const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - averagingPeriod]
         // infections per 100,000 per seven days
-        const rate = ((Math.round((10.0 * diff) / scaleFactor100k) / 10.0) * 7) / averagingPeriod
+        const rate = Math.round((10.0 * diff) / scaleFactor100k) / 10.0 / averagingPeriod
         infectionRate.push(rate)
       }
     } else {
@@ -118,7 +118,8 @@ export default class VueComponent extends Vue {
 
     console.log({ WEEKLY_INFECTIONS: infectionRate })
 
-    const grenz = 50.0 * factor100k
+    const grenz = (50.0 * totalPopulation) / 100000.0 / 7.0
+    console.log({ grenz })
     this.dataLines = [
       {
         name: 'Target: 50 per 100,000 (scaled)',
@@ -175,7 +176,7 @@ export default class VueComponent extends Vue {
       type: this.logScale ? 'log' : 'linear',
       autorange: true, // this.logScale ? false : true,
       // range: [0, 5],
-      title: 'Infections / 100,000',
+      title: 'Daily Infections',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
