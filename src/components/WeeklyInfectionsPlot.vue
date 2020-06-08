@@ -38,7 +38,11 @@ export default class VueComponent extends Vue {
     console.log({ observed: this.observed })
     if (!this.observed) return
 
-    const observedLine: any = {}
+    const observedLine: any = {
+      type: 'scatter',
+      mode: 'markers',
+      marker: { size: 4 },
+    }
     observedLine.name = 'Detected Infections per 100,000 (RKI)'
     observedLine.line = this.observed.line
     observedLine.x = []
@@ -99,7 +103,7 @@ export default class VueComponent extends Vue {
       for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
         const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - averagingPeriod]
         // infections per 100,000 per seven days
-        const rate = Math.round((10.0 * diff) / factor100k) / 10.0 * 7 / averagingPeriod
+        const rate = ((Math.round((10.0 * diff) / factor100k) / 10.0) * 7) / averagingPeriod
         infectionRate.push(rate)
       }
     } else {
@@ -114,25 +118,27 @@ export default class VueComponent extends Vue {
     console.log({ WEEKLY_INFECTIONS: infectionRate })
     this.dataLines = [
       {
-        name: 'Simulated Infections per 100,000',
-        x: susceptible.x.slice(averagingPeriod),
-        y: infectionRate,
-        fill: 'tozeroy',
-        line: {
-          width: 1.5,
-          color: '#329',
-          shape: 'hvh',
-        },
-      },
-      {
         name: 'Target: 50 per 100,000',
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50.0, 50.0],
         fill: 'tozeroy',
         line: {
           width: 1.0,
-          color: '#aa8888',
+          color: '#ddbbbb',
         },
+      },
+      {
+        name: 'Simulated Infections per 100,000',
+        x: susceptible.x.slice(averagingPeriod),
+        y: infectionRate,
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 4, color: '#329' },
+        // line: {
+        //   width: 1.5,
+        //   color: '#329',
+        //   shape: 'hvh',
+        // },
       },
     ]
 
