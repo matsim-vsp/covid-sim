@@ -43,7 +43,7 @@ export default class VueComponent extends Vue {
       mode: 'markers',
       marker: { size: 4 },
     }
-    observedLine.name = 'Detected Infections per 100,000 (RKI)'
+    observedLine.name = 'Detected Infections (RKI)'
     observedLine.line = this.observed.line
     observedLine.x = []
     observedLine.y = []
