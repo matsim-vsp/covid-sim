@@ -31,7 +31,7 @@
 
         h5.cumulative Cumulative Infected by
           br
-          | September 2020
+          | Year End, 2020
         p.infected {{ prettyInfected }}
 
       .all-plots
