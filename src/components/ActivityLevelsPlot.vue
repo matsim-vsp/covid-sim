@@ -21,6 +21,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private battery!: string
   @Prop({ required: true }) private currentRun!: any
   @Prop({ required: true }) private startDate!: string
+  @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private plusminus!: number
   @Prop({ required: true }) private zipContent!: any
 
@@ -100,6 +101,9 @@ export default class VueComponent extends Vue {
     this.dataLines = timeSerieses
 
     this.layout.grid.rows = this.dataLines.length
+
+    // set end date
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     for (let i = 2; i <= this.dataLines.length; i++) {
       const key = 'yaxis' + i

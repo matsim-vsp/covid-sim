@@ -41,7 +41,7 @@
           p 0-100% of normal
           .plotarea.compact
             activity-levels-plot.plotsize(:city="city" :battery="runId"
-              :currentRun="currentRun" :startDate="startDate" :plusminus="plusminus"
+              :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
               :zipContent="zipLoader")
 
         .plot-options
@@ -78,7 +78,7 @@
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             hospitalization-plot.plotsize(v-else
-              :data="hospitalData" :logScale="logScale" :city="city")
+              :data="hospitalData" :logScale="logScale" :city="city"  :endDate="endDate" )
 
         .linear-plot
           h5 {{ cityCap }} Infection Rate
@@ -86,7 +86,7 @@
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            weekly-infections-plot.plotsize(v-else :data="data"
+            weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
                                                    :observed="observedCases"
                                                    :logScale="logScale")
 
@@ -96,7 +96,7 @@
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            r-value-plot.plotsize(v-else :data="data" :logScale="false")
+            r-value-plot.plotsize(v-else :data="data" :endDate="endDate"  :logScale="false")
 
   .content(v-if="bottomNotes")
     .bottom
@@ -169,6 +169,7 @@ export default class VueComponent extends Vue {
   private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
 
   private isUsingRealDates = false
+  private endDate = '2020-08-31'
 
   private cityCSV: any = {
     berlin: this.RKI_URL + 'berlin-cases.csv',
@@ -195,6 +196,11 @@ export default class VueComponent extends Vue {
       alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
       return
     }
+
+    // set end date
+    this.endDate = this.yaml.endDate ? this.yaml.endDate : '2020-08-31'
+    console.log({ endDate: this.endDate })
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     // build offsets
     if (!this.yaml.offset && !this.yaml.startDates) {

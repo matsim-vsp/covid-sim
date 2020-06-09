@@ -12,6 +12,7 @@ import VuePlotly from '@statnett/vue-plotly'
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
+  @Prop({ required: true }) private endDate!: string
 
   private color = '#04f'
 
@@ -39,6 +40,9 @@ export default class VueComponent extends Vue {
    */
   private calculateRvalues() {
     if (this.data.length === 0) return
+
+    // set end date
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 

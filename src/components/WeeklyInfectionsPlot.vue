@@ -13,6 +13,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private observed!: any
+  @Prop({ required: true }) private endDate!: any
 
   private color = ['#094', '#0c4']
 
@@ -86,6 +87,9 @@ export default class VueComponent extends Vue {
   private calculateValues() {
     console.log('------ CALCULATE VALUES')
     if (this.data.length === 0) return
+
+    // set end date
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 

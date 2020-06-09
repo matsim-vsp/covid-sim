@@ -22,6 +22,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private endDate!: string
 
   private csvData: any = {
     berlin: require('@/assets/berlin-hospital.csv').default,
@@ -78,6 +79,9 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
+
+    // set end date
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     // For Berlin we need to *combine* the seriouslySick and critical into one line.
     if (this.city === 'berlin') {

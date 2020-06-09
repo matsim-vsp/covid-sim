@@ -64,6 +64,7 @@ export interface RunYaml {
   // these are for old version
   offset?: number[]
   startDate?: string
+  endDate?: string
   // these are for new version
   defaultStartDate?: string
   startDates?: string[]
