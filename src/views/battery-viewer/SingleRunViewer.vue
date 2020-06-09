@@ -31,7 +31,7 @@
 
         h5.cumulative Cumulative Infected by
           br
-          | Year End, 2020
+          | {{ this.endDate }}
         p.infected {{ prettyInfected }}
 
       .all-plots
