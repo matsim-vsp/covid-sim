@@ -1,7 +1,7 @@
 ## Published Reports
 
-The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bilding und Forschung). These reports are written in German.
-
+The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
+- [Report, 05 June 2020](http://dx.doi.org/10.14279/depositonce-10152)
 - [Report, 20 May 2020](http://dx.doi.org/10.14279/depositonce-10085)
 - [Report, 07 May 2020](https://doi.org/10.14279/depositonce-10018)
 - [Report, 24 April 2020](https://doi.org/10.14279/depositonce-10017)
