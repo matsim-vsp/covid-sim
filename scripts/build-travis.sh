@@ -29,7 +29,7 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "RK
 
 # --- process DIVI cases for Berlin.
 # 1. fetch existing csv's from SVN:
-svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinite \
+svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/DIVI/
 
 # 2. scrape most recent csv from website:

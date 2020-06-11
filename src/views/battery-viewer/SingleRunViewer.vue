@@ -599,11 +599,15 @@ export default class VueComponent extends Vue {
 
       // pull the cases field out of the CSV
       for (const datapoint of data) {
-        const datenstand = datapoint.daten_stand
-        const day = datenstand.substring(0, 10)
-        dates.push(day)
-        cumulative += datapoint.faelle_covid_aktuell
-        cases.push(cumulative)
+        try {
+          const datenstand = datapoint.daten_stand
+          const day = datenstand.substring(0, 10)
+          dates.push(day)
+          cumulative += datapoint.faelle_covid_aktuell
+          cases.push(cumulative)
+        } catch (e) {
+          // well, some lines are badly formatted. ignore them
+        }
       }
 
       serieses.push({
