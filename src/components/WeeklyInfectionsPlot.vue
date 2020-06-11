@@ -12,7 +12,7 @@ import VuePlotly from '@statnett/vue-plotly'
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private observed!: any
+  @Prop({ required: true }) private observed!: any[]
   @Prop({ required: true }) private endDate!: any
 
   private color = ['#094', '#0c4']
@@ -37,48 +37,34 @@ export default class VueComponent extends Vue {
 
   private calculateObserved(factor100k: number) {
     console.log({ observed: this.observed })
-    if (!this.observed) return
+    if (this.observed.length === 0) return
 
-    const observedLine: any = {
-      type: 'scatter',
-      mode: 'markers',
-      marker: { size: 4 },
+    // for each data source, let's draw some dots
+    for (const source of this.observed) {
+      const observedLine: any = {
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 4 },
+      }
+      observedLine.name = source.name
+      observedLine.line = source.line
+      observedLine.x = []
+      observedLine.y = []
+
+      for (let i = 0; i < source.x.length; i++) {
+        const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
+        const infectionsWithDunkelZiffer = newInfections * this.dunkelZifferFactor
+        const observedRatePer100k =
+          Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
+
+        observedLine.x.push(source.x[i])
+        observedLine.y.push(observedRatePer100k)
+      }
+
+      // done
+      this.dataLines.push(observedLine)
+      console.log({ observedLine })
     }
-    observedLine.name = 'Detected Infections (RKI)'
-    observedLine.line = this.observed.line
-    observedLine.x = []
-    observedLine.y = []
-
-    // option a: derivative
-    // for (let i = 1; i < this.observed.x.length - 2; i++) {
-    //   const before = this.observed.y[i - 1]
-    //   const after = this.observed.y[i + 1]
-
-    //   const infectionsPerDay = (after - before) / 2
-    //   const sevenDays = 7 * infectionsPerDay
-    //   const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
-    //   const observedRatePer100k =
-    //     Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
-
-    //   observedLine.x.push(this.observed.x[i])
-    //   observedLine.y.push(observedRatePer100k)
-    // }
-
-    // option b: 7-day running total
-    for (let i = 0; i < this.observed.x.length; i++) {
-      const sevenDays =
-        this.observed.y[i] - (i < this.lagDays ? 0 : this.observed.y[i - this.lagDays])
-      const infectionsWithDunkelZiffer = sevenDays * this.dunkelZifferFactor
-      const observedRatePer100k =
-        Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
-
-      observedLine.x.push(this.observed.x[i])
-      observedLine.y.push(observedRatePer100k)
-    }
-
-    // done
-    this.dataLines.push(observedLine)
-    console.log({ observedLine })
   }
 
   /**

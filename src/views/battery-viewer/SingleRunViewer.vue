@@ -167,6 +167,7 @@ export default class VueComponent extends Vue {
 
   private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
   private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
+  private DIVI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
 
   private isUsingRealDates = false
   private endDate = '2020-08-31'
@@ -175,6 +176,12 @@ export default class VueComponent extends Vue {
     berlin: this.RKI_URL + 'berlin-cases.csv',
     munich: this.RKI_URL + 'munich-cases.csv',
     heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
+  }
+
+  private cityDIVI: any = {
+    berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
+    // munich:
+    // heinsberg:
   }
 
   @Watch('yaml') private async switchYaml() {
@@ -253,7 +260,7 @@ export default class VueComponent extends Vue {
   private measureOptions: any = {}
   private runLookup: any = {}
 
-  private observedCases: any = {}
+  private observedCases: any[] = []
 
   private layout = {
     autosize: true,
@@ -531,51 +538,88 @@ export default class VueComponent extends Vue {
     }
 
     // Add Observed Data!
-    if (this.observedCases) serieses.push(this.observedCases)
+    if (this.observedCases.length > 0) {
+      // only add RKI line, because DIVI cumulative doesn't start at the beginning
+      // of the epidemic.
+      serieses.push(this.observedCases[0])
+    }
 
     return serieses
   }
 
   private async prepareObservedData(newCity: string) {
+    // 1 - RKI DATA
+
     const response = await fetch(this.cityCSV[newCity])
     const csvContents = await response.text()
-
     const data = Papa.parse(csvContents, {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
     }).data
 
-    // console.log({ data })
-
-    const dates: any = []
-    const cases: any = []
+    const xdates: any = []
+    const xcases: any = []
     let cumulative = 0
-
-    // console.log('fetched city data:', data.length)
 
     // pull the cases field out of the CSV
     for (const datapoint of data) {
       const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
-      dates.push(day)
-
+      xdates.push(day)
       cumulative += datapoint.cases
-      cases.push(cumulative)
+      xcases.push(cumulative)
     }
 
-    const series = {
-      name: this.cityCap + ' Infections (RKI)',
-      x: dates,
-      y: cases,
-      line: {
-        dash: 'dot',
-        width: 3,
-        color: 'rgb(0,200,150)',
+    const serieses = [
+      {
+        name: 'RKI ' + this.cityCap + ' Infections',
+        x: xdates,
+        y: xcases,
+        line: {
+          dash: 'dot',
+          width: 3,
+          color: 'rgb(0,200,150)',
+        },
       },
+    ]
+
+    // 2- DIVI DATA
+    if (this.cityDIVI[newCity]) {
+      const response = await fetch(this.cityDIVI[newCity])
+      const csvContents = await response.text()
+      const data = Papa.parse(csvContents, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const dates: any = []
+      const cases: any = []
+      let cumulative = 0
+
+      // pull the cases field out of the CSV
+      for (const datapoint of data) {
+        const datenstand = datapoint.daten_stand
+        const day = datenstand.substring(0, 10)
+        dates.push(day)
+        cumulative += datapoint.faelle_covid_aktuell
+        cases.push(cumulative)
+      }
+
+      serieses.push({
+        name: 'DIVI ' + this.cityCap + ' Infections',
+        x: dates,
+        y: cases,
+        line: {
+          dash: 'dot',
+          width: 3,
+          color: 'rgb(200,50,10)',
+        },
+      })
     }
 
-    // console.log({ observedData: series })
-    return series
+    console.log({ observedData: serieses })
+    return serieses
   }
 
   private async parseInfoTxt(city: string) {
