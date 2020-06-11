@@ -47,10 +47,13 @@ BERLIN_CODE="11000"
 printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../berlin-divi-processed.csv
 grep $BERLIN_CODE *.csv  |  sort  >>  ../berlin-divi-processed.csv
 
+svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
+
 cd ../..
 
 svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
 svn st | sed -rn '/^!/s/^.{8}(.+)$/\1/p' | xargs -r svn rm
+
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "DIVI autobuild: $TIMESTAMP" DIVI
 
 # DONE WITH PREP! Build the site.
