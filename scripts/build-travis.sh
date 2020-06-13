@@ -17,7 +17,7 @@ wget -nv -O rki.csv $RKI_FILE
 python3 scripts/rki-update.py rki.csv
 
 # put them in the right places
-svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth immediates \
+svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
 
 cp *cases* src/assets
