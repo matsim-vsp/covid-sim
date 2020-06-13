@@ -78,7 +78,8 @@
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
             hospitalization-plot.plotsize(v-else
-              :data="hospitalData" :logScale="logScale" :city="city"  :endDate="endDate" )
+              :data="hospitalData" :logScale="logScale" :city="city"
+              :diviData="diviData" :endDate="endDate" )
 
         .linear-plot
           h5 {{ cityCap }} Infection Rate
@@ -179,7 +180,7 @@ export default class VueComponent extends Vue {
   }
 
   private cityDIVI: any = {
-    xberlin: this.DIVI_URL + 'berlin-divi-processed.csv',
+    berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
     // munich:
     // heinsberg:
   }
@@ -237,6 +238,7 @@ export default class VueComponent extends Vue {
     this.updateNotes()
 
     this.observedCases = await this.prepareObservedData(this.city)
+    this.diviData = await this.prepareDiviData(this.city)
 
     await this.loadInfoTxt()
     await this.loadZipData()
@@ -261,6 +263,7 @@ export default class VueComponent extends Vue {
   private runLookup: any = {}
 
   private observedCases: any[] = []
+  private diviData: any[] = []
 
   private layout = {
     autosize: true,
@@ -547,6 +550,52 @@ export default class VueComponent extends Vue {
     return serieses
   }
 
+  private async prepareDiviData(newCity: string) {
+    const serieses: any[] = []
+
+    if (!this.cityDIVI[newCity]) return serieses
+
+    const response = await fetch(this.cityDIVI[newCity])
+    const csvContents = await response.text()
+    const data = Papa.parse(csvContents, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
+
+    const dates: any = []
+    const cases: any = []
+    let cumulative = 0
+
+    // pull the cases field out of the CSV
+    for (const datapoint of data) {
+      try {
+        const datenstand = datapoint.daten_stand
+        const day = datenstand.substring(0, 10)
+        dates.push(day)
+        // cumulative += datapoint.faelle_covid_aktuell
+        // cases.push(cumulative)
+        cases.push(datapoint.faelle_covid_aktuell)
+      } catch (e) {
+        // well, some lines are badly formatted. ignore them
+      }
+    }
+
+    serieses.push({
+      name: 'DIVI ' + this.cityCap + ' Infections',
+      x: dates,
+      y: cases,
+      line: {
+        dash: 'dot',
+        width: 2,
+        color: 'rgb(0,150,50)',
+      },
+    })
+
+    console.log({ DIVI_DATA: serieses })
+    return serieses
+  }
+
   private async prepareObservedData(newCity: string) {
     // 1 - RKI DATA
 
@@ -582,45 +631,6 @@ export default class VueComponent extends Vue {
         },
       },
     ]
-
-    // 2- DIVI DATA
-    if (this.cityDIVI[newCity]) {
-      const response = await fetch(this.cityDIVI[newCity])
-      const csvContents = await response.text()
-      const data = Papa.parse(csvContents, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
-
-      const dates: any = []
-      const cases: any = []
-      let cumulative = 0
-
-      // pull the cases field out of the CSV
-      for (const datapoint of data) {
-        try {
-          const datenstand = datapoint.daten_stand
-          const day = datenstand.substring(0, 10)
-          dates.push(day)
-          cumulative += datapoint.faelle_covid_aktuell
-          cases.push(cumulative)
-        } catch (e) {
-          // well, some lines are badly formatted. ignore them
-        }
-      }
-
-      serieses.push({
-        name: 'DIVI ' + this.cityCap + ' Infections',
-        x: dates,
-        y: cases,
-        line: {
-          dash: 'dot',
-          width: 3,
-          color: 'rgb(200,50,10)',
-        },
-      })
-    }
 
     console.log({ observedData: serieses })
     return serieses

@@ -23,6 +23,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private endDate!: string
+  @Prop({ required: true }) private diviData!: any[]
 
   private csvData: any = {
     berlin: require('@/assets/berlin-hospital.csv').default,
@@ -71,6 +72,10 @@ export default class VueComponent extends Vue {
 
   @Watch('city') private switchCity() {
     this.buildPlot()
+  }
+
+  @Watch('diviData') private switchDivi() {
+    this.prepareHospitalData()
   }
 
   @Watch('logScale') updateScale() {
@@ -125,7 +130,6 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
     }).data
 
-    // console.log({ hospData })
     this.hospitalSeries = []
 
     for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
@@ -142,6 +146,13 @@ export default class VueComponent extends Vue {
         },
       })
     }
+
+    console.log('DIVIDATA LENGITH IS', this.diviData.length)
+    if (this.diviData.length > 0) {
+      this.hospitalSeries.push(this.diviData[0])
+    }
+
+    console.log({ hHHHH_HOSP: this.hospitalSeries })
   }
 
   private reformatDateBerlin(day: string) {
