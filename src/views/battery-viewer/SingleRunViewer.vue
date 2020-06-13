@@ -181,7 +181,7 @@ export default class VueComponent extends Vue {
 
   private cityDIVI: any = {
     berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
-    munich: this.DIVI_URL + 'munich-divi-processed.csv',
+    xmunich: this.DIVI_URL + 'munich-divi-processed.csv',
     // munich:
     // heinsberg:
   }
