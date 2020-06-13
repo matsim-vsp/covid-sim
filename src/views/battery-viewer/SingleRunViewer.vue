@@ -588,7 +588,7 @@ export default class VueComponent extends Vue {
       line: {
         dash: 'dot',
         width: 2,
-        color: 'rgb(0,150,50)',
+        color: 'rgb(0,200,50)',
       },
     })
 
