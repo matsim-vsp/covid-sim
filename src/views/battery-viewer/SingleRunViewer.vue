@@ -583,7 +583,7 @@ export default class VueComponent extends Vue {
     }
 
     serieses.push({
-      name: 'DIVI ' + this.cityCap + ' Infections',
+      name: 'Reported: ' + this.cityCap + ' Intensive Care (DIVI)',
       x: dates,
       y: cases,
       line: {
