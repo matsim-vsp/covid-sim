@@ -18,14 +18,16 @@ python3 scripts/rki-update.py rki.csv
 
 # put them in the right places
 svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth immediates \
-    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/RKI/
+    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
 
 cp *cases* src/assets
-cp *cases* RKI
+cp *cases* Fallzahlen/RKI
 
 TIMESTAMP=`date`
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Fallzahlen
 
-svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "RKI autobuild: $TIMESTAMP" RKI
+# Get Berlin hospital data too
+cp Fallzahlen/Berlin/berlin-hospital.csv src/assets
 
 # --- process DIVI cases for Berlin.
 # 1. fetch existing csv's from SVN:
@@ -43,9 +45,12 @@ wget -qO - ${SRC} \
   | xargs wget -qO
 
 BERLIN_CODE="11000"
-
 printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../berlin-divi-processed.csv
 grep $BERLIN_CODE *.csv  |  sort  >>  ../berlin-divi-processed.csv
+
+MUNICH_CODE="9162"
+printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../munich-divi-processed.csv
+grep $MUNICH_CODE *.csv  |  sort  >>  ../munich-divi-processed.csv
 
 svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
 
