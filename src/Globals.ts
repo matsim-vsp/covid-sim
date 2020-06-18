@@ -76,6 +76,7 @@ export interface RunYaml {
     measures: {
       measure: string
       title: string
+      order?: string
       options?: number[]
     }[]
   }[]

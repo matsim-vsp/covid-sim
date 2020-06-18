@@ -18,8 +18,8 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
   components: {},
 })
 export default class VueComponent extends Vue {
-  @Prop({ required: true }) private measure!: { measure: string; title: string }
   @Prop({ required: true }) private options!: any[]
+  @Prop({ required: true }) private measure!: { measure: string; title: string; order?: string }
 
   private selectedValue: string = ''
   private stops: any[] = []
@@ -37,7 +37,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('options') private updateOptions() {
-    const experiments = []
+    let experiments = []
     if (!this.options) return
 
     // if the options are (a) all numbers and (b) all 0.0 > x > 1.0, then use %
@@ -63,6 +63,18 @@ export default class VueComponent extends Vue {
     }
 
     if (experiments[0].startsWith('+')) experiments.sort()
+
+    // hand-selected button order, if available
+    console.log('...hey.')
+    if (this.measure.order) {
+      const newOrder = []
+      for (const item of this.measure.order.split(',')) {
+        console.log(item)
+        const btn = experiments.filter(a => a === item)
+        if (btn.length) newOrder.push(btn[0])
+      }
+      experiments = newOrder
+    }
 
     this.selectedValue = experiments[0] // select first choice
     this.stops = experiments
