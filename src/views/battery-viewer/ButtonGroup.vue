@@ -65,11 +65,9 @@ export default class VueComponent extends Vue {
     if (experiments[0].startsWith('+')) experiments.sort()
 
     // hand-selected button order, if available
-    console.log('...hey.')
     if (this.measure.order) {
       const newOrder = []
       for (const item of this.measure.order.split(',')) {
-        console.log(item)
         const btn = experiments.filter(a => a === item)
         if (btn.length) newOrder.push(btn[0])
       }

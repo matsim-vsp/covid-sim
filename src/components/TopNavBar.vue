@@ -20,6 +20,7 @@
       @click='clickedBurger')
       .navbar-start
 
+        router-link.navbar-item(to="/2020-06-05/") 2020.06.05
         router-link.navbar-item(to="/v9/masks/berlin") v9:Masks
         router-link.navbar-item(to="/v9/tracing2/berlin") v9:Tracing
 

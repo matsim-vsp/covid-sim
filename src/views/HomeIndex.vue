@@ -72,6 +72,12 @@ export default {
       ],
       modelruns: [
         {
+          url: '/2020-06-05/',
+          date: 'Released: 19 June 2020',
+          title: 'Run 2020.06.05',
+          subtitle: 'Contact tracing and school reopenings',
+        },
+        {
           url: '/v9/masks/berlin',
           date: 'Released: 11 May 2020',
           title: 'v9: Masks',
