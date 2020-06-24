@@ -20,13 +20,14 @@
       @click='clickedBurger')
       .navbar-start
 
+        router-link.navbar-item(to="/2020-06-19/") 2020.06.19
         router-link.navbar-item(to="/2020-06-05/") 2020.06.05
-        router-link.navbar-item(to="/v9/masks/berlin") v9:Masks
-        router-link.navbar-item(to="/v9/tracing2/berlin") v9:Tracing
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
+            a.navbar-item(:href="root+'/v9/masks/berlin'") v9:Masks
+            a.navbar-item(:href="root+'/v9/tracing2/berlin'") v9:Tracing
             a.navbar-item(:href="root+'/v8/masks'") v8 Masks
             a.navbar-item(:href="root+'/v7'") v7
             a.navbar-item(:href="root+'/norun'") v6

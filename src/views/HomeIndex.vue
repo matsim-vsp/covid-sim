@@ -72,6 +72,13 @@ export default {
       ],
       modelruns: [
         {
+          url: '/2020-06-19/',
+          date: 'Released: 19 June 2020',
+          title: 'Run 2020.06.19',
+          subtitle:
+            'Closing of educational facilities; reduced activities and public transport; masks; contact tracing.',
+        },
+        {
           url: '/2020-06-05/',
           date: 'Released: 19 June 2020',
           title: 'Run 2020.06.05',
