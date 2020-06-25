@@ -2,7 +2,7 @@
 
 <img src="https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/readme-banner.jpg" alt="EpiSim" width="100%">
 
-This repo contains the visualization website for MATSim/EpiSim, available at https://matsim-vsp.github.io/covid-sim. See that website for information on the use of MATSim for COVID-19 disease propagation, given various measures for combating its spread.
+This repo contains the visualization website for MATSim/EpiSim, available at https://covid-sim.info. See that website for information on the use of MATSim for COVID-19 disease propagation, given various measures for combating its spread.
 
 This README details build instructions for the website itself.
 
