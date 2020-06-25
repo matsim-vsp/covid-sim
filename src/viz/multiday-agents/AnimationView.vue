@@ -73,7 +73,7 @@ export default class AnimationView extends Vue {
 
   private allTripsHaveBegun = false
 
-  private publicPath = ''
+  private publicPath = '/'
 
   @Watch('speed') speedChanged() {
     this.$store.commit('setSimulation', true)
@@ -168,8 +168,6 @@ export default class AnimationView extends Vue {
   }
 
   private mounted() {
-    this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
-
     this.setInitialClockTime()
     this.setupSimulation()
     this.setupDragListener()

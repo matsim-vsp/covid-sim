@@ -24,7 +24,7 @@ export default class App extends Vue {
   private state: any = {
     measures: {},
     runLookup: {},
-    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+    publicPath: '/',
   }
 
   private readme = require('@/assets/v2-notes.md')

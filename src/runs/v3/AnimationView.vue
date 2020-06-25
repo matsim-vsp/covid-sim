@@ -87,7 +87,7 @@ export default class AnimationView extends Vue {
   private currentTrips = new Map()
   private indexOfNextTripToAnimate = 0
 
-  private publicPath = ''
+  private publicPath = '/'
 
   @Watch('state.isRunning')
   private playPauseSim() {
@@ -165,12 +165,7 @@ export default class AnimationView extends Vue {
   }
 
   private mounted() {
-    this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
-
-    //    setTimeout(() => {
     this.setup()
-    //    }, 10)
-
     window.addEventListener('resize', this.onWindowResize, false)
   }
 

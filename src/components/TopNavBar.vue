@@ -48,16 +48,14 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 export default class VueComponent extends Vue {
   private isBurgerActive = false
   private isDropdownActive = false
-  private root = ''
+  private root = '/'
 
   private clickedBurger() {
     console.log('clicked!')
     this.isBurgerActive = !this.isBurgerActive
   }
 
-  private mounted() {
-    if (process.env.NODE_ENV === 'production') this.root = '/covid-sim'
-  }
+  private mounted() {}
 
   @Watch('$route') private routeChanged(to: any, from: any) {
     console.log(this.$route)

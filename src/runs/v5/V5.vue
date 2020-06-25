@@ -26,7 +26,7 @@ export default class App extends Vue {
     runLookup: {},
     cumulativeInfected: 0,
     berlinCases: [],
-    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+    publicPath: '/',
   }
 
   private readme = require('@/assets/v5-notes.md')

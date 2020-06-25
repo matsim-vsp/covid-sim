@@ -24,7 +24,6 @@ export default class App extends Vue {
   private state: any = {
     measures: {},
     runLookup: {},
-    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
   }
 
   private readme = require('@/assets/v1-notes.md')
@@ -36,7 +35,7 @@ export default class App extends Vue {
 
   private async loadIndexData() {
     console.log('fetching data')
-    const response = await fetch(this.state.publicPath + 'v1-info.txt')
+    const response = await fetch('/v1-info.txt')
     const text = await response.text()
     const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
     console.log({ parsed: parsed.data })

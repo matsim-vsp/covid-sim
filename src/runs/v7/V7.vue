@@ -39,7 +39,7 @@ export default class V7 extends Vue {
     runLookup: {},
     cumulativeInfected: 0,
     berlinCases: [],
-    publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+    publicPath: '/',
   }
 
   private city: string = ''

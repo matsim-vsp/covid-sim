@@ -51,7 +51,7 @@ interface Breadcrumb {
   },
 })
 export default class VueComponent extends Vue {
-  private publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
+  private publicPath = '/'
   private public_svn =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
 

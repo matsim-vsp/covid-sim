@@ -39,7 +39,7 @@ export default class AnimationView extends Vue {
 
   private fragmentShader = require('./shaderFrag.frag').default
 
-  private networkFilename = 'network.zip'
+  private networkFilename = '/network.zip'
 
   private state = store.state
 
@@ -79,8 +79,6 @@ export default class AnimationView extends Vue {
 
   private agentList: AgentProgessingThroughDisease[] = []
   private infectionList: { [id: string]: Infection } = {}
-
-  private publicPath = ''
 
   @Watch('speed') speedChanged() {
     this.$store.commit('setSimulation', true)
@@ -156,8 +154,6 @@ export default class AnimationView extends Vue {
   }
 
   private mounted() {
-    this.publicPath = process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/'
-
     this.setInitialClockTime()
     this.setupSimulation()
     this.setupDragListener()
@@ -326,7 +322,7 @@ export default class AnimationView extends Vue {
     this.networkLayers = []
 
     // load zipfile
-    const zipLoader = new ZipLoader(this.publicPath + this.networkFilename)
+    const zipLoader = new ZipLoader(this.networkFilename)
     await zipLoader.load()
 
     // extract json
