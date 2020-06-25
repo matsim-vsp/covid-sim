@@ -15,6 +15,8 @@ wget -nv -O rki.csv $RKI_FILE
 
 # create the [city]-cases.csv files
 python3 scripts/rki-update.py rki.csv
+yarn run build && yarn run test:unit
+exit 0
 
 # put them in the right places
 svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
@@ -62,5 +64,5 @@ svn st | sed -rn '/^!/s/^.{8}(.+)$/\1/p' | xargs -r svn rm
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "DIVI autobuild: $TIMESTAMP" DIVI
 
 # DONE WITH PREP! Build the site.
-
 yarn run build && yarn run test:unit
+
