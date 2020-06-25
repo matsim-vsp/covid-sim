@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/covid-sim/' : '/',
+  publicPath: process.env.NODE_ENV === '/',
   productionSourceMap: false,
   configureWebpack: {
     module: {

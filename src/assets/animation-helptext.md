@@ -2,7 +2,7 @@
 
 ### Episim: COVID-19 virus spreading dynamics
 
-This animation illustrates the [MATSIM-Episim model](https://matsim-vsp.github.io) as it simulates the spread of COVID-19 disease through **Berlin, Germany** and the surrounding area.
+This animation illustrates the [MATSIM-Episim model](https://covid-sim.info) as it simulates the spread of COVID-19 disease through **Berlin, Germany** and the surrounding area.
 
 Each dot depicts a person, going about their day. The colors represent their disease status:
 
@@ -51,7 +51,7 @@ The method used by MATSIM-Episim is available on the front page at <https://mats
 
 Please email us at [covid19@vsp.tu-berlin.de](mailto:covid19@vsp.tu-berlin.de) for more information.
 
-The main website is at [matsim-vsp.github.io](https://matsim-vsp.github.io) is under heavy development as we build new versions of the Episim model.
+The main website is at [matsim-vsp.github.io](https://covid-sim.info) is under heavy development as we build new versions of the Episim model.
 
 MATSim-Episim is freely available and open source, and can be downloaded at <https://github.com/matsim-org/matsim-episim>.
 
