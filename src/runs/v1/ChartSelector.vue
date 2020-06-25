@@ -38,7 +38,7 @@ import MySlider from './SelectWidget.vue'
 export default class SectionViewer extends Vue {
   @Prop() private state!: any
 
-  private zipFile = 'v1-data.zip'
+  private zipFile = '/v1-data.zip'
   private currentRun: any = {}
   private data: any = []
 
@@ -102,7 +102,7 @@ export default class SectionViewer extends Vue {
   }
 
   private async loadZipData() {
-    this.zipLoader = new ZipLoader(this.state.publicPath + this.zipFile)
+    this.zipLoader = new ZipLoader(this.zipFile)
 
     await this.zipLoader.load()
 

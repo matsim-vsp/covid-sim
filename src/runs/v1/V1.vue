@@ -24,6 +24,7 @@ export default class App extends Vue {
   private state: any = {
     measures: {},
     runLookup: {},
+    publicPath: '/',
   }
 
   private readme = require('@/assets/v1-notes.md')
