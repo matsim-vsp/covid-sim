@@ -47,7 +47,7 @@
 
         h2 Published reports
 
-        p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bilding und Forschung). These reports are written in German.
+        p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
 
         report-viewer()
 
