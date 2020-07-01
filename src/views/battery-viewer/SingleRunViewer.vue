@@ -181,9 +181,7 @@ export default class VueComponent extends Vue {
 
   private cityDIVI: any = {
     berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
-    xmunich: this.DIVI_URL + 'munich-divi-processed.csv',
-    // munich:
-    // heinsberg:
+    munich: this.DIVI_URL + 'munich-divi-processed.csv',
   }
 
   @Watch('yaml') private async switchYaml() {
@@ -573,10 +571,12 @@ export default class VueComponent extends Vue {
       try {
         const datenstand = datapoint.daten_stand
         const day = datenstand.substring(0, 10)
-        dates.push(day)
         // cumulative += datapoint.faelle_covid_aktuell
         // cases.push(cumulative)
-        cases.push(datapoint.faelle_covid_aktuell)
+        if (datapoint.faelle_covid_aktuell) {
+          dates.push(day)
+          cases.push(datapoint.faelle_covid_aktuell)
+        }
       } catch (e) {
         // well, some lines are badly formatted. ignore them
       }

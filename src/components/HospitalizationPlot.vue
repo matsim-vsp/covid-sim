@@ -42,7 +42,7 @@ export default class VueComponent extends Vue {
       dateColumn: 'Datum',
     },
     munich: {
-      fromModel: ['Cumulative Hospitalized'],
+      fromModel: ['Seriously Sick', 'Critical'],
       fromCSV: ['Stationär'],
       csvLineNames: ['Reported: Munich Hospitalized'],
       dateFormatter: this.reformatDateMunich,
@@ -89,10 +89,8 @@ export default class VueComponent extends Vue {
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     // For Berlin we need to *combine* the seriouslySick and critical into one line.
-    if (this.city === 'berlin') {
-      for (let i = 0; i < modelData[0].y.length; i++) {
-        modelData[0].y[i] += modelData[1].y[i]
-      }
+    for (let i = 0; i < modelData[0].y.length; i++) {
+      modelData[0].y[i] += modelData[1].y[i]
     }
 
     modelData = modelData.map(item => {
@@ -115,7 +113,7 @@ export default class VueComponent extends Vue {
       return trace
     })
 
-    if (this.city === 'berlin') modelData[0].name = 'Model: Should be Hospitalized'
+    modelData[0].name = 'Model: Should be Hospitalized'
 
     this.dataLines = modelData
     this.dataLines.push(...this.hospitalSeries)
@@ -135,6 +133,8 @@ export default class VueComponent extends Vue {
     for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
       const column = this.cityDetails.fromCSV[i]
 
+      if (this.cityDetails.csvLineNames.length <= i) continue
+
       this.hospitalSeries.push({
         name: this.cityDetails.csvLineNames[i],
         x: hospData.map(day => this.cityDetails.dateFormatter(day[this.cityDetails.dateColumn])),
@@ -147,7 +147,7 @@ export default class VueComponent extends Vue {
       })
     }
 
-    console.log('DIVIDATA LENGITH IS', this.diviData.length)
+    console.log('DIVIDATA LENGTH IS', this.diviData.length)
     if (this.diviData.length > 0) {
       this.hospitalSeries.push(this.diviData[0])
     }

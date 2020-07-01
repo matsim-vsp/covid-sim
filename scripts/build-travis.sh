@@ -38,10 +38,10 @@ svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --dep
 
 # 2. scrape most recent csv from website:
 cd DIVI/Daily_reports
-export SRC="https://www.divi.de/divi-intensivregister-tagesreport-archiv"
+export SRC="https://www.divi.de/divi-intensivregister-tagesreport-archiv-csv"
 
 wget -qO - ${SRC} \
-  | grep "\.csv\"" \
+  | grep "\"DIVI\-" \
   | head -1 \
   | awk -v src=$SRC -F "\"" '// {print $4, src $2}' \
   | xargs wget -qO
