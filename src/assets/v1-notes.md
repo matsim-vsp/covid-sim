@@ -1,6 +1,6 @@
-## v1: Intervention Strategies
+## v1: Activity reductions at different times
 
-Exploring the effects of several stay-at-home interventions.
+Exploring the effects of several stay-at-home interventions at different times.
 
 The simulations refer to the **Berlin** region (Berlin city plus some surroundings).
 
