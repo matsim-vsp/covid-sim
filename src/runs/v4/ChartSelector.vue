@@ -2,11 +2,17 @@
 #main-section
   .pieces
     .sliders
+
+      h5 Shutdown Type
+      .myslider.gap
+        my-slider(measure="ShutdownType" :state="state" @changed="sliderChanged")
+
+      br
+
       h5 School Attendance
       p.subhead Percent Still Attending:
-
       .myslider(v-for="measure in Object.keys(state.measures)" :key="measure")
-        my-slider(:measure="measure" :state="state" @changed="sliderChanged")
+        my-slider(v-if="measure != 'ShutdownType'" :measure="measure" :state="state" @changed="sliderChanged")
 
       h5.cumulative Cumulative Infected
         br
@@ -298,6 +304,10 @@ p.subhead {
 
 .cumulative {
   margin-top: 2rem;
+}
+
+.gap {
+  margin-bottom: 2rem;
 }
 
 @media only screen and (max-width: 640px) {
