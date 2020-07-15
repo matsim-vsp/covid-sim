@@ -185,8 +185,8 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('yaml') private async switchYaml() {
-    console.log('GOT NEW YAML:', this.yaml.city)
-    console.log({ yaml: this.yaml })
+    // console.log('GOT NEW YAML:', this.yaml.city)
+    // console.log({ yaml: this.yaml })
 
     if (!this.yaml.city) return
 
@@ -206,7 +206,7 @@ export default class VueComponent extends Vue {
 
     // set end date
     this.endDate = this.yaml.endDate ? this.yaml.endDate : '2020-08-31'
-    console.log({ endDate: this.endDate })
+    // console.log({ endDate: this.endDate })
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     // build offsets
@@ -231,7 +231,7 @@ export default class VueComponent extends Vue {
     } else {
       this.offset = this.yaml.offset
       this.plusminus = this.yaml.offset[0]
-      console.log({ newOffset: this.offset })
+      // console.log({ newOffset: this.offset })
     }
 
     this.updateNotes()
@@ -327,7 +327,7 @@ export default class VueComponent extends Vue {
 
   private setPlusMinus(value: string) {
     const shift = parseInt(value)
-    console.log('SET PLUS MINUS:', shift)
+    // console.log('SET PLUS MINUS:', shift)
     this.plusminus = shift
   }
 
@@ -370,14 +370,14 @@ export default class VueComponent extends Vue {
   private async loadZipData() {
     this.isZipLoaded = false
 
-    console.log('loadZipData:', this.city)
+    // console.log('loadZipData:', this.city)
 
     const filepath = this.BATTERY_URL + this.runId + '/' + this.yaml.zip
-    console.log(filepath)
+    // console.log(filepath)
 
     if (this.zipCache[this.city]) {
       // check cache first!
-      console.log('using cached zip for!', this.city)
+      // console.log('using cached zip for!', this.city)
       this.zipLoader = this.zipCache[this.city]
     } else {
       // load the zip from file
@@ -387,7 +387,7 @@ export default class VueComponent extends Vue {
       const zl = new ZipLoader(filepath)
       await zl.load()
       this.zipLoader = zl
-      console.log('zip loaded!', this.runId, this.yaml.zip)
+      // console.log('zip loaded!', this.runId, this.yaml.zip)
     }
 
     this.isZipLoaded = true
@@ -457,14 +457,14 @@ export default class VueComponent extends Vue {
     if (this.isUsingRealDates) {
       const defaultDate = moment(this.yaml.defaultStartDate)
       const diff = defaultDate.add(this.plusminus, 'days')
-      console.log(diff)
+      // console.log(diff)
       lookupKey = lookupKey.replace('undefined', diff.format('YYYY-MM-DD'))
     } else {
       const offsetPrefix = '' + this.plusminus
       lookupKey = lookupKey.replace('undefined', offsetPrefix)
     }
 
-    console.log(lookupKey)
+    // console.log(lookupKey)
 
     this.currentRun = this.runLookup[lookupKey]
 
@@ -593,7 +593,7 @@ export default class VueComponent extends Vue {
       },
     })
 
-    console.log({ DIVI_DATA: serieses })
+    // console.log({ DIVI_DATA: serieses })
     return serieses
   }
 
@@ -633,13 +633,13 @@ export default class VueComponent extends Vue {
       },
     ]
 
-    console.log({ observedData: serieses })
+    // console.log({ observedData: serieses })
     return serieses
   }
 
   private async parseInfoTxt(city: string) {
     const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
-    console.log('fetching info:', this.runId)
+    // console.log('fetching info:', this.runId)
 
     const response = await fetch(filepath)
     const text = await response.text()
@@ -682,16 +682,16 @@ export default class VueComponent extends Vue {
       runLookup[lookupKey] = row
     }
 
-    console.log({ measures })
     let order = ''
     for (const measure of Object.keys(measures)) {
       order += measure + '-'
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
+      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) =>
+        a < b ? -1 : 1
+      )
     }
 
     this.runLookup = runLookup
     this.measureOptions = measures
-    console.log({ RUNLOOKUP: this.runLookup })
   }
 
   private mdParser = new MarkdownIt()
