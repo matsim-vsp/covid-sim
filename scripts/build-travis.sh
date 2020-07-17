@@ -66,17 +66,17 @@ grep $MUNICH_CODE *.csv  |  sort  >>  ../munich-divi-processed.csv
 
 echo BUILD: svn add and commit
 
-# svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
+svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
 
 cd ../..
 
-# svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
-# svn st | sed -rn '/^!/s/^.{8}(.+)$/\1/p' | xargs -r svn rm
+svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
+svn st | sed -rn '/^!/s/^.{8}(.+)$/\1/p' | xargs -r svn rm
 
-# svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "DIVI autobuild: $TIMESTAMP" DIVI
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "DIVI autobuild: $TIMESTAMP" DIVI
 
 # DONE WITH PREP! Build the site.
-echo BUILD: Finally let's build the site
+echo BUILD: Finally lets build the site
 
 yarn run build && yarn run test:unit
 
