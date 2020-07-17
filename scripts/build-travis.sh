@@ -5,7 +5,7 @@
 # Requires $SVN_USER and $SVN_PASSWORD env variables to be set
 # -----------------------------------------------------
 # set strict mode: fail smart, don't hide pipe errors
-set -euo pipefail
+set -xeuo pipefail
 IFS=$'\n\t'
 # -----------------------------------------------------
 
