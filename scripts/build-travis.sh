@@ -42,10 +42,10 @@ export SRC="https://www.divi.de"
 export FOLDER="/divi-intensivregister-tagesreport-archiv-csv"
 
 #wget -qO - ${SRC}${FOLDER} \
-  | grep "\"DIVI\-" \
-  | head -1 \
-  | awk -v src=$SRC -F "\"" '// {print $4 ".csv", src $2}' \
-  | xargs wget -qO
+#  | grep "\"DIVI\-" \
+#  | head -1 \
+#  | awk -v src=$SRC -F "\"" '// {print $4 ".csv", src $2}' \
+#  | xargs wget -qO
 
 BERLIN_CODE="11000"
 printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../berlin-divi-processed.csv
