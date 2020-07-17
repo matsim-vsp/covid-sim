@@ -41,7 +41,7 @@ cd DIVI/Daily_reports
 export SRC="https://www.divi.de"
 export FOLDER="/divi-intensivregister-tagesreport-archiv-csv"
 
-wget -qO - ${SRC}${FOLDER} \
+#wget -qO - ${SRC}${FOLDER} \
   | grep "\"DIVI\-" \
   | head -1 \
   | awk -v src=$SRC -F "\"" '// {print $4 ".csv", src $2}' \
