@@ -67,6 +67,20 @@ export default class VueComponent extends Vue {
   private readmeBottom = require('@/assets/index-bottom.md')
   private modelruns: any[] = [
     {
+      url: '/2020-07-22',
+      date: 'Released: 22 July 2020',
+      title: 'Run 2020.07.22',
+      subtitle:
+        'Behavioral changes after June 01 and increased indoor activities in winter; further measures at October 01.',
+    },
+    {
+      url: '/2020-07-21',
+      date: 'Released: 21 July 2020',
+      title: 'Run 2020.07.21',
+      subtitle:
+        'Behavioral changes after June 01 and increased indoor activities in winter.',
+    },
+    {
       url: '/2020-06-19',
       date: 'Released: 19 June 2020',
       title: 'Run 2020.06.19',
