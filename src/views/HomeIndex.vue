@@ -21,7 +21,7 @@
           h2 Method: Mobility traces and the spreading of COVID-19
           p The MATSim-Episim virus spreading dynamics model is described in this paper:
             br
-            a(href="https://dx.doi.org/10.14279/depositonce-9835") https://dx.doi.org/10.14279/depositonce-9835 .
+            a(href=" https://doi.org/10.1101/2020.07.22.20160093")  https://doi.org/10.1101/2020.07.22.20160093 .
 
           p The code is freely available and open source:
             br
@@ -77,8 +77,7 @@ export default class VueComponent extends Vue {
       url: '/2020-07-21',
       date: 'Released: 21 July 2020',
       title: 'Run 2020.07.21',
-      subtitle:
-        'Behavioral changes after June 01 and increased indoor activities in winter.',
+      subtitle: 'Behavioral changes after June 01 and increased indoor activities in winter.',
     },
     {
       url: '/2020-06-19',
