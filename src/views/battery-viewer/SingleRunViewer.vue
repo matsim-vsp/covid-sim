@@ -433,6 +433,16 @@ export default class VueComponent extends Vue {
 
   private updateTotalInfected() {
     const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
+
+    for (let i = 0; i < infectedCumulative.x.length; i++) {
+      if (infectedCumulative.x[i] === this.endDate) {
+        console.log('got it:', infectedCumulative.x[i - 1], infectedCumulative.y[i - 1])
+        this.cumulativeInfected = infectedCumulative.y[i - 1]
+        return
+      }
+    }
+
+    // if we got here, date never matched. Just show max.
     this.cumulativeInfected = Math.max(...infectedCumulative.y)
   }
 
