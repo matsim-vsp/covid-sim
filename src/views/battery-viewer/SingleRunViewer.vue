@@ -436,8 +436,8 @@ export default class VueComponent extends Vue {
 
     for (let i = 0; i < infectedCumulative.x.length; i++) {
       if (infectedCumulative.x[i] === this.endDate) {
-        console.log('got it:', infectedCumulative.x[i - 1], infectedCumulative.y[i - 1])
-        this.cumulativeInfected = infectedCumulative.y[i - 1]
+        console.log('got it:', infectedCumulative.x[i], infectedCumulative.y[i])
+        this.cumulativeInfected = infectedCumulative.y[i]
         return
       }
     }
