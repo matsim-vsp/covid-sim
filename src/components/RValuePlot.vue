@@ -13,6 +13,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private endDate!: string
+  @Prop({ required: true }) private rValues!: any[]
 
   private color = '#04f'
 
@@ -28,8 +29,44 @@ export default class VueComponent extends Vue {
     this.calculateRvalues()
   }
 
+  @Watch('rValues') private updateRValues() {
+    this.calculateRvalues()
+  }
+
   @Watch('logScale') updateScale() {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+  }
+
+  private calculateRvalues() {
+    // calculate r-values if pre-calculated versions don't exist
+    if (!this.rValues.length) {
+      this.manuallyCalculateRvalues()
+      return
+    }
+
+    console.log({ RVALUES: this.rValues })
+
+    const x: any[] = []
+    const y: any[] = []
+
+    for (const value of this.rValues) {
+      x.push(value.date)
+      y.push(value.rValue)
+    }
+
+    // use pre-calculated r-values
+    this.dataLines = [
+      {
+        name: 'Estimated R Value',
+        x: x,
+        y: y,
+        line: {
+          width: 2,
+          color: this.color,
+          shape: 'linear',
+        },
+      },
+    ]
   }
 
   /**
@@ -38,7 +75,7 @@ export default class VueComponent extends Vue {
    * - numerator:  past four days of "newly infected", which is the difference in Susceptible;
    * - denominator: divide by the "newly infected" number from four days ago
    */
-  private calculateRvalues() {
+  private manuallyCalculateRvalues() {
     if (this.data.length === 0) return
 
     // set end date

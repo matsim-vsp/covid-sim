@@ -97,7 +97,11 @@
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            r-value-plot.plotsize(v-else :data="data" :endDate="endDate"  :logScale="false")
+            r-value-plot.plotsize(v-else
+              :data="data"
+              :endDate="endDate"
+              :logScale="false"
+              :rValues="rValues")
 
   .content(v-if="bottomNotes")
     .bottom
@@ -403,6 +407,8 @@ export default class VueComponent extends Vue {
 
   private hospitalData: any[] = []
 
+  private rValues: any[] = []
+
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
     // maybe we already did the calcs
@@ -416,9 +422,11 @@ export default class VueComponent extends Vue {
 
     // load run dataset
     const csv: any[] = await this.loadCSV(this.currentRun)
-
     // zip might not yet be loaded
     if (csv.length === 0) return
+
+    // get r-values too (background)
+    this.loadRValues(this.currentRun)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
@@ -501,6 +509,25 @@ export default class VueComponent extends Vue {
       v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
     }
     return v
+  }
+
+  private async loadRValues(currentRun: any) {
+    this.rValues = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.rValues.txt.csv'
+    console.log('RVALUES: Extracting', filename)
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.rValues = z.data
+    } catch (e) {
+      console.log('RVALUES: no', filename)
+    }
   }
 
   private async loadCSV(currentRun: any) {
