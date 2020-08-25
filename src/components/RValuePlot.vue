@@ -40,9 +40,12 @@ export default class VueComponent extends Vue {
   private calculateRvalues() {
     // calculate r-values if pre-calculated versions don't exist
     if (!this.rValues.length) {
+      this.$emit('method', 'Based on four-day new infections')
       this.manuallyCalculateRvalues()
       return
     }
+
+    this.$emit('method', 'Based on tracking all infections')
 
     console.log({ RVALUES: this.rValues })
 

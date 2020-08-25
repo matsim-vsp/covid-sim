@@ -93,7 +93,7 @@
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
-          p Based on four-day new infections
+          p {{ rValueMethodDescription }}
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -101,7 +101,8 @@
               :data="data"
               :endDate="endDate"
               :logScale="false"
-              :rValues="rValues")
+              :rValues="rValues"
+              @method="switchRMethod")
 
   .content(v-if="bottomNotes")
     .bottom
@@ -162,6 +163,7 @@ export default class VueComponent extends Vue {
   private cityMarkdownNotes: string = ''
   private plotTag = '{{PLOTS}}'
 
+  private rValueMethodDescription = 'Based on four-day new infections'
   private showActivityLevels = false
   private zipActivityLevelFileName = 'XX.zip'
 
@@ -255,6 +257,10 @@ export default class VueComponent extends Vue {
 
   @Watch('logScale') updateScale() {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+  }
+
+  private switchRMethod(method: string) {
+    this.rValueMethodDescription = method
   }
 
   private isBase = false
