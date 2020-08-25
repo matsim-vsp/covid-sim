@@ -36,6 +36,12 @@
             router-link(:to="viz.url")
               viz-card(:viz="viz")
 
+        h2 Published reports
+
+        p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
+
+        report-viewer()
+
         h2 Simulations of COVID-19 spreading in Berlin
 
         .readme(v-html="readme")
@@ -44,12 +50,6 @@
           .one-viz(v-for="viz in modelruns" :key="viz.url")
             router-link(:to="viz.url")
               viz-card(:viz="viz")
-
-        h2 Published reports
-
-        p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
-
-        report-viewer()
 
         .readme(v-html="readmeBottom")
 
