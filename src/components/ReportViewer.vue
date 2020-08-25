@@ -24,7 +24,13 @@ export default class VueComponent extends Vue {
   private mdParser = new MarkdownIt()
 
   private reports: any[] = [
-  {
+    {
+      md: '/reports/report-2020-08-21.md',
+      title: '21 Aug 2020',
+      url: 'http://dx.doi.org/10.14279/depositonce-10480',
+      html: '',
+    },
+    {
       md: '/reports/report-2020-07-24.md',
       title: '24 July 2020',
       url: 'http://dx.doi.org/10.14279/depositonce-10417',
