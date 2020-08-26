@@ -4,8 +4,8 @@
     .sliders
 
       h5 Shutdown Type
-      .myslider.gap
-        my-slider(measure="ShutdownType" :state="state" @changed="sliderChanged")
+      .myslider(v-for="measure in Object.keys(state.measures)" :key="'x'+ measure")
+        my-slider.gap(v-if="measure === 'ShutdownType'" :measure="measure" :state="state" @changed="sliderChanged")
 
       br
 
