@@ -134,15 +134,15 @@ export default class VueComponent extends Vue {
     {
       url: '/v2',
       date: 'Updated: 28 March 2020',
-      title: 'Adherence Rates',
+      title: 'Adherence Rates for Different Intervention Strategies',
       subtitle:
-        'How COVID-19 spreads under various levels of adherence for work, shopping, leisure restrictions.',
+        'Different adherence rates for different stay-at-home interventions.',
     },
     {
       url: '/v1',
       date: 'Updated: 25 March 2020',
-      title: 'Intervention Strategies',
-      subtitle: 'Exploring the effects of several stay-at-home interventions..',
+      title: 'Timings of Different Intervention Strategies',
+      subtitle: 'Different timings of different stay-at-home interventions.',
     },
   ]
 
