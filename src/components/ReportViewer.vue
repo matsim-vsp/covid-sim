@@ -10,7 +10,7 @@
   .report-details
     .banner
       p(style="flex: 1; margin-right: 0.5rem;") Summary of report:
-      button.button.is-danger(@click="clickedDownload()") Get Full PDF (Deutsch)
+      button.button.is-danger(@click="clickedDownload()") PDF(Deutsch)
     p.report-summary(v-html="selectedReport.html")
 
 </template>
