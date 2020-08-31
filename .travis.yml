@@ -1,7 +1,7 @@
 language: node_js
 dist: bionic
-# node_js:
-#  - '12'
+node_js:
+ - '12'
 
 matrix:
   include:
