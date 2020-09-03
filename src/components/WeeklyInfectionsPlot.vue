@@ -112,7 +112,7 @@ export default class VueComponent extends Vue {
     console.log({ grenz })
     this.dataLines = [
       {
-        name: 'Target: 50 per 100,000 (scaled)',
+        name: 'Target: 50 per 100,000 per 7 days',
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [grenz, grenz],
         fill: 'tozeroy',
