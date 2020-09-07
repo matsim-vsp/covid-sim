@@ -104,6 +104,13 @@
               :rValues="rValues"
               @method="switchRMethod")
 
+        .linear-plot(v-for="chart in chartYamlFiles")
+          vega-lite-chart.plotsize(
+            :baseUrl="BATTERY_URL"
+            :runId="runId"
+            :yamlConfig="chart"
+          )
+
   .content(v-if="bottomNotes")
     .bottom
       h3 Further Notes
@@ -126,6 +133,7 @@ import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
+import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import { RunYaml } from '@/Globals'
 
 interface Measure {
@@ -140,12 +148,14 @@ interface Measure {
     ButtonGroup,
     WeeklyInfectionsPlot,
     RValuePlot,
+    VegaLiteChart,
     VuePlotly,
   },
 })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private yaml!: RunYaml
   @Prop({ required: true }) private runId!: string
+  @Prop({ required: true }) private chartYamlFiles!: string[]
 
   // convenience from yaml
   private startDate: string = ''

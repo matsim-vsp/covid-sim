@@ -135,8 +135,7 @@ export default class VueComponent extends Vue {
       url: '/v2',
       date: 'Updated: 28 March 2020',
       title: 'Adherence Rates for Different Intervention Strategies',
-      subtitle:
-        'Different adherence rates for different stay-at-home interventions.',
+      subtitle: 'Different adherence rates for different stay-at-home interventions.',
     },
     {
       url: '/v1',

@@ -22,7 +22,8 @@
   .view-section
     single-run-viewer.viewer(v-if="currentCity > -1"
                              :yaml="allRuns[currentCity].yaml"
-                             :runId="allRuns[currentCity].runId")
+                             :runId="allRuns[currentCity].runId"
+                             :chartYamlFiles="chartYamlFiles")
 
 </template>
 
@@ -61,6 +62,8 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private plusminus = '0'
 
+  private chartYamlFiles: string[] = []
+
   private allRuns: { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[] = []
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
@@ -91,6 +94,8 @@ export default class VueComponent extends Vue {
       this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
       this.city = readYaml.city
       this.currentCity = 0
+
+      this.chartYamlFiles = await this.getChartYamls()
     } catch (e) {
       this.attemptMulticityFromURL()
     }
@@ -113,6 +118,17 @@ export default class VueComponent extends Vue {
 
     crumbs[crumbs.length - 1].isActive = true
     return crumbs
+  }
+
+  private async getChartYamls(): Promise<string[]> {
+    // Perhaps we want to see some charts! Check the dir for chart*.yaml files
+    const yamlFiles = []
+    const folderContents = await this.svnRoot.getDirectory(this.runId)
+    for (const file of folderContents.files) {
+      if (file.match(/^chart.*\.yaml$/)) yamlFiles.push(file)
+    }
+    console.log({ CHART_YAMLS: yamlFiles })
+    return yamlFiles
   }
 
   private async attemptMulticityFromURL() {
