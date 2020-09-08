@@ -18,7 +18,7 @@
             :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
 
         .option-group(:class="{'totally-disabled': isBase}"
-                      v-for="group in yaml.optionGroups" :key="group.heading + group.day")
+                      v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
           .g1
             h6.title {{ calendarForSimDay(group.day) }}:
               br
@@ -104,11 +104,13 @@
               :rValues="rValues"
               @method="switchRMethod")
 
-        .linear-plot(v-for="chart in chartYamlFiles")
+        .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
           vega-lite-chart.plotsize(
             :baseUrl="BATTERY_URL"
             :runId="runId"
-            :yamlConfig="chart"
+            :configFile="chartKey"
+            :yamlDef="vegaChartData[chartKey].yaml"
+            :data="vegaChartData[chartKey].data"
           )
 
   .content(v-if="bottomNotes")
@@ -125,6 +127,7 @@ import MarkdownIt from 'markdown-it'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
+import yaml from 'yaml'
 import moment from 'moment'
 
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
@@ -141,6 +144,13 @@ interface Measure {
   title: string
 }
 
+interface VegaChartDefinition {
+  yaml: any
+  zip?: string
+  url?: string
+  data?: any[]
+}
+
 @Component({
   components: {
     ActivityLevelsPlot,
@@ -153,7 +163,7 @@ interface Measure {
   },
 })
 export default class VueComponent extends Vue {
-  @Prop({ required: true }) private yaml!: RunYaml
+  @Prop({ required: true }) private runYaml!: RunYaml
   @Prop({ required: true }) private runId!: string
   @Prop({ required: true }) private chartYamlFiles!: string[]
 
@@ -200,54 +210,85 @@ export default class VueComponent extends Vue {
     munich: this.DIVI_URL + 'munich-divi-processed.csv',
   }
 
-  @Watch('yaml') private async switchYaml() {
-    // console.log('GOT NEW YAML:', this.yaml.city)
-    // console.log({ yaml: this.yaml })
+  private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
 
-    if (!this.yaml.city) return
+  // read the yaml files for each vega chart
+  // if a zip file is specified, note that so we can fetch its content later
+  private async loadVegaYamlFiles() {
+    for (const yamlFile of this.chartYamlFiles) {
+      try {
+        const url = `${this.BATTERY_URL}/${this.runId}/${yamlFile}`
+        const response = await fetch(url).then()
+        const text = await response.text()
+        const definition = yaml.parse(text)
+
+        const chart: VegaChartDefinition = { yaml: definition, data: [] }
+
+        // is there a zip file?
+        if (definition.data && definition.data.zip) {
+          chart.zip = definition.data.zip
+          chart.url = definition.data.url
+        }
+
+        this.vegaChartData[yamlFile] = chart
+      } catch (e) {
+        console.error({ e })
+      }
+    }
+  }
+
+  @Watch('chartYamlFiles') private async handleChartListChanged() {
+    this.vegaChartData = {}
+    this.loadVegaYamlFiles()
+  }
+
+  @Watch('runYaml') private async switchYaml() {
+    if (!this.runYaml.city) return
 
     this.isZipLoaded = false
     this.isUsingRealDates = false
     this.$nextTick()
-    this.city = this.yaml.city
+    this.city = this.runYaml.city
     this.offset = []
+    this.vegaChartData = {}
+
+    this.loadVegaYamlFiles()
 
     // set start date
-    if (this.yaml.startDate) this.startDate = this.yaml.startDate
-    else if (this.yaml.defaultStartDate) this.startDate = this.yaml.defaultStartDate
+    if (this.runYaml.startDate) this.startDate = this.runYaml.startDate
+    else if (this.runYaml.defaultStartDate) this.startDate = this.runYaml.defaultStartDate
     else {
       alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
       return
     }
 
     // set end date
-    this.endDate = this.yaml.endDate ? this.yaml.endDate : '2020-08-31'
+    this.endDate = this.runYaml.endDate ? this.runYaml.endDate : '2020-08-31'
     // console.log({ endDate: this.endDate })
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     // build offsets
-    if (!this.yaml.offset && !this.yaml.startDates) {
+    if (!this.runYaml.offset && !this.runYaml.startDates) {
       alert('Uh-oh, YAML file has no offsets AND no startDates!')
       return
     }
 
-    if (!this.yaml.offset) {
-      if (!this.yaml.startDates) {
+    if (!this.runYaml.offset) {
+      if (!this.runYaml.startDates) {
         alert("Need startDates in YAML if we don't have offsets")
         return
       }
       this.isUsingRealDates = true
-      const defaultDate = moment(this.yaml.defaultStartDate)
-      for (const d of this.yaml.startDates) {
+      const defaultDate = moment(this.runYaml.defaultStartDate)
+      for (const d of this.runYaml.startDates) {
         const date = moment(d)
         const diff = date.diff(defaultDate, 'days')
         this.offset.push(diff)
         if (date.isSame(d)) this.plusminus = diff
       }
     } else {
-      this.offset = this.yaml.offset
-      this.plusminus = this.yaml.offset[0]
-      // console.log({ newOffset: this.offset })
+      this.offset = this.runYaml.offset
+      this.plusminus = this.runYaml.offset[0]
     }
 
     this.updateNotes()
@@ -392,7 +433,7 @@ export default class VueComponent extends Vue {
 
     // console.log('loadZipData:', this.city)
 
-    const filepath = this.BATTERY_URL + this.runId + '/' + this.yaml.zip
+    const filepath = this.BATTERY_URL + this.runId + '/' + this.runYaml.zip
     // console.log(filepath)
 
     if (this.zipCache[this.city]) {
@@ -427,17 +468,9 @@ export default class VueComponent extends Vue {
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
-    // maybe we already did the calcs
-    // if (this.loadedSeriesData[this.currentRun.RunId]) {
-    //   const cache = this.loadedSeriesData[this.currentRun.RunId]
-    //   this.hospitalData = cache
-    //   this.data = cache.filter((row: any) => row.name !== ignoreRow)
-    //   this.updateTotalInfected()
-    //   return
-    // }
 
     // load run dataset
-    const csv: any[] = await this.loadCSV(this.currentRun)
+    const csv: any[] = await this.loadCSVs(this.currentRun)
     // zip might not yet be loaded
     if (csv.length === 0) return
 
@@ -453,6 +486,28 @@ export default class VueComponent extends Vue {
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
     this.updateTotalInfected()
+
+    // Update vega charts too
+    this.updateVegaCharts()
+  }
+
+  private updateVegaCharts() {
+    for (const key of Object.keys(this.vegaChartData)) {
+      const chart = this.vegaChartData[key]
+      // nothing to do if no zip file was specified
+      if (!chart.zip || !chart.url) continue
+
+      try {
+        const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
+        console.log('VEGA: Extracting', filename)
+        let text = this.zipLoader.extractAsText(filename)
+        const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+        chart.data = z.data
+      } catch (e) {
+        console.log(e)
+      }
+    }
   }
 
   private updateTotalInfected() {
@@ -489,7 +544,7 @@ export default class VueComponent extends Vue {
 
     // determine: use offset numeral, or offset date?
     if (this.isUsingRealDates) {
-      const defaultDate = moment(this.yaml.defaultStartDate)
+      const defaultDate = moment(this.runYaml.defaultStartDate)
       const diff = defaultDate.add(this.plusminus, 'days')
       // console.log(diff)
       lookupKey = lookupKey.replace('undefined', diff.format('YYYY-MM-DD'))
@@ -546,7 +601,7 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private async loadCSV(currentRun: any) {
+  private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
     if (this.zipLoader === {}) return []
 
@@ -750,7 +805,7 @@ export default class VueComponent extends Vue {
   private mdParser = new MarkdownIt()
 
   private async updateNotes() {
-    const url = this.BATTERY_URL + this.runId + '/' + this.yaml.readme
+    const url = this.BATTERY_URL + this.runId + '/' + this.runYaml.readme
 
     const response = await fetch(url)
 

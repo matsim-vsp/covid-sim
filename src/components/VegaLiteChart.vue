@@ -1,5 +1,5 @@
 <template lang="pug">
-#vega-container(v-if="yamlConfig")
+#vega-container(v-if="configFile")
   .main-area
     .labels
       h4.center(v-if="this.title") {{ this.title }}
@@ -26,7 +26,13 @@ class VegaLiteChart extends Vue {
   private runId!: string
 
   @Prop({ required: true })
-  private yamlConfig!: string
+  private configFile!: string
+
+  @Prop({ required: true })
+  private yamlDef!: any
+
+  @Prop({ required: true })
+  private data!: any[]
 
   private chartYaml: any = {}
 
@@ -36,63 +42,51 @@ class VegaLiteChart extends Vue {
   private loadingText: string = 'Chart'
 
   private get cleanConfigId() {
-    return this.yamlConfig.replace(/[\W_]+/g, '')
+    return this.configFile.replace(/[\W_]+/g, '')
   }
 
   public mounted() {
     this.getVizDetails()
   }
 
-  @Watch('yamlConfig') changedYaml() {
+  @Watch('configFile') changedYaml() {
     this.getVizDetails()
   }
 
   private async getVizDetails() {
-    this.chartYaml = await this.loadFiles()
     this.processInputs()
-
     this.loadingText = ''
   }
 
-  private async loadFiles() {
-    let json: any = { data: {} }
-
-    try {
-      this.loadingText = 'Loading chart...'
-
-      const url = `${this.baseUrl}/${this.runId}/${this.yamlConfig}`
-      const response = await fetch(url).then()
-      const text = await response.text()
-      json = yaml.parse(text)
-    } catch (e) {
-      console.error({ e })
-      this.loadingText = '' + e
-      return
-    }
-
-    return json
-  }
-
   private processInputs() {
+    // make a deep copy of passed-in definition object
+    this.chartYaml = JSON.parse(JSON.stringify(this.yamlDef))
+
     // schema
     if (!this.chartYaml.$schema)
       this.chartYaml.$schema = 'https://vega.github.io/schema/vega-lite/v4.json'
 
-    // data url
-    if (this.chartYaml.url) {
-      this.chartYaml.data = { url: this.chartYaml.url }
-      delete this.chartYaml.url
-    }
-    if (this.chartYaml.data.url && !this.chartYaml.data.url.startsWith('http')) {
-      const localUrl = `${this.baseUrl}/${this.runId}/${this.chartYaml.data.url}`
-      this.chartYaml.data = { url: localUrl }
+    // data
+    if (this.data.length) {
+      // data passed in already
+      this.chartYaml.data = { values: this.data }
+    } else {
+      // data url
+      if (this.chartYaml.url) {
+        this.chartYaml.data = { url: this.chartYaml.url }
+        delete this.chartYaml.url
+      }
+      if (this.chartYaml.data.url && !this.chartYaml.data.url.startsWith('http')) {
+        const localUrl = `${this.baseUrl}/${this.runId}/${this.chartYaml.data.url}`
+        this.chartYaml.data = { url: localUrl }
+      }
     }
 
     // title and description
     if (this.chartYaml.title) this.title = this.chartYaml.title
     if (this.chartYaml.description) this.description = this.chartYaml.description
-    this.chartYaml.title = null
-    this.chartYaml.description = null
+    delete this.chartYaml.title
+    delete this.chartYaml.description
 
     // standard layout
     if (!this.chartYaml.autosize) this.chartYaml.autosize = { type: 'fit', resize: true }

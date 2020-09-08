@@ -21,7 +21,7 @@
 
   .view-section
     single-run-viewer.viewer(v-if="currentCity > -1"
-                             :yaml="allRuns[currentCity].yaml"
+                             :runYaml="allRuns[currentCity].yaml"
                              :runId="allRuns[currentCity].runId"
                              :chartYamlFiles="chartYamlFiles")
 
@@ -127,7 +127,6 @@ export default class VueComponent extends Vue {
     for (const file of folderContents.files) {
       if (file.match(/^chart.*\.yaml$/)) yamlFiles.push(file)
     }
-    console.log({ CHART_YAMLS: yamlFiles })
     return yamlFiles
   }
 
