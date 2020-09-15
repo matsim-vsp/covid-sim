@@ -25,21 +25,27 @@ export default class VueComponent extends Vue {
 
   private reports: any[] = [
     {
+      md: '/reports/report-2020-09-11.md',
+      title: '11 Sep 2020',
+      url: 'https://doi.org/10.14279/depositonce-10553 ',
+      html: '',
+    },
+    {
       md: '/reports/report-2020-08-21.md',
       title: '21 Aug 2020',
-      url: 'http://dx.doi.org/10.14279/depositonce-10480',
+      url: 'https://dx.doi.org/10.14279/depositonce-10480',
       html: '',
     },
     {
       md: '/reports/report-2020-07-24.md',
       title: '24 July 2020',
-      url: 'http://dx.doi.org/10.14279/depositonce-10417',
+      url: 'https://dx.doi.org/10.14279/depositonce-10417',
       html: '',
     },
     {
       md: '/reports/report-2020-07-03.md',
       title: '03 July 2020',
-      url: 'http://dx.doi.org/10.14279/depositonce-10373',
+      url: 'https://dx.doi.org/10.14279/depositonce-10373',
       html: '',
     },
     {
@@ -51,13 +57,13 @@ export default class VueComponent extends Vue {
     {
       md: '/reports/report-2020-06-05.md',
       title: '05 Jun 2020',
-      url: 'http://dx.doi.org/10.14279/depositonce-10152',
+      url: 'https://dx.doi.org/10.14279/depositonce-10152',
       html: '',
     },
     {
       md: '/reports/report-2020-05-20.md',
       title: '20 May 2020',
-      url: 'http://dx.doi.org/10.14279/depositonce-10085',
+      url: 'https://dx.doi.org/10.14279/depositonce-10085',
       html: '',
     },
     {

@@ -18,8 +18,9 @@
     #navbarBasicExample.navbar-menu(
       :class="{'is-active': isBurgerActive}"
       @click='clickedBurger')
-      .navbar-start
 
+      .navbar-start
+        router-link.navbar-item(to="/2020-09-11/bmbf/") 2020.09.11
         router-link.navbar-item(to="/2020-07-22/") 2020.07.22
         router-link.navbar-item(to="/2020-07-21/") 2020.07.21
 
