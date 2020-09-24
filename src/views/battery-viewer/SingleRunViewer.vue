@@ -9,7 +9,7 @@
   #main-section
     .pieces(v-if="this.city")
       .option-groups
-        .button-choices.buttons.has-addons
+        .button-choices.buttons.has-addons(v-if="!runYaml.hideBase")
           button.button.is-small(
             :class="{'is-link': !isBase, 'is-selected': !isBase}"
             :key="'do-something'" @click='setBase(false)') Alternatives
