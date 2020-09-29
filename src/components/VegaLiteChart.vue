@@ -53,6 +53,11 @@ class VegaLiteChart extends Vue {
     this.getVizDetails()
   }
 
+  @Watch('data') handleDataChanged() {
+    console.log('YAML DATA CHANGED')
+    this.processInputs()
+  }
+
   private async getVizDetails() {
     this.processInputs()
     this.loadingText = ''
@@ -104,7 +109,13 @@ class VegaLiteChart extends Vue {
     }
 
     console.log({ yaml: this.chartYaml })
-    vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+
+    // don't embed before we've fetched data from zipfile
+    if (!this.chartYaml.data.url) {
+      vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+    } else if (this.chartYaml.data.url.indexOf('$RUNS$') === -1) {
+      vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+    }
   }
 }
 
