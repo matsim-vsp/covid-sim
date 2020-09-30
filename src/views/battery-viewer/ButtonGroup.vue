@@ -44,10 +44,18 @@ export default class VueComponent extends Vue {
     // otherwise treat as text
     let usePercent = true
     for (const x of this.options) {
+      // is it non-numeric?
       if (isNaN(x)) {
         usePercent = false
         break
+      } else {
+        // ok it is a number, but does it have an E in it?
+        if (x.indexOf('e') > -1 || x.indexOf('E') > -1) {
+          usePercent = false
+          break
+        }
       }
+
       if (x < 0.0 || x > 1.0) {
         usePercent = false
         break
