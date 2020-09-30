@@ -1,13 +1,13 @@
 <template lang="pug">
-#slider-thing
+.slider-thing
+  p {{ measure.title }}
+
   .button-choices(v-if="showButtons")
     button.button.is-small(
       v-for="choice in stops"
-      :class="{'is-link': choice===selectedValue}"
+      :class="{'full-width': stops.length > 5, 'is-link': choice===selectedValue}"
       :key="choice"
       @click='choseButton(choice)') {{ choice }}
-
-  p {{ measure.title }}
 
 </template>
 
@@ -109,17 +109,28 @@ export default class VueComponent extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+p {
+  color: #596;
+  margin-top: 1rem;
+  margin-bottom: -0.25rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
 .my-slider {
   margin-top: 1rem;
 }
 
 .button-choices {
   margin-left: 0;
-  margin-top: 1rem;
 }
 
 .button-choices button {
+  margin-top: 0.2rem;
   margin-right: 0.2rem;
+}
+
+.button-choices button.full-width {
+  width: 100%;
 }
 
 @media only screen and (max-width: 768px) {
