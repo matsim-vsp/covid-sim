@@ -65,6 +65,7 @@ import VizCard from '@/components/VizCard.vue'
 export default class VueComponent extends Vue {
   private readme = require('@/assets/index.md')
   private readmeBottom = require('@/assets/index-bottom.md')
+
   private modelruns: any[] = [
     {
       url: '/2020-09-11/bmbf',
@@ -213,6 +214,10 @@ a {
   margin-top: 1rem;
   margin-bottom: 3rem;
   flex: 1;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.3rem;
 }
 
 .main h2 {
@@ -265,6 +270,12 @@ a {
   line-height: 2.7rem;
   padding: 1rem 0;
   color: $themeColor;
+}
+
+@media only screen and (max-width: 800px) {
+  .colophon {
+    padding: 2rem 1rem 1rem 1rem;
+  }
 }
 
 @media only screen and (max-width: 640px) {

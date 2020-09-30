@@ -11,8 +11,9 @@
     a(href="https://matsim.org")
       img(alt="MATSim logo" src="@/assets/images/matsim-logo-white.png" width=250)
 
-    p COVID-19 Scenario Viewer, &copy; 2020 VSP TU-Berlin
-    p For more info about VSP, see
+    p COVID-19 Scenario Viewer <br/>&copy; 2020 VSP TU-Berlin
+    p GDPR: This site does not collect, store, or analyze any personal information.
+    p For more info about VSP at TU Berlin, see
       a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
 
 </template>
@@ -126,6 +127,8 @@ h3 {
 }
 
 .footer p {
+  line-height: 1.2rem;
+  margin-top: 0.5rem;
   color: white;
 }
 

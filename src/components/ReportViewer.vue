@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.vue-component
 
   .report-list
     .report-tab(v-for="report in reports" :key="report.title"
@@ -10,7 +10,7 @@
   .report-details
     .banner
       p(style="flex: 1; margin-right: 0.5rem;") Summary of report:
-      button.button.is-danger(@click="clickedDownload()") PDF(Deutsch)
+      button.button.is-danger(@click="clickedDownload()") Full PDF (Deutsch)
     p.report-summary(v-html="selectedReport.html")
 
 </template>
@@ -115,7 +115,7 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#vue-component {
+.vue-component {
   display: flex;
   flex-direction: row;
   margin-bottom: 3rem;
@@ -153,6 +153,25 @@ export default class VueComponent extends Vue {
   display: flex;
 }
 
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 800px) {
+  .report-tab {
+    cursor: pointer;
+    padding: 0.5rem 0.5rem 0.5rem 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  .report-details {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .banner {
+    flex-direction: column-reverse;
+  }
+
+  .banner button {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
 }
 </style>
