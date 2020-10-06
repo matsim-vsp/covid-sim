@@ -78,4 +78,33 @@ heinsberg = (
 
 heinsberg.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
+### same by reporting date (Meldedatum):
+
+# needs to be re-read because the original file is garbled (could be fixed)
+csv = pd.read_csv(sys.argv[1], parse_dates=True)
+
+# split out dates
+csv >>= separate(
+    X.Meldedatum,
+    ["year", "dash1", "month", "dash2", "day"],
+    sep=[4, 5, 7, 8, 10],
+    convert=True,
+    remove=False,
+) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day)
+
+# Berlin
+fname = "berlin-cases-by-reporting-date.csv"
+print(fname)
+berlin = (
+        csv
+        >> filter_by(X.Bundesland == "Berlin")
+        >> group_by(X.Bundesland, X.year, X.month, X.day)
+        >> summarize(cases=X.AnzahlFall.sum())
+        >> arrange(X.year, X.month, X.day)
+)
+
+berlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+
+
+
 print("--Done!")
