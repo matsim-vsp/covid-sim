@@ -164,6 +164,11 @@ export default class VueComponent extends Vue {
       title: 'Infection Traces',
       subtitle: 'Animation of infection spreading through the population.',
     },
+    {
+      url: '/timelapse',
+      title: '90 Day Time Lapse',
+      subtitle: 'Home locations of residents, colored by their infection status through time.',
+    },
   ]
 }
 </script>

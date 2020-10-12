@@ -38,7 +38,7 @@ export default class VizThumbnail extends Vue {
       const zimg = require(`../assets/images/v3-thumb.png`)
       return zimg
     } else if (this.viz.url.indexOf('timelapse') > -1) {
-      const zimg = require(`../assets/images/v3-thumb.png`)
+      const zimg = require(`../assets/images/timelapse.jpg`)
       return zimg
     } else {
       const zimg = require(`../assets/images/thumb-v6.png`)

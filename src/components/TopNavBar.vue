@@ -41,6 +41,12 @@
             a.navbar-item(:href="'/v2'") v2
             a.navbar-item(:href="'/v1'") v1
 
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  Visualizations
+          .navbar-dropdown
+            a.navbar-item(:href="'/v3?day=5'") Infection Traces
+            a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
+
 </template>
 
 <script lang="ts">
