@@ -499,11 +499,12 @@ export default class VueComponent extends Vue {
 
       try {
         const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
-        console.log('VEGA: Extracting', filename)
         let text = this.zipLoader.extractAsText(filename)
         const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
-        chart.data = z.data
+        const dateBracket = z.data.filter(point => point.date < this.endDate)
+
+        chart.data = dateBracket
       } catch (e) {
         console.log(e)
       }

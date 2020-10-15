@@ -57,6 +57,9 @@ export default class VueComponent extends Vue {
       y.push(value.rValue)
     }
 
+    // set end date
+    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+
     // use pre-calculated r-values
     this.dataLines = [
       {
