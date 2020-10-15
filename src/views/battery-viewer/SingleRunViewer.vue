@@ -109,6 +109,7 @@
             :baseUrl="BATTERY_URL"
             :runId="runId"
             :configFile="chartKey"
+            :logScale="logScale"
             :yamlDef="vegaChartData[chartKey].yaml"
             :data="vegaChartData[chartKey].data"
           )

@@ -32,6 +32,9 @@ class VegaLiteChart extends Vue {
   private yamlDef!: any
 
   @Prop({ required: true })
+  private logScale!: boolean
+
+  @Prop({ required: true })
   private data!: any[]
 
   private chartYaml: any = {}
@@ -54,7 +57,10 @@ class VegaLiteChart extends Vue {
   }
 
   @Watch('data') handleDataChanged() {
-    console.log('YAML DATA CHANGED')
+    this.processInputs()
+  }
+
+  @Watch('logScale') handleScaleChanged() {
     this.processInputs()
   }
 
@@ -70,6 +76,14 @@ class VegaLiteChart extends Vue {
     // schema
     if (!this.chartYaml.$schema)
       this.chartYaml.$schema = 'https://vega.github.io/schema/vega-lite/v4.json'
+
+    // scale: if it is specified, leave it. Otherwise you log/linear button
+    if (!this.chartYaml.encoding?.y?.scale) {
+      try {
+        this.chartYaml.encoding.y.scale = { type: this.logScale ? 'symlog' : 'linear' }
+        if (!this.logScale) delete this.chartYaml.encoding.y.axis
+      } catch (e) {}
+    }
 
     // data
     if (this.data.length) {
