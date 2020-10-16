@@ -148,12 +148,9 @@ export default class VueComponent extends Vue {
       })
     }
 
-    console.log('DIVIDATA LENGTH IS', this.diviData.length)
     if (this.diviData.length > 0) {
       this.hospitalSeries.push(this.diviData[0])
     }
-
-    console.log({ hHHHH_HOSP: this.hospitalSeries })
   }
 
   private reformatDateBerlin(day: string) {

@@ -36,7 +36,6 @@ export default class VueComponent extends Vue {
   private dunkelZifferFactor = 1.0
 
   private calculateObserved(factor100k: number) {
-    console.log({ observed: this.observed })
     if (this.observed.length === 0) return
 
     // for each data source, let's draw some dots
@@ -63,7 +62,6 @@ export default class VueComponent extends Vue {
 
       // done
       this.dataLines.push(observedLine)
-      console.log({ observedLine })
     }
   }
 
@@ -71,7 +69,6 @@ export default class VueComponent extends Vue {
    * We are calculating a seven day running infection rate.
    */
   private calculateValues() {
-    console.log('------ CALCULATE VALUES')
     if (this.data.length === 0) return
 
     // set end date
@@ -88,7 +85,6 @@ export default class VueComponent extends Vue {
     const averagingPeriod = 1
 
     let nShowSymptomsCum: any = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
-    console.log({ nShowSymptomsCum })
 
     if (nShowSymptomsCum.y[0] !== undefined) {
       for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
@@ -106,10 +102,8 @@ export default class VueComponent extends Vue {
       }
     }
 
-    console.log({ WEEKLY_INFECTIONS: infectionRate })
-
     const grenz = (50.0 * totalPopulation) / 100000.0 / 7.0
-    console.log({ grenz })
+
     this.dataLines = [
       {
         name: 'Target: 50 per 100,000 per 7 days',
