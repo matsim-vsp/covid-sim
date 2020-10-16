@@ -46,8 +46,6 @@ export default class VueComponent extends Vue {
 
     this.$emit('method', 'Based on tracking all infections')
 
-    console.log({ RVALUES: this.rValues })
-
     const x: any[] = []
     const y: any[] = []
 
