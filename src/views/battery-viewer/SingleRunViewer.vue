@@ -1,132 +1,120 @@
 <template lang="pug">
-#single-run-viewer
-  .page-section.content
+#charts
+  .content
     .readme(v-html="topNotes")
 
-  .page-section.preamble(:style="{backgroundColor: 'white'}")
+  .preamble
     h3.select-scenario Select Scenario:
 
-  .page-section.base-choice(v-if="this.city")
-    .button-choices.buttons.has-addons(v-if="!runYaml.hideBase")
-      button.button.is-small(
-        :style="{marginRight: '0.5rem'}"
-        :class="{'is-link': !isBase, 'is-selected': !isBase}"
-        :key="'do-something'" @click='setBase(false)') Alternatives
-      button.button.is-small(
-        :class="{'is-link': isBase, 'is-selected': isBase}"
-        :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
+  #main-section
+    .pieces(v-if="this.city")
+      .option-groups
+        .button-choices.buttons.has-addons(v-if="!runYaml.hideBase")
+          button.button.is-small(
+            :class="{'is-link': !isBase, 'is-selected': !isBase}"
+            :key="'do-something'" @click='setBase(false)') Alternatives
+          button.button.is-small(
+            :class="{'is-link': isBase, 'is-selected': isBase}"
+            :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
 
-  .page-section.option-groups(
-    v-if="this.city"
-    :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
-    .option-group(:class="{'totally-disabled': isBase}"
-                  v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-      .g1
-        h6.title {{ calendarForSimDay(group.day) }}:
-          br
-          | {{ group.heading }}
+        .option-group(:class="{'totally-disabled': isBase}"
+                      v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
+          .g1
+            h6.title {{ calendarForSimDay(group.day) }}:
+              br
+              | {{ group.heading }}
 
-        p.subhead(v-if="group.subheading") {{ group.subheading }}
+            p.subhead(v-if="group.subheading") {{ group.subheading }}
 
-        table.sliders.is-mobile
-          tr.measure(v-for="m in group.measures" :key="m.measure")
-            td.measure-labels.is-desktop-layout
-              p {{ m.title }}
-            td.measure-buttons
-              p.is-mobile-layout {{ m.title }}
+            .myslider(v-for="m in group.measures" :key="m.measure")
               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
-  .page-section(:style="{backgroundColor: 'white'}")
-    .linear-plot.activity(v-if="showActivityLevels")
-      h5 Activity Levels by Type
-      p 0-100% of normal
-      .plotarea.compact
-        activity-levels-plot.plotsize(:city="city" :battery="runId"
-          :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-          :zipContent="zipLoader")
+        h5.cumulative Cumulative Infected by
+          br
+          | {{ this.endDate }}
+        p.infected {{ prettyInfected }}
 
-  .page-section.results
-    h3.select-scenario Results:
+      .all-plots
 
-    .top-line-stats
-      h5.cumulative Cumulative Infected by
-        br
-        | {{ this.endDate }}:
-      p.infected {{ prettyInfected }}
+        .linear-plot.activity(v-if="showActivityLevels")
+          h5 Activity Levels by Type
+          p 0-100% of normal
+          .plotarea.compact
+            activity-levels-plot.plotsize(:city="city" :battery="runId"
+              :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
+              :zipContent="zipLoader")
 
-  .page-section.plot-options
-    .scale-options
-      b Scale
-      .variation-choices.buttons.has-addons
-        button.button.is-small(
-          :class="{'is-link': !logScale, 'is-selected': !logScale}"
-          @click="logScale = !logScale") Linear
-        button.button.is-small(
-          :class="{'is-link': logScale, 'is-selected': logScale}"
-          @click="logScale = !logScale") Log
+        .plot-options
+          .scale-options
+            b Scale
+            .variation-choices.buttons.has-addons
+              button.button.is-small(
+                :class="{'is-link': !logScale, 'is-selected': !logScale}"
+                @click="logScale = !logScale") Linear
+              button.button.is-small(
+                :class="{'is-link': logScale, 'is-selected': logScale}"
+                @click="logScale = !logScale") Log
 
-    .variation(v-if="offset.length > 1")
-      b Shift Start Date
-      .variation-choices.buttons.has-addons( style="margin-left: auto;")
-        button.button.is-small(v-for="offset in offset" :key="offset"
-          :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
-          @click="setPlusMinus(offset)") {{ strOffset(offset)}}
+          .variation(v-if="offset.length")
+            b Shift Start Date
+            .variation-choices.buttons.has-addons( style="margin-left: auto;")
+              button.button.is-small(v-for="offset in offset" :key="offset"
+                :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
+                @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
-  .page-section.all-plots
+        .linear-plot
+          h5 {{ cityCap }} Simulated Health Outcomes Over Time
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            vue-plotly.plotsize(v-else
+              :data="data" :layout="layout" :options="options")
 
-    .linear-plot
-      h5 {{ cityCap }} Simulated Health Outcomes Over Time
-      p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-      .plotarea
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        vue-plotly.plotsize(v-else
-          :data="data" :layout="layout" :options="options")
+        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
+          h5 {{ cityCap }} Hospitalization Rate Comparison
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            hospitalization-plot.plotsize(v-else
+              :data="hospitalData" :logScale="logScale" :city="city"
+              :diviData="diviData" :endDate="endDate" )
 
-    .linear-plot(v-if="city === 'berlin' || city === 'munich'")
-      h5 {{ cityCap }} Hospitalization Rate Comparison
-      p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-      .plotarea
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        hospitalization-plot.plotsize(v-else
-          :data="hospitalData" :logScale="logScale" :city="city"
-          :diviData="diviData" :endDate="endDate" )
+        .linear-plot
+          h5 {{ cityCap }} Infection Rate
+          p Daily new infections
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
+                                                   :observed="observedCases"
+                                                   :logScale="logScale")
 
-    .linear-plot
-      h5 {{ cityCap }} Infection Rate
-      p Daily new infections
-      .plotarea.compact
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
-        :observed="observedCases"
-        :logScale="logScale")
+        .linear-plot
+          h5 {{ cityCap }} Estimated R-Values
+          p {{ rValueMethodDescription }}
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            r-value-plot.plotsize(v-else
+              :data="data"
+              :endDate="endDate"
+              :logScale="logScale"
+              :rValues="rValues"
+              @method="switchRMethod")
 
-    .linear-plot
-      h5 {{ cityCap }} Estimated R-Values
-      p {{ rValueMethodDescription }}
-      .plotarea.compact
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        r-value-plot.plotsize(v-else
-          :data="data"
-          :endDate="endDate"
-          :logScale="logScale"
-          :rValues="rValues"
-          @method="switchRMethod")
+        .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+          vega-lite-chart.plotsize(
+            :baseUrl="BATTERY_URL"
+            :runId="runId"
+            :configFile="chartKey"
+            :logScale="logScale"
+            :yamlDef="vegaChartData[chartKey].yaml"
+            :data="vegaChartData[chartKey].data"
+          )
 
-    .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-      vega-lite-chart.plotsize(
-        :baseUrl="BATTERY_URL"
-        :runId="runId"
-        :configFile="chartKey"
-        :logScale="logScale"
-        :yamlDef="vegaChartData[chartKey].yaml"
-        :data="vegaChartData[chartKey].data"
-      )
-
-  .page-section.content(v-if="bottomNotes")
+  .content(v-if="bottomNotes")
     .bottom
       h3 Further Notes
       .readme(v-html="bottomNotes")
@@ -856,9 +844,11 @@ export default class VueComponent extends Vue {
 </script>
 
 <style scoped lang="scss">
-#single-run-viewer {
+#main-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  background-color: white;
+  padding: 0rem 3rem 1rem 3rem;
 }
 
 h5 {
@@ -879,23 +869,6 @@ h6 {
   grid-template-rows: auto;
 }
 
-.measure {
-  margin-bottom: 2rem;
-}
-
-.measure-labels p {
-  color: #596;
-  margin-top: 0.5rem;
-  margin-bottom: auto;
-  margin-right: 1rem;
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-.measure-buttons {
-  padding-bottom: 0.5rem;
-}
-
 .pieces h3 {
   color: #667883;
   border-bottom: 1px solid #ddd;
@@ -907,34 +880,30 @@ h6 {
 
 .content {
   margin-top: 2rem;
-  background-color: #eee;
+  padding: 0 3rem;
 }
 
 .option-groups {
-  background-color: white;
-  grid-row: 1 / 2;
   grid-column: 1 / 2;
-  display: grid;
-  gap: 1rem;
-  padding-top: 0;
-}
-
-.option-group {
-  padding-bottom: 1rem;
+  grid-row: 1 / 4;
+  margin-right: 1rem;
+  width: 17rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .all-plots {
-  grid-row: 1 / 2;
+  margin-left: 1rem;
   grid-column: 2 / 3;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
 }
 
 .linear-plot {
   background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  margin: 0rem 0 2rem 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -944,9 +913,8 @@ h6 {
 .linear-plot.activity {
   background-color: #f8f8f800;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  margin: 0rem auto 3rem auto;
+  margin: 0rem 0 2rem 1rem;
   text-align: center;
-  max-width: 60rem;
   display: flex;
   flex-direction: column;
   border: none;
@@ -980,6 +948,10 @@ p.subhead {
   margin-top: -0.25rem;
 }
 
+.myslider {
+  width: 100%;
+}
+
 .plot {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
@@ -989,28 +961,26 @@ p.subhead {
 .plot-options {
   display: flex;
   flex-direction: row;
-  margin-top: 1rem;
-  margin-bottom: 0.3rem;
+  margin-left: 1rem;
 }
 
 .infected {
-  padding-left: 1rem;
+  padding-left: 0rem;
   font-weight: bold;
-  font-size: 3rem;
-  margin-top: 0.25rem;
+  font-size: 2rem;
+  margin-top: 0rem;
   color: rgb(151, 71, 34);
 }
 
 .button-choices {
-  background-color: white;
-  width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  width: 100%;
   margin-bottom: 0.25rem;
 }
 
 .button-choices button {
-  margin-right: 2rem;
+  width: 100%;
 }
 
 .title {
@@ -1025,45 +995,21 @@ p.subhead {
 
 .g1 {
   padding: 0rem 0.5rem 1rem 0.5rem;
+  margin-bottom: 2rem;
   border: 1px solid #aaa;
   border-radius: 4px;
-  height: 100%;
 }
 
 .cumulative {
-  text-align: right;
   margin-top: 1rem;
-  margin-right: 1rem;
-}
-
-.page-section {
-  padding: 0rem 3rem;
-}
-
-.base-choice {
-  background-color: white;
-  padding-top: 0;
-  padding-bottom: 0;
 }
 
 .preamble {
   display: flex;
   flex-direction: row;
-  padding-top: 1rem;
-  padding-bottom: 0;
-}
-
-.results {
-  display: flex;
-  flex-direction: row;
-  padding-top: 1rem;
-  padding-bottom: 0;
-}
-
-.top-line-stats {
-  display: flex;
-  flex-direction: row;
-  margin-left: auto;
+  margin-top: 1rem;
+  padding: 1rem 3rem;
+  background-color: white;
 }
 
 .variation {
@@ -1082,49 +1028,15 @@ p.subhead {
   margin-bottom: 3rem;
 }
 
-.is-mobile-layout {
-  display: none;
-}
-
-.is-desktop-layout {
-  display: inherit;
-}
-
-@media only screen and (max-width: 1024px) {
-  .all-plots {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
 @media only screen and (max-width: 640px) {
-  .is-mobile-layout {
-    display: inherit;
-  }
-
-  .is-desktop-layout {
-    display: none;
-  }
-
-  .option-group p {
-    color: #596;
-    padding-top: 0.5rem;
-    margin-bottom: auto;
-    margin-right: 1rem;
-    font-size: 0.9rem;
-    font-weight: bold;
-  }
-
-  .page-section {
+  #main-section {
+    flex-direction: column;
     padding: 0 1rem;
-  }
-
-  td {
-    margin-right: auto;
+    margin: 0 0rem;
   }
 
   .preamble {
-    padding-top: 1rem;
+    padding: 1rem 1rem 0rem 1rem;
   }
 
   .content {
@@ -1132,8 +1044,7 @@ p.subhead {
   }
 
   .all-plots {
-    display: flex;
-    flex-direction: column;
+    margin-left: 0;
   }
 
   .plot-options {
@@ -1152,17 +1063,12 @@ p.subhead {
   }
 
   .linear-plot {
-    margin-top: 0.5rem;
+    margin-top: 2rem;
     margin-left: 0;
   }
 
-  .results {
-    padding-top: 2rem;
-    flex-direction: column;
-  }
-
-  .top-line-stats {
-    flex-direction: column;
+  .option-groups {
+    width: 18rem;
   }
 }
 </style>
