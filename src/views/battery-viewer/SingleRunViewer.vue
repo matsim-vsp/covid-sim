@@ -6,15 +6,15 @@
   .page-section.preamble(:style="{backgroundColor: 'white'}")
     h3.select-scenario Select Scenario:
 
-  .page-section.base-choice(v-if="this.city")
-    .button-choices.buttons.has-addons(v-if="!runYaml.hideBase")
+  .page-section.base-choice(v-if="city && hasBaseRun")
+    .button-choices.buttons.has-addons
       button.button.is-small(
         :style="{marginRight: '0.5rem'}"
         :class="{'is-link': !isBase, 'is-selected': !isBase}"
         :key="'do-something'" @click='setBase(false)') Alternatives
       button.button.is-small(
         :class="{'is-link': isBase, 'is-selected': isBase}"
-        :key="'base'" @click='setBase(true)') What would have happened w/o restrictions
+        :key="'base'" @click='setBase(true)') What would have happened without restrictions
 
   .page-section.option-groups(
     v-if="this.city"
@@ -312,6 +312,8 @@ export default class VueComponent extends Vue {
     await this.loadInfoTxt()
     await this.loadZipData()
 
+    this.hasBaseRun = this.isThereABaseRun()
+
     this.showPlotForCurrentSituation()
   }
 
@@ -409,6 +411,16 @@ export default class VueComponent extends Vue {
     return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
   }
 
+  private isThereABaseRun() {
+    const files = this.zipLoader.files
+    console.log({ ZIPLODER: this.zipLoader })
+    const baseFilename = 'sz0' + '.infections.txt.csv'
+
+    console.log('DOES SZ0 EXIST: ', files.hasOwnProperty(baseFilename))
+
+    return files.hasOwnProperty(baseFilename)
+  }
+
   private currentSituation: any = {}
   private loadedSeriesData: any = {}
   private zipLoader: any = {}
@@ -441,33 +453,28 @@ export default class VueComponent extends Vue {
     return Number(rounded).toLocaleString()
   }
 
+  private hasBaseRun = false
+
   private async loadZipData() {
     this.isZipLoaded = false
 
-    // console.log('loadZipData:', this.city)
-
     const filepath = this.BATTERY_URL + this.runId + '/' + this.runYaml.zip
-    // console.log(filepath)
 
     if (this.zipCache[this.city]) {
       // check cache first!
-      // console.log('using cached zip for!', this.city)
       this.zipLoader = this.zipCache[this.city]
     } else {
       // load the zip from file
 
-      // console.log('---loading zip:', filepath)
-
       const zl = new ZipLoader(filepath)
       await zl.load()
       this.zipLoader = zl
-      // console.log('zip loaded!', this.runId, this.yaml.zip)
     }
 
     this.isZipLoaded = true
     this.zipCache[this.city] = this.zipLoader
-    this.runChanged()
 
+    this.runChanged()
     this.showActivityLevelPlot()
   }
 
@@ -476,7 +483,6 @@ export default class VueComponent extends Vue {
   }
 
   private hospitalData: any[] = []
-
   private rValues: any[] = []
 
   private async runChanged() {
