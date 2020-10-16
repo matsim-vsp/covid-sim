@@ -91,11 +91,11 @@ export default class VueComponent extends Vue {
       // got something!
       const crumbs = this.buildBreadcrumbs(this.runId)
 
-      this.chartYamlFiles = await this.getChartYamls()
-
       this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
       this.city = readYaml.city
       this.currentCity = 0
+
+      this.chartYamlFiles = await this.getChartYamls()
     } catch (e) {
       this.attemptMulticityFromURL()
     }
