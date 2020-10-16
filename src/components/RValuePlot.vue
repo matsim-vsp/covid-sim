@@ -1,6 +1,5 @@
 <template lang="pug">
-#vue-component
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+vue-plotly(:data="dataLines" :layout="layout" :options="options")
 
 </template>
 

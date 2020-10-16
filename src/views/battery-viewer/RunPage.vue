@@ -210,7 +210,6 @@ export default class VueComponent extends Vue {
 .viewer {
   padding: 0rem 0rem;
   margin: 0rem 0rem;
-  max-width: 70em;
   display: flex;
   flex-direction: column;
 }

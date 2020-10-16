@@ -88,10 +88,11 @@ class VegaLiteChart extends Vue {
     // fonts
     const size = 13
     const config = {
-      axis: { titleFontSize: size + 1, labelFontSize: size },
+      axis: { titleFontSize: size, labelFontSize: size },
       legend: { labelFontSize: size },
     }
-    this.chartYaml = Object.assign(this.chartYaml, { config })
+    if (!this.chartYaml.config) this.chartYaml.config = {}
+    this.chartYaml.config = Object.assign(this.chartYaml.config, config)
 
     // data
     if (this.data.length) {
