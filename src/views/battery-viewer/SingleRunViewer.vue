@@ -265,7 +265,7 @@ export default class VueComponent extends Vue {
     this.offset = []
     this.vegaChartData = {}
 
-    this.loadVegaYamlFiles()
+    await this.loadVegaYamlFiles()
 
     // set start date
     if (this.runYaml.startDate) this.startDate = this.runYaml.startDate
@@ -519,6 +519,7 @@ export default class VueComponent extends Vue {
 
         chart.data = dateBracket
       } catch (e) {
+        console.log('YEEEARGH')
         console.log(e)
       }
     }
@@ -618,6 +619,7 @@ export default class VueComponent extends Vue {
   private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
     if (this.zipLoader === {}) return []
+    if (!this.zipLoader.extractAsText) return []
 
     const filename = currentRun.RunId + '.infections.txt.csv'
     console.log('Extracting', filename)
