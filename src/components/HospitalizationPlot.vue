@@ -84,6 +84,8 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
+    if (!modelData.length) return
+
     // set end date
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
