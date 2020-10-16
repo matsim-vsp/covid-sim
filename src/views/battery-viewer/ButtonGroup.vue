@@ -25,10 +25,12 @@ export default class VueComponent extends Vue {
   private showButtons = false
 
   private choseButton(choice: string) {
+    console.log(choice)
     this.selectedValue = choice
   }
 
   private mounted() {
+    console.log({ measure: this.measure, options: this.options })
     this.updateOptions()
   }
 
