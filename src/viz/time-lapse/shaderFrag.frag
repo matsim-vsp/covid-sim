@@ -15,7 +15,7 @@ varying float skip;
 
 vec4 getColor() {
 
-    float opacity = 0.3;
+    float opacity = 1.0;
 
     if (myInfectionStatus == 0.0) {
         return vec4(cSusceptible, opacity);  // susceptible; not moving

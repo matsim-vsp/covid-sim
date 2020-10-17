@@ -32,7 +32,7 @@ export default class VueComponent extends Vue {
     min: 0,
     max: this.maxSliderVal - 1,
     clickable: false,
-    dotSize: 20,
+    dotSize: 28,
     duration: 0,
     lazy: true,
     tooltip: 'active',

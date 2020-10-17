@@ -101,9 +101,9 @@ export const DARK_MODE: ColorSet = {
   links: '#445577',
   susceptible: '#bbbb44',
   infectedButNotContagious: '#00dddd',
-  contagious: '#ff2299',
+  contagious: '#bb2222',
   symptomatic: '#ff5533',
   seriouslyIll: '#7733ee',
-  critical: '#fff',
+  critical: '#f6f',
   recovered: '#116622',
 }

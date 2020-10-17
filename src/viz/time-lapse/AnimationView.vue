@@ -390,7 +390,7 @@ export default class AnimationView extends Vue {
       },
       vertexShader: this.vertexShader,
       fragmentShader: this.fragmentShader,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NoBlending,
       depthTest: true,
       transparent: true,
     })

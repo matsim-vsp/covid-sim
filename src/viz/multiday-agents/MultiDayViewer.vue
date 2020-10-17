@@ -473,18 +473,16 @@ img.theme-button:hover {
   display: flex;
   flex-wrap: wrap;
   padding: 1px 1px;
-  width: 4.4rem;
+  width: 10rem;
 }
 
 .day-button {
   margin: 1px 1px;
-  background-color: #eeeeeeee;
-  // border: 1px solid white;
+  background-color: #eeeeee;
   font-size: 0.7rem;
   width: 1.2rem;
   height: 1.2rem;
   text-align: center;
-  //padding-top: 2px;
   cursor: pointer;
   pointer-events: auto;
 }
@@ -496,7 +494,7 @@ img.theme-button:hover {
 }
 
 .day-button.dark {
-  background-color: #222222ee;
+  background-color: #222222;
   color: #bbb;
   border: 1px solid black;
 }
@@ -623,6 +621,10 @@ img.theme-button:hover {
   }
   .playback-stuff {
     padding-right: 1rem;
+  }
+
+  .day-button-grid {
+    width: 4.4rem;
   }
 
   .day-button {
