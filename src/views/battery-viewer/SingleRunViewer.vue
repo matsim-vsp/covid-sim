@@ -16,115 +16,112 @@
         :class="{'is-link': isBase, 'is-selected': isBase}"
         :key="'base'" @click='setBase(true)') What would have happened without restrictions
 
-  .page-section.option-groups(
-    v-if="this.city"
-    :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
-    .option-group(:class="{'totally-disabled': isBase}"
-                  v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-      .g1
-        h6.title {{ calendarForSimDay(group.day) }}:
+  .page-section.selections-and-charts
+    .left-side
+      .option-groups(
+        v-if="this.city"
+        :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
+
+        .option-group(:class="{'totally-disabled': isBase}"
+                      v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
+          .g1
+            h6.title {{ calendarForSimDay(group.day) }}:
+              br
+              | {{ group.heading }}
+
+            p.subhead(v-if="group.subheading") {{ group.subheading }}
+
+            .measure(v-for="m in group.measures" :key="m.measure")
+              .measure-buttons
+                p {{ m.title }}
+                button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+
+        h5.cumulative Cumulative Infected by
           br
-          | {{ group.heading }}
+          | {{ this.endDate }}:
+        p.infected {{ prettyInfected }}
 
-        p.subhead(v-if="group.subheading") {{ group.subheading }}
+    .right-side
+      .linear-plot.activity(v-if="showActivityLevels")
+        h5 Activity Levels by Type
+        p 0-100% of normal
+        .plotarea.compact
+          activity-levels-plot.plotsize(:city="city" :battery="runId"
+            :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
+            :zipContent="zipLoader")
 
-        table.sliders.is-mobile
-          tr.measure(v-for="m in group.measures" :key="m.measure")
-            td.measure-labels.is-desktop-layout
-              p {{ m.title }}
-            td.measure-buttons
-              p.is-mobile-layout {{ m.title }}
-              button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
-  .page-section(:style="{backgroundColor: 'white'}")
-    .linear-plot.activity(v-if="showActivityLevels")
-      h5 Activity Levels by Type
-      p 0-100% of normal
-      .plotarea.compact
-        activity-levels-plot.plotsize(:city="city" :battery="runId"
-          :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-          :zipContent="zipLoader")
+      .plot-options
+        .scale-options
+          b Scale
+          .variation-choices.buttons.has-addons
+            button.button.is-small(
+              :class="{'is-link': !logScale, 'is-selected': !logScale}"
+              @click="logScale = !logScale") Linear
+            button.button.is-small(
+              :class="{'is-link': logScale, 'is-selected': logScale}"
+              @click="logScale = !logScale") Log
 
-  .page-section.results
-    h3.select-scenario Results:
+        .variation(v-if="offset.length > 1")
+          b Shift Start Date
+          .variation-choices.buttons.has-addons( style="margin-left: auto;")
+            button.button.is-small(v-for="offset in offset" :key="offset"
+              :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
+              @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
-    .top-line-stats
-      h5.cumulative Cumulative Infected by
-        br
-        | {{ this.endDate }}:
-      p.infected {{ prettyInfected }}
+      .all-plots
 
-  .page-section.plot-options
-    .scale-options
-      b Scale
-      .variation-choices.buttons.has-addons
-        button.button.is-small(
-          :class="{'is-link': !logScale, 'is-selected': !logScale}"
-          @click="logScale = !logScale") Linear
-        button.button.is-small(
-          :class="{'is-link': logScale, 'is-selected': logScale}"
-          @click="logScale = !logScale") Log
+        .linear-plot
+          h5 {{ cityCap }} Simulated Health Outcomes Over Time
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            vue-plotly.plotsize(v-else
+              :data="data" :layout="layout" :options="options")
 
-    .variation(v-if="offset.length > 1")
-      b Shift Start Date
-      .variation-choices.buttons.has-addons( style="margin-left: auto;")
-        button.button.is-small(v-for="offset in offset" :key="offset"
-          :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
-          @click="setPlusMinus(offset)") {{ strOffset(offset)}}
+        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
+          h5 {{ cityCap }} Hospitalization Rate Comparison
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            hospitalization-plot.plotsize(v-else
+              :data="hospitalData" :logScale="logScale" :city="city"
+              :diviData="diviData" :endDate="endDate" )
 
-  .page-section.all-plots
+        .linear-plot
+          h5 {{ cityCap }} Infection Rate
+          p Daily new infections
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
+            :observed="observedCases"
+            :logScale="logScale")
 
-    .linear-plot
-      h5 {{ cityCap }} Simulated Health Outcomes Over Time
-      p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-      .plotarea
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        vue-plotly.plotsize(v-else
-          :data="data" :layout="layout" :options="options")
+        .linear-plot
+          h5 {{ cityCap }} Estimated R-Values
+          p {{ rValueMethodDescription }}
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            r-value-plot.plotsize(v-else
+              :data="data"
+              :endDate="endDate"
+              :logScale="logScale"
+              :rValues="rValues"
+              @method="switchRMethod")
 
-    .linear-plot(v-if="city === 'berlin' || city === 'munich'")
-      h5 {{ cityCap }} Hospitalization Rate Comparison
-      p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-      .plotarea
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        hospitalization-plot.plotsize(v-else
-          :data="hospitalData" :logScale="logScale" :city="city"
-          :diviData="diviData" :endDate="endDate" )
-
-    .linear-plot
-      h5 {{ cityCap }} Infection Rate
-      p Daily new infections
-      .plotarea.compact
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
-        :observed="observedCases"
-        :logScale="logScale")
-
-    .linear-plot
-      h5 {{ cityCap }} Estimated R-Values
-      p {{ rValueMethodDescription }}
-      .plotarea.compact
-        p.plotsize(v-if="!isZipLoaded") Loading data...
-        p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-        r-value-plot.plotsize(v-else
-          :data="data"
-          :endDate="endDate"
-          :logScale="logScale"
-          :rValues="rValues"
-          @method="switchRMethod")
-
-    .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-      vega-lite-chart.plotsize(
-        :baseUrl="BATTERY_URL"
-        :runId="runId"
-        :configFile="chartKey"
-        :logScale="logScale"
-        :yamlDef="vegaChartData[chartKey].yaml"
-        :data="vegaChartData[chartKey].data"
-      )
+        .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+          vega-lite-chart.plotsize(
+            :baseUrl="BATTERY_URL"
+            :runId="runId"
+            :configFile="chartKey"
+            :logScale="logScale"
+            :yamlDef="vegaChartData[chartKey].yaml"
+            :data="vegaChartData[chartKey].data"
+          )
 
   .page-section.content(v-if="bottomNotes")
     .bottom
@@ -888,13 +885,11 @@ h6 {
 }
 
 .measure {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-.measure-labels p {
+.measure-buttons p {
   color: #596;
-  margin-top: 0.5rem;
-  margin-bottom: auto;
   margin-right: 1rem;
   font-size: 0.9rem;
   font-weight: bold;
@@ -919,12 +914,16 @@ h6 {
 }
 
 .option-groups {
+  width: 18rem;
   background-color: white;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  display: grid;
-  gap: 1rem;
-  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  z-index: 10;
+  position: sticky;
+  top: 0px;
 }
 
 .option-group {
@@ -935,7 +934,7 @@ h6 {
   grid-row: 1 / 2;
   grid-column: 2 / 3;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -952,9 +951,7 @@ h6 {
 .linear-plot.activity {
   background-color: #f8f8f800;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  margin: 0rem auto 3rem auto;
   text-align: center;
-  max-width: 60rem;
   display: flex;
   flex-direction: column;
   border: none;
@@ -997,15 +994,14 @@ p.subhead {
 .plot-options {
   display: flex;
   flex-direction: row;
-  margin-top: 1rem;
+  margin-top: 2rem;
   margin-bottom: 0.3rem;
 }
 
 .infected {
-  padding-left: 1rem;
+  padding-left: 0.5rem;
   font-weight: bold;
-  font-size: 3rem;
-  margin-top: 0.25rem;
+  font-size: 2rem;
   color: rgb(151, 71, 34);
 }
 
@@ -1023,7 +1019,7 @@ p.subhead {
 
 .title {
   line-height: 1.4rem;
-  margin: 1rem 0 0.5rem 0;
+  margin: 0.5rem 0 0.5rem 0;
 }
 
 .totally-disabled {
@@ -1035,13 +1031,10 @@ p.subhead {
   padding: 0rem 0.5rem 1rem 0.5rem;
   border: 1px solid #aaa;
   border-radius: 4px;
-  height: 100%;
 }
 
 .cumulative {
-  text-align: right;
-  margin-top: 1rem;
-  margin-right: 1rem;
+  padding-left: 0.5rem;
 }
 
 .page-section {
@@ -1059,6 +1052,20 @@ p.subhead {
   flex-direction: row;
   padding-top: 1rem;
   padding-bottom: 0;
+}
+
+.left-side {
+  display: flex;
+  flex-direction: column;
+  margin-right: 3rem;
+}
+
+.right-side {
+  max-width: 60rem;
+  margin: 0 auto;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .results {
@@ -1098,20 +1105,47 @@ p.subhead {
   display: inherit;
 }
 
+.selections-and-charts {
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 2rem;
+}
+
 @media only screen and (max-width: 1024px) {
-  .all-plots {
-    display: flex;
-    flex-direction: column;
+  .page-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .left-side {
+    margin-right: 1rem;
+  }
+
+  .option-groups {
+    width: 15rem;
   }
 }
 
 @media only screen and (max-width: 640px) {
-  .is-mobile-layout {
-    display: inherit;
+  .linear-plot.activity {
+    padding-right: 0.25rem;
   }
 
-  .is-desktop-layout {
-    display: none;
+  .option-groups {
+    width: 100%;
+  }
+  .left-side {
+    margin-right: 0rem;
+  }
+
+  .right-side {
+    margin: 0 0.5rem;
+    max-width: none;
+  }
+
+  .selections-and-charts {
+    flex-direction: column;
   }
 
   .option-group p {
@@ -1124,7 +1158,7 @@ p.subhead {
   }
 
   .page-section {
-    padding: 0 1rem;
+    padding: 0 0.5rem;
   }
 
   td {
