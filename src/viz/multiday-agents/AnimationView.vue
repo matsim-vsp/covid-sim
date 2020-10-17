@@ -1,5 +1,5 @@
 <template lang="pug">
-#anim-container
+#anim-container(:style="{backgroundColor: isDarkMode ? 'black' : '#ccccc4'}")
 
 </template>
 
@@ -35,6 +35,7 @@ export default class AnimationView extends Vue {
   private state = store.state
 
   private colors = this.state.colorScheme == ColorScheme.DarkMode ? DARK_MODE : LIGHT_MODE
+  private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
 
   // keep track of time - current time in the simulation itself
   private simulationTime = 0
@@ -113,6 +114,7 @@ export default class AnimationView extends Vue {
   @Watch('state.colorScheme')
   private switchColorScheme(scheme: ColorScheme) {
     this.colors = scheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+    this.isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
 
     // background
     this.scene.background = new THREE.Color(this.colors.background)
@@ -610,6 +612,5 @@ export default class AnimationView extends Vue {
   left: 0;
   right: 0;
   z-index: -1;
-  background-color: black;
 }
 </style>
