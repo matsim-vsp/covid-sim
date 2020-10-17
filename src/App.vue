@@ -1,9 +1,9 @@
 <template lang="pug">
-#app
+#app(:class="{'full-screen-app' : state.isFullScreen }")
   top-nav-bar#nav(:style="{paddingLeft: state.isFullScreen ? '0rem':''}" )
 
-  .thing
-    router-view
+  .center-area
+    router-view.main-view
 
   .footer(v-if="!state.isFullScreen")
     a(href="https://vsp.tu-berlin.de")
@@ -37,10 +37,6 @@ export default {
 @import '@/styles.scss';
 @import '~bulma/css/bulma.css';
 
-html {
-  box-sizing: border-box;
-}
-
 *,
 *::before,
 *::after {
@@ -51,7 +47,8 @@ body,
 html {
   margin: 0px 0px;
   padding: 0px 0px;
-  overflow-y: auto;
+  height: 100%;
+  overscroll-behavior: contain;
 }
 
 canvas {
@@ -59,7 +56,13 @@ canvas {
 }
 
 html {
+  overflow-y: auto;
   background-color: #ccc;
+  box-sizing: border-box;
+}
+
+.full-screen-app {
+  height: 100%;
 }
 
 .bury-me {
@@ -86,15 +89,16 @@ h3 {
 }
 
 #app {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  background-color: $paleBackground;
   color: #222;
-  display: flex;
-  flex-direction: column;
   margin: 0rem 0rem;
   padding: 0px 0px;
   font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: $paleBackground;
 }
 
 .modebar-group {
@@ -103,13 +107,20 @@ h3 {
 }
 
 #nav {
-  position: absolute;
-  top: 0;
-  width: 100%;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
 }
 
-.thing {
-  padding-top: $navHeight;
+.center-area {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-view {
+  flex: 1;
 }
 
 #nav a.router-link-exact-active {
@@ -121,6 +132,8 @@ h3 {
 }
 
 #app .footer {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
   text-align: center;
   padding: 2rem 0.5rem 3rem 0.5rem;
   background-color: #648cb4;

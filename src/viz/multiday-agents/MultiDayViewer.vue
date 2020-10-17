@@ -11,13 +11,11 @@
   )
 
   .nav
-
     p.big.time(v-if="!state.statusMessage") Berlin: Outbreak Day {{ newDay+1 }}
     p.big.day {{ state.statusMessage }}
     p.big.time {{ state.clock }}
 
   .side-section
-
     .day-switchers
       .day-button.switchers(:class="{dark: isDarkMode}"
                    @click="dayStep(-1)" title="Previous day")
@@ -33,7 +31,6 @@
                   :key="day" @click="switchDay(day-1)" :title="'Day ' + day") {{ day }}
 
   .right-side
-
     .morestuff(v-if="isLoaded")
       vue-slider.speed-slider(v-model="speed"
         :data="speedStops"
@@ -310,15 +307,18 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 #v3-app {
-  position: absolute;
-  top: $navHeight;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  width: 100%;
   pointer-events: none;
   display: grid;
   grid-template-columns: 1fr 6rem;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto auto auto;
   grid-template-areas:
     'hd              hd'
     'days     rightside'
@@ -551,7 +551,7 @@ img.theme-button:hover {
 
 .anim {
   grid-column: 1 / 3;
-  grid-row: 1 / 7;
+  grid-row: 2 / 7;
   pointer-events: auto;
 }
 

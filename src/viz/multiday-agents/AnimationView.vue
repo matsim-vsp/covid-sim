@@ -268,11 +268,12 @@ export default class AnimationView extends Vue {
   }
 
   private async setupSimulation() {
-    this.initScene()
-
     this.$store.commit('setStatusMessage', 'loading agents')
 
+    await this.$nextTick()
     await this.loadTrips()
+
+    this.initScene()
 
     // this can happen in the background
     this.addNetworkToScene()
@@ -603,12 +604,12 @@ export default class AnimationView extends Vue {
 @import '@/styles.scss';
 
 #anim-container {
-  margin: 0 0;
-  padding: 0 0;
   position: absolute;
-  width: 100%;
   top: 0;
   bottom: 0;
+  left: 0;
+  right: 0;
   z-index: -1;
+  background-color: black;
 }
 </style>
