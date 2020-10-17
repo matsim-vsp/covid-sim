@@ -107,8 +107,12 @@ h3 {
 }
 
 #nav {
+  z-index: 5;
+  position: sticky;
+  top: 0;
   grid-column: 1 / 2;
   grid-row: 1 / 2;
+  box-shadow: 0px 2px 10px #00000060;
 }
 
 .center-area {

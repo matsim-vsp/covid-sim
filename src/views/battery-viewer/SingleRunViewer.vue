@@ -861,6 +861,8 @@ export default class VueComponent extends Vue {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles.scss';
+
 #single-run-viewer {
   display: flex;
   flex-direction: column;
@@ -923,7 +925,7 @@ h6 {
   padding-top: 1rem;
   z-index: 10;
   position: sticky;
-  top: 0px;
+  top: $navHeight;
 }
 
 .option-group {
@@ -1127,7 +1129,7 @@ p.subhead {
   }
 }
 
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 700px) {
   .linear-plot.activity {
     padding-right: 0.25rem;
   }
