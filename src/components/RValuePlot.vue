@@ -16,7 +16,7 @@ export default class VueComponent extends Vue {
 
   private color = '#04f'
 
-  private lagDays = 4
+  private lagDays = 7
 
   private dataLines: any[] = []
 
@@ -39,7 +39,7 @@ export default class VueComponent extends Vue {
   private calculateRvalues() {
     // calculate r-values if pre-calculated versions don't exist
     if (!this.rValues.length) {
-      this.$emit('method', 'Based on four-day new infections')
+      this.$emit('method', 'Based on seven-day new infections')
       this.manuallyCalculateRvalues()
       return
     }
