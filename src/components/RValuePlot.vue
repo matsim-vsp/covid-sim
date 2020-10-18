@@ -16,7 +16,9 @@ export default class VueComponent extends Vue {
 
   private color = '#04f'
 
-  private lagDays = 7
+    private static get lagDays() {
+      return 7 ;
+    }
 
   private dataLines: any[] = []
 
@@ -36,41 +38,42 @@ export default class VueComponent extends Vue {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
-  private calculateRvalues() {
-    // calculate r-values if pre-calculated versions don't exist
-    if (!this.rValues.length) {
-      this.$emit('method', 'Based on seven-day new infections')
-      this.manuallyCalculateRvalues()
-      return
+    private calculateRvalues() {
+        // calculate r-values if pre-calculated versions don't exist
+        // if (!this.rValues.length) {
+        if ( true ) {
+            this.$emit('method', 'Based on seven-day new infections')
+            this.manuallyCalculateRvalues()
+            return
+        }
+
+        this.$emit('method', 'Based on pre-calculated data')
+
+        const x: any[] = []
+        const y: any[] = []
+
+        for (const value of this.rValues) {
+            x.push(value.date)
+            y.push(value.rValue)
+        }
+
+        // set end date
+        this.layout.xaxis.range = ['2020-02-09', this.endDate]
+
+        // use pre-calculated r-values
+        this.dataLines = [
+            {
+                name: 'Estimated Multiplier',
+                x: x,
+                y: y,
+                line: {
+                    width: 2,
+                    color: this.color,
+                    shape: 'linear',
+                },
+            },
+        ]
     }
-
-    this.$emit('method', 'Based on tracking all infections')
-
-    const x: any[] = []
-    const y: any[] = []
-
-    for (const value of this.rValues) {
-      x.push(value.date)
-      y.push(value.rValue)
-    }
-
-    // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
-
-    // use pre-calculated r-values
-    this.dataLines = [
-      {
-        name: 'Estimated R Value',
-        x: x,
-        y: y,
-        line: {
-          width: 2,
-          color: this.color,
-          shape: 'linear',
-        },
-      },
-    ]
-  }
 
   /**
    * We are calculating a four day running R-value as our best guess.
@@ -79,32 +82,42 @@ export default class VueComponent extends Vue {
    * - denominator: divide by the "newly infected" number from four days ago
    */
   private manuallyCalculateRvalues() {
-    if (this.data.length === 0) return
+      // these are not really R values; rather, they are multipliers.  Maybe they are estimates of R as long as lagDays was 4, and we also assume that
+      // that is the serial interval.  kai, oct'20
 
-    // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+      if (this.data.length === 0) return
 
-    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+      // set end date
+      this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
-    const newlyInfected = []
-    const rValues = []
+      const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 
-    for (let i = this.lagDays; i < susceptible.y.length; i++) {
-      const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
+      const newlyInfected = []
+      const rValues = []
 
-      newlyInfected.push(diffSusceptible)
+      for (let i = VueComponent.lagDays; i < susceptible.y.length; i++) {
+          // for each day, we compute the difference to lagDays ago.  lagDays is a const.  We start at lagDays, because the difference does not exist for
+          // earlier days.
+          const diffSusceptible = susceptible.y[i - VueComponent.lagDays] - susceptible.y[i]
 
-      if (i >= this.lagDays * 2) {
-        const index = newlyInfected.length - 1
-        const newR = newlyInfected[index] / newlyInfected[index - this.lagDays]
-        if (newR) rValues.push(newR)
+          // we memorize this:
+          newlyInfected.push(diffSusceptible)
+
+          if (i >= VueComponent.lagDays * 2) {
+              // take as index the last index of newlyInfected:
+              const index = newlyInfected.length - 1
+              // this method computes the, say, 7-day multiplier as dividing the newly infected of the last 7 days by those of 7 days before that (i.e. 8 to 14
+              // earlier).  For that reason, we cannot start before lagDays*2
+              const newR = newlyInfected[index] / newlyInfected[index - VueComponent.lagDays]
+              // we memorize this:
+              if (newR) rValues.push(newR)
+          }
       }
-    }
 
     this.dataLines = [
       {
-        name: 'Estimated R Value',
-        x: susceptible.x.slice(this.lagDays * 2),
+        name: 'Estimated Multiplier',
+        x: susceptible.x.slice(VueComponent.lagDays * 2),
         y: rValues,
         line: {
           width: 2,
@@ -140,8 +153,9 @@ export default class VueComponent extends Vue {
     },
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
-      autorange: true,
-      title: 'R-value',
+      // autorange: true,
+        range: [Math.log10(0.5),Math.log10(2.)],
+      title: 'Multiplier',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
