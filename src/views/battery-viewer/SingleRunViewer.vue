@@ -50,6 +50,17 @@
             :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
             :zipContent="zipLoader")
 
+      //- Vega charts with top=true
+      .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+        .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
+          vega-lite-chart.plotsize(
+            :baseUrl="BATTERY_URL"
+            :runId="runId"
+            :configFile="chartKey"
+            :logScale="logScale"
+            :yamlDef="vegaChartData[chartKey].yaml"
+            :data="vegaChartData[chartKey].data"
+          )
 
       .plot-options
         .scale-options
@@ -113,15 +124,17 @@
               :rValues="rValues"
               @method="switchRMethod")
 
-        .linear-plot(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-          vega-lite-chart.plotsize(
-            :baseUrl="BATTERY_URL"
-            :runId="runId"
-            :configFile="chartKey"
-            :logScale="logScale"
-            :yamlDef="vegaChartData[chartKey].yaml"
-            :data="vegaChartData[chartKey].data"
-          )
+        //- Vega charts without top=true
+        .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+          .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
+            vega-lite-chart.plotsize(
+              :baseUrl="BATTERY_URL"
+              :runId="runId"
+              :configFile="chartKey"
+              :logScale="logScale"
+              :yamlDef="vegaChartData[chartKey].yaml"
+              :data="vegaChartData[chartKey].data"
+            )
 
   .page-section.content(v-if="bottomNotes")
     .bottom
