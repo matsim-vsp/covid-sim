@@ -109,7 +109,7 @@
                                                 endDate="2020-08-31")
 
         .linear-plot
-          h5 {{ cityCap }} Estimated R-Values
+          h5 {{ cityCap }} Estimated Multipliers
           p Based on four-day new infections
           r-value-plot.plotsize.compact(:data="data" :logScale="false" endDate="2020-08-31")
 
