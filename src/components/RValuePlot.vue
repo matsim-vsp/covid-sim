@@ -104,11 +104,21 @@ export default class VueComponent extends Vue {
           newlyInfected.push(diffSusceptible)
 
           if (i >= VueComponent.lagDays * 2) {
+
               // take as index the last index of newlyInfected:
               const index = newlyInfected.length - 1
+
               // this method computes the, say, 7-day multiplier as dividing the newly infected of the last 7 days by those of 7 days before that (i.e. 8 to 14
               // earlier).  For that reason, we cannot start before lagDays*2
-              const newR = newlyInfected[index] / newlyInfected[index - VueComponent.lagDays]
+              let newR = newlyInfected[index] / newlyInfected[index - VueComponent.lagDays]
+              newR = (newR - 1.)*4./VueComponent.lagDays + 1.;
+              // (4/lagDays since the serial interval for covid is assumed to be 4 days)
+
+              if ( newlyInfected[index] < 100 ) {
+                  // yyyyyy I really do not know why this needs to be "100".
+                  newR = 1;
+              }
+
               // we memorize this:
               if (newR) rValues.push(newR)
           }
