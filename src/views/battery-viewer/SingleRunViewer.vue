@@ -52,7 +52,7 @@
 
       //- Vega charts with top=true
       .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-        .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
+        .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
           vega-lite-chart.plotsize(
             :baseUrl="BATTERY_URL"
             :runId="runId"
@@ -531,7 +531,14 @@ export default class VueComponent extends Vue {
         let text = this.zipLoader.extractAsText(filename)
         const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
-        const dateBracket = z.data.filter(point => point.date < this.endDate)
+        const dateBracket = z.data.filter(point => point.date <= this.endDate)
+
+        // if data doesn't go out to end-date, straightline it
+        const lastEntry = dateBracket[dateBracket.length - 1]
+        if (lastEntry.date < this.endDate) {
+          dateBracket.push(lastEntry)
+          dateBracket[dateBracket.length - 1].date = this.endDate
+        }
 
         chart.data = dateBracket
       } catch (e) {
@@ -954,6 +961,10 @@ h6 {
   margin-bottom: 2rem;
 }
 
+.top-vega-plots {
+  margin-top: 1rem;
+}
+
 .linear-plot {
   background-color: #f8f8f8;
   padding: 0.5rem 0.75rem 0.5rem 0.5rem;
@@ -964,11 +975,16 @@ h6 {
 }
 
 .linear-plot.activity {
-  background-color: #f8f8f800;
-  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  background-color: white;
+  padding: 0.5rem 0.75rem 0.5rem 0rem;
   text-align: center;
   display: flex;
   flex-direction: column;
+  border: none;
+}
+
+.top-vega-plot {
+  background-color: #fff;
   border: none;
 }
 

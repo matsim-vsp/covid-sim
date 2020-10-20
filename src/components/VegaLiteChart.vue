@@ -1,13 +1,11 @@
 <template lang="pug">
-#vega-container(v-if="configFile")
-  .main-area
+.vega-container(v-if="configFile")
+  .main-area(:class="{'is-above': chartYaml.showAbove}")
     .labels
       h4.center(v-if="this.title") {{ this.title }}
       h5.center(v-if="this.description") {{ this.description }}
 
-    .vega-chart(:id="cleanConfigId"
-                :style="{padding: '1rem 1rem'}"
-    )
+    .vega-chart(:id="cleanConfigId")
 </template>
 
 <script lang="ts">
@@ -88,8 +86,14 @@ class VegaLiteChart extends Vue {
     // fonts
     const size = 13
     const config = {
-      axis: { titleFontSize: size, labelFontSize: size },
-      legend: { labelFontSize: size },
+      axis: {
+        titleFontSize: size,
+        titleFontWeight: 'normal',
+        titleColor: '#555',
+        labelColor: '#555',
+        labelFontSize: size,
+      },
+      legend: { labelFontSize: size, labelColor: '#555' },
     }
     if (!this.chartYaml.config) this.chartYaml.config = {}
     this.chartYaml.config = Object.assign(this.chartYaml.config, config)
@@ -118,14 +122,15 @@ class VegaLiteChart extends Vue {
 
     // standard layout
     if (!this.chartYaml.autosize) this.chartYaml.autosize = { type: 'fit', resize: true }
-    if (!this.chartYaml.background) this.chartYaml.background = '#f8f8f8'
+    if (!this.chartYaml.background && !this.chartYaml.showAbove)
+      this.chartYaml.background = '#f8f8f8'
     if (!this.chartYaml.width) this.chartYaml.width = 'container'
-    if (!this.chartYaml.height) this.chartYaml.height = 350
+    if (!this.chartYaml.height) this.chartYaml.height = this.chartYaml.showAbove ? 250 : 350
 
     // save buttons
     const exportActions = { export: true, source: false, compiled: false, editor: false }
     const embedOptions = {
-      actions: exportActions,
+      actions: this.chartYaml.showAbove ? false : exportActions,
       hover: true,
       scaleFactor: 2.0, // make exported PNGs bigger
       padding: { top: 2, left: 8, right: 8, bottom: 8 },
@@ -146,12 +151,26 @@ export default VegaLiteChart
 </script>
 
 <style scoped>
-#vega-container {
+.vega-container {
   width: 100%;
   display: grid;
   background-color: #f8f8f8;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto;
+}
+
+.main-area {
+  padding-top: 1rem;
+  grid-row: 1/3;
+  grid-column: 1/3;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.is-above {
+  padding: 1rem 0rem 0rem 0.5rem;
+  background-color: white;
 }
 
 h1 {
@@ -185,15 +204,6 @@ p {
   padding: 0.5rem 0rem;
   border-top: solid 1px #888;
   border-bottom: solid 1px #888;
-}
-
-.main-area {
-  padding-top: 1rem;
-  grid-row: 1/3;
-  grid-column: 1/3;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 .labels {
