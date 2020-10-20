@@ -83,25 +83,6 @@
       .all-plots
 
         .linear-plot
-          h5 {{ cityCap }} Simulated Health Outcomes Over Time
-          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            vue-plotly.plotsize(v-else
-              :data="data" :layout="layout" :options="options")
-
-        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
-          h5 {{ cityCap }} Hospitalization Rate Comparison
-          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            hospitalization-plot.plotsize(v-else
-              :data="hospitalData" :logScale="logScale" :city="city"
-              :diviData="diviData" :endDate="endDate" )
-
-        .linear-plot
           h5 {{ cityCap }} Infection Rate
           p Daily new infections
           .plotarea.compact
@@ -110,6 +91,16 @@
             weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
             :observed="observedCases"
             :logScale="logScale")
+
+        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
+          h5 {{ cityCap }} Hospitalization Rate Comparison
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea.compact
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            hospitalization-plot.plotsize(v-else
+              :data="hospitalData" :logScale="logScale" :city="city"
+              :diviData="diviData" :endDate="endDate" )
 
         .linear-plot
           h5 {{ cityCap }} Estimated R-Values
@@ -123,6 +114,15 @@
               :logScale="logScale"
               :rValues="rValues"
               @method="switchRMethod")
+
+        .linear-plot
+          h5 {{ cityCap }} Simulated Health Outcomes Over Time
+          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          .plotarea
+            p.plotsize(v-if="!isZipLoaded") Loading data...
+            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+            vue-plotly.plotsize(v-else
+              :data="data" :layout="layout" :options="options")
 
         //- Vega charts without top=true
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
