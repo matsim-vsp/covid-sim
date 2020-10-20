@@ -147,7 +147,7 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .r-calculator {
-  padding: 2rem 3rem;
+  padding: 2rem 3rem 5rem 3rem;
 }
 
 .option-groups {
@@ -170,7 +170,7 @@ h2 {
 h3 {
   font-weight: normal;
   font-size: 1.3rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: -0.5rem;
 }
 
 h4 {
