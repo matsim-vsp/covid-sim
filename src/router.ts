@@ -90,6 +90,10 @@ const routes = [
     redirect: '/*',
   },
   {
+    path: '/r-calcs/:rcalc',
+    component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculator.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),
