@@ -116,7 +116,7 @@ export default class VueComponent extends Vue {
         },
       },
       {
-        name: 'Simulated Infections',
+        name: 'Model',
         x: susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         type: 'scatter',

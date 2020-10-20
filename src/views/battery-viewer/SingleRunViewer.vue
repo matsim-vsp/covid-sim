@@ -83,8 +83,8 @@
       .all-plots
 
         .linear-plot
-          h5 {{ cityCap }} Infection Rate
-          p Daily new infections
+          h5 {{ cityCap }} Cases Comparison
+          p New persons showing symptoms (model) vs. new cases (reality)
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
             p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
