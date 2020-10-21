@@ -1,30 +1,35 @@
 <template lang="pug">
-.r-calculator(v-if="yaml.optionGroups")
+#home
+  .banner
+    h2 VSP / Technische Universität Berlin
+    h3 COVID-19 Analysis Portal
 
-  h2 R-Value Calculator
-  h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
+  .r-calculator(v-if="yaml.optionGroups")
 
-  h3.badpage(v-if="badPage") That page not found, sorry!
+    h2 R-Value Calculator
+    h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
 
-  .goodpage(v-else)
-    p(v-if="yaml.description") {{ yaml.description}}
+    h3.badpage(v-if="badPage") That page not found, sorry!
 
-    h3 Calculated R value:&nbsp;&nbsp;
-      span(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} - {{(adjustedR*1.1).toFixed(2)}}
+    .goodpage(v-else)
+      p(v-if="yaml.description") {{ yaml.description}}
 
-    .option-groups
-      .option-group(v-for="group in optionGroups" :key="group")
+      h3 Calculated R value:&nbsp;&nbsp;
+        span(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} - {{(adjustedR*1.1).toFixed(2)}}
 
-        h4 {{ group }}
-          span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
+      .option-groups
+        .option-group(v-for="group in optionGroups" :key="group")
 
-        .measures
-          .measure(v-for="m in lookup[group]" :key="group + m.title")
+          h4 {{ group }}
+            span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
 
-            button.button.is-small(
-              :class="{active: selections[group] == m.title, 'is-link': selections[group] == m.title}"
-              @click="handleButton(m,group)"
-            ) {{ m.title }}
+          .measures
+            .measure(v-for="m in lookup[group]" :key="group + m.title")
+
+              button.button.is-small(
+                :class="{active: selections[group] == m.title, 'is-link': selections[group] == m.title}"
+                @click="handleButton(m,group)"
+              ) {{ m.title }}
 
 </template>
 
@@ -201,6 +206,35 @@ p.factor {
   color: #ccc;
 }
 
+.banner {
+  display: flex;
+  flex-direction: column;
+  padding: 4rem 3rem 1rem 3rem;
+  background-color: #1e1f2c;
+  color: white;
+  background: url(../assets/images/banner.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.banner h2 {
+  margin-bottom: 0rem;
+  font-size: 1.6rem;
+  background-color: #1e1f2c;
+  line-height: 1.6rem;
+  margin-right: auto;
+}
+
+.banner h3 {
+  font-size: 1.3rem;
+  font-weight: normal;
+  margin-bottom: 0;
+  line-height: 1.4rem;
+  padding-bottom: 0.25rem;
+  background-color: #1e1f2c;
+  width: max-content;
+}
+
 @media only screen and (max-width: 850px) {
   .option-groups {
     grid-template-columns: repeat(2, 1fr);
@@ -208,6 +242,10 @@ p.factor {
 }
 
 @media only screen and (max-width: 640px) {
+  .banner {
+    padding: 2rem 1rem;
+  }
+
   .r-calculator {
     padding: 2rem 1rem;
   }
