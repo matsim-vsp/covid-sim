@@ -147,6 +147,7 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .r-calculator {
+  max-width: 70rem;
   padding: 2rem 3rem 5rem 3rem;
 }
 
