@@ -106,7 +106,7 @@ export default class VueComponent extends Vue {
     const diff = this.finalR - this.adjustedR
     const step = this.adjustedR + diff * 0.2
     this.adjustedR = step
-    if (Math.abs(this.adjustedR - this.finalR) < 0.001) {
+    if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
       this.adjustedR = this.finalR
     } else {
       setTimeout(this.animateTowardNewRValue, 16)
