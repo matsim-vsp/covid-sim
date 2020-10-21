@@ -161,6 +161,7 @@ export default class VueComponent extends Vue {
 .measures {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 h2 {
@@ -183,7 +184,7 @@ h4 {
 
 .button {
   padding: 0 0.5rem;
-  margin: 0 0.25rem 0 0;
+  margin: 0 0.15rem 0.15rem 0;
 }
 
 p {
