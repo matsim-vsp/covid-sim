@@ -74,6 +74,7 @@ export default class VueComponent extends Vue {
       this.buildUI()
       this.updateR()
     } catch (e) {
+      console.error(e)
       this.badPage = true
     }
   }
@@ -119,10 +120,7 @@ export default class VueComponent extends Vue {
   private buildUI() {
     for (const group of Object.keys(this.yaml.optionGroups)) {
       const measures = this.yaml.optionGroups[group]
-
-      this.lookup[group] = [{ title: 'x', value: 1.0 }]
-      this.factors[group] = 1.0
-      this.selections[group] = 'x'
+      this.lookup[group] = []
 
       for (const measure of measures) {
         const title = Object.keys(measure)[0]
@@ -130,6 +128,12 @@ export default class VueComponent extends Vue {
 
         if (isNumeric(value)) {
           this.lookup[group].push({ title, value })
+
+          // first?
+          if (!this.factors[group]) {
+            this.factors[group] = value
+            this.selections[group] = title
+          }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
