@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.activity-levels-plot
   vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
 
   .row-labels
@@ -76,11 +76,15 @@ export default class VueComponent extends Vue {
     const filename = currentRun.RunId + '.restrictions.txt.csv'
     console.log('Extracting', filename)
 
-    let text = this.zipLoader.extractAsText(filename)
-    const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-    console.log('Got it!', filename)
-
-    return z.data
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      console.log('Got it!', filename)
+      return z.data
+    } catch (e) {
+      this.$emit('missing', true)
+    }
+    return []
   }
 
   private async runChanged() {
@@ -125,9 +129,9 @@ export default class VueComponent extends Vue {
     { col: 'work', title: 'Work' },
     { col: 'leisure', title: 'Leisure' },
     { col: 'shopping', title: 'Other Activities' },
-    { col: 'educ_kiga', title: 'Kindergarten' },
-    { col: 'educ_primary', title: 'Primary Education' },
-    { col: 'educ_secondary', title: 'Secondary Education' },
+    { col: 'educ_kiga', title: 'Daycare' },
+    { col: 'educ_primary', title: 'Primary Ed.' },
+    { col: 'educ_secondary', title: 'Secondary Ed.' },
 
     // { col: 'educ_tertiary', title: 'Educ: Tertiary' },
     // { col: 'educ_higher', title: 'Educ: Higher' },
@@ -200,7 +204,6 @@ export default class VueComponent extends Vue {
       pattern: 'coupled',
       roworder: 'top to bottom',
     },
-    height: 250,
     autosize: true,
     showlegend: false,
     legend: {
@@ -211,7 +214,7 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
+    margin: { t: 5, r: 10, b: 0, l: 45 },
     xaxis: {
       zeroline: true,
       range: ['2020-02-09', '2020-12-31'],
@@ -266,7 +269,8 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#vue-component {
+.activity-levels-plot {
+  margin-left: 0.5rem;
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr;
