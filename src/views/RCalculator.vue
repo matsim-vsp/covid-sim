@@ -15,7 +15,7 @@
       p(v-if="yaml.description") {{ yaml.description}}
 
       h3 Calculated R value:&nbsp;&nbsp;
-        span(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} - {{(adjustedR*1.1).toFixed(2)}}
+        span(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
 
       .option-groups
         .option-group(v-for="group in optionGroups" :key="group")

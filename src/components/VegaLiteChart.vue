@@ -1,5 +1,5 @@
 <template lang="pug">
-.vega-container(v-if="configFile")
+.vega-container(v-if="configFile && showChart")
   .main-area(:class="{'is-above': chartYaml.showAbove}")
     .labels
       h4.center(v-if="this.title") {{ this.title }}
@@ -36,6 +36,8 @@ class VegaLiteChart extends Vue {
   private data!: any[]
 
   private chartYaml: any = {}
+
+  private showChart = false
 
   private title = ''
   private description = ''
@@ -102,6 +104,7 @@ class VegaLiteChart extends Vue {
     if (this.data.length) {
       // data passed in already
       this.chartYaml.data = { values: this.data }
+      this.showChart = true
     } else {
       // data url
       if (this.chartYaml.url) {

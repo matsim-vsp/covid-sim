@@ -48,7 +48,8 @@
         .plotarea.compact
           activity-levels-plot.plotsize(:city="city" :battery="runId"
             :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-            :zipContent="zipLoader")
+            :zipContent="zipLoader"
+            @missing="showActivityLevels = false")
 
       //- Vega charts with top=true
       .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")

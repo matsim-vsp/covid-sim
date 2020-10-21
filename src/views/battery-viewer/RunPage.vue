@@ -1,5 +1,9 @@
 <template lang="pug">
-#vue-component
+#run-page
+  .banner
+    h2 VSP / Technische Universität Berlin
+    h3 COVID-19 Analysis Portal
+
   .city-picker(v-if="!badPage")
     .which-city(v-for="(run,index) in allRuns"
       :key="run.runId"
@@ -202,7 +206,35 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+#run-page {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto auto auto;
+}
+
+.banner {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+}
+
+.city-picker {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.breadcrumb {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
+}
+
+.badpage {
+  grid-column: 1 / 2;
+  grid-row: 4 / 5;
+}
+
 .view-section {
+  grid-column: 1 / 2;
+  grid-row: 5 / 6;
   background: #eee;
   width: 100%;
 }
@@ -216,8 +248,7 @@ export default class VueComponent extends Vue {
 
 .city-picker {
   display: flex;
-  background-color: $bannerHighlight;
-  padding: 0.3rem 3rem 0 3rem;
+  padding: 0rem 3rem 0 3rem;
 }
 
 .which-city {
@@ -227,6 +258,7 @@ export default class VueComponent extends Vue {
   font-weight: bold;
   text-transform: capitalize;
   color: #bbb;
+  background-color: #222233ff;
   cursor: pointer;
 }
 
@@ -251,6 +283,35 @@ a.selected {
 .badpage {
   padding: 5rem 3rem;
   color: $bannerHighlight;
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  padding: 4rem 3rem 1rem 3rem;
+  background-color: #1e1f2c;
+  color: white;
+  background: url(../../assets/images/banner.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.banner h2 {
+  margin-bottom: 0rem;
+  font-size: 1.6rem;
+  background-color: #1e1f2c;
+  line-height: 1.6rem;
+  margin-right: auto;
+}
+
+.banner h3 {
+  font-size: 1.3rem;
+  font-weight: normal;
+  margin-bottom: 2rem;
+  line-height: 1.4rem;
+  padding-bottom: 0.25rem;
+  background-color: #1e1f2c;
+  width: max-content;
 }
 
 @media only screen and (max-width: 640px) {
