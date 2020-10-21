@@ -16,9 +16,7 @@ export default class VueComponent extends Vue {
 
   private color = '#04f'
 
-  private static get lagDays() {
-    return 7
-  }
+  private lagDays = 7
 
   private dataLines: any[] = []
 
@@ -40,21 +38,31 @@ export default class VueComponent extends Vue {
 
   private calculateRvalues() {
     // calculate r-values if pre-calculated versions don't exist
-    // if (!this.rValues.length) {
-    if (true) {
+    if (!this.rValues.length) {
       this.$emit('method', 'Based on seven-day new infections')
       this.manuallyCalculateRvalues()
       return
     }
 
-    this.$emit('method', 'Based on pre-calculated data')
+    this.$emit('method', '7-day moving average')
 
     const x: any[] = []
-    const y: any[] = []
+    const r: any[] = []
+    const avgR = []
 
     for (const value of this.rValues) {
       x.push(value.date)
-      y.push(value.rValue)
+      r.push(value.rValue)
+    }
+
+    // 0,1,2 *3* 4,5,6
+    const center = Math.floor(this.lagDays / 2)
+
+    for (let index = center; index < x.length - center; index++) {
+      const average =
+        r.slice(index - center, index + center + 1).reduce((a, b) => a + b, 0) / this.lagDays
+
+      avgR.push(average)
     }
 
     // set end date
@@ -63,14 +71,22 @@ export default class VueComponent extends Vue {
     // use pre-calculated r-values
     this.dataLines = [
       {
-        name: 'Estimated Multiplier',
-        x: x,
-        y: y,
+        name: '7-Day Average R-Value',
+        x: x.slice(center),
+        y: avgR,
         line: {
           width: 2,
           color: this.color,
           shape: 'linear',
         },
+      },
+      {
+        name: 'Daily R-Value',
+        x: x,
+        y: r,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { color: '#8c7', size: 3 },
       },
     ]
   }
@@ -95,22 +111,22 @@ export default class VueComponent extends Vue {
     const newlyInfected = []
     const rValues = []
 
-    for (let i = VueComponent.lagDays; i < susceptible.y.length; i++) {
+    for (let i = this.lagDays; i < susceptible.y.length; i++) {
       // for each day, we compute the difference to lagDays ago.  lagDays is a const.  We start at lagDays, because the difference does not exist for
       // earlier days.
-      const diffSusceptible = susceptible.y[i - VueComponent.lagDays] - susceptible.y[i]
+      const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
 
       // we memorize this:
       newlyInfected.push(diffSusceptible)
 
-      if (i >= VueComponent.lagDays * 2) {
+      if (i >= this.lagDays * 2) {
         // take as index the last index of newlyInfected:
         const index = newlyInfected.length - 1
 
         // this method computes the, say, 7-day multiplier as dividing the newly infected of the last 7 days by those of 7 days before that (i.e. 8 to 14
         // earlier).  For that reason, we cannot start before lagDays*2
-        let newR = newlyInfected[index] / newlyInfected[index - VueComponent.lagDays]
-        newR = ((newR - 1) * 4) / VueComponent.lagDays + 1
+        let newR = newlyInfected[index] / newlyInfected[index - this.lagDays]
+        newR = ((newR - 1) * 4) / this.lagDays + 1
         // (4/lagDays since the serial interval for covid is assumed to be 4 days)
 
         if (newlyInfected[index] < 100) {
@@ -126,7 +142,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Estimated Multiplier',
-        x: susceptible.x.slice(VueComponent.lagDays * 2),
+        x: susceptible.x.slice(this.lagDays * 2),
         y: rValues,
         line: {
           width: 2,
@@ -144,7 +160,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    height: 225,
     autosize: true,
     showlegend: true,
     legend: {
@@ -163,7 +178,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
       // autorange: true,
-      range: [Math.log10(0.5), Math.log10(2)],
+      range: [Math.log10(0.3), Math.log10(2)],
       title: 'Multiplier',
     },
     plot_bgcolor: '#f8f8f8',

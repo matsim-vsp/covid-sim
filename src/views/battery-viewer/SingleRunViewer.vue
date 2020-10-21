@@ -103,7 +103,7 @@
               :diviData="diviData" :endDate="endDate" )
 
         .linear-plot
-          h5 {{ cityCap }} Estimated R-Values
+          h5 {{ cityCap }} Simulated R-Values
           p {{ rValueMethodDescription }}
           .plotarea.compact
             p.plotsize(v-if="!isZipLoaded") Loading data...
