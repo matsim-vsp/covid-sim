@@ -14,8 +14,9 @@
     .goodpage(v-else)
       p(v-if="yaml.description") {{ yaml.description}}
 
+
       h3 Base R value:&nbsp;&nbsp;
-        span.greenbig {{ yaml.baseValue ? yaml.baseValue.toFixed(2) : selectedBaseR.toFixed(2) }}
+        span.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
 
       .base-buttons(v-if="yaml.baseValues")
         button.button.is-small(
@@ -41,6 +42,7 @@
                 @click="handleButton(m,group)"
               ) {{ m.title }}
 
+<!--        span.greenbig {{ yaml.baseValue ? (yaml.baseValue*0.9).toFixed(2) : selectedBaseR.toFixed(2) }}-->
 </template>
 
 <script lang="ts">
