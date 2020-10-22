@@ -79,11 +79,17 @@ export default class VueComponent extends Vue {
     this.buildPageForURL()
   }
 
+  public beforeDestroy() {
+    document.title = 'covid-sim.info'
+  }
+
   private async buildPageForURL() {
     this.badPage = false
     console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
+    let trim = this.runId.endsWith('/') ? 1 : 0
+    document.title = this.runId.slice(0, this.runId.length - trim) + ' : covid-sim.info'
     this.currentCity = -1
     this.allRuns = []
 
