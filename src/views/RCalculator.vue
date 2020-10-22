@@ -14,8 +14,18 @@
     .goodpage(v-else)
       p(v-if="yaml.description") {{ yaml.description}}
 
+      h3 Base R value:&nbsp;&nbsp;
+        span.greenbig {{ yaml.baseValue ? yaml.baseValue.toFixed(2) : selectedBaseR.toFixed(2) }}
+
+      .base-buttons(v-if="yaml.baseValues")
+        button.button.is-small(
+          v-for="base in yaml.baseValues"
+          :class="{ active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
+          @click="handleNewBaseValue(Object.values(base)[0])"
+        ) {{ Object.keys(base)[0] }}
+
       h3 Calculated R value:&nbsp;&nbsp;
-        span(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
+        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
 
       .option-groups
         .option-group(v-for="group in optionGroups" :key="group")
@@ -38,10 +48,9 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 
-import { isNumeric } from 'vega-lite/build/src/util'
-
 type RCalcYaml = {
-  baseValue: number
+  baseValue?: number
+  baseValues?: { [date: string]: number }[]
   optionGroups: { [group: string]: { [measure: string]: any }[] }
 }
 
@@ -55,11 +64,17 @@ export default class VueComponent extends Vue {
   private yaml: RCalcYaml = { baseValue: 0, optionGroups: {} }
 
   private adjustedR = 2.5
+  private selectedBaseR = 2.5
 
   private badPage = false
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
+  }
+
+  private handleNewBaseValue(base: number) {
+    this.selectedBaseR = base
+    this.updateR()
   }
 
   private async mounted() {
@@ -98,7 +113,9 @@ export default class VueComponent extends Vue {
   private finalR = 2.5
 
   private updateR() {
-    let r = this.yaml.baseValue
+    let r = 3.0
+    if (this.yaml.baseValue) r = this.yaml.baseValue
+    else if (this.yaml.baseValues) r = this.selectedBaseR
 
     for (const factor of Object.values(this.factors)) r *= factor
 
@@ -111,6 +128,7 @@ export default class VueComponent extends Vue {
     const diff = this.finalR - this.adjustedR
     const step = this.adjustedR + diff * 0.2
     this.adjustedR = step
+
     if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
       this.adjustedR = this.finalR
     } else {
@@ -123,6 +141,10 @@ export default class VueComponent extends Vue {
   private selections: { [measure: string]: string } = {}
 
   private buildUI() {
+    if (this.yaml.baseValues) {
+      this.selectedBaseR = Object.values(this.yaml.baseValues[0])[0]
+    }
+
     for (const group of Object.keys(this.yaml.optionGroups)) {
       const measures = this.yaml.optionGroups[group]
       this.lookup[group] = []
@@ -131,7 +153,7 @@ export default class VueComponent extends Vue {
         const title = Object.keys(measure)[0]
         const value = measure[title]
 
-        if (isNumeric(value)) {
+        if (!isNaN(value)) {
           this.lookup[group].push({ title, value })
 
           // first?
@@ -233,6 +255,17 @@ p.factor {
   padding-bottom: 0.25rem;
   background-color: #1e1f2c;
   width: max-content;
+}
+
+.base-buttons {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.greenbig {
+  color: #596;
+  font-weight: bold;
+  font-size: 2.5rem;
 }
 
 @media only screen and (max-width: 850px) {
