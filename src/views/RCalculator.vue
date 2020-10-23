@@ -42,7 +42,16 @@
                 @click="handleButton(m,group)"
               ) {{ m.title }}
 
+      h3 Remarks:
+      <li> The situation gets considerably worse by waiting just one week (see date button on top). </li>
+      <li> Even setting the leisure curfew to 7pm and all other activities to 0% is no longer enough to stop the dynamics. </li>
+      <li> Many of the changes (Schools, Other Education, Kindergarten, Shop, Errands) have some effect, but it is not large. One would shut down many important activities in order to spare the leisure activities and still not reach R less than one.</li>
+      <li> "Leisure" refers to public spaces only; if private homes are included in the measures, the effects roughly double. ??? </li>
+      <li> We give a range for R since point predictions are impossible.  We would recommend to have both ends of the range below 1.0 if one wanted to stop the exponential growth. </li>
+
+
 <!--        span.greenbig {{ yaml.baseValue ? (yaml.baseValue*0.9).toFixed(2) : selectedBaseR.toFixed(2) }}-->
+
 </template>
 
 <script lang="ts">
