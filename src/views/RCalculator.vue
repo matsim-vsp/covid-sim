@@ -42,15 +42,12 @@
                 @click="handleButton(m,group)"
               ) {{ m.title }}
 
-      h3 Remarks:
-      <li> The situation gets considerably worse by waiting just one week (see date button on top). </li>
-      <li> Even setting the leisure curfew to 7pm and all other activities to 0% is no longer enough to stop the dynamics. </li>
-      <li> Many of the changes (Schools, Other Education, Kindergarten, Shop, Errands) have some effect, but it is not large. One would shut down many important activities in order to spare the leisure activities and still not reach R less than one.</li>
-      <li> "Leisure" refers to public spaces only; if private homes are included in the measures, the effects roughly double. ??? </li>
-      <li> We give a range for R since point predictions are impossible.  We would recommend to have both ends of the range below 1.0 if one wanted to stop the exponential growth. </li>
+      br
 
+      h3(v-if="yaml.notes") Remarks:
 
-<!--        span.greenbig {{ yaml.baseValue ? (yaml.baseValue*0.9).toFixed(2) : selectedBaseR.toFixed(2) }}-->
+      ul(v-if="yaml.notes")
+        li.notes-item(v-for="line in yaml.notes") {{ line }}
 
 </template>
 
@@ -63,6 +60,7 @@ type RCalcYaml = {
   baseValue?: number
   baseValues?: { [date: string]: number }[]
   optionGroups: { [group: string]: { [measure: string]: any }[] }
+  notes: string[]
 }
 
 @Component({ components: {}, props: {} })
@@ -72,7 +70,7 @@ export default class VueComponent extends Vue {
 
   private calcId = ''
 
-  private yaml: RCalcYaml = { baseValue: 0, optionGroups: {} }
+  private yaml: RCalcYaml = { baseValue: 0, optionGroups: {}, notes: [] }
 
   private adjustedR = 2.5
   private selectedBaseR = 2.5
@@ -276,6 +274,17 @@ p.factor {
   color: #596;
   font-weight: bold;
   font-size: 2.5rem;
+}
+
+.notes-item {
+  list-style-type: square;
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+  color: #222;
+}
+
+li.notes-item {
+  line-height: 1.3rem;
 }
 
 @media only screen and (max-width: 850px) {
