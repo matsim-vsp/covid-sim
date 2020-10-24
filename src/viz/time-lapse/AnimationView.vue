@@ -366,7 +366,7 @@ export default class AnimationView extends Vue {
 
     this.agentMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        simulationTime: { value: 30.0 },
+        simulationTime: { value: 0.0 },
         showSusceptible: { value: this.showSusceptible },
         colorLinks: { value: new THREE.Color(this.colors.links) },
 
