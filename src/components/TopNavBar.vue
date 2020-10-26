@@ -20,13 +20,14 @@
       @click='clickedBurger')
 
       .navbar-start
+        router-link.navbar-item(to="/2020-10-23/interventions/") 2020.10.23
         router-link.navbar-item(to="/2020-10-01/bmbf/") 2020.10.01
         router-link.navbar-item(to="/2020-09-11/bmbf/") 2020.09.11
-        router-link.navbar-item(to="/2020-07-22/") 2020.07.22
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
+            a.navbar-item(:href="/2020-07-22/") 2020.07.22
             a.navbar-item(:href="'/2020-07-21/'") 2020.07.21
             a.navbar-item(:href="'/2020-06-19/'") 2020.06.19
             a.navbar-item(:href="'/2020-06-05/'") 2020.06.05
@@ -46,6 +47,8 @@
           .navbar-dropdown
             a.navbar-item(:href="'/v3?day=5'") Infection Traces
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
+
+        router-link.navbar-item(to="/r-calcs/2020-10-23") R-Calculator
 
 </template>
 
