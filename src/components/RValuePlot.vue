@@ -33,7 +33,13 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    if (this.logScale) {
+      this.layout.yaxis.type = 'log'
+      this.layout.yaxis.range = [Math.log10(0.3), Math.log10(2)]
+    } else {
+      this.layout.yaxis.type = 'linear'
+      this.layout.yaxis.range = [0, 2]
+    }
   }
 
   private calculateRvalues() {
@@ -178,7 +184,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
       // autorange: true,
-      range: [Math.log10(0.3), Math.log10(2)],
+      range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
       title: 'Multiplier',
     },
     plot_bgcolor: '#f8f8f8',
