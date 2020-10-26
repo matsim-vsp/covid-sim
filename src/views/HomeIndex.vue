@@ -28,7 +28,6 @@
             a(href="https://github.com/matsim-org/matsim-episim") https://github.com/matsim-org/matsim-episim .
 
         h2 Interactive Visualizations
-
         p The following interactive visualizations help to illustrate the method and results which emerge from the model. These are produced directly from simulated model results. Note that due to the advanced nature of the visualizations, only modern versions of recent web browsers are supported.
 
         .viz-cards
@@ -36,11 +35,23 @@
             router-link(:to="viz.url")
               viz-card(:viz="viz")
 
-        h2 Published reports
 
+        h2 R-Value Calculator
+        p Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.
+
+        .viz-cards
+          .one-viz(v-for="rcalc in rCalculators" :key="rcalc.url")
+            router-link(:to="rcalc.url")
+              .box
+                h5 Calculator: {{ rcalc.date}}
+                img(width=300 src="../assets/images/thumb-rcalculator.png")
+
+
+        h2 Published reports
         p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
 
         report-viewer()
+
 
         h2 Simulations of COVID-19 spreading in Berlin
 
@@ -168,6 +179,14 @@ export default class VueComponent extends Vue {
       url: '/timelapse',
       title: '90 Day Time Lapse',
       subtitle: 'Home locations of residents, colored by their infection status through time.',
+    },
+  ]
+
+  private rCalculators = [
+    {
+      url: '/r-calcs/2020-10-23',
+      title: 'R-Value Calculator',
+      date: '2020-Oct-23',
     },
   ]
 }
