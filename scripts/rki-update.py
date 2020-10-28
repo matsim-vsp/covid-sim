@@ -41,7 +41,7 @@ csv >>= separate(
     sep=[4, 5, 7, 8, 10],
     convert=True,
     remove=False,
-) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day, Xmyear, X.mmonth, X.mday)
+) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day, X.myear, X.mmonth, X.mday)
 
 # Berlin
 fname = "berlin-cases.csv"
