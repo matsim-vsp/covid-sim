@@ -35,7 +35,13 @@ csv >>= separate(
     sep=[4, 5, 7, 8, 10],
     convert=True,
     remove=False,
-) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day)
+) >> separate(
+    X.Meldedatum,
+    ["myear", "dash1", "mmonth", "dash2", "mday"],
+    sep=[4, 5, 7, 8, 10],
+    convert=True,
+    remove=False,
+) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day, Xmyear, X.mmonth, X.mday)
 
 # Berlin
 fname = "berlin-cases.csv"
@@ -49,6 +55,19 @@ berlin = (
 )
 
 berlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+
+# Berlin - Meldedatum
+fname = "berlin-cases-meldedatum.csv"
+print(fname)
+mberlin = (
+    csv
+    >> filter_by(X.Bundesland == "Berlin")
+    >> group_by(X.Bundesland, X.myear, X.mmonth, X.mday)
+    >> summarize(cases=X.AnzahlFall.sum())
+    >> arrange(X.myear, X.mmonth, X.mday)
+)
+
+mberlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
 
 # München
