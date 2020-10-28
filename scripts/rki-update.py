@@ -65,6 +65,7 @@ mberlin = (
     >> group_by(X.Bundesland, X.myear, X.mmonth, X.mday)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.myear, X.mmonth, X.mday)
+    >> rename(year=X.myear, month=X.mmonth, day=X.mday)
 )
 
 mberlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
