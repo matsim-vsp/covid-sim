@@ -125,22 +125,22 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private fields: any[] = [
+  private activityTypes: any[] = [
     { col: 'work', title: 'Work' },
     { col: 'leisure', title: 'Leisure' },
-    { col: 'shopping', title: 'Other Activities' },
     { col: 'educ_kiga', title: 'Daycare' },
     { col: 'educ_primary', title: 'Primary Ed.' },
     { col: 'educ_secondary', title: 'Secondary Ed.' },
+    { col: 'educ_higher', title: 'Higher Ed.' },
+    { col: 'educ_other', title: 'Other Ed.' },
+    { col: 'shop_daily', title: 'Other Non-Home' },
 
     // { col: 'educ_tertiary', title: 'Educ: Tertiary' },
-    // { col: 'educ_higher', title: 'Educ: Higher' },
-    { col: 'educ_other', title: 'Other Education' },
-    { col: 'shop_daily', title: 'Other Non-Home' },
     // { col: 'shop_other', title: 'Shopping: Other' },
     // { col: 'visit', title: 'Visits' },
     // { col: 'errands', title: 'Errands' },
     // { col: 'business', title: 'Pers. Business' },
+    // { col: 'shopping', title: 'Other Activities' },
   ]
 
   private generateSeriesFromCSVData(data: any[]) {
@@ -150,7 +150,7 @@ export default class VueComponent extends Vue {
     const x = days.map(d => this.calculateDatefromSimulationDay(d))
 
     let yaxis = 0
-    for (const field of this.fields) {
+    for (const field of this.activityTypes) {
       const name = field.title
       try {
         const y: number[] = this.unpack(data, field.col)
