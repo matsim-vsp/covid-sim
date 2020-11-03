@@ -257,8 +257,8 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'custom_image',
-      width: 800,
+      filename: 'activity_levels',
+      width: 1200,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
     },
