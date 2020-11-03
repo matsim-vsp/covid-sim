@@ -229,6 +229,14 @@ export default class VueComponent extends Vue {
     heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
   }
 
+  private cityCSVMeldedatum: any = {
+    berlin: this.RKI_URL + 'berlin-cases-meldedatum.csv',
+  }
+
+  private cityCSVTests: any = {
+    berlin: this.RKI_URL + 'berlin-cases-tests.csv',
+  }
+
   private cityDIVI: any = {
     berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
     munich: this.DIVI_URL + 'munich-divi-processed.csv',
@@ -768,21 +776,93 @@ export default class VueComponent extends Vue {
       xcases.push(cumulative)
     }
 
-    const serieses = [
-      {
-        name: 'RKI ' + this.cityCap + ' Infections',
-        x: xdates,
-        y: xcases,
-        line: {
-          dash: 'dot',
-          width: 3,
-          color: 'rgb(0,200,150)',
-        },
-      },
-    ]
+	//get the meldedatum
+	const responseM = await fetch(this.cityCSVMeldedatum[newCity])
+	const csvContentsM = await responseM.text()
+	const dataM = Papa.parse(csvContentsM, {
+	header: true,
+	dynamicTyping: true,
+	skipEmptyLines: true,
+	}).data
 
-    // console.log({ observedData: serieses })
-    return serieses
+	const mDates: any = []
+	const mCases: any = []
+	let mCumulative = 0
+	const mOffset = 0
+
+	// pull the cases field out of the CSV
+	for (const datapoint of dataM) {
+    let dayObject = moment({ year: datapoint.year, month: datapoint.month - 1, day: datapoint.day })
+    dayObject.add(mOffset, 'days')
+
+    const day = dayObject.format('YYYY-MM-DD')
+
+    mDates.push(day)
+    mCumulative += datapoint.cases
+    mCases.push(mCumulative)
+  }
+  
+  //get test data
+	const responseT = await fetch(this.cityCSVTests[newCity])
+	const csvContentsT = await responseT.text()
+	const dataT = Papa.parse(csvContentsT, {
+	header: true,
+	dynamicTyping: true,
+	skipEmptyLines: true,
+	}).data
+
+	const tDates: any = []
+	const tCases: any = []
+	let tCumulative = 0
+	const tOffset = 0
+
+	// pull the cases field out of the CSV
+	for (const datapoint of dataT) {
+    let dayObject = moment({ year: datapoint.year, month: datapoint.month - 1, day: datapoint.day })
+    dayObject.add(tOffset, 'days')
+
+    const day = dayObject.format('YYYY-MM-DD')
+
+    tDates.push(day)
+    tCumulative += datapoint.cases
+    tCases.push(tCumulative)
+	}
+
+	const serieses = [
+	 {
+    name: 'RKI ' + this.cityCap + ' Infections',
+    x: xdates,
+    y: xcases,
+    line: {
+      dash: 'dot',
+      width: 3,
+      color: 'rgb(0,200,150)',
+    },
+	},
+  // {
+  //   name: 'RKI-Meldedatum ' + this.cityCap + ' offset:' + mOffset,
+  //   x: mDates,
+  //   y: mCases,
+  //   line: {
+  //     dash: 'dot',
+  //     width: 3,
+  //     color: 'rgb(200,0,150)',
+  //   },
+  // },
+  // {
+  //   name: 'Positive Tests ' + this.cityCap + ' offset:' + tOffset,
+  //   x: tDates,
+  //   y: tCases,
+  //   line: {
+  //     dash: 'dot',
+  //     width: 3,
+  //     color: 'rgb(0,0,0)',
+  //   },
+	// },
+]
+
+	// console.log({ observedData: serieses })
+	return serieses
   }
 
   private async parseInfoTxt(city: string) {
