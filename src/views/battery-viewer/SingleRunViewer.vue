@@ -839,26 +839,26 @@ export default class VueComponent extends Vue {
       color: 'rgb(0,200,150)',
     },
 	},
-  // {
-  //   name: 'RKI-Meldedatum ' + this.cityCap + ' offset:' + mOffset,
-  //   x: mDates,
-  //   y: mCases,
-  //   line: {
-  //     dash: 'dot',
-  //     width: 3,
-  //     color: 'rgb(200,0,150)',
-  //   },
-  // },
-  // {
-  //   name: 'Positive Tests ' + this.cityCap + ' offset:' + tOffset,
-  //   x: tDates,
-  //   y: tCases,
-  //   line: {
-  //     dash: 'dot',
-  //     width: 3,
-  //     color: 'rgb(0,0,0)',
-  //   },
-	// },
+  {
+    name: 'RKI-Meldedatum ' + this.cityCap + ' offset:' + mOffset,
+    x: mDates,
+    y: mCases,
+    line: {
+      dash: 'dot',
+      width: 3,
+      color: 'rgb(200,0,150)',
+    },
+  },
+  {
+    name: 'Positive Tests ' + this.cityCap + ' offset:' + tOffset,
+    x: tDates,
+    y: tCases,
+    line: {
+      dash: 'dot',
+      width: 3,
+      color: 'rgb(0,0,0)',
+    },
+	},
 ]
 
 	// console.log({ observedData: serieses })
