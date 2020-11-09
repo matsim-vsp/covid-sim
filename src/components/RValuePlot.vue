@@ -146,7 +146,18 @@ export default class VueComponent extends Vue {
     }
 
     this.dataLines = [
-      {
+        {
+            name: 'Target: 50 per 100,000 per 7 days',
+            x: [0, susceptible.x[susceptible.x.length - 1]],
+            y: [1, 1],
+            fill: 'tozeroy',
+            line: {
+                width: 1.0,
+                // color: '#ddbbbb',
+                color: '#bbddbb',
+            },
+        },
+        {
         name: 'Estimated Multiplier',
         x: susceptible.x.slice(this.lagDays * 2),
         y: rValues,

@@ -112,7 +112,8 @@ export default class VueComponent extends Vue {
         fill: 'tozeroy',
         line: {
           width: 1.0,
-          color: '#ddbbbb',
+            // color: '#ddbbbb',
+            color: '#bbddbb',
         },
       },
       {
