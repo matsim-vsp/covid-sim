@@ -29,6 +29,10 @@ export default class VueComponent extends Vue {
     munich: require('@/assets/munich-hospital.csv').default,
   }
 
+  private hospitalCapacity: any = {
+    berlin: [1252, 1694],
+  }
+
   private dataDetails: { [id: string]: City } = {
     berlin: {
       fromModel: ['Seriously Sick', 'Critical'],
@@ -113,6 +117,34 @@ export default class VueComponent extends Vue {
 
       return trace
     })
+
+    // Hospital capacity lines
+    if (this.hospitalCapacity[this.city]) {
+      modelData.push(
+        {
+          name: 'Hospital Capacity',
+          x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
+          y: [this.hospitalCapacity[this.city][0], this.hospitalCapacity[this.city][0]],
+          fill: 'none',
+          marker: { size: 2 },
+          line: {
+            width: 0.5,
+            color: '#707',
+          },
+        },
+        {
+          name: 'Hospital Max Reserve Capacity',
+          x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
+          y: [this.hospitalCapacity[this.city][1], this.hospitalCapacity[this.city][1]],
+          fill: 'none',
+          marker: { size: 2 },
+          line: {
+            width: 0.5,
+            color: '#707',
+          },
+        }
+      )
+    }
 
     modelData[0].name = 'Model: Should be Hospitalized'
 
