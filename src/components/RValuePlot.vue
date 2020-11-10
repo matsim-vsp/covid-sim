@@ -77,6 +77,17 @@ export default class VueComponent extends Vue {
     // use pre-calculated r-values
     this.dataLines = [
       {
+        name: 'Target: 1.0',
+        x: [0, x[x.length - 1]],
+        y: [1.0, 1.0],
+        fill: 'tozeroy',
+        line: {
+          width: 1.0,
+          // color: '#ddbbbb',
+          color: '#bbddbb',
+        },
+      },
+      {
         name: '7-Day Average R-Value',
         x: x.slice(center),
         y: avgR,
@@ -92,7 +103,7 @@ export default class VueComponent extends Vue {
         y: r,
         mode: 'markers',
         type: 'scatter',
-        marker: { color: '#8c7', size: 3 },
+        marker: { color: '#c44', size: 3 },
       },
     ]
   }
@@ -146,18 +157,18 @@ export default class VueComponent extends Vue {
     }
 
     this.dataLines = [
-        {
-            name: 'Target: 50 per 100,000 per 7 days',
-            x: [0, susceptible.x[susceptible.x.length - 1]],
-            y: [1, 1],
-            fill: 'tozeroy',
-            line: {
-                width: 1.0,
-                // color: '#ddbbbb',
-                color: '#bbddbb',
-            },
+      {
+        name: 'Target: 50 per 100,000 per 7 days',
+        x: [0, susceptible.x[susceptible.x.length - 1]],
+        y: [1, 1],
+        fill: 'tozeroy',
+        line: {
+          width: 1.0,
+          // color: '#ddbbbb',
+          color: '#bbddbb',
         },
-        {
+      },
+      {
         name: 'Estimated Multiplier',
         x: susceptible.x.slice(this.lagDays * 2),
         y: rValues,
