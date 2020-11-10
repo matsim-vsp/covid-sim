@@ -1224,6 +1224,12 @@ p.subhead {
   padding-bottom: 2rem;
 }
 
+.readme {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 @media only screen and (max-width: 1024px) {
   .page-section {
     padding-left: 1rem;

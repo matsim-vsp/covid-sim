@@ -154,11 +154,11 @@ export default class VueComponent extends Vue {
     if (this.yaml.baseValue) r = this.yaml.baseValue
     else if (this.yaml.baseValues) r = this.selectedBaseR
 
-    // multiplicative factors
-    for (const factor of Object.values(this.factors)) r *= factor
-
     // additive factors
     for (const addition of Object.values(this.additions)) r += addition
+
+    // multiplicative factors
+    for (const factor of Object.values(this.factors)) r *= factor
 
     // fancy!
     this.finalR = r
