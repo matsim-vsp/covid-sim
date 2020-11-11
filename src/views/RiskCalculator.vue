@@ -4,7 +4,7 @@
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
-  .r-calculator(v-if="yaml.multipliers")
+  .center-area(v-if="yaml.multipliers")
 
     h2 Personal Risk Calculator
     h5(:style="{marginBottom: '1rem', color: '#596'}") Released {{ this.calcId}}
@@ -21,32 +21,33 @@
 
       p {{ selectedScenario ? selectedScenario.description : '...or try different combinations below.' }}
 
-      h3: b Estimated Infection Risk:&nbsp;
-        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR.toFixed(1) }}%
+  h3.center-area.sticky: b Estimated Infection Risk:&nbsp;
+    span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR.toFixed(1) }}%
 
-      .option-groups
-        //- multipliers
-        .option-group(v-for="group in multipliers" :key="`add+${group}`")
-          h4 {{ group }}
-          .description {{ yaml.multipliers[group].description }}
-          .measures
-            .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
-              button.button.is-link.is-small(
-                :class="{active: selections[group] == m.title,  'is-outlined': selections[group] != m.title}"
-                @click="handleFactorButton(m,group)"
-              ) {{ m.title }}
+  .center-area(v-if="yaml.multipliers")
+    .option-groups
+      //- multipliers
+      .option-group(v-for="group in multipliers" :key="`add+${group}`")
+        h4 {{ group }}
+        .description {{ yaml.multipliers[group].description }}
+        .measures
+          .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
+            button.button.is-link.is-small(
+              :class="{active: selections[group] == m.title,  'is-outlined': selections[group] != m.title}"
+              @click="handleFactorButton(m,group)"
+            ) {{ m.title }}
 
-        //- divisors
-        .option-group(v-for="group in divisors" :key="group")
-          h4 {{ group }}
-          .description {{ yaml.divisors[group].description }}
+      //- divisors
+      .option-group(v-for="group in divisors" :key="group")
+        h4 {{ group }}
+        .description {{ yaml.divisors[group].description }}
 
-          .measures
-            .measure(v-for="m in lookup[group]" :key="group + m.title")
-              button.button.is-link.is-small(
-                :class="{active: selections[group] == m.title, 'is-outlined': selections[group] != m.title}"
-                @click="handleDivFactorButton(m,group)"
-              ) {{ m.title }}
+        .measures
+          .measure(v-for="m in lookup[group]" :key="group + m.title")
+            button.button.is-link.is-small(
+              :class="{active: selections[group] == m.title, 'is-outlined': selections[group] != m.title}"
+              @click="handleDivFactorButton(m,group)"
+            ) {{ m.title }}
 
       br
 
@@ -268,9 +269,9 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-.r-calculator {
+.center-area {
   max-width: 70rem;
-  padding: 2rem 3rem 5rem 3rem;
+  padding: 1rem 3rem 1rem 3rem;
 }
 
 .option-groups {
@@ -382,6 +383,14 @@ li.notes-item {
   margin-bottom: 0.25rem;
 }
 
+.sticky {
+  top: 3rem;
+  position: sticky;
+  background-color: #eee;
+  padding-top: 0;
+  padding-bottom: 0rem;
+}
+
 @media only screen and (max-width: 850px) {
   .option-groups {
     grid-template-columns: repeat(2, 1fr);
@@ -393,8 +402,9 @@ li.notes-item {
     padding: 2rem 1rem;
   }
 
-  .r-calculator {
-    padding: 2rem 1rem;
+  .center-area {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .option-groups {
