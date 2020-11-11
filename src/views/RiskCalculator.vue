@@ -7,25 +7,22 @@
   .r-calculator(v-if="yaml.multipliers")
 
     h2 Personal Risk Calculator
-    h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
+    h5(:style="{marginBottom: '1rem', color: '#596'}") Released {{ this.calcId}}
 
     h3.badpage(v-if="badPage") That page not found, sorry!
 
     .goodpage(v-else)
       p(v-if="yaml.description") {{ yaml.description}}
 
-      //- h3: b Base R value:&nbsp;&nbsp;
-      //- h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
+      h3: b Explore typical scenarios:
+      .measures
+        .measure(v-for="m in Object.keys(examples)" :key="m")
+          button.button.is-danger.is-outlined.is-small(@click="handleScenario(m)") {{ m }}
 
-      //- .base-buttons(v-if="yaml.baseValues")
-      //-   button.button.is-small(
-      //-     v-for="base in yaml.baseValues"
-      //-     :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
-      //-     @click="handleNewBaseValue(Object.values(base)[0])"
-      //-   ) {{ Object.keys(base)[0] }}
+      p {{ selectedScenario ? selectedScenario.description : '...or try different combinations below.' }}
 
       h3: b Estimated Infection Risk:&nbsp;
-        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ Math.floor(adjustedR) }}%
+        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR.toFixed(1) }}%
 
       .option-groups
         //- multipliers
@@ -92,6 +89,32 @@ export default class VueComponent extends Vue {
 
   private calcId = ''
 
+  private examples: any = {
+    'Dinner Party': {
+      description:
+        'Personal risk for attending a dinner party with an unknowingly contagious guest',
+      presets: {
+        'Duration of activity': '4 hours',
+        "Infected person's behavior": 'Speaking loudly',
+        'Infected person wears a mask': 'No',
+        'You wear a mask': 'No',
+        'Room size': '20qm',
+        'Air exchange': 'Every two hours',
+      },
+    },
+    'Sick Housemate': {
+      description: 'Living with a contagious roommate for four days',
+      presets: {
+        'Duration of activity': 'Four days',
+        "Infected person's behavior": 'Speaking loudly',
+        'Infected person wears a mask': 'Yes',
+        'You wear a mask': 'No',
+        'Room size': '50qm',
+        'Air exchange': 'Every two hours',
+      },
+    },
+  }
+
   private yaml: RiskYaml = {
     description: '',
     calibrationParam: 0.075,
@@ -143,6 +166,25 @@ export default class VueComponent extends Vue {
     this.$forceUpdate()
   }
 
+  private selectedScenario: any = ''
+
+  private async handleScenario(scenario: string) {
+    this.selectedScenario = this.examples[scenario]
+    for (const measure of Object.keys(this.selectedScenario.presets) as any) {
+      const title = this.selectedScenario.presets[measure]
+      const value = this.lookup[measure].find((a: any) => a.title === title).value
+
+      console.log(measure, title, value)
+      this.selections[measure] = title
+
+      if (this.multipliers.indexOf(measure) > -1) this.factors[measure] = value
+      if (this.divisors.indexOf(measure) > -1) this.divFactors[measure] = value
+    }
+    console.log(this.selections)
+    this.updateR()
+    this.$forceUpdate()
+  }
+
   private get multipliers() {
     return Object.keys(this.yaml.multipliers)
   }
@@ -161,9 +203,11 @@ export default class VueComponent extends Vue {
     for (const factor of Object.values(this.factors)) r *= factor
     // divisors factors, already 1/x
     for (const factor of Object.values(this.divFactors)) r *= factor
+    // exp result
+    r = 1.0 - Math.exp(-1.0 * r)
 
     // fancy!
-    this.finalR = Math.floor(Math.min(99, r * 100.0)) // percentage
+    this.finalR = Math.min(99, r * 100.0) // percentage
     this.animateTowardNewRValue()
   }
 
@@ -193,7 +237,6 @@ export default class VueComponent extends Vue {
       for (const option of measures.options) {
         const title = Object.keys(option)[0]
         const value = option[title]
-        console.log(title, value)
 
         if (!isNaN(value)) {
           this.lookup[measureName].push({ title, value })
@@ -221,7 +264,6 @@ export default class VueComponent extends Vue {
       for (const option of measures.options) {
         const title = Object.keys(option)[0]
         const value = option[title]
-        console.log(title, value)
 
         if (!isNaN(value)) {
           this.lookup[measureName].push({ title, value: 1.0 / value })
@@ -240,7 +282,6 @@ export default class VueComponent extends Vue {
         }
       }
     }
-    console.log(this.selections)
   }
 }
 </script>
@@ -254,15 +295,16 @@ export default class VueComponent extends Vue {
 }
 
 .option-groups {
-  border: 1px solid #ccc;
-  padding: 0.75rem 0.75rem;
+  margin-top: 0.25rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
 .option-group {
+  border: solid 1px #bbf;
   background-color: #fff;
+  // box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   padding: 0.5rem 0.5rem;
 }
 
