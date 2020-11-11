@@ -201,7 +201,7 @@ export default class VueComponent extends Vue {
           this.lookup[group].push({ title, value })
 
           // first?
-          if (!(group in this.additions)) {
+          if (!(group in this.optionGroups)) {
             this.factors[group] = value
             this.selections[group] = title
           }
