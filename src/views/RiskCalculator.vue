@@ -6,7 +6,7 @@
 
   .r-calculator(v-if="yaml.multipliers")
 
-    h2 Activity Risk Calculator
+    h2 Personal Risk Calculator
     h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
 
     h3.badpage(v-if="badPage") That page not found, sorry!
