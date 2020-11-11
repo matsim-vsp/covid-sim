@@ -16,7 +16,7 @@
 
       h3: b Explore typical scenarios:
       .measures
-        .measure(v-for="m in Object.keys(examples)" :key="m")
+        .measure(v-for="m in Object.keys(yaml.scenarios)" :key="m")
           button.button.is-danger.is-outlined.is-small(@click="handleScenario(m)") {{ m }}
 
       p {{ selectedScenario ? selectedScenario.description : '...or try different combinations below.' }}
@@ -28,8 +28,7 @@
         //- multipliers
         .option-group(v-for="group in multipliers" :key="`add+${group}`")
           h4 {{ group }}
-            span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
-          p.description {{ yaml.multipliers[group].description }}
+          .description {{ yaml.multipliers[group].description }}
           .measures
             .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
               button.button.is-link.is-small(
@@ -40,7 +39,6 @@
         //- divisors
         .option-group(v-for="group in divisors" :key="group")
           h4 {{ group }}
-            span(:style="{fontWeight: 'normal'}" v-if="divFactors[group] != 1") &nbsp; : {{ divFactors[group].toFixed(2) }}x
           .description {{ yaml.divisors[group].description }}
 
           .measures
@@ -80,6 +78,12 @@ type RiskYaml = {
       options: { [choice: string]: any }[]
     }
   }
+  scenarios: {
+    [scenario: string]: {
+      description: string
+      presets: { [measure: string]: any }[]
+    }
+  }
 }
 
 @Component({ components: {}, props: {} })
@@ -89,37 +93,12 @@ export default class VueComponent extends Vue {
 
   private calcId = ''
 
-  private examples: any = {
-    'Dinner Party': {
-      description:
-        'Personal risk for attending a dinner party with an unknowingly contagious guest',
-      presets: {
-        'Duration of activity': '4 hours',
-        "Infected person's behavior": 'Speaking loudly',
-        'Infected person wears a mask': 'No',
-        'You wear a mask': 'No',
-        'Room size': '20qm',
-        'Air exchange': 'Every two hours',
-      },
-    },
-    'Sick Housemate': {
-      description: 'Living with a contagious roommate for four days',
-      presets: {
-        'Duration of activity': 'Four days',
-        "Infected person's behavior": 'Speaking loudly',
-        'Infected person wears a mask': 'Yes',
-        'You wear a mask': 'No',
-        'Room size': '50qm',
-        'Air exchange': 'Every two hours',
-      },
-    },
-  }
-
   private yaml: RiskYaml = {
     description: '',
     calibrationParam: 0.075,
     multipliers: {},
     divisors: {},
+    scenarios: {},
     notes: [],
   }
 
@@ -169,7 +148,7 @@ export default class VueComponent extends Vue {
   private selectedScenario: any = ''
 
   private async handleScenario(scenario: string) {
-    this.selectedScenario = this.examples[scenario]
+    this.selectedScenario = this.yaml.scenarios[scenario]
     for (const measure of Object.keys(this.selectedScenario.presets) as any) {
       const title = this.selectedScenario.presets[measure]
       const value = this.lookup[measure].find((a: any) => a.title === title).value
