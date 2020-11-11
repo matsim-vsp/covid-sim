@@ -94,6 +94,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculator.vue'),
   },
   {
+    path: '/risk-calcs/:rcalc',
+    component: () => import(/* webpackChunkName: "risk-calcs" */ '@/views/RiskCalculator.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),

@@ -4,9 +4,9 @@
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
-  .r-calculator(v-if="yaml.optionGroups")
+  .r-calculator(v-if="yaml.multipliers")
 
-    h2 R-Value Calculator
+    h2 Activity Risk Calculator
     h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
 
     h3.badpage(v-if="badPage") That page not found, sorry!
@@ -14,43 +14,42 @@
     .goodpage(v-else)
       p(v-if="yaml.description") {{ yaml.description}}
 
-      h3: b Base R value:&nbsp;&nbsp;
-      h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
+      //- h3: b Base R value:&nbsp;&nbsp;
+      //- h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
 
-      .base-buttons(v-if="yaml.baseValues")
-        button.button.is-small(
-          v-for="base in yaml.baseValues"
-          :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
-          @click="handleNewBaseValue(Object.values(base)[0])"
-        ) {{ Object.keys(base)[0] }}
+      //- .base-buttons(v-if="yaml.baseValues")
+      //-   button.button.is-small(
+      //-     v-for="base in yaml.baseValues"
+      //-     :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
+      //-     @click="handleNewBaseValue(Object.values(base)[0])"
+      //-   ) {{ Object.keys(base)[0] }}
 
-      h3: b Calculated R value:
-      h3.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
+      h3: b Estimated Infection Risk:&nbsp;
+        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR }}%
 
       .option-groups
-        //- additive factors
-        .option-group(v-for="group in additiveGroups" :key="`add+${group}`")
+        //- multipliers
+        .option-group(v-for="group in multipliers" :key="`add+${group}`")
           h4 {{ group }}
-            span(:style="{fontWeight: 'normal'}"
-                 v-if="additions[group] != 0") &nbsp; : {{additions[group]>0 ? '+' : ''}}{{ additions[group].toFixed(3) }}
+            span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
 
           .measures
             .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
               button.button.is-link.is-small(
                 :class="{active: selections[group] == m.title,  'is-outlined': selections[group] != m.title}"
-                @click="handleAdditiveButton(m,group)"
+                @click="handleFactorButton(m,group)"
               ) {{ m.title }}
 
-        //- multiplicative factors
-        .option-group(v-for="group in optionGroups" :key="group")
+        //- divisors
+        .option-group(v-for="group in divisors" :key="group")
           h4 {{ group }}
-            span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
+            span(:style="{fontWeight: 'normal'}" v-if="divFactors[group] != 1") &nbsp; : {{ divFactors[group].toFixed(2) }}x
 
           .measures
             .measure(v-for="m in lookup[group]" :key="group + m.title")
               button.button.is-link.is-small(
                 :class="{active: selections[group] == m.title, 'is-outlined': selections[group] != m.title}"
-                @click="handleButton(m,group)"
+                @click="handleDivFactorButton(m,group)"
               ) {{ m.title }}
 
       br
@@ -67,12 +66,22 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 
-type RCalcYaml = {
-  baseValue?: number
-  baseValues?: { [date: string]: number }[]
-  optionGroups: { [group: string]: { [measure: string]: any }[] }
-  additiveGroups: { [group: string]: { [measure: string]: any }[] }
+type RiskYaml = {
+  description: string
+  calibrationParam: number
   notes: string[]
+  multipliers: {
+    [measure: string]: {
+      description: string
+      options: { [choice: string]: any }[]
+    }
+  }
+  divisors: {
+    [measure: string]: {
+      description: string
+      options: { [choice: string]: any }[]
+    }
+  }
 }
 
 @Component({ components: {}, props: {} })
@@ -82,20 +91,18 @@ export default class VueComponent extends Vue {
 
   private calcId = ''
 
-  private yaml: RCalcYaml = { baseValue: 0, optionGroups: {}, additiveGroups: {}, notes: [] }
-
-  private adjustedR = 2.5
-  private selectedBaseR = 2.5
+  private yaml: RiskYaml = {
+    description: '',
+    calibrationParam: 0.075,
+    multipliers: {},
+    divisors: {},
+    notes: [],
+  }
 
   private badPage = false
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
-  }
-
-  private handleNewBaseValue(base: number) {
-    this.selectedBaseR = base
-    this.updateR()
   }
 
   private async mounted() {
@@ -107,14 +114,11 @@ export default class VueComponent extends Vue {
 
     this.calcId = this.$route.params.rcalc
 
-    const url = this.public_svn + `r-calculator/${this.calcId}.yaml`
+    const url = this.public_svn + `risk-calculator/${this.calcId}.yaml`
 
     try {
       const response = await fetch(url)
       this.yaml = YAML.parse(await response.text())
-
-      // some old yamls might not have any additive groups
-      if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
 
       this.buildUI()
       this.updateR()
@@ -124,43 +128,41 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private async handleButton(m: any, group: string) {
+  private async handleDivFactorButton(m: any, group: string) {
+    this.selections[group] = m.title
+    this.divFactors[group] = m.value
+    this.updateR()
+    this.$forceUpdate()
+  }
+
+  private async handleFactorButton(m: any, group: string) {
     this.selections[group] = m.title
     this.factors[group] = m.value
     this.updateR()
     this.$forceUpdate()
   }
 
-  private async handleAdditiveButton(m: any, group: string) {
-    this.selections[group] = m.title
-    this.additions[group] = m.value
-    this.updateR()
-    this.$forceUpdate()
+  private get multipliers() {
+    return Object.keys(this.yaml.multipliers)
   }
 
-  private get optionGroups() {
-    return Object.keys(this.yaml.optionGroups)
+  private get divisors() {
+    return Object.keys(this.yaml.divisors)
   }
 
-  private get additiveGroups() {
-    return Object.keys(this.yaml.additiveGroups)
-  }
-
-  private finalR = 2.5
+  private finalR = 0
+  private adjustedR = 0
 
   private updateR() {
-    let r = 3.0
-    if (this.yaml.baseValue) r = this.yaml.baseValue
-    else if (this.yaml.baseValues) r = this.selectedBaseR
-
-    // additive factors
-    for (const addition of Object.values(this.additions)) r += addition
+    let r = this.yaml.calibrationParam
 
     // multiplicative factors
     for (const factor of Object.values(this.factors)) r *= factor
+    // divisors factors, already 1/x
+    for (const factor of Object.values(this.divFactors)) r *= factor
 
     // fancy!
-    this.finalR = r
+    this.finalR = Math.floor(Math.min(99, r * 100.0)) // percentage
     this.animateTowardNewRValue()
   }
 
@@ -178,65 +180,62 @@ export default class VueComponent extends Vue {
 
   private lookup: any = {}
   private factors: { [measure: string]: number } = {}
-  private additions: { [measure: string]: number } = {}
-
+  private divFactors: { [measure: string]: number } = {}
   private selections: { [measure: string]: string } = {}
 
   private buildUI() {
-    if (this.yaml.baseValues) {
-      this.selectedBaseR = Object.values(this.yaml.baseValues[0])[0]
-    }
-
     // multiplicative factors
-    for (const group of Object.keys(this.yaml.optionGroups)) {
-      const measures = this.yaml.optionGroups[group]
-      this.lookup[group] = []
+    for (const measureName of Object.keys(this.yaml.multipliers)) {
+      const measures = this.yaml.multipliers[measureName]
+      this.lookup[measureName] = []
 
-      for (const measure of measures) {
-        const title = Object.keys(measure)[0]
-        const value = measure[title]
+      for (const option of measures.options) {
+        const title = Object.keys(option)[0]
+        const value = option[title]
+        console.log(title, value)
 
         if (!isNaN(value)) {
-          this.lookup[group].push({ title, value })
+          this.lookup[measureName].push({ title, value })
 
           // first?
-          if (this.yaml.optionGroups[group] === undefined) {
-            this.factors[group] = value
-            this.selections[group] = title
+          if (this.yaml.multipliers[measureName].options === undefined) {
+            this.factors[measureName] = value
+            this.selections[measureName] = title
           }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          this.lookup[group].push({ title, value: trimAsterisk })
-          this.selections[group] = title
-          this.factors[group] = trimAsterisk
+          this.lookup[measureName].push({ title, value: trimAsterisk })
+          this.selections[measureName] = title
+          this.factors[measureName] = trimAsterisk
         }
       }
     }
 
-    // additive factors
-    for (const group of Object.keys(this.yaml.additiveGroups)) {
-      const measures = this.yaml.additiveGroups[group]
-      this.lookup[group] = []
+    // divisors
+    for (const measureName of Object.keys(this.yaml.divisors)) {
+      const measures = this.yaml.divisors[measureName]
+      this.lookup[measureName] = []
 
-      for (const measure of measures) {
-        const title = Object.keys(measure)[0]
-        const value = measure[title]
+      for (const option of measures.options) {
+        const title = Object.keys(option)[0]
+        const value = option[title]
+        console.log(title, value)
 
         if (!isNaN(value)) {
-          this.lookup[group].push({ title, value })
+          this.lookup[measureName].push({ title, value: 1.0 / value })
 
           // first?
-          if (this.yaml.additiveGroups[group] === undefined) {
-            this.additions[group] = value
-            this.selections[group] = title
+          if (this.yaml.divisors[measureName].options === undefined) {
+            this.divFactors[measureName] = value
+            this.selections[measureName] = title
           }
         } else {
           // user specified a default with an asterisk* after the number
-          const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          this.lookup[group].push({ title, value: trimAsterisk })
-          this.selections[group] = title
-          this.additions[group] = trimAsterisk
+          const trimAsterisk = 1.0 / parseFloat(value.substring(0, value.length - 1))
+          this.lookup[measureName].push({ title, value: trimAsterisk })
+          this.selections[measureName] = title
+          this.divFactors[measureName] = trimAsterisk
         }
       }
     }
@@ -257,7 +256,7 @@ export default class VueComponent extends Vue {
   border: 1px solid #ccc;
   padding: 0.75rem 0.75rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
