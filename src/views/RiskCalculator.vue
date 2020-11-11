@@ -25,14 +25,14 @@
       //-   ) {{ Object.keys(base)[0] }}
 
       h3: b Estimated Infection Risk:&nbsp;
-        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR }}%
+        span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ Math.floor(adjustedR) }}%
 
       .option-groups
         //- multipliers
         .option-group(v-for="group in multipliers" :key="`add+${group}`")
           h4 {{ group }}
             span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
-
+          p.description {{ yaml.multipliers[group].description }}
           .measures
             .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
               button.button.is-link.is-small(
@@ -44,6 +44,7 @@
         .option-group(v-for="group in divisors" :key="group")
           h4 {{ group }}
             span(:style="{fontWeight: 'normal'}" v-if="divFactors[group] != 1") &nbsp; : {{ divFactors[group].toFixed(2) }}x
+          .description {{ yaml.divisors[group].description }}
 
           .measures
             .measure(v-for="m in lookup[group]" :key="group + m.title")
@@ -266,6 +267,7 @@ export default class VueComponent extends Vue {
 }
 
 .measures {
+  padding: 0.5rem 0;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -353,6 +355,12 @@ li.notes-item {
   line-height: 1.3rem;
 }
 
+.description {
+  font-size: 0.85rem;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
 @media only screen and (max-width: 850px) {
   .option-groups {
     grid-template-columns: repeat(2, 1fr);
@@ -369,7 +377,7 @@ li.notes-item {
   }
 
   .option-groups {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
 }
 </style>
