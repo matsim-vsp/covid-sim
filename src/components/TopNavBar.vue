@@ -49,6 +49,7 @@
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
         router-link.navbar-item(to="/r-calcs/2020-10-23") R-Calculator
+        router-link.navbar-item(to="/risk-calcs/2020-11-11") Risk Calculator
 
 </template>
 

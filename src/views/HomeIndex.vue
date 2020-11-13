@@ -79,6 +79,30 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
+      url: '/2020-11-12/secondLockdownCurfew',
+      date: 'Released: 12 Nov 2020',
+      title: 'Second Lockdown & Curfew',
+      subtitle: 'Effect of second lockdown and curfew hours.',
+    },
+    {
+      url: '/2020-11-12/secondLockdown',
+      date: 'Released: 12 Nov 2020',
+      title: 'Second Lockdown',
+      subtitle: 'Different options for second lockdown.',
+    },  
+    {
+      url: '/2020-11-09/tracing',
+      date: 'Released: 09 Nov 2020',
+      title: 'Tracing',
+      subtitle: 'Effects of different tracing capabilities.',
+    },
+    {
+      url: '/2020-11-03/sensitivity',
+      date: 'Released: 03 Nov 2020',
+      title: 'Sensitivity',
+      subtitle: 'Effects of switching off different parts of the model.',
+    },
+    {
       url: '/2020-10-23/interventions',
       date: 'Released: 23 Oct 2020',
       title: 'Run 2020.10.23',
