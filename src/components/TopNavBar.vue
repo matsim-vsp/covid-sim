@@ -24,15 +24,12 @@
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2020.11.12
           .navbar-dropdown
-            a.navbar-item(:href="/2020-11-12/secondLockdown") Second Lockdown
-            a.navbar-item(:href="/2020-11-12/secondLockdownCurfew") Curfew
+            a.navbar-item(:href="'/2020-11-12/secondLockdown'") Second Lockdown
+            a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") Curfew
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
-            a.navbar-item(:href="/2020-10-23/interventions/") 2020.10.23
-            a.navbar-item(:href="/2020-10-01/bmbf/") 2020.10.01
-            a.navbar-item(:href="/2020-09-11/bmbf/") 2020.09.11
             a.navbar-item(:href="/2020-07-22/") 2020.07.22
             a.navbar-item(:href="'/2020-07-21/'") 2020.07.21
             a.navbar-item(:href="'/2020-06-19/'") 2020.06.19
