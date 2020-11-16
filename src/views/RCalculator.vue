@@ -58,7 +58,7 @@
       h3(v-if="yaml.notes"): b Remarks:
 
       ul(v-if="yaml.notes")
-        li.notes-item(v-for="line in yaml.notes") {{ line }}
+        li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
 
 </template>
 
@@ -66,6 +66,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
+import MarkdownIt from 'markdown-it'
 
 type RCalcYaml = {
   baseValue?: number
@@ -88,6 +89,12 @@ export default class VueComponent extends Vue {
   private selectedBaseR = 2.5
 
   private badPage = false
+
+  private markdownParser = new MarkdownIt()
+
+  private parseMarkdown(text: string) {
+    return this.markdownParser.render(text)
+  }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()

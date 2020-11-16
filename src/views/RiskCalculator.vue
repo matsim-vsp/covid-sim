@@ -54,7 +54,7 @@
       h3(v-if="yaml.notes"): b Remarks:
 
       ul(v-if="yaml.notes")
-        li.notes-item(v-for="line in yaml.notes") {{ line }}
+        li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
 
 </template>
 
@@ -62,6 +62,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
+import MarkdownIt from 'markdown-it'
 
 type RiskYaml = {
   description: string
@@ -104,6 +105,7 @@ export default class VueComponent extends Vue {
   }
 
   private badPage = false
+  private markdownParser = new MarkdownIt()
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -111,6 +113,10 @@ export default class VueComponent extends Vue {
 
   private async mounted() {
     this.buildPageForURL()
+  }
+
+  private parseMarkdown(text: string) {
+    return this.markdownParser.render(text)
   }
 
   private async buildPageForURL() {
