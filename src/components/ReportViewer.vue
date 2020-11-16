@@ -27,6 +27,12 @@ export default class VueComponent extends Vue {
     {
       md: '/reports/report-2020-10-23.md',
       title: '23 Oct 2020',
+      url: 'http://dx.doi.org/10.14279/depositonce-10810',
+      html: '',
+    },
+    {
+      md: '/reports/report-2020-10-23.md',
+      title: '23 Oct 2020',
       url: 'https://dx.doi.org/10.14279/depositonce-10662.2',
       html: '',
     },
