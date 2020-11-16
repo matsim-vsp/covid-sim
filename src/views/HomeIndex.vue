@@ -43,8 +43,9 @@
           .one-viz(v-for="rcalc in rCalculators" :key="rcalc.url")
             router-link(:to="rcalc.url")
               .box
-                h5 Calculator: {{ rcalc.date}}
-                img(width=300 src="../assets/images/thumb-rcalculator.png")
+                h5 {{rcalc.title}}
+                .date {{ rcalc.date}}
+                img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
 
 
         h2 Published reports
@@ -89,7 +90,7 @@ export default class VueComponent extends Vue {
       date: 'Released: 12 Nov 2020',
       title: 'Second Lockdown',
       subtitle: 'Different options for second lockdown.',
-    },  
+    },
     {
       url: '/2020-11-09/tracing',
       date: 'Released: 09 Nov 2020',
@@ -217,6 +218,13 @@ export default class VueComponent extends Vue {
       url: '/r-calcs/2020-10-23',
       title: 'R-Value Calculator',
       date: '2020-Oct-23',
+      image: '/thumb-rcalculator.png',
+    },
+    {
+      url: '/risk-calcs/2020-11-11',
+      title: 'Activity Risk Calculator',
+      date: '2020-Nov-11',
+      image: '/thumb-risk-calculator.png',
     },
   ]
 }
@@ -330,6 +338,10 @@ a {
   line-height: 2.7rem;
   padding: 1rem 0;
   color: $themeColor;
+}
+
+.box h5 {
+  margin-bottom: 0;
 }
 
 @media only screen and (max-width: 800px) {
