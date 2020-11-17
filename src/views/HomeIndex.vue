@@ -36,7 +36,7 @@
               viz-card(:viz="viz")
 
 
-        h2 R-Value Calculator
+        h2 R-Value and Risk Calculators
         p Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.
 
         .viz-cards
