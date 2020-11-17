@@ -12,7 +12,7 @@
     h3.badpage(v-if="badPage") That page not found, sorry!
 
     .goodpage(v-else)
-      p(v-if="yaml.description") {{ yaml.description}}
+      p(v-if="yaml.description" v-html="topDescription")
 
       h3: b Base R value:&nbsp;&nbsp;
       h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
@@ -69,6 +69,7 @@ import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 
 type RCalcYaml = {
+  description?: string
   baseValue?: number
   baseValues?: { [date: string]: number }[]
   optionGroups: { [group: string]: { [measure: string]: any }[] }
@@ -94,6 +95,11 @@ export default class VueComponent extends Vue {
 
   private parseMarkdown(text: string) {
     return this.markdownParser.render(text)
+  }
+
+  private get topDescription() {
+    if (!this.yaml.description) return ''
+    return this.markdownParser.render(this.yaml.description)
   }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {

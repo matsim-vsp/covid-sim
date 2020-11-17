@@ -23,6 +23,7 @@
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2020.11.12
+
           .navbar-dropdown
             a.navbar-item(:href="'/2020-11-12/secondLockdown'") Second Lockdown
             a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") Curfew
@@ -54,10 +55,16 @@
           a.navbar-link  Visualizations
           .navbar-dropdown
             a.navbar-item(:href="'/v3?day=5'") Infection Traces
-            a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
+            a.navbar-item(:href="'/timelapse'") 90 Da:y Time Lapse
 
-        router-link.navbar-item(to="/r-calcs/2020-10-23") R-Calculator
-        router-link.navbar-item(to="/risk-calcs/2020-11-11") Risk Calculator
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  Calculators
+          .navbar-dropdown
+            a.navbar-item(:href="'/r-calcs/2020-10-23'") R-Calculator (23.Oct)
+            a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown59'") R-Calculator (14.Nov, restrictive)
+            a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown84'") R-Calculator (14.Nov, permissive)
+            hr
+            a.navbar-item(:href="'/risk-calcs/2020-11-11'") Activity Risk Calculator
 
 </template>
 
@@ -97,6 +104,10 @@ export default class VueComponent extends Vue {
 
 .home-link {
   margin-left: 2.25rem;
+}
+
+.navbar-dropdown hr {
+  margin: 0.25rem 0;
 }
 
 @media only screen and (max-width: 640px) {
