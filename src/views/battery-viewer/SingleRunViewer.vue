@@ -85,45 +85,57 @@
 
         .linear-plot
           h5 {{ cityCap }} Cases Comparison
-          p New persons showing symptoms (model) vs. new cases (reality)
-          .plotarea.compact
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
-            :observed="observedCases"
-            :logScale="logScale")
+            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+
+          .hideIt(v-show="showPlot[0]")
+            p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
+              :observed="observedCases"
+              :logScale="logScale")
 
         .linear-plot(v-if="city === 'berlin' || city === 'munich'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
-          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea.compact
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            hospitalization-plot.plotsize(v-else
-              :data="hospitalData" :logScale="logScale" :city="city"
-              :diviData="diviData" :endDate="endDate" )
+            button.button.is-small.hider(@click="toggleShowPlot(1)") ..
+
+          .hideIt(v-show="showPlot[1]")
+            p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              hospitalization-plot.plotsize(v-else
+                :data="hospitalData" :logScale="logScale" :city="city"
+                :diviData="diviData" :endDate="endDate" )
 
         .linear-plot
           h5 {{ cityCap }} Simulated R-Values
-          p {{ rValueMethodDescription }}
-          .plotarea.compact
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            r-value-plot.plotsize(v-else
-              :data="data"
-              :endDate="endDate"
-              :logScale="logScale"
-              :rValues="rValues"
-              @method="switchRMethod")
+            button.button.is-small.hider(@click="toggleShowPlot(2)") ..
+
+          .hideIt(v-show="showPlot[2]")
+            p {{ rValueMethodDescription }}
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              r-value-plot.plotsize(v-else
+                :data="data"
+                :endDate="endDate"
+                :logScale="logScale"
+                :rValues="rValues"
+                @method="switchRMethod")
 
         .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
-          p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-          .plotarea
-            p.plotsize(v-if="!isZipLoaded") Loading data...
-            p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-            vue-plotly.plotsize(v-else
-              :data="data" :layout="layout" :options="options")
+            button.button.is-small.hider(@click="toggleShowPlot(3)") ..
+
+          .hideIt(v-show="showPlot[3]")
+            p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+            .plotarea
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vue-plotly.plotsize(v-else
+                :data="data" :layout="layout" :options="options")
 
         //- Vega charts without top=true
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
@@ -195,6 +207,8 @@ export default class VueComponent extends Vue {
   private startDate: string = ''
   private city: string = ''
   private offset: number[] = []
+
+  private showPlot: any = { 0: true, 1: true, 2: true }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
@@ -358,6 +372,15 @@ export default class VueComponent extends Vue {
 
   private observedCases: any[] = []
   private diviData: any[] = []
+
+  private toggleShowPlot(which: number) {
+    this.showPlot[which] = !this.showPlot[which]
+    console.log(this.showPlot)
+  }
+
+  private showThisPlot(which: number) {
+    return this.showPlot[which]
+  }
 
   private layout = {
     autosize: true,
@@ -973,6 +996,12 @@ export default class VueComponent extends Vue {
 
 <style scoped lang="scss">
 @import '@/styles.scss';
+
+.hider {
+  border-radius: 10rem;
+  font-size: 0.6rem;
+  margin-left: 1rem;
+}
 
 #single-run-viewer {
   display: flex;
