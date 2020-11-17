@@ -208,7 +208,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private showPlot: any = { 0: true, 1: true, 2: true }
+  private showPlot: any = { 0: true, 1: true, 2: true, 3: true }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
