@@ -221,6 +221,18 @@ export default class VueComponent extends Vue {
       image: '/thumb-rcalculator.png',
     },
     {
+      url: '/r-calcs/2020-11-14-lockdown59',
+      title: 'R-Value Calculator (restrictive)',
+      date: '2020-Nov-14',
+      image: '/thumb-rcalculator.png',
+    },
+    {
+      url: '/r-calcs/2020-11-14-lockdown84',
+      title: 'R-Value Calculator (permissive)',
+      date: '2020-Nov-14',
+      image: '/thumb-rcalculator.png',
+    },
+    {
       url: '/risk-calcs/2020-11-11',
       title: 'Activity Risk Calculator',
       date: '2020-Nov-11',
