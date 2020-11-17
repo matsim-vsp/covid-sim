@@ -776,93 +776,103 @@ export default class VueComponent extends Vue {
       xcases.push(cumulative)
     }
 
-	//get the meldedatum
-	const responseM = await fetch(this.cityCSVMeldedatum[newCity])
-	const csvContentsM = await responseM.text()
-	const dataM = Papa.parse(csvContentsM, {
-	header: true,
-	dynamicTyping: true,
-	skipEmptyLines: true,
-	}).data
+    //get the meldedatum
+    const responseM = await fetch(this.cityCSVMeldedatum[newCity])
+    const csvContentsM = await responseM.text()
+    const dataM = Papa.parse(csvContentsM, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
 
-	const mDates: any = []
-	const mCases: any = []
-	let mCumulative = 0
-	const mOffset = 0
+    const mDates: any = []
+    const mCases: any = []
+    let mCumulative = 0
+    const mOffset = 0
 
-	// pull the cases field out of the CSV
-	for (const datapoint of dataM) {
-    let dayObject = moment({ year: datapoint.year, month: datapoint.month - 1, day: datapoint.day })
-    dayObject.add(mOffset, 'days')
+    // pull the cases field out of the CSV
+    for (const datapoint of dataM) {
+      let dayObject = moment({
+        year: datapoint.year,
+        month: datapoint.month - 1,
+        day: datapoint.day,
+      })
+      dayObject.add(mOffset, 'days')
 
-    const day = dayObject.format('YYYY-MM-DD')
+      const day = dayObject.format('YYYY-MM-DD')
 
-    mDates.push(day)
-    mCumulative += datapoint.cases
-    mCases.push(mCumulative)
-  }
-  
-  //get test data
-	const responseT = await fetch(this.cityCSVTests[newCity])
-	const csvContentsT = await responseT.text()
-	const dataT = Papa.parse(csvContentsT, {
-	header: true,
-	dynamicTyping: true,
-	skipEmptyLines: true,
-	}).data
+      mDates.push(day)
+      mCumulative += datapoint.cases
+      mCases.push(mCumulative)
+    }
 
-	const tDates: any = []
-	const tCases: any = []
-	let tCumulative = 0
-	const tOffset = 0
+    //get test data
+    const responseT = await fetch(this.cityCSVTests[newCity])
+    const csvContentsT = await responseT.text()
+    const dataT = Papa.parse(csvContentsT, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    }).data
 
-	// pull the cases field out of the CSV
-	for (const datapoint of dataT) {
-    let dayObject = moment({ year: datapoint.year, month: datapoint.month - 1, day: datapoint.day })
-    dayObject.add(tOffset, 'days')
+    const tDates: any = []
+    const tCases: any = []
+    let tCumulative = 0
+    const tOffset = 0
 
-    const day = dayObject.format('YYYY-MM-DD')
+    // pull the cases field out of the CSV
+    for (const datapoint of dataT) {
+      let dayObject = moment({
+        year: datapoint.year,
+        month: datapoint.month - 1,
+        day: datapoint.day,
+      })
+      dayObject.add(tOffset, 'days')
 
-    tDates.push(day)
-    tCumulative += datapoint.cases
-    tCases.push(tCumulative)
-	}
+      const day = dayObject.format('YYYY-MM-DD')
 
-	const serieses = [
-	 {
-    name: 'RKI ' + this.cityCap + ' Infections',
-    x: xdates,
-    y: xcases,
-    line: {
-      dash: 'dot',
-      width: 3,
-      color: 'rgb(0,200,150)',
-    },
-	},
-  {
-    name: 'RKI-Meldedatum ' + this.cityCap + ' offset:' + mOffset,
-    x: mDates,
-    y: mCases,
-    line: {
-      dash: 'dot',
-      width: 3,
-      color: 'rgb(200,0,150)',
-    },
-  },
-  {
-    name: 'Positive Tests ' + this.cityCap + ' offset:' + tOffset,
-    x: tDates,
-    y: tCases,
-    line: {
-      dash: 'dot',
-      width: 3,
-      color: 'rgb(0,0,0)',
-    },
-	},
-]
+      tDates.push(day)
+      tCumulative += datapoint.cases
+      tCases.push(tCumulative)
+    }
 
-	// console.log({ observedData: serieses })
-	return serieses
+    const serieses = [
+      {
+        name: 'RKI ' + this.cityCap + ' Infections',
+        x: xdates,
+        y: xcases,
+        line: {
+          dash: 'dot',
+          width: 3,
+          color: '#080',
+        },
+      },
+      {
+        name: 'RKI-Meldedatum ' + this.cityCap, // + ' offset:' + mOffset,
+        x: mDates,
+        y: mCases,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { color: '#6d2', size: 3 },
+      },
+      {
+        name: 'Positive Tests ' + this.cityCap, // + ' offset:' + tOffset,
+        x: tDates,
+        y: tCases,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { color: '#f42', size: 4 },
+
+        // line: {
+        //   dash: 'dot',
+        //   width: 2,
+        //   color: 'rgb(100,100,255)',
+        // },
+      },
+    ]
+
+    // console.log({ observedData: serieses })
+    return serieses
   }
 
   private async parseInfoTxt(city: string) {

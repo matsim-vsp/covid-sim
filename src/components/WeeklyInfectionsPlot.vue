@@ -43,12 +43,14 @@ export default class VueComponent extends Vue {
       const observedLine: any = {
         type: 'scatter',
         mode: 'markers',
-        marker: { size: 4 },
+        marker: { size: 3 },
       }
+
       observedLine.name = source.name
       observedLine.line = source.line
       observedLine.x = []
       observedLine.y = []
+      if (source.marker) observedLine.marker = source.marker
 
       for (let i = 0; i < source.x.length; i++) {
         const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
@@ -112,8 +114,8 @@ export default class VueComponent extends Vue {
         fill: 'tozeroy',
         line: {
           width: 1.0,
-            // color: '#ddbbbb',
-            color: '#bbddbb',
+          // color: '#ddbbbb',
+          color: '#cdc',
         },
       },
       {
@@ -122,7 +124,7 @@ export default class VueComponent extends Vue {
         y: infectionRate,
         type: 'scatter',
         mode: 'markers',
-        marker: { size: 4, color: '#329' },
+        marker: { size: 3, color: '#32c' },
         // line: {
         //   width: 1.5,
         //   color: '#329',
