@@ -139,7 +139,7 @@ class VegaLiteChart extends Vue {
       padding: { top: 2, left: 8, right: 8, bottom: 8 },
     }
 
-    console.log({ yaml: this.chartYaml })
+    // console.log({ yaml: this.chartYaml })
 
     // don't embed before we've fetched data from zipfile
     if (!this.chartYaml.data.url) {
