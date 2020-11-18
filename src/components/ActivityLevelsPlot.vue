@@ -56,7 +56,6 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('city') private changedCity() {
-    console.log('CITY CHANGED')
     this.zipLoader = this.zipContent
     this.zipCache[this.city] = this.zipLoader
     this.isZipLoaded = true
@@ -74,12 +73,12 @@ export default class VueComponent extends Vue {
     if (this.zipLoader === {}) return []
 
     const filename = currentRun.RunId + '.restrictions.txt.csv'
-    console.log('Extracting', filename)
+    // console.log('Extracting', filename)
 
     try {
       let text = this.zipLoader.extractAsText(filename)
       const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-      console.log('Got it!', filename)
+      // console.log('Got it!', filename)
       return z.data
     } catch (e) {
       this.$emit('missing', true)
@@ -95,9 +94,6 @@ export default class VueComponent extends Vue {
     if (csv.length === 0) return
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
-
-    // cache the result
-    // this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
 
     console.log({ timeSerieses })
 

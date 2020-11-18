@@ -59,7 +59,7 @@ export interface RunYaml {
   city: string
   info: string
   readme: string
-  zip: string
+  zipFolder: string
   timestamp: string
   // these are for old version
   offset?: number[]

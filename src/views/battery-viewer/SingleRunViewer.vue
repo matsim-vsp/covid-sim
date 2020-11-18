@@ -48,8 +48,8 @@
         .plotarea.compact
           activity-levels-plot.plotsize(:city="city" :battery="runId"
             :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-            :zipContent="zipLoader"
-            @missing="showActivityLevels = false")
+            :zipContent="zipLoader")
+            //- @missing="showActivityLevels = false")
 
       //- Vega charts with top=true
       .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
@@ -288,12 +288,21 @@ export default class VueComponent extends Vue {
     this.loadVegaYamlFiles()
   }
 
+  private clearZipLoaderLookups() {
+    for (const zipfile of Object.values(this.zipLoaderLookup)) {
+      zipfile.clear()
+    }
+    this.zipLoaderLookup = {}
+  }
+
   @Watch('runYaml') private async switchYaml() {
     if (!this.runYaml.city) return
 
-    this.isZipLoaded = false
+    this.clearZipLoaderLookups()
     this.isUsingRealDates = false
+
     this.$nextTick()
+
     this.city = this.runYaml.city
     this.offset = []
     this.vegaChartData = {}
@@ -343,7 +352,8 @@ export default class VueComponent extends Vue {
     this.diviData = await this.prepareDiviData(this.city)
 
     await this.loadInfoTxt()
-    await this.loadZipData()
+    this.runChanged()
+    this.showActivityLevelPlot()
 
     this.hasBaseRun = this.isThereABaseRun()
 
@@ -486,8 +496,6 @@ export default class VueComponent extends Vue {
     this.switchYaml()
   }
 
-  private zipCache: any = {}
-
   private get prettyInfected() {
     if (!this.cumulativeInfected) return ''
 
@@ -497,27 +505,16 @@ export default class VueComponent extends Vue {
 
   private hasBaseRun = false
 
-  private async loadZipData() {
-    this.isZipLoaded = false
+  private async loadZipFile(whichZip: string) {
+    // this.isZipLoaded = false
 
-    const filepath = this.BATTERY_URL + this.runId + '/' + this.runYaml.zip
-
-    if (this.zipCache[this.city]) {
-      // check cache first!
-      this.zipLoader = this.zipCache[this.city]
-    } else {
-      // load the zip from file
-
-      const zl = new ZipLoader(filepath)
-      await zl.load()
-      this.zipLoader = zl
-    }
+    const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
+    const zloader = new ZipLoader(filepath)
+    await zloader.load()
 
     this.isZipLoaded = true
-    this.zipCache[this.city] = this.zipLoader
 
-    this.runChanged()
-    this.showActivityLevelPlot()
+    return zloader
   }
 
   private async showActivityLevelPlot() {
@@ -585,7 +582,7 @@ export default class VueComponent extends Vue {
 
     for (let i = 0; i < infectedCumulative.x.length; i++) {
       if (infectedCumulative.x[i] === this.endDate) {
-        console.log('got it:', infectedCumulative.x[i], infectedCumulative.y[i])
+        // console.log('got it:', infectedCumulative.x[i], infectedCumulative.y[i])
         this.cumulativeInfected = infectedCumulative.y[i]
         return
       }
@@ -659,7 +656,6 @@ export default class VueComponent extends Vue {
     if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.rValues.txt.csv'
-    console.log('RVALUES: Extracting', filename)
 
     try {
       let text = this.zipLoader.extractAsText(filename)
@@ -671,8 +667,21 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private zipLoaderLookup: { [run: string]: any } = {} // holds the ZipLoaders
+
   private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
+
+    // get the ZipLoader for this run
+    if (this.zipLoaderLookup[currentRun.RunId]) {
+      // already loaded! Use cached copy
+      this.zipLoader = this.zipLoaderLookup[currentRun.RunId]
+    } else {
+      // need to load it from disk
+      this.zipLoader = await this.loadZipFile(currentRun.RunId)
+      this.zipLoaderLookup[currentRun.RunId] = this.zipLoader
+    }
+
     if (this.zipLoader === {}) return []
     if (!this.zipLoader.extractAsText) return []
 
