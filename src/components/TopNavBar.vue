@@ -56,7 +56,7 @@
           a.navbar-link  Visualizations
           .navbar-dropdown
             a.navbar-item(:href="'/v3?day=5'") Infection Traces
-            a.navbar-item(:href="'/timelapse'") 90 Da:y Time Lapse
+            a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Calculators
