@@ -47,7 +47,7 @@ export default class VueComponent extends Vue {
       matrix.push(cells.splice(1))
     }
 
-    matrix = transpose(matrix)
+    matrix = log(transpose(matrix))
 
     this.dataMatrix = [
       {
