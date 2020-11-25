@@ -137,6 +137,19 @@
               vue-plotly.plotsize(v-else
                 :data="data" :layout="layout" :options="options")
 
+        .linear-plot(v-if="incidenceHeatMapData")
+          h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
+            button.button.is-small.hider(@click="toggleShowPlot(4)") ..
+
+          .hideIt(v-show="showPlot[4]")
+            .plotarea(style="grid-template-rows: 18rem")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              heat-map.plotsize(v-else
+                :endDate="endDate"
+                :data="incidenceHeatMapData"
+              )
+
         //- Vega charts without top=true
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
           .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
@@ -168,6 +181,7 @@ import moment from 'moment'
 
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
+import HeatMap from '@/components/HeatMap.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
@@ -190,6 +204,7 @@ interface VegaChartDefinition {
 @Component({
   components: {
     ActivityLevelsPlot,
+    HeatMap,
     HospitalizationPlot,
     ButtonGroup,
     WeeklyInfectionsPlot,
@@ -208,7 +223,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private showPlot: any = { 0: true, 1: true, 2: true, 3: true }
+  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
@@ -523,6 +538,7 @@ export default class VueComponent extends Vue {
 
   private hospitalData: any[] = []
   private rValues: any[] = []
+  private incidenceHeatMapData: string = ''
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
@@ -531,6 +547,9 @@ export default class VueComponent extends Vue {
     const csv: any[] = await this.loadCSVs(this.currentRun)
     // zip might not yet be loaded
     if (csv.length === 0) return
+
+    // get weekly incidence data
+    this.loadIncidenceHeatMapData(this.currentRun)
 
     // get r-values too (background)
     this.loadRValues(this.currentRun)
@@ -647,6 +666,22 @@ export default class VueComponent extends Vue {
       v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
     }
     return v
+  }
+
+  private async loadIncidenceHeatMapData(currentRun: any) {
+    this.incidenceHeatMapData = ''
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.post.incidenceByAge.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      this.incidenceHeatMapData = text
+    } catch (e) {
+      // console.log('INCIDENCE HEAT MAP DATA: fail', filename)
+    }
   }
 
   private async loadRValues(currentRun: any) {
