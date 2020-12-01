@@ -13,7 +13,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: string
   @Prop({ required: true }) private endDate!: string
 
-  private color = '#04f'
+  private maximumValue = 2000
 
   private dataMatrix: any[] = []
 
@@ -41,13 +41,15 @@ export default class VueComponent extends Vue {
     // build matrix
     for (const line of lines.splice(1)) {
       const cells = line.split('\t')
-
       const date = cells[0]
       x.push(date)
-      matrix.push(cells.splice(1))
+
+      const values = cells.splice(1)
+      matrix.push(values)
     }
 
-    matrix = log(transpose(matrix))
+    matrix = transpose(matrix)
+    matrix[0][0] = this.maximumValue
 
     this.dataMatrix = [
       {
@@ -55,10 +57,10 @@ export default class VueComponent extends Vue {
         x,
         y,
         z: matrix,
-        colorscale: 'Hot',
+        colorscale: 'Hot', // 'YlOrRed', // 'Hot',
         reversescale: true,
-        hoverongaps: false,
         showscale: false,
+        hoverongaps: false,
       },
     ]
   }
@@ -83,7 +85,6 @@ export default class VueComponent extends Vue {
   }
 
   private options = {
-    // displayModeBar: true,
     displaylogo: false,
     responsive: true,
     modeBarButtonsToRemove: [
@@ -102,7 +103,7 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'r-values',
+      filename: 'heatmap',
       width: 1200,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
