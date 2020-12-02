@@ -14,6 +14,12 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private observed!: any[]
   @Prop({ required: true }) private endDate!: any
+  @Prop({ required: true }) private rkiDetectionData!: {
+    x?: any[]
+    y?: any[]
+    line?: any
+    name?: string
+  }
 
   private color = ['#094', '#0c4']
 
@@ -132,6 +138,9 @@ export default class VueComponent extends Vue {
         // },
       },
     ]
+
+    // add RKI detection data if it exists
+    if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
 
     this.calculateObserved(scaleFactor100k)
   }

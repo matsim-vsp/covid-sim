@@ -94,6 +94,7 @@
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
               :observed="observedCases"
+              :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
         .linear-plot(v-if="city === 'berlin' || city === 'munich'")
@@ -514,7 +515,7 @@ export default class VueComponent extends Vue {
     this.switchYaml()
   }
 
-  private rkiDetectionRateData: any[] = []
+  private rkiDetectionRateData: { x?: any[]; y?: any[]; line?: any; name?: string } = {}
 
   private async loadCoronaDetectionRateData() {
     // Load CSV data of Corona-Datenspende from RKI -- Berlin+Brandenburg only
@@ -539,7 +540,21 @@ export default class VueComponent extends Vue {
         })
         .sort((a, b) => (a.date < b.date ? -1 : 1))
 
-      this.rkiDetectionRateData = trimmedData
+      const x = trimmedData.map(a => a.date)
+      const y = trimmedData.map(a => a.rkiDetected)
+
+      const plotData = {
+        name: 'NEW RKI Detection Rate Trend',
+        visible: 'legendonly',
+        x,
+        y,
+        line: {
+          dash: 'dot',
+          width: 2,
+          color: 'rgb(200,0,0)',
+        },
+      }
+      this.rkiDetectionRateData = plotData
     } catch (e) {
       console.warn(e)
     }
@@ -804,19 +819,8 @@ export default class VueComponent extends Vue {
     }
 
     // // Add RKI Detection-Rate-Trend Data
-    if (this.city === 'berlin' && this.rkiDetectionRateData.length > 0) {
-      const x = this.rkiDetectionRateData.map(a => a.date)
-      const y = this.rkiDetectionRateData.map(a => a.rkiDetected)
-      serieses.push({
-        name: 'NEW RKI Detection Rate Trend',
-        x,
-        y,
-        line: {
-          dash: 'dot',
-          width: 2,
-          color: 'rgb(200,0,0)',
-        },
-      })
+    if (this.city === 'berlin' && this.rkiDetectionRateData.x) {
+      serieses.push(this.rkiDetectionRateData)
     }
 
     return serieses
