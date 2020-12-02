@@ -508,7 +508,46 @@ export default class VueComponent extends Vue {
   }
 
   private async mounted() {
+    this.loadCoronaDetectionRateData()
     this.switchYaml()
+  }
+
+  private rkiDetectionRateData: any[] = []
+
+  private async loadCoronaDetectionRateData() {
+    // Load CSV data of Corona-Datenspende from RKI -- Berlin+Brandenburg only
+
+    // if (this.city !== 'berlin') return
+
+    const url =
+      'https://raw.githubusercontent.com/corona-datenspende/data-updates/master/detections/detection.csv'
+
+    const berlin_population = 3500000
+
+    try {
+      const response = await fetch(url)
+      const csvContents = await response.text()
+      const rawdata = Papa.parse(csvContents, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const region = rawdata.filter(
+        // (a: any) => a.state_de === 'Berlin' || a.state_de === 'Brandenburg'
+        (a: any) => a.state_de === 'Berlin'
+      )
+
+      const trimmedData = region
+        .map(a => {
+          return { date: a.date, rkiDetected: berlin_population * a.detection_rate_trend }
+        })
+        .sort((a, b) => (a.date < b.date ? -1 : 1))
+
+      this.rkiDetectionRateData = trimmedData
+    } catch (e) {
+      console.warn(e)
+    }
   }
 
   private get prettyInfected() {
@@ -654,7 +693,7 @@ export default class VueComponent extends Vue {
   }
 
   private unpack(rows: any[], key: any) {
-    let v = rows.map(function(row) {
+    let v = rows.map(row => {
       if (key === 'day') return row[key]
       return row[key]
     })
@@ -762,11 +801,27 @@ export default class VueComponent extends Vue {
       serieses.push({ x, y, name })
     }
 
-    // Add Observed Data!
+    // Add Observed Data
     if (this.observedCases.length > 0) {
       // only add RKI line, because DIVI cumulative doesn't start at the beginning
       // of the epidemic.
       serieses.push(this.observedCases[0])
+    }
+
+    // // Add RKI Detection-Rate-Trend Data
+    if (this.rkiDetectionRateData.length > 0) {
+      const x = this.rkiDetectionRateData.map(a => a.date)
+      const y = this.rkiDetectionRateData.map(a => a.rkiDetected)
+      serieses.push({
+        name: 'NEW RKI Detection Rate Trend',
+        x,
+        y,
+        line: {
+          dash: 'dot',
+          width: 2,
+          color: 'rgb(200,0,0)',
+        },
+      })
     }
 
     return serieses
