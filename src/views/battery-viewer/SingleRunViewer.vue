@@ -218,6 +218,8 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private runId!: string
   @Prop({ required: true }) private chartYamlFiles!: string[]
 
+  private berlin_population = 3574568
+
   // convenience from yaml
   private startDate: string = ''
   private city: string = ''
@@ -517,12 +519,8 @@ export default class VueComponent extends Vue {
   private async loadCoronaDetectionRateData() {
     // Load CSV data of Corona-Datenspende from RKI -- Berlin+Brandenburg only
 
-    // if (this.city !== 'berlin') return
-
     const url =
       'https://raw.githubusercontent.com/corona-datenspende/data-updates/master/detections/detection.csv'
-
-    const berlin_population = 3500000
 
     try {
       const response = await fetch(url)
@@ -533,14 +531,11 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
       }).data
 
-      const region = rawdata.filter(
-        // (a: any) => a.state_de === 'Berlin' || a.state_de === 'Brandenburg'
-        (a: any) => a.state_de === 'Berlin'
-      )
+      const region = rawdata.filter((a: any) => a.state_de === 'Berlin')
 
       const trimmedData = region
         .map(a => {
-          return { date: a.date, rkiDetected: berlin_population * a.detection_rate_trend }
+          return { date: a.date, rkiDetected: this.berlin_population * a.detection_rate_trend }
         })
         .sort((a, b) => (a.date < b.date ? -1 : 1))
 
@@ -809,7 +804,7 @@ export default class VueComponent extends Vue {
     }
 
     // // Add RKI Detection-Rate-Trend Data
-    if (this.rkiDetectionRateData.length > 0) {
+    if (this.city === 'berlin' && this.rkiDetectionRateData.length > 0) {
       const x = this.rkiDetectionRateData.map(a => a.date)
       const y = this.rkiDetectionRateData.map(a => a.rkiDetected)
       serieses.push({

@@ -27,7 +27,7 @@ export default class VueComponent extends Vue {
   private logColorScale = [
     [0.0, 'rgb(255,255,255)'],
     [0.01, 'rgb(250,210,0)'],
-    [0.1, 'rgb(240,100,0)'],
+    [0.1, 'rgb(240,120,0)'],
     [0.2, 'rgb(230,0,0)'],
     [1.0, 'rgb(0,0,0)'],
   ]
