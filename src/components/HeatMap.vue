@@ -17,6 +17,21 @@ export default class VueComponent extends Vue {
 
   private dataMatrix: any[] = []
 
+  // log of 'Hot' Colorscale from
+  // https://github.com/plotly/plotly.js/blob/master/src/components/colorscale/scales.js
+  // [0.0, 'rgb(255,255,255)'],
+  // [0.4, 'rgb(255,210,0)'],
+  // [0.7, 'rgb(230,0,0)'],
+  // [1.0, 'rgb(0,0,0)'],
+
+  private logColorScale = [
+    [0.0, 'rgb(255,255,255)'],
+    [0.01, 'rgb(250,210,0)'],
+    [0.1, 'rgb(240,100,0)'],
+    [0.2, 'rgb(230,0,0)'],
+    [1.0, 'rgb(0,0,0)'],
+  ]
+
   private mounted() {
     this.buildHeatMap()
   }
@@ -57,8 +72,8 @@ export default class VueComponent extends Vue {
         x,
         y,
         z: matrix,
-        colorscale: 'Hot', // 'YlOrRed', // 'Hot',
-        reversescale: true,
+        colorscale: this.logColorScale, // 'Hot', // 'YlOrRed', // 'Hot',
+        // reversescale: true,
         showscale: false,
         hoverongaps: false,
       },
