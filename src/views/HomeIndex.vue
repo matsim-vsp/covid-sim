@@ -80,7 +80,7 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
-      url: '/2020-12-03/secondLockdownCurfew',
+      url: '/2020-12-03/secondLockdown',
       date: 'Released: 03 Dec 2020',
       title: 'Second Lockdown & Curfew',
       subtitle: 'Effect of second lockdown and curfew hours.',
