@@ -22,6 +22,12 @@
       .navbar-start
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2020.12.03
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2020-12-03/secondLockdown'") Second Lockdown
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2020.11.12
 
           .navbar-dropdown
