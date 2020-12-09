@@ -34,7 +34,6 @@
 <script lang="ts">
 // ###########################################################################
 import YAML from 'yaml'
-import Papa from 'papaparse'
 import MarkdownIt from 'markdown-it'
 import * as moment from 'moment'
 

@@ -39,6 +39,8 @@ export default class VueComponent extends Vue {
     // if the options are (a) all numbers and (b) all 0.0 > x > 1.0, then use %
     // otherwise treat as text
     let usePercent = true
+    let hasDecimal = false
+
     for (const x of this.options) {
       // is it non-numeric?
       if (isNaN(x)) {
@@ -50,6 +52,8 @@ export default class VueComponent extends Vue {
           usePercent = false
           break
         }
+        // also btw does it have a decimal point?
+        if (x.indexOf('.') > -1) hasDecimal = true
       }
 
       if (x < 0.0 || x > 1.0) {
@@ -57,6 +61,9 @@ export default class VueComponent extends Vue {
         break
       }
     }
+
+    // one last test: if none of the numbers had decimals, don't use percent
+    if (usePercent && !hasDecimal) usePercent = false
 
     // build labels
     for (const x of this.options) {
