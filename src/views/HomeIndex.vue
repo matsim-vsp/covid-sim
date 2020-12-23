@@ -19,9 +19,13 @@
             | &nbsp;virus spreading model.
 
           h2 Method: Mobility traces and the spreading of COVID-19
-          p The MATSim-Episim virus spreading dynamics model is described in this paper:
+          p The MATSim-Episim virus spreading dynamics model is described in these papers:
             br
-            a(href=" https://doi.org/10.1101/2020.07.22.20160093")  https://doi.org/10.1101/2020.07.22.20160093 .
+            a(href=" https://arxiv.org/abs/2011.11453") https://arxiv.org/abs/2011.11453
+            br
+            a(href=" https://doi.org/10.1101/2020.07.22.20160093")  https://doi.org/10.1101/2020.07.22.20160093
+            br
+            a(href=" https://doi.org/10.14279/depositonce-9835") https://doi.org/10.14279/depositonce-9835
 
           p The code is freely available and open source:
             br
