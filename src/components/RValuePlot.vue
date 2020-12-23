@@ -35,7 +35,7 @@ export default class VueComponent extends Vue {
   @Watch('logScale') updateScale() {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
-      this.layout.yaxis.range = [Math.log10(0.3), Math.log10(2)]
+      this.layout.yaxis.range = [Math.log10(0.4), Math.log10(2.4)]
     } else {
       this.layout.yaxis.type = 'linear'
       this.layout.yaxis.range = [0, 2]
@@ -50,7 +50,7 @@ export default class VueComponent extends Vue {
       return
     }
 
-    this.$emit('method', '7-day moving average')
+    this.$emit('method', this.lagDays + '-day moving average')
 
     const x: any[] = []
     const r: any[] = []
@@ -66,7 +66,7 @@ export default class VueComponent extends Vue {
 
     for (let index = center; index < x.length - center; index++) {
       const average =
-        r.slice(index - center, index + center + 1).reduce((a, b) => a + b, 0) / this.lagDays
+        r.slice(index - center, index + center ).reduce((a, b) => a + b, 0) / 2 / center
 
       avgR.push(average)
     }
