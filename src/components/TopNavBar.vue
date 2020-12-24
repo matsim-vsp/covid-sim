@@ -25,7 +25,7 @@
           a.navbar-link  2020.12.18
 
           .navbar-dropdown
-            a.navbar-item(:href="'/2020-12-10/secondLockdown'") Second Lockdown incl Curfew Option
+            a.navbar-item(:href="'/2020-12-10/secondLockdown'") Second Lockdown incl Curfew Options
             a.navbar-item(:href="'/2020-12-10/vaccinations'") Vaccination Strategies
             a.navbar-item(:href="'/2020-12-10/vaccinationsWinterEnd'") Vaccination vs Winter End
 
