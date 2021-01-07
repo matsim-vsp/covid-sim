@@ -127,6 +127,22 @@
                 @method="switchRMethod")
 
         .linear-plot
+          h5 R-Values by Purpose
+            button.button.is-small.hider(@click="toggleShowPlot(5)") ..
+
+          .hideIt(v-show="showPlot[5]")
+            p {{ rValueMethodDescription }}
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              r-value-two.plotsize(v-else
+                :data="data"
+                :endDate="endDate"
+                :logScale="logScale"
+                :rValues="rValues"
+                @method="switchRMethod")
+
+        .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
             button.button.is-small.hider(@click="toggleShowPlot(3)") ..
 
@@ -186,6 +202,7 @@ import HeatMap from '@/components/HeatMap.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
+import RValueTwo from '@/components/RValueTwo.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import { RunYaml } from '@/Globals'
@@ -210,6 +227,7 @@ interface VegaChartDefinition {
     ButtonGroup,
     WeeklyInfectionsPlot,
     RValuePlot,
+    RValueTwo,
     VegaLiteChart,
     VuePlotly,
   },
@@ -226,7 +244,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true }
+  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true, 5: true }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
