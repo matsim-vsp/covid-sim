@@ -35,7 +35,7 @@ export default class VueComponent extends Vue {
   @Watch('logScale') updateScale() {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
-      this.layout.yaxis.range = [Math.log10(0.4), Math.log10(2.4)]
+      this.layout.yaxis.range = [Math.log10(0.2), Math.log10(1.5)]
     } else {
       this.layout.yaxis.type = 'linear'
       this.layout.yaxis.range = [0, 1.5]
