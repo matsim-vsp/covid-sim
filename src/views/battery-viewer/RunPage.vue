@@ -71,6 +71,10 @@ export default class VueComponent extends Vue {
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     console.log('ROUTE CHANGED', to)
+
+    // skip a reload if only the search query changed.
+    if (to.path === from.path) return
+
     this.buildPageForURL()
   }
 

@@ -26,6 +26,15 @@ export default class VueComponent extends Vue {
 
   private choseButton(choice: string) {
     this.selectedValue = choice
+
+    // add param to URL if it's not the first option
+    const params = Object.assign({}, this.$route.query)
+    if (choice !== this.stops[0]) {
+      params[this.measure.measure] = choice
+    } else {
+      delete params[this.measure.measure]
+    }
+    this.$router.replace({ query: params })
   }
 
   private mounted() {
@@ -85,7 +94,21 @@ export default class VueComponent extends Vue {
       experiments = newOrder
     }
 
+    // Does URL have the measure value hard-coded? use it if so!
     this.selectedValue = experiments[0] // select first choice
+
+    try {
+      if (this.$route.query && this.measure.measure in this.$route.query) {
+        if (this.$route.query[this.measure.measure].length > 0) {
+          this.selectedValue = this.$route.query[this.measure.measure] as string
+        } else {
+          this.selectedValue = experiments[0] // select first choice
+        }
+      }
+    } catch (e) {
+      console.warn(e)
+      this.selectedValue = experiments[0] // select first choice
+    }
     this.stops = experiments
   }
 

@@ -114,6 +114,7 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes, // native-like back/forward and top-of-page routing
   scrollBehavior(to, from, savedPosition) {
+    if (to.path === from.path) return
     if (savedPosition) {
       return savedPosition
     } else {
