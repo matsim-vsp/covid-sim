@@ -96,6 +96,7 @@ export default class VueComponent extends Vue {
       name: purpose,
       x: x.slice(center),
       y: avgR,
+      // type: 'bar',
       line: {
         width: 2,
         // color: this.color,
@@ -184,6 +185,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
+    // barmode: 'stack',
     autosize: true,
     showlegend: true,
     legend: {

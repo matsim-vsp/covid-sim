@@ -127,7 +127,7 @@
                 @method="switchRMethod")
 
         .linear-plot
-          h5 R-Values by Purpose
+          h5 {{ cityCap }} Simulated R-Values by Purpose
             button.button.is-small.hider(@click="toggleShowPlot(5)") ..
 
           .hideIt(v-show="showPlot[5]")
