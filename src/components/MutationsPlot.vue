@@ -134,8 +134,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
-    // barmode: 'stack',
-    height: 250,
+    height: 150,
     autosize: true,
     showlegend: true,
     legend: {
@@ -146,7 +145,7 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
+    margin: { t: 5, r: 10, b: 5, l: 60 },
     xaxis: {
       fixedrange: window.innerWidth < 700,
       range: ['2020-02-09', '2020-12-31'],

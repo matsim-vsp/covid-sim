@@ -110,13 +110,13 @@
                 :data="hospitalData" :logScale="logScale" :city="city"
                 :diviData="diviData" :endDate="endDate" )
 
-        .linear-plot
+        .linear-plot(v-if="mutationValues.length > 0")
           h5 {{ cityCap }} Virus Strains
             button.button.is-small.hider(@click="toggleShowPlot(6)") ..
 
           .hideIt(v-show="showPlot[6]")
             p Simulated number of infections and percentage, by strain
-            .plotarea(:style="{height: '32rem'}")
+            .plotarea(:style="{height: '25rem'}")
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               mutations-plot(v-else
