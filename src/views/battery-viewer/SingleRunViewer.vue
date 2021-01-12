@@ -256,7 +256,7 @@ export default class VueComponent extends Vue {
 
   private berlin_population = 3574568
 
-  private scaleRKISurveillanceAnteil = 150
+  private scaleRKISurveillanceAnteil = 150.0
 
   // convenience from yaml
   private startDate: string = ''
@@ -1036,8 +1036,9 @@ export default class VueComponent extends Vue {
     const sOffset = -2
 
     // pull the cases field out of the CSV
-    for (const datapoint of survData) {
-      const dateField = datapoint['Beginn Meldewoche']
+    for (const xdatapoint of survData) {
+      console.log(xdatapoint)
+      const dateField = xdatapoint['Beginn Meldewoche']
       let dayObject = moment({
         year: parseInt(dateField.substring(6, 10)),
         month: parseInt(dateField.substring(3, 5)),
@@ -1046,10 +1047,13 @@ export default class VueComponent extends Vue {
       dayObject.add(sOffset, 'days')
 
       const day = dayObject.format('YYYY-MM-DD')
-
       const estimPositive =
         this.scaleRKISurveillanceAnteil *
-        datapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
+        xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
+
+      console.log(day, estimPositive)
+
+      if (day === 'Invalid date') continue
 
       sDates.push(day)
       sShare.push(estimPositive)
@@ -1057,7 +1061,7 @@ export default class VueComponent extends Vue {
 
     // console.log('---------##############')
     // console.log(survData)
-    // console.log({ sDates, sShare })
+    console.log({ sDates, sShare })
 
     const serieses = [
       {
@@ -1086,14 +1090,14 @@ export default class VueComponent extends Vue {
         type: 'scatter',
         marker: { color: '#f42', size: 4 },
       },
-      {
-        name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
-        x: sDates,
-        y: sShare,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { symbol: 'cross', color: '#f0a', size: 4 },
-      },
+      // {
+      //   name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
+      //   x: sDates,
+      //   y: sShare,
+      //   mode: 'markers',
+      //   type: 'scatter',
+      //   marker: { symbol: 'cross', color: '#f0a', size: 4 },
+      // },
     ]
 
     // console.log({ observedData: serieses })
