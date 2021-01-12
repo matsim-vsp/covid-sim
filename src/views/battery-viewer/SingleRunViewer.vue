@@ -256,6 +256,8 @@ export default class VueComponent extends Vue {
 
   private berlin_population = 3574568
 
+  private scaleRKISurveillanceAnteil = 150
+
   // convenience from yaml
   private startDate: string = ''
   private city: string = ''
@@ -298,6 +300,10 @@ export default class VueComponent extends Vue {
 
   private cityCSVMeldedatum: any = {
     berlin: this.RKI_URL + 'berlin-cases-meldedatum.csv',
+  }
+
+  private cityRKISurveillance: any = {
+    berlin: this.RKI_URL + 'SARS-CoV2_surveillance.csv',
   }
 
   private cityCSVTests: any = {
@@ -1015,6 +1021,44 @@ export default class VueComponent extends Vue {
       tCases.push(tCumulative)
     }
 
+    // get case surveillance data
+    const responseSurv = await fetch(this.cityRKISurveillance[newCity])
+    const csvContentsSurv = await responseSurv.text()
+    const survData = Papa.parse(csvContentsSurv, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      delimiter: ';',
+    }).data
+
+    const sDates: any = []
+    const sShare: any = []
+    const sOffset = -2
+
+    // pull the cases field out of the CSV
+    for (const datapoint of survData) {
+      const dateField = datapoint['Beginn Meldewoche']
+      let dayObject = moment({
+        year: parseInt(dateField.substring(6, 10)),
+        month: parseInt(dateField.substring(3, 5)),
+        day: parseInt(dateField.substring(0, 2)),
+      })
+      dayObject.add(sOffset, 'days')
+
+      const day = dayObject.format('YYYY-MM-DD')
+
+      const estimPositive =
+        this.scaleRKISurveillanceAnteil *
+        datapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
+
+      sDates.push(day)
+      sShare.push(estimPositive)
+    }
+
+    // console.log('---------##############')
+    // console.log(survData)
+    // console.log({ sDates, sShare })
+
     const serieses = [
       {
         name: 'RKI ' + this.cityCap + ' Infections',
@@ -1027,7 +1071,7 @@ export default class VueComponent extends Vue {
         },
       },
       {
-        name: 'RKI-Meldedatum ' + this.cityCap, // + ' offset:' + mOffset,
+        name: 'RKI-Meldedatum ' + this.cityCap,
         x: mDates,
         y: mCases,
         mode: 'markers',
@@ -1035,18 +1079,20 @@ export default class VueComponent extends Vue {
         marker: { color: '#6d2', size: 3 },
       },
       {
-        name: 'Positive Tests ' + this.cityCap, // + ' offset:' + tOffset,
+        name: 'Positive Tests ' + this.cityCap,
         x: tDates,
         y: tCases,
         mode: 'markers',
         type: 'scatter',
         marker: { color: '#f42', size: 4 },
-
-        // line: {
-        //   dash: 'dot',
-        //   width: 2,
-        //   color: 'rgb(100,100,255)',
-        // },
+      },
+      {
+        name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
+        x: sDates,
+        y: sShare,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { symbol: 'cross', color: '#f0a', size: 4 },
       },
     ]
 
