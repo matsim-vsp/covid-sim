@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots
   vue-plotly(:data="dataLines" :layout="layout" :options="options")
-  //- vue-plotly(:data="dataLines2" :layout="layout" :options="options")
+  vue-plotly(:data="dataLines2" :layout="layout" :options="options")
 
 </template>
 
@@ -44,14 +44,20 @@ export default class VueComponent extends Vue {
     // generate list of mutation names
     const allStrains: string[] = Object.keys(this.strainValues[0])
     const strains: string[] = []
-    const skip = ['day', 'date']
+    const skip = ['day', 'date', 'total']
 
     for (const strain of allStrains) {
       if (skip.indexOf(strain) === -1) strains.push(strain)
     }
 
     this.dataLines = []
-    this.dataLines2 = []
+
+    // build totals
+    for (const value of this.strainValues) {
+      let t = 0
+      for (const strain of strains) t += value[strain]
+      value.total = t
+    }
 
     for (const strain of strains) {
       this.calculateValueForStrain(strain)
@@ -61,11 +67,14 @@ export default class VueComponent extends Vue {
   private calculateValueForStrain(strain: string) {
     const x: any[] = []
     const r: any[] = []
+    const t: any[] = []
+
     const avgR = []
 
     for (const value of this.strainValues) {
       x.push(value.date)
       r.push(value[strain])
+      t.push((100.0 * value[strain]) / value.total)
     }
 
     // set end date
@@ -77,6 +86,14 @@ export default class VueComponent extends Vue {
       y: r,
       mode: 'markers',
       marker: { size: 4 },
+    })
+
+    this.dataLines2.push({
+      name: strain + '%',
+      x: x,
+      y: t,
+      // mode: 'markers',
+      // marker: { size: 4 },
     })
   }
 

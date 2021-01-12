@@ -116,7 +116,7 @@
 
           .hideIt(v-show="showPlot[6]")
             p Simulated number of infections and percentage, by strain
-            .plotarea(:style="{height: '16rem'}")
+            .plotarea(:style="{height: '32rem'}")
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               mutations-plot(v-else
