@@ -111,6 +111,21 @@
                 :diviData="diviData" :endDate="endDate" )
 
         .linear-plot
+          h5 {{ cityCap }} Virus Strains
+            button.button.is-small.hider(@click="toggleShowPlot(6)") ..
+
+          .hideIt(v-show="showPlot[6]")
+            p Simulated number of infections and percentage, by strain
+            .plotarea(:style="{height: '16rem'}")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              mutations-plot(v-else
+                :endDate="endDate"
+                :logScale="logScale"
+                :strainValues="mutationValues"
+              )
+
+        .linear-plot
           h5 {{ cityCap }} Simulated R-Values
             button.button.is-small.hider(@click="toggleShowPlot(2)") ..
 
@@ -200,11 +215,12 @@ import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HeatMap from '@/components/HeatMap.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
-import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
+import MutationsPlot from '@/components/MutationsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import RValueTwo from '@/components/RValueTwo.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
+import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import { RunYaml } from '@/Globals'
 
 interface Measure {
@@ -222,14 +238,15 @@ interface VegaChartDefinition {
 @Component({
   components: {
     ActivityLevelsPlot,
+    ButtonGroup,
     HeatMap,
     HospitalizationPlot,
-    ButtonGroup,
-    WeeklyInfectionsPlot,
+    MutationsPlot,
     RValuePlot,
     RValueTwo,
     VegaLiteChart,
     VuePlotly,
+    WeeklyInfectionsPlot,
   },
 })
 export default class VueComponent extends Vue {
@@ -244,7 +261,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true, 5: true }
+  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
@@ -619,6 +636,9 @@ export default class VueComponent extends Vue {
     this.loadIncidenceHeatMapData(this.currentRun)
 
     // get r-values too (background)
+    this.loadMutationValues(this.currentRun)
+
+    // get r-values too (background)
     this.loadRValues(this.currentRun)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
@@ -766,6 +786,26 @@ export default class VueComponent extends Vue {
       this.rValues = z.data
     } catch (e) {
       console.log('RVALUES: no', filename)
+    }
+  }
+
+  private mutationValues: any[] = []
+
+  private async loadMutationValues(currentRun: any) {
+    this.mutationValues = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.strains.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.mutationValues = z.data
+    } catch (e) {
+      console.log('MUTATIONS: no', filename)
     }
   }
 
