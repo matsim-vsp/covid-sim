@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots
   vue-plotly(:data="dataLines" :layout="layout" :options="options")
-  vue-plotly(:data="dataLines2" :layout="layout" :options="options")
+  vue-plotly(:data="dataLines2" :layout="layout2" :options="options")
 
 </template>
 
@@ -51,6 +51,7 @@ export default class VueComponent extends Vue {
     }
 
     this.dataLines = []
+    this.dataLines2 = []
 
     // build totals
     for (const value of this.strainValues) {
@@ -79,6 +80,7 @@ export default class VueComponent extends Vue {
 
     // set end date
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout2.xaxis.range = ['2020-02-09', this.endDate]
 
     this.dataLines.push({
       name: strain,
@@ -89,7 +91,7 @@ export default class VueComponent extends Vue {
     })
 
     this.dataLines2.push({
-      name: strain + '%',
+      name: '% ' + strain,
       x: x,
       y: t,
       // mode: 'markers',
@@ -126,6 +128,34 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
       title: 'Number of Infections',
+    },
+    plot_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8',
+  }
+
+  private layout2 = {
+    // barmode: 'stack',
+    height: 250,
+    autosize: true,
+    showlegend: true,
+    legend: {
+      orientation: 'h',
+    },
+    font: {
+      family: 'Roboto,Arial,Helvetica,sans-serif',
+      size: 12,
+      color: '#000',
+    },
+    margin: { t: 5, r: 10, b: 0, l: 60 },
+    xaxis: {
+      fixedrange: window.innerWidth < 700,
+      range: ['2020-02-09', '2020-12-31'],
+      type: 'date',
+    },
+    yaxis: {
+      fixedrange: window.innerWidth < 700,
+      type: 'linear',
+      title: 'Percent of Cases',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
