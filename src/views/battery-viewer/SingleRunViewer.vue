@@ -69,10 +69,10 @@
           .variation-choices.buttons.has-addons
             button.button.is-small(
               :class="{'is-link': !logScale, 'is-selected': !logScale}"
-              @click="logScale = !logScale") Linear
+              @click="logScale = false") Linear
             button.button.is-small(
               :class="{'is-link': logScale, 'is-selected': logScale}"
-              @click="logScale = !logScale") Log
+              @click="logScale = true") Log
 
         .variation(v-if="offset.length > 1")
           b Shift Start Date
