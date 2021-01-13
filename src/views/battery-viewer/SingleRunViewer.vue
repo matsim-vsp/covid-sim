@@ -1030,28 +1030,25 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
       delimiter: ';',
     }).data
-
     const sDates: any = []
     const sShare: any = []
-    const sOffset = -2
 
     // pull the cases field out of the CSV
     for (const xdatapoint of survData) {
-      console.log(xdatapoint)
       const dateField = xdatapoint['Beginn Meldewoche']
+      const year = parseInt(dateField.substring(6, 10))
+      const month = parseInt(dateField.substring(3, 5)) - 1
+      const zday = parseInt(dateField.substring(0, 2))
       let dayObject = moment({
-        year: parseInt(dateField.substring(6, 10)),
-        month: parseInt(dateField.substring(3, 5)),
-        day: parseInt(dateField.substring(0, 2)),
+        year,
+        month,
+        day: zday,
       })
-      dayObject.add(sOffset, 'days')
 
       const day = dayObject.format('YYYY-MM-DD')
       const estimPositive =
         this.scaleRKISurveillanceAnteil *
         xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
-
-      console.log(day, estimPositive)
 
       if (day === 'Invalid date') continue
 
@@ -1059,8 +1056,6 @@ export default class VueComponent extends Vue {
       sShare.push(estimPositive)
     }
 
-    // console.log('---------##############')
-    // console.log(survData)
     console.log({ sDates, sShare })
 
     const serieses = [
@@ -1090,28 +1085,24 @@ export default class VueComponent extends Vue {
         type: 'scatter',
         marker: { color: '#f42', size: 4 },
       },
-      // {
-      //   name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
-      //   x: sDates,
-      //   y: sShare,
-      //   mode: 'markers',
-      //   type: 'scatter',
-      //   marker: { symbol: 'cross', color: '#f0a', size: 4 },
-      // },
+      {
+        name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
+        x: sDates,
+        y: sShare,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { symbol: 'cross', color: '#f80', size: 5 },
+      },
     ]
-
-    // console.log({ observedData: serieses })
     return serieses
   }
 
   private async parseInfoTxt(city: string) {
     const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
-    // console.log('fetching info:', this.runId)
 
     const response = await fetch(filepath)
     const text = await response.text()
     const parsed: any = Papa.parse(text, { header: true, dynamicTyping: false })
-    // console.log({ parsed: parsed.data })
 
     return parsed.data
   }

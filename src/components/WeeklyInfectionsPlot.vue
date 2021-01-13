@@ -46,6 +46,12 @@ export default class VueComponent extends Vue {
 
     // for each data source, let's draw some dots
     for (const source of this.observed) {
+      // Don't scale the 150x pre-scaled line, it's already been scaled!
+      if (source.name.startsWith('150')) {
+        this.dataLines.push(source)
+        continue
+      }
+
       const observedLine: any = {
         type: 'scatter',
         mode: 'markers',
