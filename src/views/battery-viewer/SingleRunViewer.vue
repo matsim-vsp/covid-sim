@@ -89,7 +89,7 @@
 
           .hideIt(v-show="showPlot[0]")
             p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.compact
+            .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
@@ -1322,6 +1322,10 @@ h5 {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 25rem;
+}
+
+.plotarea.tall {
+  grid-template-rows: 29rem;
 }
 
 .plotarea.compact {

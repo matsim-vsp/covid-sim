@@ -152,7 +152,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    height: 225,
+    height: 450,
     autosize: true,
     showlegend: true,
     legend: {
