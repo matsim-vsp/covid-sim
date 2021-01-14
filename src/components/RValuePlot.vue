@@ -35,10 +35,10 @@ export default class VueComponent extends Vue {
   @Watch('logScale') updateScale() {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
-      this.layout.yaxis.range = [Math.log10(0.4), Math.log10(2.4)]
+      // this.layout.yaxis.range = [Math.log10(0.4), Math.log10(2.4)]
     } else {
       this.layout.yaxis.type = 'linear'
-      this.layout.yaxis.range = [0, 2]
+      // this.layout.yaxis.range = [0, 2]
     }
   }
 
@@ -199,10 +199,10 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
-      fixedrange: window.innerWidth < 700,
+      // fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
       // autorange: true,
-      range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
+      // range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
       title: 'Multiplier',
       hoverformat: '.3f',
     },
