@@ -141,7 +141,7 @@
                 :rValues="rValues"
                 @method="switchRMethod")
 
-        .linear-plot
+        .linear-plot(v-if="hasRValuePurposes")
           h5 {{ cityCap }} Simulated R-Values by Purpose
             button.button.is-small.hider(@click="toggleShowPlot(5)") ..
 
@@ -828,8 +828,11 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private hasRValuePurposes = false
+
   private async loadRValues(currentRun: any) {
     this.rValues = []
+    this.hasRValuePurposes = false
 
     if (!currentRun.RunId) return
     if (this.zipLoader === {}) return
@@ -841,6 +844,7 @@ export default class VueComponent extends Vue {
       const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
       this.rValues = z.data
+      if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
     } catch (e) {
       console.log('RVALUES: no', filename)
     }
