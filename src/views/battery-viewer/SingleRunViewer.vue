@@ -157,6 +157,20 @@
                 :rValues="rValues"
                 @method="switchRMethod")
 
+        .linear-plot(v-if="infectionsByActivityType.length > 0")
+          h5 {{ cityCap }} Infections by Activity Type
+            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
+          .hideIt(v-show="showPlot[7]")
+            p 7 day average
+            .plotarea(:style="{height: '28rem'}")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              infections-by-activity-type(v-else
+                :endDate="endDate"
+                :logScale="logScale"
+                :values="infectionsByActivityType"
+              )
+
         .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
             button.button.is-small.hider(@click="toggleShowPlot(3)") ..
@@ -180,20 +194,6 @@
               heat-map.plotsize(v-else
                 :endDate="endDate"
                 :data="incidenceHeatMapData"
-              )
-
-        .linear-plot(v-if="infectionsByActivityType.length > 0")
-          h5 {{ cityCap }} Infections by Activity Type
-            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
-          .hideIt(v-show="showPlot[7]")
-            p 7 day average
-            .plotarea(:style="{height: '28rem'}")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              infections-by-activity-type(v-else
-                :endDate="endDate"
-                :logScale="logScale"
-                :values="infectionsByActivityType"
               )
 
         //- Vega charts without top=true
