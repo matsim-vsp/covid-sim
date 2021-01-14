@@ -181,12 +181,6 @@ export default class VueComponent extends Vue {
     ]
   }
 
-  private reformatDate(day: string) {
-    const pieces = day.split('.')
-    const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
-    return date
-  }
-
   private layout = {
     autosize: true,
     showlegend: true,

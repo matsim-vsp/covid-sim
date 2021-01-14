@@ -64,7 +64,7 @@ export default class VueComponent extends Vue {
     console.log({ purposes })
     this.dataLines = []
 
-    for (const purpose of purposes) {
+    for (const purpose of purposes.sort()) {
       this.calculateRValueForPurpose(purpose)
     }
   }

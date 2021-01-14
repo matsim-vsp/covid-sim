@@ -182,6 +182,20 @@
                 :data="incidenceHeatMapData"
               )
 
+        .linear-plot(v-if="infectionsByActivityType.length > 0")
+          h5 {{ cityCap }} Infections by Activity Type
+            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
+          .hideIt(v-show="showPlot[7]")
+            p 7 day average
+            .plotarea(:style="{height: '28rem'}")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              infections-by-activity-type(v-else
+                :endDate="endDate"
+                :logScale="logScale"
+                :values="infectionsByActivityType"
+              )
+
         //- Vega charts without top=true
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
           .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
@@ -215,6 +229,7 @@ import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HeatMap from '@/components/HeatMap.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
+import InfectionsByActivityType from '@/components/InfectionsByActivityType.vue'
 import MutationsPlot from '@/components/MutationsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import RValueTwo from '@/components/RValueTwo.vue'
@@ -241,6 +256,7 @@ interface VegaChartDefinition {
     ButtonGroup,
     HeatMap,
     HospitalizationPlot,
+    InfectionsByActivityType,
     MutationsPlot,
     RValuePlot,
     RValueTwo,
@@ -263,7 +279,19 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private showPlot: any = { 0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true }
+  private showPlot: any = {
+    0: true,
+    1: true,
+    2: true,
+    3: true,
+    4: true,
+    5: true,
+    6: true,
+    7: true,
+    8: true,
+    9: true,
+    10: true,
+  }
 
   private MAX_DAYS = 500
   private cumulativeInfected = 0
@@ -639,14 +667,13 @@ export default class VueComponent extends Vue {
     // zip might not yet be loaded
     if (csv.length === 0) return
 
-    // get weekly incidence data
     this.loadIncidenceHeatMapData(this.currentRun)
 
-    // get r-values too (background)
     this.loadMutationValues(this.currentRun)
 
-    // get r-values too (background)
     this.loadRValues(this.currentRun)
+
+    this.loadInfectionsByActivityType(this.currentRun)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
@@ -656,9 +683,8 @@ export default class VueComponent extends Vue {
     // populate the data where we need it
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
-    this.updateTotalInfected()
 
-    // Update vega charts too
+    this.updateTotalInfected()
     this.updateVegaCharts()
   }
 
@@ -775,6 +801,30 @@ export default class VueComponent extends Vue {
       this.incidenceHeatMapData = text
     } catch (e) {
       // console.log('INCIDENCE HEAT MAP DATA: fail', filename)
+    }
+  }
+
+  private infectionsByActivityType: any[] = []
+  private async loadInfectionsByActivityType(currentRun: any) {
+    this.infectionsByActivityType = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.infectionsPerActivity.txt.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        delimiter: '\t',
+      })
+
+      this.infectionsByActivityType = z.data
+    } catch (e) {
+      console.log('INFECTIONSPERACTIVITY: no', filename)
     }
   }
 
