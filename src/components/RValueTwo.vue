@@ -36,11 +36,11 @@ export default class VueComponent extends Vue {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
       this.layout.yaxis.autorange = false
-      this.layout.yaxis.range = [Math.log10(0.05), Math.log10(2)]
+      this.layout.yaxis.range = [Math.log10(0.005), Math.log10(2)]
     } else {
       this.layout.yaxis.type = 'linear'
+      delete this.layout.yaxis.range // [0, 1.5]
       this.layout.yaxis.autorange = true
-      // this.layout.yaxis.range = [0, 1.5]
     }
   }
 
@@ -63,7 +63,6 @@ export default class VueComponent extends Vue {
       if (skip.indexOf(purpose) === -1) purposes.push(purpose)
     }
 
-    console.log({ purposes })
     this.dataLines = []
 
     for (const purpose of purposes.sort()) {
@@ -186,7 +185,7 @@ export default class VueComponent extends Vue {
     return date
   }
 
-  private layout = {
+  private layout: any = {
     // barmode: 'stack',
     autosize: true,
     showlegend: true,
@@ -205,10 +204,10 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
+      autorange: false,
       // fixedrange: window.innerWidth < 700,
-      type: this.logScale ? 'log' : 'linear',
-      autorange: this.logScale ? false : true,
-      range: this.logScale ? [Math.log10(0.005), Math.log10(2)] : undefined,
+      type: 'log',
+      range: [Math.log10(0.005), Math.log10(2)],
       title: 'Multiplier',
       hoverformat: '.3f',
     },
