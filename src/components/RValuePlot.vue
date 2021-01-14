@@ -66,7 +66,7 @@ export default class VueComponent extends Vue {
 
     for (let index = center; index < x.length - center; index++) {
       const average =
-        r.slice(index - center, index + center ).reduce((a, b) => a + b, 0) / 2 / center
+        r.slice(index - center, index + center).reduce((a, b) => a + b, 0) / 2 / center
 
       avgR.push(average)
     }
@@ -210,6 +210,7 @@ export default class VueComponent extends Vue {
       // autorange: true,
       range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
       title: 'Multiplier',
+      hoverformat: '.3f',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

@@ -1030,8 +1030,10 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
       delimiter: ';',
     }).data
+
     const sDates: any = []
     const sShare: any = []
+    const text: any = []
 
     // pull the cases field out of the CSV
     for (const xdatapoint of survData) {
@@ -1046,14 +1048,13 @@ export default class VueComponent extends Vue {
       })
 
       const day = dayObject.format('YYYY-MM-DD')
-      const estimPositive =
-        this.scaleRKISurveillanceAnteil *
-        xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
+      const estimPositive = xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
 
       if (day === 'Invalid date') continue
 
       sDates.push(day)
-      sShare.push(estimPositive)
+      sShare.push(this.scaleRKISurveillanceAnteil * estimPositive)
+      text.push(estimPositive)
     }
 
     console.log({ sDates, sShare })
@@ -1086,11 +1087,13 @@ export default class VueComponent extends Vue {
         marker: { color: '#f42', size: 4 },
       },
       {
-        name: '150 x RKI Fraction Positive Tests ' + this.cityCap,
+        name: 'RKI: Share Positive Tests',
         x: sDates,
         y: sShare,
+        text: text,
         mode: 'markers',
         type: 'scatter',
+        hovertemplate: '%{text}%',
         marker: { symbol: 'cross', color: '#f80', size: 5 },
       },
     ]

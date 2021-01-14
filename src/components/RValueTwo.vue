@@ -208,6 +208,7 @@ export default class VueComponent extends Vue {
       // autorange: true,
       range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
       title: 'Multiplier',
+      hoverformat: '.3f',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
