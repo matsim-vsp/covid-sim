@@ -1138,7 +1138,7 @@ export default class VueComponent extends Vue {
         marker: { color: '#f42', size: 4 },
       },
       {
-        name: 'ALM e.V.: Share Positive Tests',
+        name: 'Reported: Share Positive Tests (ALM e.V.)',
         x: sDates,
         y: sShare,
         text: text,

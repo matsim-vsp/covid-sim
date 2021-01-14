@@ -47,7 +47,7 @@ export default class VueComponent extends Vue {
     // for each data source, let's draw some dots
     for (const source of this.observed) {
       // Don't scale the 150x pre-scaled line, it's already been scaled!
-      if (source.name.startsWith('ALM e.V')) {
+      if (source.name.indexOf('ALM e.V') > -1) {
         this.dataLines.push(source)
         continue
       }
