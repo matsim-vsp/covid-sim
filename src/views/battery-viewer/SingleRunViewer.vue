@@ -549,6 +549,7 @@ export default class VueComponent extends Vue {
     nInQuarantine: 'In Quarantine',
     nHospitalCumulative: 'Cumulative Hospitalized',
     nShowingSymptomsCumulative: 'Showing Symptoms Cum.',
+    nVaccinated: 'Vaccinated',
   }
 
   private async mounted() {
