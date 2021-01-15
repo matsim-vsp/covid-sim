@@ -25,6 +25,12 @@ export default class VueComponent extends Vue {
 
   private reports: any[] = [
       {
+          md: '/reports/report-2021-01-15.md',
+          title: '15 Jan 2021',
+          url: 'http://dx.doi.org/10.14279/depositonce-11289',
+          html: '',
+      },
+      {
           md: '/reports/report-2020-12-18.md',
           title: '18 Dez 2020',
           url: 'http://dx.doi.org/10.14279/depositonce-11107',
