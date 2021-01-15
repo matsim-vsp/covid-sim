@@ -28,7 +28,10 @@ export default class VizThumbnail extends Vue {
   private viz!: Viz
 
   private get vizNumber() {
-    return this.viz.url.slice(1)
+    const n = this.viz.url.slice(1)
+    const query = n.indexOf('?')
+    if (query === -1) return n
+    return n.substring(0, query)
   }
 
   private get thumbnail() {

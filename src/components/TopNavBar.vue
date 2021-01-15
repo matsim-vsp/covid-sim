@@ -22,6 +22,12 @@
       .navbar-start
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.01.15
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346'") Where do we stand after the holidays?
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2020.12.18
 
           .navbar-dropdown
@@ -36,16 +42,11 @@
             a.navbar-item(:href="'/2020-12-03/secondLockdown'") Second Lockdown
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2020.11.12
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2020-11-12/secondLockdown'") Second Lockdown
-            a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") Curfew
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2020-11-12/secondLockdown'") 2020.11.12: Second Lockdown
+              a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") 2020.11.12: Curfew
               a.navbar-item(:href="'/2020-11-09/tracing'") 2020.11.09
               a.navbar-item(:href="'/2020-11-03/sensitivity'") 2020.11.03
               a.navbar-item(:href="'/2020-10-23/interventions/'") 2020.10.23

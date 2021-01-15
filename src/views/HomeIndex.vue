@@ -84,6 +84,12 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
+      url: '/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346',
+      date: 'Released: 15 Jan 2021',
+      title: 'Where do we stand after the holidays?',
+      subtitle: 'Effect of the holidays, virus variants, and the start of vaccinations.',
+    },
+    {
       url: '/2020-12-03/secondLockdown',
       date: 'Released: 03 Dec 2020',
       title: 'Second Lockdown & Curfew',
