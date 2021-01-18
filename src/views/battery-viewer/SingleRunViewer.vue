@@ -42,6 +42,7 @@
         p.infected {{ prettyInfected }}
 
     .right-side
+      //- ------- ACTIVITY LEVELS
       .linear-plot.activity(v-if="showActivityLevels")
         h5 Activity Levels by Type
         p 0-100% of normal
@@ -51,7 +52,7 @@
             :zipContent="zipLoader")
             //- @missing="showActivityLevels = false")
 
-      //- Vega charts with top=true
+      //- ------ Vega charts with top=true -----------
       .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
         .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
           vega-lite-chart.plotsize(
@@ -63,6 +64,7 @@
             :data="vegaChartData[chartKey].data"
           )
 
+      //- ----- SCALE AND SHIFT BUTTONS -----
       .plot-options
         .scale-options
           b Scale
@@ -83,6 +85,7 @@
 
       .all-plots
 
+        //- ---------- CASES COMPARISION -------
         .linear-plot
           h5 {{ cityCap }} Cases Comparison
             button.button.is-small.hider(@click="toggleShowPlot(0)") ..
@@ -97,6 +100,7 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- HOSPITALIZATION RATES
         .linear-plot(v-if="city === 'berlin' || city === 'munich'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
             button.button.is-small.hider(@click="toggleShowPlot(1)") ..
@@ -110,6 +114,7 @@
                 :data="hospitalData" :logScale="logScale" :city="city"
                 :diviData="diviData" :endDate="endDate" )
 
+        //- ---------- VIRUS STRAINS -------
         .linear-plot(v-if="mutationValues.length > 0")
           h5 {{ cityCap }} Virus Strains
             button.button.is-small.hider(@click="toggleShowPlot(6)") ..
@@ -125,6 +130,7 @@
                 :strainValues="mutationValues"
               )
 
+        //- ---------- R-VALUES -------
         .linear-plot
           h5 {{ cityCap }} Simulated R-Values
             button.button.is-small.hider(@click="toggleShowPlot(2)") ..
@@ -141,6 +147,7 @@
                 :rValues="rValues"
                 @method="switchRMethod")
 
+        //- ---------- R VALUES 2 -------
         .linear-plot(v-if="hasRValuePurposes")
           h5 {{ cityCap }} Simulated R-Values by Purpose
             button.button.is-small.hider(@click="toggleShowPlot(5)") ..
@@ -157,6 +164,7 @@
                 :rValues="rValues"
                 @method="switchRMethod")
 
+        //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
         .linear-plot(v-if="infectionsByActivityType.length > 0")
           h5 {{ cityCap }} Infections by Activity Type
             button.button.is-small.hider(@click="toggleShowPlot(7)") ..
@@ -171,6 +179,7 @@
                 :values="infectionsByActivityType"
               )
 
+        //- ---------- HEALTH OUTCOMES ------
         .linear-plot
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
             button.button.is-small.hider(@click="toggleShowPlot(3)") ..
@@ -183,6 +192,7 @@
               vue-plotly.plotsize(v-else
                 :data="data" :layout="layout" :options="options")
 
+        //- ---------- AGE GROUP BLOCK CHART ------
         .linear-plot(v-if="incidenceHeatMapData")
           h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
             button.button.is-small.hider(@click="toggleShowPlot(4)") ..
@@ -196,7 +206,7 @@
                 :data="incidenceHeatMapData"
               )
 
-        //- Vega charts without top=true
+        //- ---------- VEGA BOTTOM CHARTS ------
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
           .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
             vega-lite-chart.plotsize(

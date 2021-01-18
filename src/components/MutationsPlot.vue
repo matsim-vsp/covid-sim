@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
-  vue-plotly(:data="dataLines2" :layout="layout2" :options="options")
+  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options")
 
 </template>
 
@@ -107,7 +107,7 @@ export default class VueComponent extends Vue {
 
   private layout = {
     // barmode: 'stack',
-    height: 250,
+    // height: 250,
     autosize: true,
     showlegend: true,
     legend: {
@@ -134,7 +134,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
-    height: 150,
+    // height: 210,
     autosize: true,
     showlegend: true,
     legend: {
@@ -154,7 +154,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       fixedrange: window.innerWidth < 700,
       type: 'linear',
-      title: 'Percent of Cases',
+      title: '% of Cases',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
@@ -195,6 +195,14 @@ export default class VueComponent extends Vue {
 .mutations-plots {
   display: flex;
   flex-direction: column;
+}
+
+.plot1 {
+  flex: 6;
+}
+
+.plot2 {
+  flex: 5;
 }
 
 @media only screen and (max-width: 640px) {
