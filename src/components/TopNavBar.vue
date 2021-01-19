@@ -25,7 +25,7 @@
           a.navbar-link  2021.01.15
 
           .navbar-dropdown
-            a.navbar-item(:href="'/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346'") New virus variant and restrictions
+            a.navbar-item(:href="'/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346'") Curfew options
             a.navbar-item(:href="'/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346'") Where do we stand after the holidays?
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
