@@ -6,20 +6,23 @@
       h5 {{ post.date }}
 
       .report(v-if="post.type==='modelrun'")
-        h3 New Model Run: {{ post.title }}
-        p: i {{ post.subtitle }}
-
-        p Full results&nbsp;
-          router-link(:to="post.url") here
+        img(src="@/assets/images/dots.png")
+        .stuff
+          h3 New Model Run: {{ post.title }}
+          p: i {{ post.subtitle }}
+          p Full results&nbsp;
+            router-link(:to="post.url") here
 
       .report(v-if="post.type==='report'")
-        h3 {{ post.title || "New findings reported" }}
-        .wide
-          p Full report in German delivered to the BMBF Ministry:
-          button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
-        .narrow
-          button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
-        p.summary(v-html="post.md")
+        img(src="@/assets/images/document.png")
+        .stuff
+          h3 {{ post.title || "New findings reported" }}
+          .wide
+            p Full report in German delivered to the BMBF Ministry:
+            button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
+          .narrow
+            button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
+          p.summary(v-html="post.md")
 
 </template>
 
@@ -108,13 +111,25 @@ export default class VueComponent extends Vue {
   padding-bottom: 1rem;
 }
 
+.report {
+  display: flex;
+  flex-direction: row;
+}
+
+.report img {
+  width: 6rem;
+  height: 6rem;
+  margin: 0.5rem 0.5rem 0 0;
+  border: 1px solid #ccc;
+}
+
 .report-tab {
   // border-top: 2rem solid #c70715;
   padding: 0.5rem 0rem;
 }
 
 .content h3 {
-  margin: 1rem 0 1rem 0;
+  margin: 0.5rem 0 1rem 0;
   padding: 0 0;
 }
 
@@ -124,10 +139,6 @@ export default class VueComponent extends Vue {
   padding-left: 0.5rem;
   line-height: 2rem;
   color: white;
-}
-
-.summary {
-  margin-bottom: 2rem;
 }
 
 button {
@@ -150,12 +161,23 @@ button {
   display: none;
 }
 
+.stuff {
+  // display: flex;
+  // flex-direction: column;
+  flex: 1;
+  margin-bottom: 2rem;
+}
+
 @media only screen and (max-width: 800px) {
   .wide {
     display: none;
   }
   .narrow {
     display: inherit;
+  }
+
+  .report {
+    flex-direction: column;
   }
 
   .report-tab {
