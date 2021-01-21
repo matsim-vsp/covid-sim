@@ -1,3 +1,6 @@
+export const PUBLIC_SVN =
+  'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
+
 export enum ColorScheme {
   LightMode = 'light',
   DarkMode = 'dark',

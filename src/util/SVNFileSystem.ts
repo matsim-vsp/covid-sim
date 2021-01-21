@@ -33,6 +33,22 @@ class SVNFileSystem {
       })
   }
 
+  async getFile(scaryPath: string): Promise<string> {
+    // hostile user could put anything in the URL really...
+    let path = this.baseUrl + scaryPath.replace(/^0-9a-zA-Z_\-\/:+/i, '')
+
+    // don't download any files!
+    if (!path.endsWith('/')) path += '/'
+
+    // ok now we're safe
+    // console.log('fetching file:', path)
+
+    return await fetch(path).then(response => {
+      return response.text()
+    })
+    // no catch, because we want errors to propagate up
+  }
+
   private buildListFromHtml(data: string): DirectoryEntry {
     const regex = /"(.*?)"/
     const dirs = []
