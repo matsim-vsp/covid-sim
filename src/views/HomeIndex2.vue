@@ -31,10 +31,6 @@
             br
             a(href="https://github.com/matsim-org/matsim-episim") https://github.com/matsim-org/matsim-episim .
 
-        h2 Latest updates
-
-        blog-list(:modelRuns="modelruns")
-
         h2 Interactive Visualizations
         p The following interactive visualizations help to illustrate the method and results which emerge from the model. These are produced directly from simulated model results. Note that due to the advanced nature of the visualizations, only modern versions of recent web browsers are supported.
 
@@ -55,21 +51,14 @@
                 .date {{ rcalc.date}}
                 img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
 
+        h2 Latest updates
 
-        h2 Published reports
+        blog-list(:modelRuns="modelruns")
+
+        h2 All published reports
         p The following reports have been delivered to the German Ministry of Education and Research (Bundesministerium für Bildung und Forschung). These reports are written in German.
 
         report-viewer()
-
-
-        h2 Simulations of COVID-19 spreading in Berlin
-
-        .readme(v-html="readme")
-
-        .viz-cards
-          .one-viz(v-for="viz in modelruns" :key="viz.url")
-            router-link(:to="viz.url")
-              viz-card(:viz="viz")
 
         .readme(v-html="readmeBottom")
 

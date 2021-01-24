@@ -1,28 +1,31 @@
 <template lang="pug">
 .vue-component
 
-    .report-tab(v-for="post in posts" :key="post.filename")
+    .post-container(v-for="post in listOfPosts" :key="post.filename")
       //- :class="{active: report === selectedReport}")
-      h5 {{ post.date }}
 
-      .report(v-if="post.type==='modelrun'")
+      .post.modelrun(v-if="post.type==='modelrun'")
         img(src="@/assets/images/dots.png")
         .stuff
           h3 New Model Run: {{ post.title }}
+          h5 {{ post.date }}
           p: i {{ post.subtitle }}
           p Full results&nbsp;
             router-link(:to="post.url") here
 
-      .report(v-if="post.type==='report'")
+      .post.report(v-if="post.type==='report'")
         img(src="@/assets/images/document.png")
         .stuff
           h3 {{ post.title || "New findings reported" }}
+          h5 {{ post.date }}
           .wide
             p Full report in German delivered to the BMBF Ministry:
             button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
           .narrow
             button.button.is-danger(@click="clickedDownload(post.url)") Full PDF (Deutsch)
           p.summary(v-html="post.md")
+
+    button.button(@click="showMore = !showMore") {{ showMore ? "Show Fewer Posts" : `Show All ${this.posts.length} Updates` }}
 
 </template>
 
@@ -43,6 +46,12 @@ export default class VueComponent extends Vue {
   private mdParser = new MarkdownIt()
 
   private posts: any[] = []
+  private showMore = false
+
+  private get listOfPosts() {
+    if (this.showMore) return this.posts
+    return this.posts.slice(0, 6)
+  }
 
   private mounted() {
     this.loadPosts() // this will return immediately and load in background
@@ -107,38 +116,49 @@ export default class VueComponent extends Vue {
   display: flex;
   flex-direction: column;
   margin-bottom: 3rem;
-  padding-top: 1rem;
+  padding-top: 0rem;
   padding-bottom: 1rem;
 }
 
-.report {
+.post {
   display: flex;
   flex-direction: row;
 }
 
-.report img {
-  width: 6rem;
-  height: 6rem;
-  margin: 0.5rem 0.5rem 0 0;
+.post img {
+  width: 4rem;
+  height: 4rem;
+  margin: 0.5rem 1rem 0 0rem;
   border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-.report-tab {
+.post-container {
   // border-top: 2rem solid #c70715;
-  padding: 0.5rem 0rem;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  margin-bottom: 2rem;
+  border-radius: 5px;
+}
+
+.report {
+  /* */
 }
 
 .content h3 {
-  margin: 0.5rem 0 1rem 0;
+  margin: 0.5rem 0 0rem 0;
   padding: 0 0;
 }
 
 .content h5 {
-  margin: 0rem 0 0.25rem 0;
-  background-color: rgb(96, 60, 136); //  #c70715;
-  padding-left: 0.5rem;
-  line-height: 2rem;
-  color: white;
+  margin: 0rem 0 1rem 0;
+  // background-color: rgb(96, 60, 136); //  #c70715;
+  // color: white;
+  // padding-left: 0.5rem;
+  font-weight: normal;
+  font-size: 1rem;
+  color: $themeColorPale;
+  line-height: 1.5rem;
 }
 
 button {
@@ -176,13 +196,13 @@ button {
     display: inherit;
   }
 
-  .report {
+  .post {
     flex-direction: column;
   }
 
-  .report-tab {
-    cursor: pointer;
-    padding: 0.5rem 0.5rem 0.5rem 0.25rem;
+  .post-container {
+    padding: 0rem 0.5rem 0.5rem 0.5rem;
+    margin-bottom: 1rem;
     font-size: 0.9rem;
   }
 }
