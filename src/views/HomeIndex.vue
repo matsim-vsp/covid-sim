@@ -18,6 +18,32 @@
               b MATSim-Episim
             | &nbsp;virus spreading model.
 
+          h2 Latest Updates
+          .latest-updates
+            .one-viz(v-for="run in modelruns.slice(0,1)" :key="run.url")
+              router-link(:to="run.url")
+                .box(style="height: 100%;")
+                  h5 Model results
+                  .date(:style="{color: '#555599', fontWeight: 'bold'}") {{ run.date }}
+                  p {{run.title}}
+                  p {{run.subtitle}}
+
+            .one-viz(v-for="rcalc in rCalculators.slice(0,1)" :key="rcalc.url")
+              router-link(:to="rcalc.url")
+                .box(style="height: 100%;")
+                  h5 {{rcalc.title}}
+                  .date(:style="{flex: 1, color: '#555599', fontWeight: 'bold'}") Released {{ rcalc.date}}
+                  img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
+
+            .one-viz
+              a(:href="latestReport.url" target="_blank")
+                .box(style="height: 100%;")
+                  h5 Latest Published Report
+                  p(:style="{color: '#555599', fontWeight: 'bold'}") Released {{latestReport.title}}
+                  p(style="flex: 1")  We deliver frequent updates to the German BMBF Ministry.
+                  button.button.is-link(style="width: 100%") Get full PDF (Deutsch)
+
+
           h2 Method: Mobility traces and the spreading of COVID-19
           p The MATSim-Episim virus spreading dynamics model is described in these papers:
             br
@@ -77,12 +103,23 @@ import Colophon from '@/components/Colophon.vue'
 import ReportViewer from '@/components/ReportViewer.vue'
 import VizCard from '@/components/VizCard.vue'
 
+import reports from '@/assets/reports.ts'
+
 @Component({ components: { Colophon, ReportViewer, VizCard }, props: {} })
 export default class VueComponent extends Vue {
   private readme = require('@/assets/index.md')
   private readmeBottom = require('@/assets/index-bottom.md')
 
+  private latestReport = reports[0]
+
   private modelruns: any[] = [
+    {
+      url:
+        '/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346',
+      date: 'Released: 15 Jan 2021',
+      title: 'Curfews & vaccinations',
+      subtitle: 'Examination of new strains, curfews, and the start of vaccinations',
+    },
     {
       url: '/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346',
       date: 'Released: 15 Jan 2021',
@@ -233,31 +270,31 @@ export default class VueComponent extends Vue {
     {
       url: '/r-calcs/2021-01-24',
       title: 'R-Value Calculator',
-      date: '2020-Jan-24',
+      date: '24 Jan 2021',
       image: '/thumb-rcalculator.png',
     },
     {
       url: '/r-calcs/2020-10-23',
       title: 'R-Value Calculator',
-      date: '2020-Oct-23',
+      date: '23 Oct 2020',
       image: '/thumb-rcalculator.png',
     },
     {
       url: '/r-calcs/2020-11-14-lockdown59',
       title: 'R-Value Calculator (restrictive)',
-      date: '2020-Nov-14',
+      date: '14 Nov 2020',
       image: '/thumb-rcalculator.png',
     },
     {
       url: '/r-calcs/2020-11-14-lockdown84',
       title: 'R-Value Calculator (permissive)',
-      date: '2020-Nov-14',
+      date: '14 Nov 2020',
       image: '/thumb-rcalculator.png',
     },
     {
       url: '/risk-calcs/2020-11-11',
       title: 'Activity Risk Calculator',
-      date: '2020-Nov-11',
+      date: '11 Nov 2020',
       image: '/thumb-risk-calculator.png',
     },
   ]
@@ -374,13 +411,30 @@ a {
   color: $themeColor;
 }
 
+.box {
+  display: flex;
+  flex-direction: column;
+}
+
 .box h5 {
   margin-bottom: 0;
+}
+
+.latest-updates {
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
 }
 
 @media only screen and (max-width: 800px) {
   .colophon {
     padding: 2rem 1rem 1rem 1rem;
+  }
+
+  .latest-updates {
+    grid-template-rows: auto auto auto;
+    grid-template-columns: 1fr;
   }
 }
 
