@@ -77,9 +77,10 @@
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Calculators
           .navbar-dropdown
-            a.navbar-item(:href="'/r-calcs/2020-10-23'") R-Calculator (23.Oct)
+            a.navbar-item(:href="'/r-calcs/2021-01-24'") R-Calculator (24.Jan)
             a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown59'") R-Calculator (14.Nov, restrictive)
             a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown84'") R-Calculator (14.Nov, permissive)
+            a.navbar-item(:href="'/r-calcs/2020-10-23'") R-Calculator (23.Oct)
             hr
             a.navbar-item(:href="'/risk-calcs/2020-11-11'") Activity Risk Calculator
 

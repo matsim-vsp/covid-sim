@@ -231,6 +231,12 @@ export default class VueComponent extends Vue {
 
   private rCalculators = [
     {
+      url: '/r-calcs/2021-01-24',
+      title: 'R-Value Calculator',
+      date: '2020-Jan-24',
+      image: '/thumb-rcalculator.png',
+    },
+    {
       url: '/r-calcs/2020-10-23',
       title: 'R-Value Calculator',
       date: '2020-Oct-23',
