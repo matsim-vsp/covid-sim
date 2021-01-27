@@ -41,7 +41,7 @@
                   h5 Latest Published Report
                   p(:style="{color: '#555599', fontWeight: 'bold'}") Released {{latestReport.title}}
                   p(style="flex: 1")  We deliver frequent updates to the German BMBF Ministry.
-                  button.button.is-link(style="width: 100%") Get full PDF (Deutsch)
+                  button.button.is-link(style="width: 100%") Get PDF (Deutsch)
 
 
           h2 Method: Mobility traces and the spreading of COVID-19
@@ -427,14 +427,16 @@ a {
   gap: 1rem;
 }
 
-@media only screen and (max-width: 800px) {
-  .colophon {
-    padding: 2rem 1rem 1rem 1rem;
-  }
-
+@media only screen and (max-width: 1000px) {
   .latest-updates {
     grid-template-rows: auto auto auto;
     grid-template-columns: 1fr;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .colophon {
+    padding: 2rem 1rem 1rem 1rem;
   }
 }
 
