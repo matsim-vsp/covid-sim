@@ -39,9 +39,8 @@ export default class VueComponent extends Vue {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
-  private dunkelZifferFactor = 1.0
-
   private calculateObserved(factor100k: number) {
+    // private dunkelZifferFactor = 1.0
     if (this.observed.length === 0) return
 
     // for each data source, let's draw some dots
@@ -64,17 +63,26 @@ export default class VueComponent extends Vue {
       observedLine.y = []
       if (source.marker) observedLine.marker = source.marker
 
-      for (let i = 0; i < source.x.length; i++) {
-        const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
-        const infectionsWithDunkelZiffer = newInfections * this.dunkelZifferFactor
-        const observedRatePer100k =
-          Math.floor((10.0 * infectionsWithDunkelZiffer) / factor100k) / 10.0
+      if (observedLine.name.startsWith('RKI')) {
+        // RKI lines: weekly average
+        const week = 7
+        for (let i = week; i < source.x.length; i += week) {
+          const newInfections = source.y[i] - source.y[i - week]
+          const observedRatePer100k = Math.floor((10.0 * newInfections) / week / factor100k) / 10.0
 
-        observedLine.x.push(source.x[i])
-        observedLine.y.push(observedRatePer100k)
+          observedLine.x.push(source.x[i - 3]) // midweek
+          observedLine.y.push(observedRatePer100k)
+        }
+      } else {
+        // non RKI lines: every day
+        for (let i = 0; i < source.x.length; i++) {
+          const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
+          const observedRatePer100k = Math.floor((10.0 * newInfections) / factor100k) / 10.0
+          observedLine.x.push(source.x[i])
+          observedLine.y.push(observedRatePer100k)
+        }
       }
 
-      // done
       this.dataLines.push(observedLine)
     }
   }

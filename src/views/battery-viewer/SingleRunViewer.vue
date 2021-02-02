@@ -1038,7 +1038,7 @@ export default class VueComponent extends Vue {
     const mDates: any = []
     const mCases: any = []
     let mCumulative = 0
-    const mOffset = 0
+    const mOffset = -1
 
     // pull the cases field out of the CSV
     for (const datapoint of dataM) {
