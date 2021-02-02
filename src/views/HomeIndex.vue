@@ -32,14 +32,14 @@
               router-link(:to="rcalc.url")
                 .box(style="height: 100%;")
                   h5 {{rcalc.title}}
-                  .date(:style="{flex: 1, color: '#555599', fontWeight: 'bold'}") Released {{ rcalc.date}}
+                  .date(:style="{flex: 1, color: '#555599', fontWeight: 'bold'}") Released: {{ rcalc.date}}
                   img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
 
             .one-viz
               a(:href="latestReport.url" target="_blank")
                 .box(style="height: 100%;")
                   h5 Latest Published Report
-                  p(:style="{color: '#555599', fontWeight: 'bold'}") Released {{latestReport.title}}
+                  p(:style="{color: '#555599', fontWeight: 'bold'}") Released: {{latestReport.title}}
                   p(style="flex: 1")  We deliver frequent updates to the German BMBF Ministry.
                   button.button.is-link(style="width: 100%") Get PDF (Deutsch)
 
@@ -414,6 +414,11 @@ a {
 .box {
   display: flex;
   flex-direction: column;
+}
+
+.box:hover {
+  box-shadow: 0px 4px 8px 5px #00000022;
+  transition: all 150ms linear;
 }
 
 .box h5 {
