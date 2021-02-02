@@ -46,7 +46,7 @@
       .linear-plot.activity(v-if="showActivityLevels")
         h5 Activity Levels by Type
         p 0-100% of normal
-        .plotarea.compact
+        .plotarea.activities
           activity-levels-plot.plotsize(:city="city" :battery="runId"
             :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
             :zipContent="zipLoader")
@@ -1389,6 +1389,10 @@ h5 {
 
 .plotarea.compact {
   grid-template-rows: 15rem;
+}
+
+.plotarea.activities {
+  grid-template-rows: 18rem;
 }
 
 .plotsize {

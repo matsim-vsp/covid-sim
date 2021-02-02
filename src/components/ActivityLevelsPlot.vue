@@ -3,7 +3,8 @@
   vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
 
   .row-labels
-    p(v-for="row in dataLines" :key="row.name") {{ row.name}}
+    .activity(v-for="row in dataLines" :key="row.name")
+      p {{ row.name}}
 
 </template>
 
@@ -129,7 +130,8 @@ export default class VueComponent extends Vue {
     { col: 'educ_secondary', title: 'Secondary Ed.' },
     { col: 'educ_higher', title: 'Higher Ed.' },
     { col: 'educ_other', title: 'Other Ed.' },
-    { col: 'shop_daily', title: 'Other Non-Home' },
+    { col: 'shop_daily', title: 'Other NonHome' },
+    { col: 'restaurant', title: 'Restaurant' },
 
     // { col: 'educ_tertiary', title: 'Educ: Tertiary' },
     // { col: 'shop_other', title: 'Shopping: Other' },
@@ -271,31 +273,32 @@ export default class VueComponent extends Vue {
   margin-left: 0.5rem;
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: auto;
 }
 
 .activity-plot {
   grid-column: 1 / 3;
-  grid-row: 1 / 1;
+  grid-row: 1 / 2;
 }
 
 .row-labels {
   grid-column: 1 / 2;
-  grid-row: 1 / 1;
+  grid-row: 1 / 2;
   text-align: right;
   display: flex;
   flex-direction: column;
-  margin-left: -1rem;
-  margin-top: 0.6rem;
+  margin-left: -0.5rem;
+  margin-top: 0rem;
+  margin-bottom: 0;
 }
 
 .row-labels p {
   font-size: 0.8rem;
   text-align: right;
-  margin: auto 0 auto auto;
+  margin: 0.5rem 0 0 auto;
   line-height: 0.8rem;
   width: min-content;
-  height: 1.6rem;
+  height: 1.52rem;
 }
 
 @media only screen and (max-width: 640px) {
