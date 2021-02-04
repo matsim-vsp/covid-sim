@@ -1,3 +1,22 @@
+<i18n>
+en:
+  risk-calculator: 'Personal Risk Calculator'
+  badpage: 'That page not found, sorry!'
+  released: 'Released'
+  estimated-risk: 'Estimated Infection Risk'
+  explore-scenarios: 'Explore typical scenarios'
+  try-combos: '...or try different combinations below.'
+  remarks: 'Remarks'
+de:
+  risk-calculator: 'Personal Risiko Rechner'
+  badpage: 'Seite wurde nicht gefunden.'
+  released: 'Veröffentlicht'
+  explore-scenarios: 'Typische Szenarien erforschen'
+  try-combos: '...oder versuchen Sie verschiedene Kombinationen unten.'
+  estimated-risk: 'Geschätztes Infektionsrisiko'
+  remarks: 'Bemerkungen'
+</i18n>
+
 <template lang="pug">
 #home
   .banner
@@ -6,22 +25,22 @@
 
   .center-area(v-if="yaml.multipliers")
 
-    h2 Personal Risk Calculator
-    h5(:style="{marginBottom: '1rem', color: '#596'}") Released {{ this.calcId}}
+    h2 {{ $t('risk-calculator') }}
+    h5(:style="{marginBottom: '1rem', color: '#596'}") {{ $t('released')}} {{ this.calcId}}
 
-    h3.badpage(v-if="badPage") That page not found, sorry!
+    h3.badpage(v-if="badPage") {{ $t('badpage') }}
 
     .goodpage(v-else)
       p(v-if="yaml.description") {{ yaml.description}}
 
-      h3: b Explore typical scenarios:
+      h3: b {{ $t('explore-scenarios') }}:
       .measures
         .measure(v-for="m in Object.keys(yaml.scenarios)" :key="m")
           button.button.is-danger.is-outlined.is-small(@click="handleScenario(m)") {{ m }}
 
-      p {{ selectedScenario ? selectedScenario.description : '...or try different combinations below.' }}
+      p {{ selectedScenario ? selectedScenario.description : $t('try-combos') }}
 
-  h3.center-area.sticky: b Estimated Infection Risk:&nbsp;
+  h3.center-area.sticky: b {{ $t('estimated-risk') }}:&nbsp;
     span.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ adjustedR.toFixed(1) }}%
 
   .center-area(v-if="yaml.multipliers")
@@ -51,7 +70,7 @@
 
       br
 
-      h3(v-if="yaml.notes"): b Remarks:
+      h3(v-if="yaml.notes"): b {{$t('remarks') }}:
 
       ul(v-if="yaml.notes")
         li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
@@ -124,18 +143,39 @@ export default class VueComponent extends Vue {
 
     this.calcId = this.$route.params.rcalc
 
-    const url = this.public_svn + `risk-calculator/${this.calcId}.yaml`
+    const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
+    const url = this.public_svn + `risk-calculator/${this.calcId}.${lang}.yaml`
+
+    let responseText = ''
 
     try {
       const response = await fetch(url)
-      this.yaml = YAML.parse(await response.text())
-
-      this.buildUI()
-      this.updateR()
+      responseText = await response.text()
     } catch (e) {
       console.error(e)
-      this.badPage = true
     }
+
+    // maybe .de. doesn't exist, fallback .en.:
+    if (!responseText && url.indexOf('.de.') > -1) {
+      console.warn('no', url, 'falling back to .en.')
+      const en_url = url.replace('.de.', '.en.')
+      console.log(en_url)
+      try {
+        const response = await fetch(en_url)
+        responseText = await response.text()
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    if (!responseText) {
+      this.badPage = true
+      return
+    }
+
+    this.yaml = YAML.parse(responseText)
+    this.buildUI()
+    this.updateR()
   }
 
   private async handleDivFactorButton(m: any, group: string) {

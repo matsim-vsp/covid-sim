@@ -1,3 +1,18 @@
+<i18n>
+en:
+  r-value-calculator: 'R-Value Calculator'
+  badpage: 'That page not found, sorry!'
+  base-r-value: 'Base R Value'
+  calculated-r-value: 'Calculated R Value'
+  remarks: 'Remarks'
+de:
+  r-value-calculator: 'R-Wert Rechner'
+  badpage: 'Seite wurde nicht gefunden.'
+  base-r-value: 'Basis R-Wert'
+  calculated-r-value: 'Berechneter R-Wert'
+  remarks: 'Bemerkungen'
+</i18n>
+
 <template lang="pug">
 #home
   .banner
@@ -6,15 +21,15 @@
 
   .r-calculator(v-if="yaml.optionGroups")
 
-    h2 R-Value Calculator
+    h2 {{ $t('r-value-calculator') }}
     h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
 
-    h3.badpage(v-if="badPage") That page not found, sorry!
+    h3.badpage(v-if="badPage") {{ $t('badpage') }}
 
     .goodpage(v-else)
       p(v-if="yaml.description" v-html="topDescription")
 
-      h3: b Base R value:&nbsp;&nbsp;
+      h3: b {{ $t('base-r-value')}}:&nbsp;&nbsp;
       h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
 
       .base-buttons(v-if="yaml.baseValues")
@@ -24,7 +39,7 @@
           @click="handleNewBaseValue(Object.values(base)[0])"
         ) {{ Object.keys(base)[0] }}
 
-      h3: b Calculated R value:
+      h3: b {{ $t('calculated-r-value')}}:
       h3.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
 
       .option-groups
@@ -55,7 +70,7 @@
 
       br
 
-      h3(v-if="yaml.notes"): b Remarks:
+      h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
       ul(v-if="yaml.notes")
         li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
@@ -120,21 +135,45 @@ export default class VueComponent extends Vue {
 
     this.calcId = this.$route.params.rcalc
 
-    const url = this.public_svn + `r-calculator/${this.calcId}.yaml`
+    const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
+    console.log(lang)
+    const url = this.public_svn + `r-calculator/${this.calcId}.${lang}.yaml`
+    console.log(url)
+
+    let responseText = ''
 
     try {
       const response = await fetch(url)
-      this.yaml = YAML.parse(await response.text())
-
-      // some old yamls might not have any additive groups
-      if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
-
-      this.buildUI()
-      this.updateR()
+      responseText = await response.text()
     } catch (e) {
       console.error(e)
-      this.badPage = true
     }
+
+    // maybe .de. doesn't exist, fallback .en.:
+    if (!responseText && url.indexOf('.de.') > -1) {
+      console.warn('no', url, 'falling back to .en.')
+      const en_url = url.replace('.de.', '.en.')
+      console.log(en_url)
+      try {
+        const response = await fetch(en_url)
+        responseText = await response.text()
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    if (!responseText) {
+      this.badPage = true
+      return
+    }
+
+    this.yaml = YAML.parse(responseText)
+
+    // some old yamls might not have any additive groups
+    if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
+
+    this.buildUI()
+    this.updateR()
   }
 
   private async handleButton(m: any, group: string) {
