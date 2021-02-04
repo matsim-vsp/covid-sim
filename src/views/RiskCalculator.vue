@@ -8,7 +8,7 @@ en:
   try-combos: '...or try different combinations below.'
   remarks: 'Remarks'
 de:
-  risk-calculator: 'Personal Risiko Rechner'
+  risk-calculator: 'Personalrisiko Rechner'
   badpage: 'Seite wurde nicht gefunden.'
   released: 'Veröffentlicht'
   explore-scenarios: 'Typische Szenarien erforschen'
