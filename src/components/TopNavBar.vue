@@ -20,6 +20,11 @@
       @click='clickedBurger')
 
       .navbar-start
+         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.02.05
+          
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-02-02/'") Report runs
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.01.15
