@@ -20,11 +20,11 @@
       @click='clickedBurger')
 
       .navbar-start
-         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+       .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.02.05
-          
+
           .navbar-dropdown
-            a.navbar-item(:href="'/2021-02-02/'") Report runs
+            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=yesUntil80&newVariantDate=2020-12-15&schools=closed&work=no&dailyInitialVaccinations=3000'") Report runs     
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.01.15
@@ -42,15 +42,10 @@
             a.navbar-item(:href="'/2020-12-10/vaccinationsWinterEnd'") Vaccination vs Winter End
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2020.12.03
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2020-12-03/secondLockdown'") Second Lockdown
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2020-12-03/secondLockdown'") Second Lockdown
               a.navbar-item(:href="'/2020-11-12/secondLockdown'") 2020.11.12: Second Lockdown
               a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") 2020.11.12: Curfew
               a.navbar-item(:href="'/2020-11-09/tracing'") 2020.11.09
