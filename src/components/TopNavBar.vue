@@ -20,7 +20,7 @@
       @click='clickedBurger')
 
       .navbar-start
-       .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.02.05
 
           .navbar-dropdown
