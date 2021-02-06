@@ -24,7 +24,7 @@
           a.navbar-link  2021.02.05
 
           .navbar-dropdown
-            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=yesUntil80&newVariantDate=2020-12-15&schools=closed&work=no&dailyInitialVaccinations=3000'") Report runs     
+            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=yesUntil80&schools=closed&work=no&dailyInitialVaccinations=3000&curfew=no'") Runs for report Feb. 05    
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.01.15
