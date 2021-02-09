@@ -354,7 +354,7 @@ h3 {
 
 h4 {
   color: #596;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin: 0 0 0 0;
   padding: 0 0;
