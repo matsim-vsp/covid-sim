@@ -1,18 +1,16 @@
 <i18n>
 en:
   calculators: 'R-Value and Risk Calculators'
-  r-value-calculator: 'R-Value Calculator'
   badpage: 'That page not found, sorry!'
-  base-r-value: 'Base R Value'
-  calculated-r-value: 'Calculated R Value'
-  remarks: 'Remarks'
+  headline1: 'We build advanced human mobility models, and attach virus infection dynamics taken from recent literature and publications.'
+  headline2: 'This results in a virus spreading dynamics model.'
+  description: 'Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.'
 de:
   calculators: 'R-Wert und Risiko Rechner'
-  r-value-calculator: 'R-Wert Rechner'
   badpage: 'Seite wurde nicht gefunden.'
-  base-r-value: 'Basis R-Wert'
-  calculated-r-value: 'Berechneter R-Wert'
-  remarks: 'Bemerkungen'
+  headline1: 'Wir erstellen fortschrittliche Modelle der menschlichen Mobilität und fügen Virusinfektionsdynamiken aus aktueller Literatur und Veröffentlichungen hinzu.'
+  headline2: 'Daraus ergibt sich ein Modell der Virusausbreitungsdynamik.'
+  description: 'Maßnahmen wie die Ermittlung von Kontaktpersonen, das Tragen von Masken und die Schließung von Schulen könnten sich jeweils auf die Ausbreitungsfähigkeit der Krankheit auswirken. Mit den folgenden R-Wert-Rechnern können Sie mit diesen und anderen Maßnahmen experimentieren, um zu sehen, wie sie zum R-Wert der Krankheit beitragen.'
 </i18n>
 
 <template lang="pug">
@@ -26,12 +24,12 @@ de:
     .content
       .main
         .top
-          p.headline We build advanced human mobility models, and attach virus infection dynamics taken from recent literature and publications.
+          p.headline {{ $t('headline1')  }}
             br
-            | This results in a virus spreading dynamics model.
+            | {{ $t('headline2') }}
 
-        h2 {{ $t('calculators')}}
-        p Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.
+        h2 {{ $t('calculators') }}
+        p {{ $t('description') }}
 
         .viz-cards
           .one-viz(v-for="rcalc in rCalculators" :key="rcalc.url")
