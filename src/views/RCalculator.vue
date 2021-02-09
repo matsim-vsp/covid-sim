@@ -185,7 +185,6 @@ export default class VueComponent extends Vue {
     if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
 
     this.buildUI()
-    this.buildSliders()
     this.updateR()
   }
 
