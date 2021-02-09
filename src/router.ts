@@ -95,6 +95,10 @@ const routes = [
     redirect: '/*',
   },
   {
+    path: '/calculators',
+    component: () => import(/* webpackChunkName: "calculators" */ '@/views/Calculators.vue'),
+  },
+  {
     path: '/r-calcs/:rcalc',
     component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculator.vue'),
   },

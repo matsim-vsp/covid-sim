@@ -75,7 +75,7 @@
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  Calculators
+          a.navbar-link(:href="'/calculators'")  Calculators
           .navbar-dropdown
             a.navbar-item(:href="'/r-calcs/2021-01-24'") R-Calculator (24.Jan)
             a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown59'") R-Calculator (14.Nov, restrictive)
@@ -104,56 +104,6 @@ export default class VueComponent extends Vue {
     this.isBurgerActive = false
     this.isDropdownActive = false
   }
-
-  // private mounted() {
-  //   this.closeAllMenus()
-  // }
-
-  // private closeAllMenus() {
-  //   // Get all "navbar-burger" elements
-  //   const $navbarMenus = Array.prototype.slice.call(document.querySelectorAll('.navbar-menu'), 0)
-
-  //   // Check if there are any navbar burgers
-  //   if ($navbarMenus.length > 0) {
-  //     // Add a click event on each of them
-  //     $navbarMenus.forEach(el => {
-  //       el.addEventListener('click', () => {
-  //         console.log('GONNA BOOP NOW')
-  //         console.log(el)
-  //         // Get the target from the "data-target" attribute
-  //         const target = el.dataset.target
-  //         const $target = document.getElementById(target)
-  //         console.log({ target })
-  //         // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-  //         el.classList.toggle('is-active')
-  //         if ($target) $target.classList.toggle('is-active')
-  //       })
-  //     })
-  //   }
-
-  //   // Get all "navbar-burger" elements
-  //   const $navbarBurgers = Array.prototype.slice.call(
-  //     document.querySelectorAll('.navbar-burger'),
-  //     0
-  //   )
-
-  //   // Check if there are any navbar burgers
-  //   if ($navbarBurgers.length > 0) {
-  //     // Add a click event on each of them
-  //     $navbarBurgers.forEach(el => {
-  //       el.addEventListener('click', () => {
-  //         console.log('GONNA BOOP NOW')
-  //         // Get the target from the "data-target" attribute
-  //         const target = el.dataset.target
-  //         const $target = document.getElementById(target)
-
-  //         // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-  //         el.classList.toggle('is-active')
-  //         if ($target) $target.classList.toggle('is-active')
-  //       })
-  //     })
-  //   }
-  // }
 }
 </script>
 
