@@ -49,24 +49,36 @@ de:
       .option-group(v-for="group in multipliers" :key="`add+${group}`")
         h4 {{ group }}
         .description {{ yaml.multipliers[group].description }}
-        .measures
-          .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
-            button.button.is-link.is-small(
-              :class="{active: selections[group] == m.title,  'is-outlined': selections[group] != m.title}"
-              @click="handleFactorButton(m,group)"
-            ) {{ m.title }}
+
+        vue-slider.slider(
+              v-model="sliders[group]"
+              :data="lookup[group]"
+              :data-value="'value'"
+              :data-label="'title'"
+              tooltip="none"
+              :adsorb="true"
+              :dotSize=20
+              @change="handleFactorButton(group)"
+        )
+        p.slider-label {{ sliders[group].title }}
 
       //- divisors
       .option-group(v-for="group in divisors" :key="group")
         h4 {{ group }}
         .description {{ yaml.divisors[group].description }}
 
-        .measures
-          .measure(v-for="m in lookup[group]" :key="group + m.title")
-            button.button.is-link.is-small(
-              :class="{active: selections[group] == m.title, 'is-outlined': selections[group] != m.title}"
-              @click="handleDivFactorButton(m,group)"
-            ) {{ m.title }}
+        vue-slider.slider(
+              v-model="sliders[group]"
+              :data="lookup[group]"
+              :data-value="'value'"
+              :data-label="'title'"
+              tooltip="none"
+              :adsorb="true"
+              :dotSize=20
+              @change="handleFactorButton(group)"
+        )
+        p.slider-label {{ sliders[group].title }}
+
 
       br
 
@@ -82,6 +94,8 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
 
 type RiskYaml = {
   description: string
@@ -107,7 +121,7 @@ type RiskYaml = {
   }
 }
 
-@Component({ components: {}, props: {} })
+@Component({ components: { VueSlider }, props: {} })
 export default class VueComponent extends Vue {
   private public_svn =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
@@ -125,6 +139,8 @@ export default class VueComponent extends Vue {
 
   private badPage = false
   private markdownParser = new MarkdownIt()
+
+  private sliders: { [measure: string]: { title: string; value: number } } = {}
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -178,16 +194,16 @@ export default class VueComponent extends Vue {
     this.updateR()
   }
 
-  private async handleDivFactorButton(m: any, group: string) {
-    this.selections[group] = m.title
-    this.divFactors[group] = m.value
+  private async handleDivFactorButton(measure: string) {
+    const slider = this.sliders[measure]
+    this.divFactors[measure] = slider.value
     this.updateR()
     this.$forceUpdate()
   }
 
-  private async handleFactorButton(m: any, group: string) {
-    this.selections[group] = m.title
-    this.factors[group] = m.value
+  private async handleFactorButton(measure: string) {
+    const slider = this.sliders[measure]
+    this.factors[measure] = slider.value
     this.updateR()
     this.$forceUpdate()
   }
@@ -198,15 +214,24 @@ export default class VueComponent extends Vue {
     this.selectedScenario = this.yaml.scenarios[scenario]
     for (const measure of Object.keys(this.selectedScenario.presets) as any) {
       const title = this.selectedScenario.presets[measure]
+
+      //@ts-ignore:
       const value = this.lookup[measure].find((a: any) => a.title === title).value
 
       console.log(measure, title, value)
-      this.selections[measure] = title
 
       if (this.multipliers.indexOf(measure) > -1) this.factors[measure] = value
       if (this.divisors.indexOf(measure) > -1) this.divFactors[measure] = value
+
+      // find this entry for the slider!
+      for (const choice of this.lookup[measure]) {
+        if (choice.title === title) {
+          this.sliders[measure] = choice
+          break
+        }
+      }
     }
-    console.log(this.selections)
+
     this.updateR()
     this.$forceUpdate()
   }
@@ -249,10 +274,9 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private lookup: any = {}
+  private lookup: { [measure: string]: { title: string; value: number }[] } = {}
   private factors: { [measure: string]: number } = {}
   private divFactors: { [measure: string]: number } = {}
-  private selections: { [measure: string]: string } = {}
 
   private buildUI() {
     // multiplicative factors
@@ -270,13 +294,14 @@ export default class VueComponent extends Vue {
           // first?
           if (this.yaml.multipliers[measureName].options === undefined) {
             this.factors[measureName] = value
-            this.selections[measureName] = title
+            this.sliders[measureName] = this.lookup[measureName][0]
           }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          this.lookup[measureName].push({ title, value: trimAsterisk })
-          this.selections[measureName] = title
+          const choice = { title, value: trimAsterisk }
+          this.lookup[measureName].push(choice)
+          this.sliders[measureName] = choice
           this.factors[measureName] = trimAsterisk
         }
       }
@@ -297,13 +322,14 @@ export default class VueComponent extends Vue {
           // first?
           if (this.yaml.divisors[measureName].options === undefined) {
             this.divFactors[measureName] = value
-            this.selections[measureName] = title
+            this.sliders[measureName] = this.lookup[measureName][0]
           }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = 1.0 / parseFloat(value.substring(0, value.length - 1))
-          this.lookup[measureName].push({ title, value: trimAsterisk })
-          this.selections[measureName] = title
+          const choice = { title, value: trimAsterisk }
+          this.lookup[measureName].push(choice)
+          this.sliders[measureName] = choice
           this.divFactors[measureName] = trimAsterisk
         }
       }
@@ -321,7 +347,6 @@ export default class VueComponent extends Vue {
 }
 
 .option-groups {
-  margin-top: 0.25rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
@@ -329,8 +354,8 @@ export default class VueComponent extends Vue {
 
 .option-group {
   border: solid 1px #bbf;
+  border-radius: 4px;
   background-color: #fff;
-  // box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   padding: 0.5rem 0.5rem;
 }
 
@@ -435,6 +460,17 @@ li.notes-item {
   background-color: #eee;
   padding-top: 0;
   padding-bottom: 0rem;
+}
+
+.slider {
+  margin: 0.5rem 0.5rem;
+}
+
+.slider-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #383ab1;
+  margin: 0 0;
 }
 
 @media only screen and (max-width: 850px) {

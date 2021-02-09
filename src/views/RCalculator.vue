@@ -44,29 +44,41 @@ de:
 
       .option-groups
         //- additive factors
-        .option-group(v-for="group in additiveGroups" :key="`add+${group}`")
-          h4 {{ group }}
+        .option-group(v-for="measure in additiveGroups" :key="`add+${measure}`")
+          h4 {{ measure }}
             span(:style="{fontWeight: 'normal'}"
-                 v-if="additions[group] != 0") &nbsp; : {{additions[group]>0 ? '+' : ''}}{{ additions[group].toFixed(3) }}
+                 v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
 
-          .measures
-            .measure(v-for="m in lookup[group]" :key="`addgroup-${group + m.title}`")
-              button.button.is-link.is-small(
-                :class="{active: selections[group] == m.title,  'is-outlined': selections[group] != m.title}"
-                @click="handleAdditiveButton(m,group)"
-              ) {{ m.title }}
+          vue-slider.slider(
+                v-model="sliders[measure]"
+                :data="lookup[measure]"
+                :data-value="'value'"
+                :data-label="'title'"
+                tooltip="none"
+                :adsorb="true"
+                :dotSize=20
+                @change="handleAdditiveButton(measure)"
+          )
+          p.slider-label {{ sliders[measure].title }}
+
 
         //- multiplicative factors
-        .option-group(v-for="group in optionGroups" :key="group")
-          h4 {{ group }}
-            span(:style="{fontWeight: 'normal'}" v-if="factors[group] != 1") &nbsp; : {{ factors[group].toFixed(2) }}x
+        .option-group(v-for="measure in optionGroups" :key="measure")
+          h4 {{ measure }}
+            span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
 
-          .measures
-            .measure(v-for="m in lookup[group]" :key="group + m.title")
-              button.button.is-link.is-small(
-                :class="{active: selections[group] == m.title, 'is-outlined': selections[group] != m.title}"
-                @click="handleButton(m,group)"
-              ) {{ m.title }}
+          vue-slider.slider(
+                v-model="sliders[measure]"
+                :data="lookup[measure]"
+                :data-value="'value'"
+                :data-label="'title'"
+                tooltip="none"
+                :adsorb="true"
+                :dotSize=20
+                @change="handleButton(measure)"
+          )
+          p.slider-label {{ sliders[measure].title }}
+
 
       br
 
@@ -82,6 +94,8 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
 
 type RCalcYaml = {
   description?: string
@@ -92,7 +106,7 @@ type RCalcYaml = {
   notes: string[]
 }
 
-@Component({ components: {}, props: {} })
+@Component({ components: { VueSlider }, props: {} })
 export default class VueComponent extends Vue {
   private public_svn =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
@@ -136,9 +150,7 @@ export default class VueComponent extends Vue {
     this.calcId = this.$route.params.rcalc
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    console.log(lang)
     const url = this.public_svn + `r-calculator/${this.calcId}.${lang}.yaml`
-    console.log(url)
 
     let responseText = ''
 
@@ -173,19 +185,20 @@ export default class VueComponent extends Vue {
     if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
 
     this.buildUI()
+    this.buildSliders()
     this.updateR()
   }
 
-  private async handleButton(m: any, group: string) {
-    this.selections[group] = m.title
-    this.factors[group] = m.value
+  private async handleButton(measure: string) {
+    const slider = this.sliders[measure]
+    this.factors[measure] = slider.value
     this.updateR()
     this.$forceUpdate()
   }
 
-  private async handleAdditiveButton(m: any, group: string) {
-    this.selections[group] = m.title
-    this.additions[group] = m.value
+  private async handleAdditiveButton(measure: string) {
+    const slider = this.sliders[measure]
+    this.additions[measure] = slider.value
     this.updateR()
     this.$forceUpdate()
   }
@@ -228,11 +241,12 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private lookup: any = {}
+  private lookup: { [measure: string]: { title: string; value: number }[] } = {}
+
+  private sliders: { [measure: string]: { title: string; value: number } } = {}
+
   private factors: { [measure: string]: number } = {}
   private additions: { [measure: string]: number } = {}
-
-  private selections: { [measure: string]: string } = {}
 
   private buildUI() {
     if (this.yaml.baseValues) {
@@ -254,13 +268,14 @@ export default class VueComponent extends Vue {
           // first?
           if (this.yaml.optionGroups[group] === undefined) {
             this.factors[group] = value
-            this.selections[group] = title
+            this.sliders[group] = this.lookup[group][0]
           }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          this.lookup[group].push({ title, value: trimAsterisk })
-          this.selections[group] = title
+          const choice = { title, value: trimAsterisk }
+          this.lookup[group].push(choice)
+          this.sliders[group] = choice
           this.factors[group] = trimAsterisk
         }
       }
@@ -281,18 +296,18 @@ export default class VueComponent extends Vue {
           // first?
           if (this.yaml.additiveGroups[group] === undefined) {
             this.additions[group] = value
-            this.selections[group] = title
+            this.sliders[group] = this.lookup[group][0]
           }
         } else {
           // user specified a default with an asterisk* after the number
           const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          this.lookup[group].push({ title, value: trimAsterisk })
-          this.selections[group] = title
+          const choice = { title, value: trimAsterisk }
+          this.lookup[group].push(choice)
+          this.sliders[group] = choice
           this.additions[group] = trimAsterisk
         }
       }
     }
-    console.log(this.selections)
   }
 }
 </script>
@@ -306,16 +321,20 @@ export default class VueComponent extends Vue {
 }
 
 .option-groups {
-  border: 1px solid #ccc;
-  padding: 0.75rem 0.75rem;
+  margin-top: 0.5rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
 .option-group {
+  display: flex;
+  flex-direction: column;
+  border: solid 1px #bbf;
+  border-radius: 4px;
   background-color: #fff;
   padding: 0.5rem 0.5rem;
+  min-height: 8rem;
 }
 
 .measures {
@@ -404,6 +423,17 @@ p.factor {
 
 li.notes-item {
   line-height: 1.3rem;
+}
+
+.slider {
+  margin: 0.5rem 0.5rem;
+}
+
+.slider-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #383ab1;
+  margin: 0 0;
 }
 
 @media only screen and (max-width: 850px) {
