@@ -1,16 +1,20 @@
 <i18n>
 en:
-  calculators: 'R-Value and Risk Calculators'
   badpage: 'That page not found, sorry!'
-  headline1: 'We build advanced human mobility models, and attach virus infection dynamics taken from recent literature and publications.'
-  headline2: 'This results in a virus spreading dynamics model.'
+  headline1: 'R-Value and Risk Calculators'
   description: 'Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.'
 de:
-  calculators: 'R-Wert und Risiko Rechner'
   badpage: 'Seite wurde nicht gefunden.'
-  headline1: 'Wir erstellen fortschrittliche Modelle der menschlichen Mobilität und fügen Virusinfektionsdynamiken aus aktueller Literatur und Veröffentlichungen hinzu.'
-  headline2: 'Daraus ergibt sich ein Modell der Virusausbreitungsdynamik.'
-  description: 'Maßnahmen wie die Ermittlung von Kontaktpersonen, das Tragen von Masken und die Schließung von Schulen könnten sich jeweils auf die Ausbreitungsfähigkeit der Krankheit auswirken. Mit den folgenden R-Wert-Rechnern können Sie mit diesen und anderen Maßnahmen experimentieren, um zu sehen, wie sie zum R-Wert der Krankheit beitragen.'
+  headline1: 'R-Wert-Rechner und Ansteckungsrechner'
+  description: 'Mit Hilfe des **„R-Wert-Rechners“** kann der Effekt verschiedener Maßnahmen bzw. Maßnahmenpakete auf das Infektionsgeschehen bestimmmt werden. 
+    Der R-Wert gibt an, wie viele weitere Personen eine infizierte Person im Durchschnitt mit dem Corona-Virus ansteckt. 
+    Daher ist es erforderlich den R-Wert langfristig kleiner 1 zu halten, um die Corona-Pandemie nachhaltig einzudämmen.
+    
+    
+    Mit Hilfe des **„Ansteckungsrechners“** lässt sich die rechnerische Wahrscheinlichkeit ermitteln, wenn in bestimmten Situationen eine ansteckende Person anwesend ist, sich selbst mit dem Virus zu infizieren.
+
+    
+    Weitere Infos zur Methodik der gesamten Simulation finden Sie auf unserer [Startseite](https://covid-sim.info/) .'
 </i18n>
 
 <template lang="pug">
@@ -25,10 +29,6 @@ de:
       .main
         .top
           p.headline {{ $t('headline1')  }}
-            br
-            | {{ $t('headline2') }}
-
-        h2 {{ $t('calculators') }}
 
         p(v-html="mdDescription($t('description'))")
 

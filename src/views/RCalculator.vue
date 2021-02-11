@@ -6,10 +6,10 @@ en:
   calculated-r-value: 'Calculated R Value'
   remarks: 'Remarks'
 de:
-  r-value-calculator: 'R-Wert Rechner'
+  r-value-calculator: 'R-Wert-Rechner'
   badpage: 'Seite wurde nicht gefunden.'
   base-r-value: 'Basis R-Wert'
-  calculated-r-value: 'Berechneter R-Wert'
+  calculated-r-value: 'Resultierender R-Wert'
   remarks: 'Bemerkungen'
 </i18n>
 
