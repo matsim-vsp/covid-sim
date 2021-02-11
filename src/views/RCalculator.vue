@@ -5,12 +5,14 @@ en:
   base-r-value: 'Base R Value'
   calculated-r-value: 'Calculated R Value'
   remarks: 'Remarks'
+  older-calculators: 'All Calculators:'
 de:
   r-value-calculator: 'R-Wert-Rechner'
   badpage: 'Seite wurde nicht gefunden.'
   base-r-value: 'Basis R-Wert'
   calculated-r-value: 'Resultierender R-Wert'
   remarks: 'Bemerkungen'
+  older-calculators: 'Alle Rechner:'
 </i18n>
 
 <template lang="pug">
@@ -19,73 +21,84 @@ de:
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
 
-  .r-calculator(v-if="yaml.optionGroups")
+  .page-area
+    colophon.colophon
 
-    h2 {{ $t('r-value-calculator') }}
-    h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
+    .r-calculator(v-if="yaml.optionGroups")
+      h2 {{ $t('r-value-calculator') }}
+      h3(:style="{marginBottom: '1rem', color: '#596'}") {{ this.calcId}}
 
-    h3.badpage(v-if="badPage") {{ $t('badpage') }}
+      h3.badpage(v-if="badPage") {{ $t('badpage') }}
 
-    .goodpage(v-else)
-      p(v-if="yaml.description" v-html="topDescription")
+      .goodpage(v-else)
+        p(v-if="yaml.description" v-html="topDescription")
 
-      h3: b {{ $t('base-r-value')}}:&nbsp;&nbsp;
-      h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
+        .columns
+          .column
+            h3: b {{ $t('base-r-value')}}:&nbsp;&nbsp;
+            h3.greenbig {{ (selectedBaseR*0.9).toFixed(2) }} &ndash; {{ (selectedBaseR*1.1).toFixed(2) }}
 
-      .base-buttons(v-if="yaml.baseValues")
-        button.button.is-small(
-          v-for="base in yaml.baseValues"
-          :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
-          @click="handleNewBaseValue(Object.values(base)[0])"
-        ) {{ Object.keys(base)[0] }}
+            .base-buttons(v-if="yaml.baseValues")
+              button.button.is-small(
+                v-for="base in yaml.baseValues"
+                :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
+                @click="handleNewBaseValue(Object.values(base)[0])"
+              ) {{ Object.keys(base)[0] }}
 
-      h3: b {{ $t('calculated-r-value')}}:
-      h3.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
+            h3: b {{ $t('calculated-r-value')}}:
+            h3.greenbig(:style="{fontSize: '2.5rem', fontWeight: 'bold', color: '#596'}") {{ (adjustedR*0.9).toFixed(2) }} &ndash; {{(adjustedR*1.1).toFixed(2)}}
 
-      .option-groups
-        //- additive factors
-        .option-group(v-for="measure in additiveGroups" :key="`add+${measure}`")
-          h4 {{ measure }}
-            span(:style="{fontWeight: 'normal'}"
-                 v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
+          .column.stretch
+            .option-groups
+              //- additive factors
+              .option-group(v-for="measure in additiveGroups" :key="`add+${measure}`")
+                h4 {{ measure }}
+                  span(:style="{fontWeight: 'normal'}"
+                      v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
 
-          vue-slider.slider(
-                v-model="sliders[measure]"
-                :data="lookup[measure]"
-                :data-value="'value'"
-                :data-label="'title'"
-                tooltip="none"
-                :adsorb="true"
-                :dotSize=20
-                @change="handleAdditiveButton(measure)"
-          )
-          p.slider-label {{ sliders[measure].title }}
-
-
-        //- multiplicative factors
-        .option-group(v-for="measure in optionGroups" :key="measure")
-          h4 {{ measure }}
-            span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
-
-          vue-slider.slider(
-                v-model="sliders[measure]"
-                :data="lookup[measure]"
-                :data-value="'value'"
-                :data-label="'title'"
-                tooltip="none"
-                :adsorb="true"
-                :dotSize=20
-                @change="handleButton(measure)"
-          )
-          p.slider-label {{ sliders[measure].title }}
+                vue-slider.slider(
+                      v-model="sliders[measure]"
+                      :data="lookup[measure]"
+                      :data-value="'value'"
+                      :data-label="'title'"
+                      tooltip="none"
+                      :adsorb="true"
+                      :dotSize=20
+                      @change="handleAdditiveButton(measure)"
+                )
+                p.slider-label {{ sliders[measure].title }}
 
 
-      br
+              //- multiplicative factors
+              .option-group(v-for="measure in optionGroups" :key="measure")
+                h4 {{ measure }}
+                  span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
 
-      h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
+                vue-slider.slider(
+                      v-model="sliders[measure]"
+                      :data="lookup[measure]"
+                      :data-value="'value'"
+                      :data-label="'title'"
+                      tooltip="none"
+                      :adsorb="true"
+                      :dotSize=20
+                      @change="handleButton(measure)"
+                )
+                p.slider-label {{ sliders[measure].title }}
 
-      ul(v-if="yaml.notes")
-        li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
+        br
+
+        h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
+
+        ul(v-if="yaml.notes")
+          li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
+
+
+        h3: b {{ $t('older-calculators') }}:
+
+        ul(v-if="oldCalculators")
+          li.notes-item(v-for="calc in oldCalculators")
+            router-link(:to="calc.url") {{ calc.title }}, {{ calc.date }}
 
 </template>
 
@@ -95,7 +108,11 @@ import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import VueSlider from 'vue-slider-component'
+
+import Colophon from '@/components/Colophon.vue'
 import 'vue-slider-component/theme/default.css'
+
+import allCalculators from '@/assets/calculators.ts'
 
 type RCalcYaml = {
   description?: string
@@ -106,7 +123,7 @@ type RCalcYaml = {
   notes: string[]
 }
 
-@Component({ components: { VueSlider }, props: {} })
+@Component({ components: { VueSlider, Colophon }, props: {} })
 export default class VueComponent extends Vue {
   private public_svn =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
@@ -119,6 +136,8 @@ export default class VueComponent extends Vue {
   private selectedBaseR = 2.5
 
   private badPage = false
+
+  private oldCalculators = allCalculators
 
   private markdownParser = new MarkdownIt()
 
@@ -314,14 +333,31 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+#home {
+  background-color: $paleBackground;
+}
+
+.page-area {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.colophon {
+  padding: 2rem 2rem 1rem 5rem;
+  text-align: right;
+  font-size: 0.85rem;
+  background-color: white;
+}
+
 .r-calculator {
   max-width: 70rem;
+  margin: 0 auto;
   padding: 2rem 3rem 5rem 3rem;
 }
 
 .option-groups {
-  margin-top: 0.5rem;
   display: grid;
+  flex-direction: column;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
@@ -333,7 +369,7 @@ export default class VueComponent extends Vue {
   border-radius: 4px;
   background-color: #fff;
   padding: 0.5rem 0.5rem;
-  min-height: 8rem;
+  margin-bottom: 1rem;
 }
 
 .measures {
@@ -430,18 +466,48 @@ li.notes-item {
 
 .slider-label {
   font-size: 0.9rem;
+  line-height: 1.1rem;
   font-weight: bold;
   color: #383ab1;
   margin: 0 0;
 }
 
-@media only screen and (max-width: 850px) {
+.columns {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  min-width: fit-content;
+  flex: 0;
+}
+
+.stretch {
+  margin-left: 1rem;
+  min-width: unset;
+  flex: 1;
+}
+
+ul {
+  margin-bottom: 1rem;
+}
+
+@media only screen and (max-width: 950px) {
+  .colophon {
+    display: none;
+  }
+
   .option-groups {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
 }
 
 @media only screen and (max-width: 640px) {
+  .columns {
+    flex-direction: column;
+  }
+
   .banner {
     padding: 2rem 1rem;
   }

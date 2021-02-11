@@ -24,7 +24,7 @@
           a.navbar-link  2021.02.05
 
           .navbar-dropdown
-            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=yesUntil80&schools=closed&work=no&dailyInitialVaccinations=3000&curfew=no'") Runs for report Feb. 05    
+            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=yesUntil80&schools=closed&work=no&dailyInitialVaccinations=3000&curfew=no'") Runs for report Feb. 05
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.01.15
@@ -74,15 +74,17 @@
             a.navbar-item(:href="'/v3?day=5'") Infection Traces
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link(:href="'/calculators'")  Calculators
-          .navbar-dropdown
-            a.navbar-item(:href="'/r-calcs/2021-01-24'") R-Calculator (24.Jan)
-            a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown59'") R-Calculator (14.Nov, restrictive)
-            a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown84'") R-Calculator (14.Nov, permissive)
-            a.navbar-item(:href="'/r-calcs/2020-10-23'") R-Calculator (23.Oct)
-            hr
-            a.navbar-item(:href="'/risk-calcs/2020-11-11'") Activity Risk Calculator
+        router-link.navbar-item(to="/r-calcs/2021-01-24" :style="{color: 'white'}") Calculator
+
+        //- .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+        //-   a.navbar-link(:href="'/calculators'")  Calculators
+        //-   .navbar-dropdown
+        //-     a.navbar-item(:href="'/r-calcs/2021-01-24'") R-Calculator (24.Jan)
+        //-     a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown59'") R-Calculator (14.Nov, restrictive)
+        //-     a.navbar-item(:href="'/r-calcs/2020-11-14-lockdown84'") R-Calculator (14.Nov, permissive)
+        //-     a.navbar-item(:href="'/r-calcs/2020-10-23'") R-Calculator (23.Oct)
+        //-     hr
+        //-     a.navbar-item(:href="'/risk-calcs/2020-11-11'") Activity Risk Calculator
 
 </template>
 
