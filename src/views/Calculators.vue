@@ -29,7 +29,8 @@ de:
             | {{ $t('headline2') }}
 
         h2 {{ $t('calculators') }}
-        p {{ $t('description') }}
+
+        p(v-html="mdDescription($t('description'))")
 
         .viz-cards
           .one-viz(v-for="rcalc in rCalculators" :key="rcalc.url")
@@ -43,13 +44,19 @@ de:
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import Colophon from '@/components/Colophon.vue'
+import MarkdownIt from 'markdown-it'
 
+import Colophon from '@/components/Colophon.vue'
 import allCalculators from '@/assets/calculators.ts'
 
 @Component({ components: { Colophon }, props: {} })
 export default class VueComponent extends Vue {
   private rCalculators = allCalculators
+  private mdParser = new MarkdownIt()
+
+  private mdDescription(msg: string) {
+    return this.mdParser.render(msg)
+  }
 }
 </script>
 
