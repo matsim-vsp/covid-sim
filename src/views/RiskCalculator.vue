@@ -75,7 +75,7 @@ de:
               tooltip="none"
               :adsorb="true"
               :dotSize=20
-              @change="handleFactorButton(group)"
+              @change="handleDivFactorButton(group)"
         )
         p.slider-label {{ sliders[group].title }}
 
