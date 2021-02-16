@@ -36,7 +36,7 @@ export default class VueComponent extends Vue {
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
   private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
 
-  private MAX_DAYS = 500
+  private MAX_DAYS = 800
 
   private mounted() {
     // if results were passed in, then we don't need to unzip.
