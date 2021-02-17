@@ -56,7 +56,9 @@ export default class VueComponent extends Vue {
     // build totals
     for (const value of this.strainValues) {
       let t = 0
-      for (const strain of strains) t += value[strain]
+      for (const strain of strains) {
+        if (value[strain]) t += value[strain]
+      }
       value.total = t
     }
 
@@ -73,9 +75,11 @@ export default class VueComponent extends Vue {
     const avgR = []
 
     for (const value of this.strainValues) {
-      x.push(value.date)
-      r.push(value[strain])
-      t.push((100.0 * value[strain]) / value.total)
+      if (value[strain]) {
+        x.push(value.date)
+        r.push(value[strain])
+        t.push((100.0 * value[strain]) / value.total)
+      }
     }
 
     // set end date
