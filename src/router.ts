@@ -4,6 +4,8 @@ import HomeIndex from '@/views/HomeIndex.vue'
 
 Vue.use(VueRouter)
 
+const latestRCalculator = '/r-calcs/2021-01-24'
+
 const routes = [
   {
     path: '/',
@@ -97,6 +99,14 @@ const routes = [
   {
     path: '/calculators',
     component: () => import(/* webpackChunkName: "calculators" */ '@/views/Calculators.vue'),
+  },
+  {
+    path: '/calculator',
+    redirect: latestRCalculator,
+  },
+  {
+    path: '/r-calc',
+    redirect: latestRCalculator,
   },
   {
     path: '/r-calcs/:rcalc',
