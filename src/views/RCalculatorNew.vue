@@ -65,7 +65,7 @@ de:
                       tooltip="none"
                       @change="handleAdditiveButton(measure)"
                 )
-                p.slider-label {{ sliders[measure].title }}
+                p.slider-label {{ sliders[measure].description }}
 
 
               //- multiplicative factors
