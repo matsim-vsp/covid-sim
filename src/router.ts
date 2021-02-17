@@ -113,6 +113,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculator.vue'),
   },
   {
+    path: '/r-calc-new/:rcalc',
+    component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculatorNew.vue'),
+  },
+  {
     path: '/risk-calcs/:rcalc',
     component: () => import(/* webpackChunkName: "risk-calcs" */ '@/views/RiskCalculator.vue'),
   },
