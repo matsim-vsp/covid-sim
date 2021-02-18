@@ -57,7 +57,7 @@ de:
                       v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
 
                 vue-slider.slider(
-                      v-model="sliders[measure]"
+                      v-model="selectedOptionLabels[measure]"
                       :data="labels[measure]"
                       :marks="true"
                       :adsorb="true"
@@ -67,14 +67,13 @@ de:
                 )
                 p.slider-label {{ sliders[measure].description }}
 
-
               //- multiplicative factors
               .option-group(v-for="measure in optionGroups" :key="measure")
                 h4 {{ measure }}
                   span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
 
                 vue-slider.slider(
-                      v-model="sliders[measure]"
+                      v-model="selectedOptionLabels[measure]"
                       :data="labels[measure]"
                       :marks="true"
                       :adsorb="true"
@@ -136,6 +135,17 @@ export default class VueComponent extends Vue {
   private badPage = false
 
   private oldCalculators = allCalculators
+
+  private sliders: { [measure: string]: { title: string; value: number; description: string } } = {}
+  private labels: { [measure: string]: string[] } = {}
+  private selectedOptionLabels: { [measure: string]: string } = {}
+
+  private factors: { [measure: string]: number } = {}
+  private additions: { [measure: string]: number } = {}
+
+  private lookup: {
+    [measure: string]: { title: string; value: number; description: string }[]
+  } = {}
 
   private markdownParser = new MarkdownIt()
 
@@ -206,10 +216,8 @@ export default class VueComponent extends Vue {
   }
 
   private async handleButton(measure: string) {
-    const selectedValue = this.sliders[measure]
-
-    //@ts-ignore
-    const selection = this.lookup[measure].filter(a => a.title === selectedValue)[0]
+    const selectedTitle = this.selectedOptionLabels[measure]
+    const selection = this.lookup[measure].filter(a => a.title === selectedTitle)[0]
 
     this.sliders[measure] = selection
     this.factors[measure] = selection.value
@@ -218,10 +226,8 @@ export default class VueComponent extends Vue {
   }
 
   private async handleAdditiveButton(measure: string) {
-    const selectedValue = this.sliders[measure]
-
-    //@ts-ignore
-    const selection = this.lookup[measure].filter(a => a.title === selectedValue)[0]
+    const selectedTitle = this.selectedOptionLabels[measure]
+    const selection = this.lookup[measure].filter(a => a.title === selectedTitle)[0]
 
     this.sliders[measure] = selection
     this.additions[measure] = selection.value
@@ -266,16 +272,6 @@ export default class VueComponent extends Vue {
       setTimeout(this.animateTowardNewRValue, 16)
     }
   }
-
-  private lookup: {
-    [measure: string]: { title: string; value: number; description: string }[]
-  } = {}
-
-  private sliders: { [measure: string]: { title: string; value: number; description: string } } = {}
-  private labels: { [measure: string]: string[] } = {}
-
-  private factors: { [measure: string]: number } = {}
-  private additions: { [measure: string]: number } = {}
 
   private buildUI() {
     if (this.yaml.baseValues) {
@@ -329,6 +325,7 @@ export default class VueComponent extends Vue {
           if (this.yaml.additiveGroups[group] === undefined) {
             this.additions[group] = value
             this.sliders[group] = this.lookup[group][0]
+            this.selectedOptionLabels[group] = this.sliders[group].title
           }
         } else {
           // user specified a default with an asterisk* after the number
@@ -337,11 +334,11 @@ export default class VueComponent extends Vue {
           this.lookup[group].push(choice)
           this.sliders[group] = choice
           this.additions[group] = trimAsterisk
+          this.selectedOptionLabels[group] = this.sliders[group].title
         }
       }
       this.labels[group] = this.lookup[group].map(g => g.title)
     }
-    console.log({ labels: this.labels })
   }
 }
 </script>
@@ -383,9 +380,13 @@ export default class VueComponent extends Vue {
   flex-direction: column;
   border: solid 1px #bbf;
   border-radius: 4px;
-  background-color: #fff;
+  background-color: #fafafa;
   padding: 0.5rem 2rem;
   margin-bottom: 0rem;
+
+  h4 {
+    margin-left: -1.2rem;
+  }
 }
 
 .measures {
@@ -477,7 +478,8 @@ li.notes-item {
 }
 
 .slider {
-  margin: 0.5rem 0.5rem;
+  margin: 0 0;
+  // 0.5rem 0.5rem 0.5rem 0.5rem;
 }
 
 .slider-label {
@@ -485,7 +487,7 @@ li.notes-item {
   line-height: 1.1rem;
   font-weight: bold;
   color: #383ab1;
-  margin: 1rem 0 0 0;
+  margin: 1.5rem 0 0 -1.35rem;
 }
 
 .columns {
