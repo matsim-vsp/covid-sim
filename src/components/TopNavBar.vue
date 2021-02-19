@@ -74,7 +74,7 @@
             a.navbar-item(:href="'/v3?day=5'") Infection Traces
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
-        router-link.navbar-item(to="/r-calcs/2021-01-24" :style="{color: 'white'}") Calculator
+        router-link.navbar-item(to="/r-calcs-v2/2021-01-24b" :style="{color: 'white'}") Calculator
 
         //- .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
         //-   a.navbar-link(:href="'/calculators'")  Calculators

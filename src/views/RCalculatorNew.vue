@@ -5,14 +5,14 @@ en:
   base-r-value: 'Base R Value'
   calculated-r-value: 'Calculated R Value'
   remarks: 'Remarks'
-  older-calculators: 'All Calculators:'
+  older-calculators: 'All Calculators'
 de:
   r-value-calculator: 'R-Wert-Rechner'
   badpage: 'Seite wurde nicht gefunden.'
   base-r-value: 'Basis R-Wert'
   calculated-r-value: 'Resultierender R-Wert'
   remarks: 'Bemerkungen'
-  older-calculators: 'Alle Rechner:'
+  older-calculators: 'Alle Rechner'
 </i18n>
 
 <template lang="pug">
@@ -38,7 +38,7 @@ de:
             h3: b {{ $t('base-r-value')}}:&nbsp;&nbsp;
             h3.greenbig {{ selectedBaseR.toFixed(2) }}
 
-            .base-buttons(v-if="yaml.baseValues")
+            .base-buttons(v-if="yaml.baseValues.length > 1")
               button.button.is-small(
                 v-for="base in yaml.baseValues"
                 :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"

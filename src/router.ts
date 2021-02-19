@@ -4,7 +4,7 @@ import HomeIndex from '@/views/HomeIndex.vue'
 
 Vue.use(VueRouter)
 
-const latestRCalculator = '/r-calcs/2021-01-24'
+const latestRCalculator = '/r-calcs-v2/2021-01-24b'
 
 const routes = [
   {
@@ -109,11 +109,11 @@ const routes = [
     redirect: latestRCalculator,
   },
   {
-    path: '/r-calcs/:rcalc',
+    path: '/r-calcs-v1/:rcalc',
     component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculator.vue'),
   },
   {
-    path: '/r-calc-new/:rcalc',
+    path: '/r-calcs-v2/:rcalc',
     component: () => import(/* webpackChunkName: "r-calcs" */ '@/views/RCalculatorNew.vue'),
   },
   {
