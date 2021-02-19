@@ -303,7 +303,7 @@ export default class VueComponent extends Vue {
     10: true,
   }
 
-  private MAX_DAYS = 500
+  private MAX_DAYS = 1000
   private cumulativeInfected = 0
 
   private isZipLoaded = false
