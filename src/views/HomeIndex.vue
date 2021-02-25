@@ -118,7 +118,7 @@ export default class VueComponent extends Vue {
   private modelruns: any[] = [
     {
       url:
-        '/2021-02-02/',
+        '/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15',
       date: 'Released: 05 Feb 2021',
       title: 'Report runs',
       subtitle: 'Examination of new strains, curfews, and some reopening strategies',
