@@ -118,9 +118,23 @@ export default class VueComponent extends Vue {
   private modelruns: any[] = [
     {
       url:
+        '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',
+      date: 'Released: 26 Feb 2021',
+      title: 'Report runs Feb. 26',
+      subtitle: 'Effect of adaptive restrictions',
+    },
+    {
+      url:
+        '/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes',
+      date: 'Released: 26 Feb 2021',
+      title: 'Report runs Feb. 26',
+      subtitle: 'Testing strategies',
+    },
+    {
+      url:
         '/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15',
       date: 'Released: 05 Feb 2021',
-      title: 'Report runs',
+      title: 'Report runs Feb. 05',
       subtitle: 'Examination of new strains, curfews, and some reopening strategies',
     },
     {

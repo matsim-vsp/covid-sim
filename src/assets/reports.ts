@@ -1,4 +1,10 @@
 const reports: { md: string; title: string; url: string; html: string }[] = [
+ {
+    md: '/reports/report-2021-02-26.md',
+    title: '26 Feb 2021',
+    url: 'https://doi.org/10.14279/depositonce-11486',
+    html: '',
+  },
   {
     md: '/reports/report-2021-02-05.md',
     title: '05 Feb 2021',
