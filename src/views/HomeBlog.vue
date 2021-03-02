@@ -21,6 +21,8 @@
           h2 Method: Mobility traces and the spreading of COVID-19
           p The MATSim-Episim virus spreading dynamics model is described in these papers:
             br
+            a(href=" https://doi.org/10.1101/2021.02.27.21252583") Predicting the effects of COVID-19 related interventions in urban settings by combining activity-based modelling, agent-based simulation, and mobile phone data
+            br
             a(href=" https://arxiv.org/abs/2011.11453") https://arxiv.org/abs/2011.11453
             br
             a(href=" https://doi.org/10.1101/2020.07.22.20160093")  https://doi.org/10.1101/2020.07.22.20160093
