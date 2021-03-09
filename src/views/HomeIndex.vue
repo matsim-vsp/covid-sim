@@ -105,8 +105,8 @@ import Colophon from '@/components/Colophon.vue'
 import ReportViewer from '@/components/ReportViewer.vue'
 import VizCard from '@/components/VizCard.vue'
 
-import reports from '@/assets/reports.ts'
-import allCalculators from '@/assets/calculators.ts'
+import reports from '@/assets/reports'
+import allCalculators from '@/assets/calculators'
 
 @Component({ components: { Colophon, ReportViewer, VizCard }, props: {} })
 export default class VueComponent extends Vue {
@@ -126,8 +126,7 @@ export default class VueComponent extends Vue {
       subtitle: 'Effect of adaptive restrictions',
     },
     {
-      url:
-        '/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes',
+      url: '/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes',
       date: 'Released: 26 Feb 2021',
       title: 'Report runs Feb. 26',
       subtitle: 'Testing strategies',
