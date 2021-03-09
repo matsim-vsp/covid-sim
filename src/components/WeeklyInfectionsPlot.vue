@@ -63,12 +63,21 @@ export default class VueComponent extends Vue {
       observedLine.y = []
       if (source.marker) observedLine.marker = source.marker
 
-      if (observedLine.name.startsWith('RKI')) {
+      // RKI meldedatum and infection data start on different days of the week.
+      const offsetRKIDate: { [id: string]: number } = {
+        'RKI Berlin Infections': 11,
+        'RKI-Meldedatum Berlin': 12,
+      }
+
+      const lineName = observedLine.name as string
+      if (lineName.startsWith('RKI')) {
         // RKI lines: weekly average
-        const week = 7
-        for (let i = week; i < source.x.length; i += week) {
-          const newInfections = source.y[i] - source.y[i - week]
-          const observedRatePer100k = Math.floor((10.0 * newInfections) / week / factor100k) / 10.0
+        const startWeek = offsetRKIDate[lineName]
+
+        // generate weekly numbers
+        for (let i = startWeek; i < source.x.length; i += 7) {
+          const newInfections = source.y[i] - source.y[i - 7]
+          const observedRatePer100k = Math.floor((10.0 * newInfections) / 7 / factor100k) / 10.0
 
           observedLine.x.push(source.x[i - 3]) // midweek
           observedLine.y.push(observedRatePer100k)
