@@ -125,6 +125,7 @@
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               mutations-plot(v-else
+                :data="data"
                 :endDate="endDate"
                 :logScale="logScale"
                 :strainValues="mutationValues"
@@ -282,7 +283,10 @@ export default class VueComponent extends Vue {
 
   private berlin_population = 3574568
 
-  private scaleRKISurveillanceAnteil = 150.0
+  // this is a fudge factor to get the ALM e.V. numbers on approx
+  // the same scale as the other WeeklyInfectionPlot values.
+  // It has no other meaning.
+  private scaleRKISurveillanceAnteil = 40.0
 
   // convenience from yaml
   private startDate: string = ''

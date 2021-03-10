@@ -40,7 +40,6 @@ export default class VueComponent extends Vue {
   }
 
   private calculateObserved(factor100k: number) {
-    // private dunkelZifferFactor = 1.0
     if (this.observed.length === 0) return
 
     // for each data source, let's draw some dots
@@ -77,16 +76,17 @@ export default class VueComponent extends Vue {
         // generate weekly numbers
         for (let i = startWeek; i < source.x.length; i += 7) {
           const newInfections = source.y[i] - source.y[i - 7]
-          const observedRatePer100k = Math.floor((10.0 * newInfections) / 7 / factor100k) / 10.0
+          const observedRate = 0.1 * Math.floor((10.0 * newInfections) / factor100k)
 
           observedLine.x.push(source.x[i - 3]) // midweek
-          observedLine.y.push(observedRatePer100k)
+          observedLine.y.push(observedRate)
         }
       } else {
         // non RKI lines: every day
+
         for (let i = 0; i < source.x.length; i++) {
           const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
-          const observedRatePer100k = Math.floor((10.0 * newInfections) / factor100k) / 10.0
+          const observedRatePer100k = 7.0 * 0.1 * Math.floor((10.0 * newInfections) / factor100k)
           observedLine.x.push(source.x[i])
           observedLine.y.push(observedRatePer100k)
         }
@@ -109,37 +109,40 @@ export default class VueComponent extends Vue {
 
     const totalPopulation = susceptible.y[0]
     const factor100k = totalPopulation / 100000.0
-    const scaleFactor100k = 1.0 // factor100k
+    const sevenDays = 7
 
     const infectionRate = []
-
-    const averagingPeriod = 1
+    const midWeekDates = []
 
     let nShowSymptomsCum: any = this.data.filter(item => item.name === 'Showing Symptoms Cum.')[0]
 
+    // Newer (Oct 2020) versions of the model have a "Showing Symptoms" column
+    // Use it if it exists.
     if (nShowSymptomsCum.y[0] !== undefined) {
-      for (let i = averagingPeriod; i < nShowSymptomsCum.y.length; i++) {
-        const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - averagingPeriod]
-        // infections per 100,000 per seven days
-        const rate = Math.round((10.0 * diff) / scaleFactor100k) / 10.0 / averagingPeriod
+      for (let i = sevenDays + 5; i < nShowSymptomsCum.y.length; i += sevenDays) {
+        // difference in cumulative num of people showing symptoms is new infections
+        const diff = nShowSymptomsCum.y[i] - nShowSymptomsCum.y[i - sevenDays]
+        // rate: infections per 100,000 per seven days
+        const rate = 0.1 * Math.round((10.0 * diff) / factor100k)
         infectionRate.push(rate)
+        midWeekDates.push(nShowSymptomsCum.x[i - 3])
       }
     } else {
       for (let i = this.lagDays; i < susceptible.y.length; i++) {
+        // difference in people susceptible is new infections
         const diffSusceptible = susceptible.y[i - this.lagDays] - susceptible.y[i]
-        // infections per 100,000
-        const rate = (7.0 * Math.round((10.0 * diffSusceptible) / scaleFactor100k)) / 10.0
+        // rate: infections per 100,000 per seven days
+        const rate = 0.1 * Math.round((10.0 * diffSusceptible) / factor100k)
         infectionRate.push(rate)
+        midWeekDates.push(susceptible.x[i - 3])
       }
     }
 
-    const grenz = (50.0 * totalPopulation) / 100000.0 / 7.0
-
     this.dataLines = [
       {
-        name: 'Target: 50 per 100,000 per 7 days',
+        name: 'Target: 50 per 100K',
         x: [0, susceptible.x[susceptible.x.length - 1]],
-        y: [grenz, grenz],
+        y: [50, 50],
         fill: 'tozeroy',
         line: {
           width: 1.0,
@@ -147,9 +150,20 @@ export default class VueComponent extends Vue {
           color: '#cdc',
         },
       },
+      // {
+      //   name: 'Target: 35 per 100K',
+      //   x: [0, susceptible.x[susceptible.x.length - 1]],
+      //   y: [35, 35],
+      //   fill: 'tozeroy',
+      //   line: {
+      //     width: 1.0,
+      //     // color: '#ddbbbb',
+      //     color: '#cdc',
+      //   },
+      // },
       {
         name: 'Model',
-        x: susceptible.x.slice(averagingPeriod),
+        x: midWeekDates, // susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         type: 'scatter',
         mode: 'markers',
@@ -165,7 +179,7 @@ export default class VueComponent extends Vue {
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
 
-    this.calculateObserved(scaleFactor100k)
+    this.calculateObserved(factor100k)
   }
 
   private reformatDate(day: string) {
@@ -197,7 +211,7 @@ export default class VueComponent extends Vue {
       type: this.logScale ? 'log' : 'linear',
       autorange: true, // this.logScale ? false : true,
       // range: [0, 5],
-      title: 'Daily Infections',
+      title: '7-Day Infections / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

@@ -14,13 +14,20 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private strainValues!: any[]
+  @Prop({ required: true }) private data!: any[]
 
   private color = '#04f'
 
   private dataLines: any[] = []
   private dataLines2: any[] = []
 
+  private factor100k = 1
+
   private mounted() {
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+    const totalPopulation = susceptible.y[0]
+    this.factor100k = totalPopulation / 100000.0
+
     this.calculateValues()
   }
 
@@ -53,11 +60,18 @@ export default class VueComponent extends Vue {
     this.dataLines = []
     this.dataLines2 = []
 
-    // build totals
-    for (const value of this.strainValues) {
+    // // build totals
+    for (let i = 7; i < this.strainValues.length; i += 7) {
+      const value = this.strainValues[i]
+
       let t = 0
       for (const strain of strains) {
-        if (value[strain]) t += value[strain]
+        if (value[strain]) {
+          const infections = this.strainValues
+            .slice(i - 7, i)
+            .reduce((total, v) => v[strain] + total, 0)
+          t += infections
+        }
       }
       value.total = t
     }
@@ -72,13 +86,19 @@ export default class VueComponent extends Vue {
     const r: any[] = []
     const t: any[] = []
 
-    const avgR = []
+    for (let i = 7; i < this.strainValues.length; i += 7) {
+      const value = this.strainValues[i]
+      if (!value) continue
 
-    for (const value of this.strainValues) {
+      const thisWeek = this.strainValues.slice(i - 7, i)
+      const infections = thisWeek.reduce((total, v) => v[strain] + total, 0)
+
+      const infectionRate = infections / this.factor100k
+
       if (value[strain]) {
         x.push(value.date)
-        r.push(value[strain])
-        t.push((100.0 * value[strain]) / value.total)
+        r.push(infectionRate)
+        t.push((100.0 * infections) / value.total)
       }
     }
 
@@ -131,7 +151,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
-      title: 'Number of Infections',
+      title: '7-Day Infections / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

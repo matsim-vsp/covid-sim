@@ -218,7 +218,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Number of Hospitalizations',
+      title: 'Hospitalizations',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
