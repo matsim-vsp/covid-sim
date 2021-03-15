@@ -57,10 +57,11 @@ export default class VueComponent extends Vue {
     for (const line of lines.splice(1)) {
       const cells = line.split('\t')
       const date = cells[0]
-      x.push(date)
-
-      const values = cells.splice(1)
-      matrix.push(values)
+      if (date) {
+        x.push(date)
+        const values = cells.splice(1)
+        matrix.push(values)
+      }
     }
 
     matrix = transpose(matrix)
