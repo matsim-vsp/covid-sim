@@ -89,6 +89,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "multiday" */ '@/viz/time-lapse/TimeLapseViz.vue'),
   },
   {
+    path: '/entiresim',
+    component: () => import(/* webpackChunkName: "entiresim" */ '@/viz/entire-sim/EntireSim.vue'),
+  },
+  {
     path: '/shader',
     redirect: '/multiday',
   },
