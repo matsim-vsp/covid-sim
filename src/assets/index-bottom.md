@@ -14,6 +14,8 @@ Many other teams worldwide are working on COVID-19 simulations, here are a few t
 
 - https://fisica.ufpr.br/modinterv/ Relatively slow to get started; wait!
 
+- https://thomasvanboeckel.wixsite.com/hegep 
+
 Human mobility data over the course of the pandemics:
 
 - https://www.google.com/covid19/mobility/
@@ -23,6 +25,8 @@ Human mobility data over the course of the pandemics:
 - https://www.covid-19-mobility.org/de/
 
 - https://www.infas.de/neuigkeit/die-mobilitaet-und-corona-kaum-oepnv-viel-fahrrad-und-immer-noch-auto/
+
+- https://explore.veitchlister.com.au/covid-19-dashboard/
 
 Other regularly updated information sources:
 
