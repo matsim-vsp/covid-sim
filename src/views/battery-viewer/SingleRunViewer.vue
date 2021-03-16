@@ -449,8 +449,11 @@ export default class VueComponent extends Vue {
 
     this.updateNotes()
 
-    this.observedCases = await this.prepareObservedData(this.city)
-    this.diviData = await this.prepareDiviData(this.city)
+    // berlin has some observed data, other cities don't
+    if (this.cityCSV[this.city]) {
+      this.observedCases = await this.prepareObservedData(this.city)
+      this.diviData = await this.prepareDiviData(this.city)
+    }
 
     await this.loadInfoTxt()
     this.runChanged()
