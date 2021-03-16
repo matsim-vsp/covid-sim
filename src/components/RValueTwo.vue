@@ -207,10 +207,10 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
-      autorange: false,
+      autorange: true,
       // fixedrange: window.innerWidth < 700,
-      type: 'log',
-      range: [Math.log10(0.01), Math.log10(2)],
+      type: 'linear',
+      // range: [Math.log10(0.01), Math.log10(2)],
       title: 'Multiplier',
       hoverformat: '.3f',
     },

@@ -144,7 +144,7 @@
               r-value-plot.plotsize(v-else
                 :data="data"
                 :endDate="endDate"
-                :logScale="logScale"
+                :logScale="false"
                 :rValues="rValues"
                 @method="switchRMethod")
 
@@ -161,7 +161,7 @@
               r-value-two.plotsize(v-else
                 :data="data"
                 :endDate="endDate"
-                :logScale="logScale"
+                :logScale="false"
                 :rValues="rValues"
                 @method="switchRMethod")
 

@@ -200,8 +200,8 @@ export default class VueComponent extends Vue {
     },
     yaxis: {
       // fixedrange: window.innerWidth < 700,
-      type: 'log',
-      // autorange: true,
+      type: 'linear',
+      autorange: true,
       // range: this.logScale ? [Math.log10(0.3), Math.log10(2)] : [0, 2],
       title: 'Multiplier',
       hoverformat: '.3f',
