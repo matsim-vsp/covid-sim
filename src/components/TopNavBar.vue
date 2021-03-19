@@ -21,6 +21,10 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.03.19
+            a.navbar-item(:href="'//2021-03-19?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29'") Runs for report March 19
+            
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.02.26
 
           .navbar-dropdown
