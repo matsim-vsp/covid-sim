@@ -112,7 +112,7 @@ import VueSlider from 'vue-slider-component'
 import Colophon from '@/components/Colophon.vue'
 import 'vue-slider-component/theme/default.css'
 
-import allCalculators from '@/assets/calculators.ts'
+import allCalculators from '@/assets/calculators'
 
 type RCalcYaml = {
   description?: string
