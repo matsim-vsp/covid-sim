@@ -119,12 +119,11 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
-      url:
-        '/2021-03-19?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29',
+      url: '/2021-03-19?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29',
       date: 'Released: 19 March 2021',
       title: 'Report runs March 19',
       subtitle: 'Activity-based testing strategies',
-    },  
+    },
     {
       url:
         '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',

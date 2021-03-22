@@ -27,6 +27,7 @@ export default class VueComponent extends Vue {
   private csvData: any = {
     berlin: require('@/assets/berlin-hospital.csv').default,
     munich: require('@/assets/munich-hospital.csv').default,
+    jakarta: require('@/assets/jakarta-hospital.csv').default,
   }
 
   private hospitalCapacity: any = {
@@ -50,6 +51,13 @@ export default class VueComponent extends Vue {
       csvLineNames: ['Reported: Munich Hospitalized'],
       dateFormatter: this.reformatDateMunich,
       dateColumn: 'Tag',
+    },
+    jakarta: {
+      fromModel: ['Seriously Sick', 'Critical'],
+      fromCSV: ['Intensivmedizin'],
+      csvLineNames: ['Reported: Jakarta Intensive Care'],
+      dateFormatter: this.reformatDateBerlin,
+      dateColumn: 'Datum',
     },
   }
 

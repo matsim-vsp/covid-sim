@@ -101,7 +101,7 @@
               :logScale="logScale")
 
         //- ---------- HOSPITALIZATION RATES
-        .linear-plot(v-if="city === 'berlin' || city === 'munich'")
+        .linear-plot(v-if="city !== 'heinsberg'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
             button.button.is-small.hider(@click="toggleShowPlot(1)") ..
 

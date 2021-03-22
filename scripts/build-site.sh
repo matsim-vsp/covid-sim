@@ -34,6 +34,7 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "au
 
 # Get Berlin hospital data too
 cp Fallzahlen/Berlin/berlin-hospital.csv src/assets
+cp Fallzahlen/Other/*.csv src/assets
 
 echo BUILD: Process DIVI Cases
 # --- process DIVI cases for Berlin.
