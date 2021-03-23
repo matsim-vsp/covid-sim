@@ -13,11 +13,6 @@ const routes = [
     component: HomeIndex,
   },
   {
-    path: '/blog',
-    name: 'Home2',
-    component: () => import(/* webpackChunkName: "home2" */ '@/views/HomeBlog.vue'),
-  },
-  {
     // REDIRECT for old */covid-sim/* links
     path: '/covid-sim/*',
     redirect: '/*',
