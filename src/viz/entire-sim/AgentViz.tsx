@@ -51,7 +51,7 @@ export default function Component(props: {
   searchEnabled: boolean
   onClick: any
 }) {
-  const mapStyle = 'mapbox://styles/mapbox/dark-v9'
+  const mapStyle = 'mapbox://styles/mapbox/light-v9'
 
   // 'mapbox://styles/vsp-tu-berlin/ckek59op0011219pbwfar1rex'
   // const mapStyle = 'mapbox://styles/vsp-tu-berlin/ckeetelh218ef19ob5nzw5vbh'
@@ -126,7 +126,7 @@ export default function Component(props: {
       getColor: (d: any) => [255, 0, 0], // props.colors[d.occ],
       iconMoving: 'vehicle',
       iconStill: 'diamond',
-      getSize: searchEnabled ? 56 : 44,
+      getSize: searchEnabled ? 56 : 20,
       opacity: 1.0,
       currentTime: simulationTime,
       shadowEnabled: false,
