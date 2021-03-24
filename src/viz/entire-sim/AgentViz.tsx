@@ -57,7 +57,7 @@ export default function Component(props: {
   // const mapStyle = 'mapbox://styles/vsp-tu-berlin/ckeetelh218ef19ob5nzw5vbh'
   // mapStyle = "mapbox://styles/mapbox/dark-v10",
 
-  const { simulationTime, paths, dataArray, center, vehicleLookup, searchEnabled, onClick } = props
+  const { simulationTime, paths, center, vehicleLookup, searchEnabled, onClick } = props
 
   const theme = DEFAULT_THEME
 
