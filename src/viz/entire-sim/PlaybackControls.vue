@@ -32,11 +32,14 @@ export default class VueComponent extends Vue {
   @Prop({ required: true })
   private currentTime!: number
 
+  @Prop({ required: true })
+  private currentDay!: number
+
   private sliderValue = 0
 
   private sliderOptions = {
     min: 0,
-    max: 1000000,
+    max: 10000000,
     clickable: false,
     dotSize: 30,
     duration: 0,
@@ -89,14 +92,18 @@ export default class VueComponent extends Vue {
   }
 
   private getSecondsFromSlider(value: number) {
-    let seconds = ((this.timeEnd - this.timeStart) * value) / 1000000.0
+    let seconds = ((this.timeEnd - this.timeStart) * value) / 10000000.0
     if (seconds === this.timeEnd) seconds = this.timeEnd - 1
     return seconds
   }
 
-  @Watch('currentTime') handleTimeChanged() {
+  @Watch('currentTime')
+  @Watch('currentDay')
+  handleTimeChanged() {
+    const totalSeconds = 86400.0 * (this.currentDay - 1) + this.currentTime
+
     this.sliderValue =
-      (1000000.0 * (this.currentTime - this.timeStart)) / (this.timeEnd - this.timeStart)
+      (10000000.0 * (totalSeconds - this.timeStart)) / (this.timeEnd - this.timeStart)
   }
 
   private mounted() {

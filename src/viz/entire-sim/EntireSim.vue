@@ -1,14 +1,12 @@
 <template lang="pug">
 #entire-sim
 
-  .nav(v-if="!thumbnail")
+  .nav
     p.big.xtitle {{ vizDetails.title }}
     p.big.time(v-if="myState.statusMessage") {{ myState.statusMessage }}
 
-  trip-viz.anim(:simulationTime="simulationTime"
+  agent-viz.anim(:simulationTime="simulationTime"
                 :paths="$options.paths"
-                :drtRequests="$options.drtRequests"
-                :traces="$options.traces"
                 :colors="COLOR_OCCUPANCY"
                 :settingsShowLayers="SETTINGS"
                 :center="vizDetails.center"
@@ -16,8 +14,8 @@
                 :vehicleLookup = "vehicleLookup"
                 :onClick = "handleClick")
 
-  .right-side(v-if="isLoaded && !thumbnail")
-    collapsible-panel(:darkMode="true" width="150" direction="right")
+  .right-side(v-if="isLoaded")
+    collapsible-panel(:darkMode="false" width="150" direction="right")
       .big.clock
         p Day&nbsp;{{ myState.day }}
         p {{ myState.clock }}
@@ -42,8 +40,7 @@
         settings-panel.settings-area(:items="SETTINGS" @click="handleSettingChange")
 
         .speed-block
-          p.speed-label(
-            :style="{color: textColor.text}") Geschwindigkeit:
+          p.speed-label Speed:
             br
             | {{ speed }}x
 
@@ -63,7 +60,8 @@
       :timeStart = "timeStart"
       :timeEnd = "timeEnd"
       :isRunning = "myState.isRunning"
-      :currentTime = "simulationTime")
+      :currentTime = "simulationTime"
+      :currentDay = "myState.day")
 
 </template>
 
@@ -96,7 +94,7 @@ import { ColorScheme, LegendItem, LegendItemType, LIGHT_MODE, DARK_MODE } from '
 import { VuePlugin } from 'vuera'
 Vue.use(VuePlugin)
 
-import TripViz from './TripViz'
+import AgentViz from './AgentViz'
 
 @Component({
   components: {
@@ -106,49 +104,33 @@ import TripViz from './TripViz'
     // LegendColors,
     PlaybackControls,
     ToggleButton,
-    TripViz,
+    AgentViz,
   } as any,
 })
 class VueComponent extends Vue {
-  @Prop({ required: false })
-  private subfolder!: string
-
-  @Prop({ required: false })
-  private yamlConfig!: string
-
-  private thumbnail = false
-
-  private COLOR_OCCUPANCY: any = {
-    0: [255, 255, 85],
-    1: [32, 96, 255],
-    2: [85, 255, 85],
-    3: [255, 85, 85],
-    4: [200, 0, 0],
-    // 5: [255, 150, 255],
-  }
-
-  COLOR_OCCUPANCY_MATSIM_UNUSED: any = {
-    0: [255, 85, 255],
-    1: [255, 255, 85],
-    2: [85, 255, 85],
-    3: [85, 85, 255],
-    4: [255, 85, 85],
-    5: [255, 85, 0],
-  }
-
-  SETTINGS: { [label: string]: boolean } = {
+  private SETTINGS = {
     Fahrzeuge: true,
     Routen: false,
     'DRT Anfragen': false,
   }
 
-  private legendItems: LegendItem[] = Object.keys(this.COLOR_OCCUPANCY).map(key => {
-    return { type: LegendItemType.line, color: this.COLOR_OCCUPANCY[key], value: key, label: key }
-  })
+  private COLOR_OCCUPANCY = {
+    0: [255, 0, 0],
+    1: [255, 0, 0],
+    2: [255, 0, 0],
+    3: [255, 0, 0],
+    4: [255, 0, 0],
+  }
 
-  private legendRequests = [
-    { type: LegendItemType.line, color: [255, 0, 255], value: 0, label: '' },
-  ]
+  private legendItems: LegendItem[] = []
+  // Object.keys(this.COLOR_OCCUPANCY).map(key => {
+  //   return { type: LegendItemType.line, color: this.COLOR_OCCUPANCY[key], value: key, label: key }
+  // })
+
+  private legendRequests = []
+
+  //   { type: LegendItemType.line, color: [255, 0, 255], value: 0, label: '' },
+  // ]
 
   private vizDetails = {
     network: '',
@@ -156,8 +138,7 @@ class VueComponent extends Vue {
     projection: '',
     title: '',
     description: '',
-    thumbnail: '',
-    center: [6.5, 51.0],
+    center: [13.45, 52.5],
   }
 
   public myState = {
@@ -169,9 +150,6 @@ class VueComponent extends Vue {
     isShowingHelp: false,
     fileApi: null as any,
     fileSystem: undefined as any,
-    subfolder: this.subfolder,
-    yamlConfig: this.yamlConfig,
-    thumbnail: this.thumbnail,
     data: [] as any[],
   }
 
@@ -179,20 +157,10 @@ class VueComponent extends Vue {
   private timeStart = 0
   private timeEnd = this.maxDays * 86400
 
-  private traces: crossfilter.Crossfilter<any> = crossfilter([])
-  private traceStart!: crossfilter.Dimension<any, any>
-  private traceEnd!: crossfilter.Dimension<any, any>
-  private traceVehicle!: crossfilter.Dimension<any, any>
-
   private paths: crossfilter.Crossfilter<any> = crossfilter([])
   private pathStart!: crossfilter.Dimension<any, any>
   private pathEnd!: crossfilter.Dimension<any, any>
   private pathVehicle!: crossfilter.Dimension<any, any>
-
-  private requests: crossfilter.Crossfilter<any> = crossfilter([])
-  private requestStart!: crossfilter.Dimension<any, any>
-  private requestEnd!: crossfilter.Dimension<any, any>
-  private requestVehicle!: crossfilter.Dimension<any, any>
 
   private simulationTime = 6 * 3600 // 8 * 3600 + 10 * 60 + 10
   private timeElapsedSinceLastFrame = 0
@@ -205,14 +173,14 @@ class VueComponent extends Vue {
   private isLoaded = true
   private showHelp = false
 
-  private speedStops = [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10]
+  private speedStops = [-100, -10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10, 100]
   private speed = 1
 
   private legendBits: any[] = []
 
   private async handleSettingChange(label: string) {
     console.log(label)
-    this.SETTINGS[label] = !this.SETTINGS[label]
+    // this.SETTINGS[label] = !this.SETTINGS[label]
     this.updateDatasetFilters()
     this.simulationTime += 1 // this will force a redraw
   }
@@ -234,85 +202,6 @@ class VueComponent extends Vue {
     const sep = 1 + params.pathMatch.lastIndexOf('/')
     const subfolder = params.pathMatch.substring(0, sep)
     const config = params.pathMatch.substring(sep)
-
-    this.myState.subfolder = subfolder
-    this.myState.yamlConfig = config
-  }
-
-  private async generateBreadcrumbs() {
-    if (!this.myState.fileSystem) return []
-
-    const crumbs = [
-      {
-        label: this.myState.fileSystem.name,
-        url: '/' + this.myState.fileSystem.url,
-      },
-    ]
-
-    const subfolders = this.myState.subfolder.split('/')
-    let buildFolder = '/'
-    for (const folder of subfolders) {
-      if (!folder) continue
-
-      buildFolder += folder + '/'
-      crumbs.push({
-        label: folder,
-        url: '/' + this.myState.fileSystem.url + buildFolder,
-      })
-    }
-
-    // get run title in there
-    try {
-      const metadata = await this.myState.fileApi.getFileText(
-        this.myState.subfolder + '/metadata.yml'
-      )
-      const details = YAML.parse(metadata)
-
-      if (details.title) {
-        const lastElement = crumbs.pop()
-        const url = lastElement ? lastElement.url : '/'
-        crumbs.push({ label: details.title, url })
-      }
-    } catch (e) {
-      // if something went wrong the UI will just show the folder name
-      // which is fine
-    }
-    crumbs.push({
-      label: this.vizDetails.title ? this.vizDetails.title : '',
-      url: '#',
-    })
-
-    // save them!
-    globalStore.commit('setBreadCrumbs', crumbs)
-
-    return crumbs
-  }
-
-  private async getVizDetails() {
-    // first get config
-    try {
-      const text = await this.myState.fileApi.getFileText(
-        this.myState.subfolder + '/' + this.myState.yamlConfig
-      )
-      this.vizDetails = YAML.parse(text)
-      if (!this.vizDetails.center) this.vizDetails.center = [14, 52.1]
-    } catch (e) {
-      console.log('failed')
-      // maybe it failed because password?
-      if (this.myState.fileSystem && this.myState.fileSystem.need_password && e.status === 401) {
-        globalStore.commit('requestLogin', this.myState.fileSystem.url)
-      }
-    }
-
-    // title
-    const t = this.vizDetails.title ? this.vizDetails.title : 'Agent Animation'
-    this.$emit('title', t)
-  }
-
-  @Watch('globalState.authAttempts') private async authenticationChanged() {
-    console.log('AUTH CHANGED - Reload')
-    if (!this.yamlConfig) this.buildRouteFromUrl()
-    await this.getVizDetails()
   }
 
   @Watch('state.colorScheme') private swapTheme() {
@@ -325,16 +214,10 @@ class VueComponent extends Vue {
     if (vehicleNumber > -1) {
       console.log('vehicle', vehicleNumber)
       this.pathVehicle?.filterExact(vehicleNumber)
-      this.traceVehicle?.filterExact(vehicleNumber)
-      this.requestVehicle?.filterExact(vehicleNumber)
-      this.requestStart.filterAll()
-      this.requestEnd.filterAll()
       this.searchEnabled = true
     } else {
       console.log('nope')
       this.pathVehicle?.filterAll()
-      this.traceVehicle?.filterAll()
-      this.requestVehicle?.filterAll()
       this.searchEnabled = false
     }
     this.updateDatasetFilters()
@@ -405,25 +288,13 @@ class VueComponent extends Vue {
     this.setWallClock()
 
     // only filter if search is disabled and we have data loaded already
-    if (this.traceStart && this.pathStart && this.requestStart) {
+    if (this.pathStart) {
       this.pathStart.filter([0, this.simulationTime])
       this.pathEnd.filter([this.simulationTime, Infinity])
-
-      // scrub vehicles if search is disabled
-      if (!this.searchEnabled) {
-        this.traceStart.filter([0, this.simulationTime])
-        this.traceEnd.filter([this.simulationTime, Infinity])
-        this.requestStart.filter([0, this.simulationTime])
-        this.requestEnd.filter([this.simulationTime, Infinity])
-      }
     }
 
     //@ts-ignore
     this.$options.paths = this.paths.allFiltered()
-    //@ts-ignore
-    this.$options.traces = this.traces.allFiltered()
-    //@ts-ignore
-    this.$options.drtRequests = this.requests.allFiltered()
   }
 
   private toggleSimulation() {
@@ -440,43 +311,19 @@ class VueComponent extends Vue {
   }
 
   private async mounted() {
-    globalStore.commit('setFullScreen', !this.thumbnail)
-
-    if (!this.yamlConfig) this.buildRouteFromUrl()
-    await this.getVizDetails()
-
-    if (this.thumbnail) return
+    globalStore.commit('setFullScreen', true)
 
     this.showHelp = false
-    this.generateBreadcrumbs()
     this.updateLegendColors()
 
     this.setWallClock()
 
-    this.myState.statusMessage = '/ Dateien laden...'
+    this.myState.statusMessage = 'Loading files...'
     console.log('loading files')
-    const { trips, drtRequests } = await this.loadFiles()
+    this.loadFiles()
 
     console.log('parsing vehicle motion')
-    this.myState.statusMessage = '/ Standorte berechnen...'
-    this.paths = await this.parseVehicles(trips)
-    this.pathStart = this.paths.dimension(d => d.t0)
-    this.pathEnd = this.paths.dimension(d => d.t1)
-    this.pathVehicle = this.paths.dimension(d => d.v)
-
-    console.log('Routen verarbeiten...')
-    this.myState.statusMessage = '/ Routen verarbeiten...'
-    this.traces = await this.parseRouteTraces(trips)
-    this.traceStart = this.traces.dimension(d => d.t0)
-    this.traceEnd = this.traces.dimension(d => d.t1)
-    this.traceVehicle = this.traces.dimension(d => d.v)
-
-    console.log('Anfragen sortieren...')
-    this.myState.statusMessage = '/ Anfragen...'
-    this.requests = await this.parseDrtRequests(drtRequests)
-    this.requestStart = this.requests.dimension(d => d[0]) // time0
-    this.requestEnd = this.requests.dimension(d => d[6]) // arrival
-    this.requestVehicle = this.requests.dimension(d => d[5])
+    this.myState.statusMessage = 'Calculating motion...'
 
     console.log('GO!')
     this.myState.statusMessage = ''
@@ -533,38 +380,13 @@ class VueComponent extends Vue {
 
   private updateDatasetFilters() {
     // dont' filter if we haven't loaded yet
-    if (!this.traceStart || !this.pathStart || !this.requestStart) return
-
-    // filter out all traces that havent started or already finished
-    if (this.SETTINGS.Routen) {
-      if (this.searchEnabled) {
-        this.traceStart.filterAll()
-        this.traceEnd.filterAll()
-      } else {
-        this.traceStart.filter([0, this.simulationTime])
-        this.traceEnd.filter([this.simulationTime, Infinity])
-      }
-      //@ts-ignore
-      this.$options.traces = this.traces.allFiltered()
-    }
+    if (!this.pathStart) return
 
     if (this.SETTINGS.Fahrzeuge) {
       this.pathStart.filter([0, this.simulationTime])
       this.pathEnd.filter([this.simulationTime, Infinity])
       //@ts-ignore:
       this.$options.paths = this.paths.allFiltered()
-    }
-
-    if (this.SETTINGS['DRT Anfragen']) {
-      if (this.searchEnabled) {
-        this.requestStart.filterAll()
-        this.requestEnd.filterAll()
-      } else {
-        this.requestStart.filter([0, this.simulationTime])
-        this.requestEnd.filter([this.simulationTime, Infinity])
-      }
-      //@ts-ignore
-      this.$options.drtRequests = this.requests.allFiltered()
     }
   }
 
@@ -573,6 +395,14 @@ class VueComponent extends Vue {
       const elapsed = Date.now() - this.timeElapsedSinceLastFrame
       this.timeElapsedSinceLastFrame += elapsed
       this.simulationTime += elapsed * this.speed * 0.06
+
+      if (this.simulationTime > 86400) {
+        this.myState.day += 1
+        this.simulationTime -= 86400
+      } else if (this.simulationTime < 0) {
+        this.myState.day -= 1
+        this.simulationTime += 86400
+      }
 
       this.updateDatasetFilters()
       this.setWallClock()
@@ -653,33 +483,45 @@ class VueComponent extends Vue {
     this.myState.isRunning = false
   }
 
-  private async loadFiles() {
+  private loadFiles() {
     let trips: any[] = []
-    let drtRequests: any = []
 
-    try {
-      if (this.vizDetails.drtTrips.endsWith('json')) {
-        const json = await this.myState.fileApi.getFileJson(
-          this.myState.subfolder + '/' + this.vizDetails.drtTrips
-        )
-        trips = json.trips
-        drtRequests = json.drtRequests
-      } else if (this.vizDetails.drtTrips.endsWith('gz')) {
-        const blob = await this.myState.fileApi.getFileBlob(
-          this.myState.subfolder + this.vizDetails.drtTrips
-        )
-        const blobString = blob ? await blobToBinaryString(blob) : null
-        let text = await coroutines.run(pako.inflateAsync(blobString, { to: 'string' }))
-        const json = JSON.parse(text)
+    const filename = 'http://localhost:8080/entire-animation/trips.csv'
+    Papaparse.parse(filename, {
+      preview: 200000,
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: true,
+      worker: true,
+      step: this.chunkCSVloaded,
+      complete: this.finishedLoadingCSV,
+    })
+  }
 
-        trips = json.trips
-        drtRequests = json.drtRequests
-      }
-    } catch (e) {
-      console.error(e)
-      this.myState.statusMessage = '' + e
-    }
-    return { trips, drtRequests }
+  private dataArray: any[] = []
+
+  private numPoints = 0
+  private chunkCSVloaded(results: any) {
+    this.numPoints++
+    this.dataArray.push([
+      results.data.timeStart,
+      results.data.timeEnd,
+      [results.data.locStartX, results.data.locStartY],
+      [results.data.locEndX, results.data.locEndY],
+    ])
+    if (this.numPoints % 10000 === 0) this.myState.statusMessage = `${this.numPoints}`
+  }
+
+  private finishedLoadingCSV(parsed: any) {
+    console.log('all done', this.numPoints)
+    this.myState.statusMessage = ''
+
+    this.paths = crossfilter(this.dataArray)
+    this.pathStart = this.paths.dimension(d => d[0])
+    this.pathEnd = this.paths.dimension(d => d[1])
+    // this.pathVehicle = this.paths.dimension(d => d.v)
+    this.dataArray = []
   }
 
   private toggleLoaded(loaded: boolean) {
@@ -769,10 +611,10 @@ export default VueComponent
 .right-side {
   margin-top: 2rem;
   grid-area: rightside;
-  background-color: $steelGray;
-  box-shadow: 0px 2px 10px #111111ee;
-  color: white;
+  background-color: white;
+  box-shadow: 0px 2px 10px #aaaaaaee;
   display: flex;
+  color: black;
   flex-direction: column;
   font-size: 0.8rem;
   pointer-events: auto;
@@ -795,7 +637,7 @@ export default VueComponent
   z-index: 20;
   pointer-events: auto;
   background-color: $steelGray;
-  color: white;
+  color: black;
   font-size: 0.8rem;
   padding: 0.25rem 0;
   margin: 1.5rem 0rem 0 0;
@@ -805,7 +647,7 @@ export default VueComponent
   background-color: var(--bgPale);
   z-index: -1;
   grid-column: 1 / 3;
-  grid-row: 1 / 7;
+  grid-row: 1 / 5;
   pointer-events: auto;
 }
 
@@ -817,6 +659,7 @@ export default VueComponent
 .clock {
   min-width: max-content;
   background-color: #000000cc;
+  color: white;
   padding: 0.5rem 1rem 0.5rem 0rem;
   // border: 3px solid white;
 }
