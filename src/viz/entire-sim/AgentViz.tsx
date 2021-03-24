@@ -126,7 +126,7 @@ export default function Component(props: {
       getColor: (d: any) => [255, 0, 0], // props.colors[d.occ],
       iconMoving: 'vehicle',
       iconStill: 'diamond',
-      getSize: searchEnabled ? 56 : 20,
+      getSize: searchEnabled ? 56 : 24,
       opacity: 1.0,
       currentTime: simulationTime,
       shadowEnabled: false,
