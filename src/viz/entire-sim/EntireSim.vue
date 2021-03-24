@@ -486,7 +486,7 @@ class VueComponent extends Vue {
   private loadFiles() {
     let trips: any[] = []
 
-    const filename = 'http://localhost:8080/entire-animation/trips.csv'
+    const filename = 'https://covid-sim.info/entire-animation/trips.csv'
     Papaparse.parse(filename, {
       preview: 200000,
       download: true,
