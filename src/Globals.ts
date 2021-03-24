@@ -110,3 +110,15 @@ export const DARK_MODE: ColorSet = {
   critical: '#f6f',
   recovered: '#116622',
 }
+
+export enum LegendItemType {
+  line,
+  box,
+}
+
+export interface LegendItem {
+  type: LegendItemType
+  color: number[]
+  value: any
+  label?: string
+}

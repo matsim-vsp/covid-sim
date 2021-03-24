@@ -13,11 +13,6 @@ const routes = [
     component: HomeIndex,
   },
   {
-    path: '/blog',
-    name: 'Home2',
-    component: () => import(/* webpackChunkName: "home2" */ '@/views/HomeBlog.vue'),
-  },
-  {
     // REDIRECT for old */covid-sim/* links
     path: '/covid-sim/*',
     redirect: '/*',
@@ -87,6 +82,10 @@ const routes = [
   {
     path: '/timelapse',
     component: () => import(/* webpackChunkName: "multiday" */ '@/viz/time-lapse/TimeLapseViz.vue'),
+  },
+  {
+    path: '/entiresim',
+    component: () => import(/* webpackChunkName: "entiresim" */ '@/viz/entire-sim/EntireSim.vue'),
   },
   {
     path: '/shader',

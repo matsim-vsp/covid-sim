@@ -28,13 +28,6 @@
                   p {{run.title}}
                   p {{run.subtitle}}
 
-            .one-viz(v-for="rcalc in rCalculators.slice(0,1)" :key="rcalc.url")
-              router-link(:to="rcalc.url")
-                .box(style="height: 100%;")
-                  h5 {{rcalc.title}}
-                  .date(:style="{flex: 1, color: '#555599', fontWeight: 'bold'}") Released: {{ rcalc.date}}
-                  img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
-
             .one-viz
               a(:href="latestReport.url" target="_blank")
                 .box(style="height: 100%;")
@@ -42,6 +35,13 @@
                   p(:style="{color: '#555599', fontWeight: 'bold'}") Released: {{latestReport.title}}
                   p(style="flex: 1")  We deliver frequent updates to the German BMBF Ministry.
                   button.button.is-link(style="width: 100%") Get PDF (Deutsch)
+
+            .one-viz(v-for="rcalc in rCalculators.slice(0,1)" :key="rcalc.url")
+              router-link(:to="rcalc.url")
+                .box(style="height: 100%;")
+                  h5 {{rcalc.title}}
+                  .date(:style="{flex: 1, color: '#555599', fontWeight: 'bold'}") Released: {{ rcalc.date}}
+                  img(width=250 :style="{height: '100px', 'object-fit': 'fill'}" :src="rcalc.image")
 
 
           h2 Method: Mobility traces and the spreading of COVID-19
@@ -123,7 +123,7 @@ export default class VueComponent extends Vue {
       date: 'Released: 19 March 2021',
       title: 'Report runs March 19',
       subtitle: 'Activity-based testing strategies',
-    },  
+    },
     {
       url:
         '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',

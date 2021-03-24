@@ -19,7 +19,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MarkdownIt from 'markdown-it'
 
-import allReports from '@/assets/reports.ts'
+import allReports from '@/assets/reports'
 
 @Component({ components: {}, props: {} })
 export default class VueComponent extends Vue {

@@ -22,10 +22,10 @@
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.03.19
-          
-          .navbar-dropdown          
+
+          .navbar-dropdown
             a.navbar-item(:href="'/2021-03-19/testing?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29'") Runs for report March 19
-            
+
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.02.26
 
@@ -34,30 +34,15 @@
             a.navbar-item(:href="'/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes'") Testing strategies
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.02.05
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15'") Runs for report Feb. 05
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.01.15
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346'") Curfew options
-            a.navbar-item(:href="'/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346'") Where do we stand after the holidays?
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2020.12.18
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2020-12-10/secondLockdown'") Second Lockdown incl Curfew Options
-            a.navbar-item(:href="'/2020-12-10/vaccinations'") Vaccination Strategies
-            a.navbar-item(:href="'/2020-12-10/vaccinationsWinterEnd'") Vaccination vs Winter End
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15'") 2021.02.05: Runs for Feb. 5th
+              a.navbar-item(:href="'/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346'") 2021.01.15: Curfew options
+              a.navbar-item(:href="'/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346'") 2021.01.15: Where we stand post-holidays
+              a.navbar-item(:href="'/2020-12-10/secondLockdown'") 2020.12.18: 2nd Lockdown w/Curfew
+              a.navbar-item(:href="'/2020-12-10/vaccinations'") 2020.12.18: Vaccination Strategies
+              a.navbar-item(:href="'/2020-12-10/vaccinationsWinterEnd'") 2020.12.18 Vaccination vs. Winter End
               a.navbar-item(:href="'/2020-12-03/secondLockdown'") Second Lockdown
               a.navbar-item(:href="'/2020-11-12/secondLockdown'") 2020.11.12: Second Lockdown
               a.navbar-item(:href="'/2020-11-12/secondLockdownCurfew'") 2020.11.12: Curfew

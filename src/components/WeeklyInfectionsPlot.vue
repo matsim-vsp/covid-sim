@@ -209,8 +209,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
-      autorange: true, // this.logScale ? false : true,
-      // range: [0, 5],
+      autorange: true,
       title: '7-Day Infections / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
