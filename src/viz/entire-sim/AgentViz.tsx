@@ -51,7 +51,7 @@ export default function Component(props: {
   searchEnabled: boolean
   onClick: any
 }) {
-  const mapStyle = 'mapbox://styles/mapbox/light-v9'
+  const mapStyle = 'mapbox://styles/mapbox/dark-v10'
 
   // 'mapbox://styles/vsp-tu-berlin/ckek59op0011219pbwfar1rex'
   // const mapStyle = 'mapbox://styles/vsp-tu-berlin/ckeetelh218ef19ob5nzw5vbh'
