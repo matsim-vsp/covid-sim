@@ -11,6 +11,7 @@ import ndjson
 import xopen
 import xml.etree.ElementTree as ET
 import sys
+import random
 
 from pyproj import Transformer
 
@@ -80,14 +81,19 @@ def build_disease_codes(diseaseList):
 
     return [diseaseList[0], diseaseList[1], diseaseList[2]]
 
+random.seed(1234)
 
 ## ------------START DOING STUFF
 
 # Read in facilities and create id: [x,y] lookup
+
 print('Reading facilities')
 facilities = {}
 for facility in facility_reader('be_2020-facilities_assigned_simplified_grid.xml.gz'):
-    facilities[facility['id']] = [facility['x'], facility['y']]
+    # add random noise to x/y since they are in blocks
+    x = float(facility['x']) + 500 * random.random() - 250.0
+    y = float(facility['y']) + 500 * random.random() - 250.0
+    facilities[facility['id']] = [x,y]
 
 print(len(facilities), "facilities found")
 
