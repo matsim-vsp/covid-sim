@@ -330,6 +330,7 @@ export default class VueComponent extends Vue {
   private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
   private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
   private DIVI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
+  private JAKARTA_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/Other/'
 
   private isUsingRealDates = false
   private endDate = '2020-08-31'
@@ -338,6 +339,7 @@ export default class VueComponent extends Vue {
     berlin: this.RKI_URL + 'berlin-cases.csv',
     munich: this.RKI_URL + 'munich-cases.csv',
     heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
+    jakarta: this.JAKARTA_URL + 'jakarta-cases.CSV',
   }
 
   private cityCSVMeldedatum: any = {
@@ -1011,129 +1013,33 @@ export default class VueComponent extends Vue {
   }
 
   private async prepareObservedData(newCity: string) {
-    // 1 - RKI DATA
+    const serieses = []
 
-    const response = await fetch(this.cityCSV[newCity])
-    const csvContents = await response.text()
-    const data = Papa.parse(csvContents, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
+    // 1 - CASES DATA
+    if (this.cityCSV[newCity]) {
+      const response = await fetch(this.cityCSV[newCity])
+      const csvContents = await response.text()
+      const data = Papa.parse(csvContents, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
 
-    const xdates: any = []
-    const xcases: any = []
-    let cumulative = 0
+      const xdates: any = []
+      const xcases: any = []
+      let cumulative = 0
 
-    // pull the cases field out of the CSV
-    for (const datapoint of data) {
-      const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
-      xdates.push(day)
-      cumulative += datapoint.cases
-      xcases.push(cumulative)
-    }
+      // pull the cases field out of the CSV
+      for (const datapoint of data) {
+        const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
+        xdates.push(day)
+        cumulative += datapoint.cases
+        xcases.push(cumulative)
+      }
 
-    //get the meldedatum
-    const responseM = await fetch(this.cityCSVMeldedatum[newCity])
-    const csvContentsM = await responseM.text()
-    const dataM = Papa.parse(csvContentsM, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
-
-    const mDates: any = []
-    const mCases: any = []
-    let mCumulative = 0
-    const mOffset = -1
-
-    // pull the cases field out of the CSV
-    for (const datapoint of dataM) {
-      let dayObject = moment({
-        year: datapoint.year,
-        month: datapoint.month - 1,
-        day: datapoint.day,
-      })
-      dayObject.add(mOffset, 'days')
-
-      const day = dayObject.format('YYYY-MM-DD')
-
-      mDates.push(day)
-      mCumulative += datapoint.cases
-      mCases.push(mCumulative)
-    }
-
-    //get test data
-    const responseT = await fetch(this.cityCSVTests[newCity])
-    const csvContentsT = await responseT.text()
-    const dataT = Papa.parse(csvContentsT, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
-
-    const tDates: any = []
-    const tCases: any = []
-    let tCumulative = 0
-    const tOffset = 0
-
-    // pull the cases field out of the CSV
-    for (const datapoint of dataT) {
-      let dayObject = moment({
-        year: datapoint.year,
-        month: datapoint.month - 1,
-        day: datapoint.day,
-      })
-      dayObject.add(tOffset, 'days')
-
-      const day = dayObject.format('YYYY-MM-DD')
-
-      tDates.push(day)
-      tCumulative += datapoint.cases
-      tCases.push(tCumulative)
-    }
-
-    // get case surveillance data
-    const responseSurv = await fetch(this.cityRKISurveillance[newCity])
-    const csvContentsSurv = await responseSurv.text()
-    const survData = Papa.parse(csvContentsSurv, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      delimiter: ';',
-    }).data
-
-    const sDates: any = []
-    const sShare: any = []
-    const text: any = []
-
-    // pull the cases field out of the CSV
-    for (const xdatapoint of survData) {
-      const dateField = xdatapoint['Beginn Meldewoche']
-      const year = parseInt(dateField.substring(6, 10))
-      const month = parseInt(dateField.substring(3, 5)) - 1
-      const zday = parseInt(dateField.substring(0, 2))
-      let dayObject = moment({
-        year,
-        month,
-        day: zday,
-      })
-
-      const day = dayObject.format('YYYY-MM-DD')
-      const estimPositive = xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
-
-      if (day === 'Invalid date') continue
-
-      sDates.push(day)
-      sShare.push(this.scaleRKISurveillanceAnteil * estimPositive)
-      text.push(estimPositive)
-    }
-
-    console.log({ sDates, sShare })
-
-    const serieses = [
-      {
-        name: 'RKI ' + this.cityCap + ' Infections',
+      const name = newCity !== 'jakarta' ? `RKI ${this.cityCap} Infections` : 'Observed Infections'
+      serieses.push({
+        name,
         x: xdates,
         y: xcases,
         line: {
@@ -1141,24 +1047,128 @@ export default class VueComponent extends Vue {
           width: 3,
           color: '#080',
         },
-      },
-      {
+      })
+    }
+
+    //get the meldedatum
+    if (this.cityCSVMeldedatum[newCity]) {
+      const responseM = await fetch(this.cityCSVMeldedatum[newCity])
+      const csvContentsM = await responseM.text()
+      const dataM = Papa.parse(csvContentsM, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const mDates: any = []
+      const mCases: any = []
+      let mCumulative = 0
+      const mOffset = -1
+
+      // pull the cases field out of the CSV
+      for (const datapoint of dataM) {
+        let dayObject = moment({
+          year: datapoint.year,
+          month: datapoint.month - 1,
+          day: datapoint.day,
+        })
+        dayObject.add(mOffset, 'days')
+
+        const day = dayObject.format('YYYY-MM-DD')
+
+        mDates.push(day)
+        mCumulative += datapoint.cases
+        mCases.push(mCumulative)
+      }
+
+      serieses.push({
         name: 'RKI-Meldedatum ' + this.cityCap,
         x: mDates,
         y: mCases,
         mode: 'markers',
         type: 'scatter',
         marker: { color: '#6d2', size: 3 },
-      },
-      {
+      })
+    }
+
+    //get test data
+    if (this.cityCSVTests[newCity]) {
+      const responseT = await fetch(this.cityCSVTests[newCity])
+      const csvContentsT = await responseT.text()
+      const dataT = Papa.parse(csvContentsT, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const tDates: any = []
+      const tCases: any = []
+      let tCumulative = 0
+      const tOffset = 0
+
+      // pull the cases field out of the CSV
+      for (const datapoint of dataT) {
+        let dayObject = moment({
+          year: datapoint.year,
+          month: datapoint.month - 1,
+          day: datapoint.day,
+        })
+        dayObject.add(tOffset, 'days')
+
+        const day = dayObject.format('YYYY-MM-DD')
+
+        tDates.push(day)
+        tCumulative += datapoint.cases
+        tCases.push(tCumulative)
+      }
+      serieses.push({
         name: 'Positive Tests ' + this.cityCap,
         x: tDates,
         y: tCases,
         mode: 'markers',
         type: 'scatter',
         marker: { color: '#f42', size: 4 },
-      },
-      {
+      })
+    }
+
+    // get case surveillance data
+    if (this.cityRKISurveillance[newCity]) {
+      const responseSurv = await fetch(this.cityRKISurveillance[newCity])
+      const csvContentsSurv = await responseSurv.text()
+      const survData = Papa.parse(csvContentsSurv, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        delimiter: ';',
+      }).data
+
+      const sDates: any = []
+      const sShare: any = []
+      const text: any = []
+
+      // pull the cases field out of the CSV
+      for (const xdatapoint of survData) {
+        const dateField = xdatapoint['Beginn Meldewoche']
+        const year = parseInt(dateField.substring(6, 10))
+        const month = parseInt(dateField.substring(3, 5)) - 1
+        const zday = parseInt(dateField.substring(0, 2))
+        let dayObject = moment({
+          year,
+          month,
+          day: zday,
+        })
+
+        const day = dayObject.format('YYYY-MM-DD')
+        const estimPositive = xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
+
+        if (day === 'Invalid date') continue
+
+        sDates.push(day)
+        sShare.push(this.scaleRKISurveillanceAnteil * estimPositive)
+        text.push(estimPositive)
+      }
+
+      serieses.push({
         name: 'Reported: Share Positive Tests (ALM e.V.)',
         x: sDates,
         y: sShare,
@@ -1167,8 +1177,9 @@ export default class VueComponent extends Vue {
         type: 'scatter',
         hovertemplate: '%{text}%',
         marker: { symbol: 'cross', color: '#f80', size: 5 },
-      },
-    ]
+      })
+    }
+
     return serieses
   }
 

@@ -66,11 +66,12 @@ export default class VueComponent extends Vue {
       const offsetRKIDate: { [id: string]: number } = {
         'RKI Berlin Infections': 11,
         'RKI-Meldedatum Berlin': 12,
+        'Observed Infections': 12,
       }
 
       const lineName = observedLine.name as string
-      if (lineName.startsWith('RKI')) {
-        // RKI lines: weekly average
+      if (lineName.startsWith('RKI') || lineName.startsWith('Observed')) {
+        // Observed lines: weekly average
         const startWeek = offsetRKIDate[lineName]
 
         // generate weekly numbers
@@ -82,7 +83,7 @@ export default class VueComponent extends Vue {
           observedLine.y.push(observedRate)
         }
       } else {
-        // non RKI lines: every day
+        // non Observed lines: every day
 
         for (let i = 0; i < source.x.length; i++) {
           const newInfections = source.y[i] - (i < this.lagDays ? 0 : source.y[i - this.lagDays])
