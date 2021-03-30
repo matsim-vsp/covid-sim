@@ -2,7 +2,7 @@
 .activity-levels-plot
   vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
 
-  .row-labels
+  .row-labels(:class="{jakarta: city==='jakarta'}")
     .activity(v-for="row in dataLines" :key="row.name")
       p {{ row.name}}
 
@@ -133,6 +133,12 @@ export default class VueComponent extends Vue {
     { col: 'shop_daily', title: 'Other NonHome' },
     { col: 'restaurant', title: 'Restaurant' },
 
+    // JAKARTA
+    { col: 'education', title: 'Education' },
+    { col: 'shop', title: 'Shop' },
+    { col: 'other', title: 'Other' },
+
+    // OLD BERLIN, UNUSED NOW
     // { col: 'educ_tertiary', title: 'Educ: Tertiary' },
     // { col: 'shop_other', title: 'Shopping: Other' },
     // { col: 'visit', title: 'Visits' },
@@ -295,10 +301,14 @@ export default class VueComponent extends Vue {
 .row-labels p {
   font-size: 0.8rem;
   text-align: right;
-  margin: 0.5rem 0 0 auto;
+  margin: 0.7rem 0 0 auto;
   line-height: 0.8rem;
   width: min-content;
   height: 1.52rem;
+}
+
+.row-labels.jakarta p {
+  margin-top: 2rem;
 }
 
 @media only screen and (max-width: 640px) {
