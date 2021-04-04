@@ -145,7 +145,10 @@ export default class VueComponent extends Vue {
         {
           name: 'Hospital Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
-          y: [this.hospitalCapacity[this.city][0], this.hospitalCapacity[this.city][0]],
+          y: [
+            this.hospitalCapacity[this.city][0] / factor100k,
+            this.hospitalCapacity[this.city][0] / factor100k,
+          ],
           fill: 'none',
           marker: { size: 2 },
           line: {
@@ -156,7 +159,10 @@ export default class VueComponent extends Vue {
         {
           name: 'Hospital Max Reserve Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
-          y: [this.hospitalCapacity[this.city][1], this.hospitalCapacity[this.city][1]],
+          y: [
+            this.hospitalCapacity[this.city][1] / factor100k,
+            this.hospitalCapacity[this.city][1] / factor100k,
+          ],
           fill: 'none',
           marker: { size: 2 },
           line: {
