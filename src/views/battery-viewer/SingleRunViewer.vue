@@ -107,7 +107,7 @@
 
           .hideIt(v-show="showPlot[1]")
             p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-            .plotarea.compact
+            .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               hospitalization-plot.plotsize(v-else
