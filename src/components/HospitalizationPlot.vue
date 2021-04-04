@@ -7,6 +7,7 @@ vue-plotly(:data="dataLines" :layout="layout" :options="options")
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
+import { forEachTransformDependencies } from 'mathjs'
 
 interface City {
   fromModel: string[]
@@ -88,6 +89,11 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
+    const sevenDays = 7
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+    const totalPopulation = susceptible.y[0]
+    const factor100k = totalPopulation / 100000.0
+
     if (!modelData.length) return
 
     // set end date
@@ -101,6 +107,21 @@ export default class VueComponent extends Vue {
     modelData = modelData.map(item => {
       // we are going to mutate the line color (!!!) to ensure all plots on the screen
       // have the same color for these metrics.
+
+      const midWeekDates = []
+      const infectionRate = []
+
+      for (let j = sevenDays + 5; j < item.x.length; j += sevenDays) {
+        let avgSum = 0
+        for (let k = j - sevenDays; k <= j; k += 1) {
+          avgSum += item.y[k]
+        }
+        let avgerage = avgSum / 7
+        const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
+        infectionRate.push(rate)
+        midWeekDates.push(item.x[j - 3])
+      }
+
       const color = this.colors[item.name]
       item.line = {
         dash: 'solid',
@@ -110,8 +131,8 @@ export default class VueComponent extends Vue {
 
       const trace = {
         name: 'Model: ' + item.name,
-        x: item.x,
-        y: item.y,
+        x: midWeekDates,
+        y: infectionRate,
         line: item.line,
       }
 
@@ -161,6 +182,11 @@ export default class VueComponent extends Vue {
       skipEmptyLines: true,
     }).data
 
+    const sevenDays = 7
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
+    const totalPopulation = susceptible.y[0]
+    const factor100k = totalPopulation / 100000.0
+
     this.hospitalSeries = []
 
     for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
@@ -168,10 +194,28 @@ export default class VueComponent extends Vue {
 
       if (this.cityDetails.csvLineNames.length <= i) continue
 
+      const midWeekDates = []
+      const infectionRate = []
+
+      for (let j = sevenDays + 5; j < hospData.length; j += sevenDays) {
+        let avgSum = 0
+        for (let k = j - sevenDays; k <= j; k += 1) {
+          avgSum += hospData[k][column]
+        }
+        let avgerage = avgSum / 7
+        const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
+        infectionRate.push(rate)
+        midWeekDates.push(hospData[j - 3]['Datum'])
+      }
+
+      for (let j = 0; j < midWeekDates.length; j += 1) {
+        midWeekDates[j] = this.reformatDateBerlin(midWeekDates[j])
+      }
+
       this.hospitalSeries.push({
         name: this.cityDetails.csvLineNames[i],
-        x: hospData.map(day => this.cityDetails.dateFormatter(day[this.cityDetails.dateColumn])),
-        y: hospData.map(day => day[column]),
+        x: midWeekDates,
+        y: infectionRate,
         line: {
           dash: 'dot',
           width: 2,
@@ -179,6 +223,23 @@ export default class VueComponent extends Vue {
         },
       })
     }
+
+    const midWeekDates = []
+    const infectionRate = []
+
+    for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
+      let avgSum = 0
+      for (let k = j - sevenDays; k <= j; k += 1) {
+        avgSum += this.diviData[0].y[k]
+      }
+      let avgerage = avgSum / 7
+      const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
+      infectionRate.push(rate)
+      midWeekDates.push(this.diviData[0].x[j - 3])
+    }
+
+    this.diviData[0].x = midWeekDates
+    this.diviData[0].y = infectionRate
 
     if (this.diviData.length > 0) {
       this.hospitalSeries.push(this.diviData[0])
