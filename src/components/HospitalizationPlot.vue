@@ -7,7 +7,6 @@ vue-plotly(:data="dataLines" :layout="layout" :options="options")
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
-import { forEachTransformDependencies } from 'mathjs'
 
 interface City {
   fromModel: string[]
@@ -78,8 +77,8 @@ export default class VueComponent extends Vue {
 
   private buildPlot() {
     this.cityDetails = this.dataDetails[this.city]
-    this.prepareHospitalData()
     this.updateModelData()
+    this.prepareHospitalData()
   }
 
   @Watch('city') private switchCity() {
@@ -94,13 +93,19 @@ export default class VueComponent extends Vue {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
+  private factor100k = 1
+
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
     const sevenDays = 7
-    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
-    const totalPopulation = susceptible.y[0]
-    const factor100k = totalPopulation / 100000.0
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')
+
+    // maybe data is not loaded yet
+    if (!susceptible.length) return
+
+    const totalPopulation = susceptible[0].y[0]
+    this.factor100k = totalPopulation / 100000.0
 
     if (!modelData.length) return
 
@@ -125,7 +130,7 @@ export default class VueComponent extends Vue {
           avgSum += item.y[k]
         }
         let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
+        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
         infectionRate.push(rate)
         midWeekDates.push(item.x[j - 3])
       }
@@ -154,8 +159,8 @@ export default class VueComponent extends Vue {
           name: 'Hospital Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
-            this.hospitalCapacity[this.city][0] / factor100k,
-            this.hospitalCapacity[this.city][0] / factor100k,
+            this.hospitalCapacity[this.city][0] / this.factor100k,
+            this.hospitalCapacity[this.city][0] / this.factor100k,
           ],
           fill: 'none',
           marker: { size: 2 },
@@ -168,8 +173,8 @@ export default class VueComponent extends Vue {
           name: 'Hospital Max Reserve Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
-            this.hospitalCapacity[this.city][1] / factor100k,
-            this.hospitalCapacity[this.city][1] / factor100k,
+            this.hospitalCapacity[this.city][1] / this.factor100k,
+            this.hospitalCapacity[this.city][1] / this.factor100k,
           ],
           fill: 'none',
           marker: { size: 2 },
@@ -197,9 +202,6 @@ export default class VueComponent extends Vue {
     }).data
 
     const sevenDays = 7
-    const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
-    const totalPopulation = susceptible.y[0]
-    const factor100k = totalPopulation / 100000.0
 
     this.hospitalSeries = []
 
@@ -217,7 +219,7 @@ export default class VueComponent extends Vue {
           avgSum += hospData[k][column]
         }
         let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
+        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
         infectionRate.push(rate)
         midWeekDates.push(hospData[j - 3]['Datum'])
       }
@@ -241,21 +243,22 @@ export default class VueComponent extends Vue {
     const midWeekDates = []
     const infectionRate = []
 
-    for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
-      let avgSum = 0
-      for (let k = j - sevenDays; k <= j; k += 1) {
-        avgSum += this.diviData[0].y[k]
+    // add dividata, if we have some
+    if (this.diviData.length) {
+      for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
+        let avgSum = 0
+        for (let k = j - sevenDays; k <= j; k += 1) {
+          avgSum += this.diviData[0].y[k]
+        }
+        let avgerage = avgSum / 7
+        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
+        infectionRate.push(rate)
+        midWeekDates.push(this.diviData[0].x[j - 3])
       }
-      let avgerage = avgSum / 7
-      const rate = 0.1 * Math.round((10.0 * avgerage) / factor100k)
-      infectionRate.push(rate)
-      midWeekDates.push(this.diviData[0].x[j - 3])
-    }
 
-    this.diviData[0].x = midWeekDates
-    this.diviData[0].y = infectionRate
+      this.diviData[0].x = midWeekDates
+      this.diviData[0].y = infectionRate
 
-    if (this.diviData.length > 0) {
       this.hospitalSeries.push(this.diviData[0])
     }
   }
