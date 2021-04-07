@@ -11,7 +11,7 @@ Vue.use(VueI18n)
 // locale: we only support EN and DE
 const locale = localStorage.getItem('default-locale')
   ? '' + localStorage.getItem('default-locale')
-  : // @ts-ignore
+  : // ignore
   // @ts-ignore
   (navigator.language || navigator.userLanguage).startsWith('de')
   ? 'de'
