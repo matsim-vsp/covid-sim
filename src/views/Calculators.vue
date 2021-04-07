@@ -6,14 +6,14 @@ en:
 de:
   badpage: 'Seite wurde nicht gefunden.'
   headline1: 'R-Wert-Rechner und Ansteckungsrechner'
-  description: 'Mit Hilfe des **„R-Wert-Rechners“** kann der Effekt verschiedener Maßnahmen bzw. Maßnahmenpakete auf das Infektionsgeschehen bestimmmt werden. 
-    Der R-Wert gibt an, wie viele weitere Personen eine infizierte Person im Durchschnitt mit dem Corona-Virus ansteckt. 
+  description: 'Mit Hilfe des **„R-Wert-Rechners“** kann der Effekt verschiedener Maßnahmen bzw. Maßnahmenpakete auf das Infektionsgeschehen bestimmmt werden.
+    Der R-Wert gibt an, wie viele weitere Personen eine infizierte Person im Durchschnitt mit dem Corona-Virus ansteckt.
     Daher ist es erforderlich den R-Wert langfristig kleiner 1 zu halten, um die Corona-Pandemie nachhaltig einzudämmen.
-    
-    
+
+
     Mit Hilfe des **„Ansteckungsrechners“** lässt sich die rechnerische Wahrscheinlichkeit ermitteln, wenn in bestimmten Situationen eine ansteckende Person anwesend ist, sich selbst mit dem Virus zu infizieren.
 
-    
+
     Weitere Infos zur Methodik der gesamten Simulation finden Sie auf unserer [Startseite](https://covid-sim.info/) .'
 </i18n>
 
@@ -47,7 +47,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MarkdownIt from 'markdown-it'
 
 import Colophon from '@/components/Colophon.vue'
-import allCalculators from '@/assets/calculators.ts'
+import allCalculators from '@/assets/calculators'
 
 @Component({ components: { Colophon }, props: {} })
 export default class VueComponent extends Vue {

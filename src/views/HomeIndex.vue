@@ -123,7 +123,7 @@ export default class VueComponent extends Vue {
       date: 'Released: 19 March 2021',
       title: 'Report runs March 19',
       subtitle: 'Activity-based testing strategies',
-    },  
+    },
     {
       url:
         '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',

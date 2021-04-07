@@ -7,11 +7,11 @@
 
   .team COVID-19 Team
 
-  p Billy Charlton
-  p Ricardo Ewert
-  p Ihab Kaddoura
   p Sebastian Müller
   p Christian Rakow
+  p Ricardo Ewert
+  p Ihab Kaddoura
+  p Billy Charlton
   p Tilmann Schlenther
 
   .team MATSim-EpiSim
