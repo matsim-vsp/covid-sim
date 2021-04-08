@@ -36,7 +36,19 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    this.layout.yaxis = this.logScale
+      ? {
+          fixedrange: window.innerWidth < 700,
+          type: 'log',
+          range: [Math.log10(2), Math.log10(5000)],
+          title: '7-Day Infections / 100k Pop.',
+        }
+      : {
+          fixedrange: window.innerWidth < 700,
+          type: 'linear',
+          autorange: true,
+          title: '7-Day Infections / 100k Pop.',
+        }
   }
 
   private calculateObserved(factor100k: number) {
@@ -208,12 +220,13 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
+      // note this gets overwritten when the scale changes - see updateScale()
       fixedrange: window.innerWidth < 700,
-      type: this.logScale ? 'log' : 'linear',
-      // autorange: true,
-        range: [Math.log10(2),Math.log10(5000)],
+      type: 'log',
+      autorange: false,
+      range: [Math.log10(2), Math.log10(5000)],
       title: '7-Day Infections / 100k Pop.',
-    },
+    } as any,
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
   }
