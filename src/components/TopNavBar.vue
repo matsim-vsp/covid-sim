@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.04.09
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 1.8 higher infectivity of B117
+            a.navbar-item(:href="'/2021-04-09/bmbf-2.0?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 2.0 higher infectivity of B117
+
           a.navbar-link  2021.03.19
 
           .navbar-dropdown
