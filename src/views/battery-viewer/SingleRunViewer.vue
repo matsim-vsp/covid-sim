@@ -455,6 +455,7 @@ export default class VueComponent extends Vue {
     if (this.cityCSV[this.city]) {
       this.observedCases = await this.prepareObservedData(this.city)
       this.diviData = await this.prepareDiviData(this.city)
+      console.log(this.diviData)
     }
 
     await this.loadInfoTxt()
