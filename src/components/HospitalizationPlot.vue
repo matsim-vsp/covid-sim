@@ -130,7 +130,7 @@ export default class VueComponent extends Vue {
           avgSum += item.y[k]
         }
         let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
+        const rate = (0.1 * Math.round(10.0 * avgerage)) / this.factor100k
         infectionRate.push(rate)
         midWeekDates.push(item.x[j - 3])
       }
@@ -219,7 +219,7 @@ export default class VueComponent extends Vue {
           avgSum += hospData[k][column]
         }
         let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
+        let rate = (0.1 * Math.round(10.0 * avgerage)) / 35.7458
         infectionRate.push(rate)
         midWeekDates.push(hospData[j - 3]['Datum'])
       }
@@ -250,8 +250,8 @@ export default class VueComponent extends Vue {
         for (let k = j - sevenDays; k <= j; k += 1) {
           avgSum += this.diviData[0].y[k]
         }
-        let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round((10.0 * avgerage) / this.factor100k)
+        let avgerage = avgSum / 7 / 35.7458
+        const rate = 0.1 * Math.round(10.0 * avgerage)
         infectionRate.push(rate)
         midWeekDates.push(this.diviData[0].x[j - 3])
       }
@@ -296,7 +296,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Hospitalizations',
+      title: '7-Day Hospitalizations / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
