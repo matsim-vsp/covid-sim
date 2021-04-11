@@ -219,7 +219,7 @@ export default class VueComponent extends Vue {
           avgSum += hospData[k][column]
         }
         let avgerage = avgSum / 7
-        let rate = (0.1 * Math.round(10.0 * avgerage)) / 35.7458
+        let rate = (0.1 * Math.round(10.0 * avgerage)) / 35.7458 //TODO: Change to this.factor100k
         infectionRate.push(rate)
         midWeekDates.push(hospData[j - 3]['Datum'])
       }
@@ -250,7 +250,7 @@ export default class VueComponent extends Vue {
         for (let k = j - sevenDays; k <= j; k += 1) {
           avgSum += this.diviData[0].y[k]
         }
-        let avgerage = avgSum / 7 / 35.7458
+        let avgerage = avgSum / 7 / 35.7458 //TODO: Change to this.factor100k
         const rate = 0.1 * Math.round(10.0 * avgerage)
         infectionRate.push(rate)
         midWeekDates.push(this.diviData[0].x[j - 3])
