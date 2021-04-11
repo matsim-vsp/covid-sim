@@ -186,7 +186,7 @@ export default class VueComponent extends Vue {
     // console.log({ dataLines: this.dataLines })
   }
 
-  private prepareHospitalData() {
+  @Watch('data') private prepareHospitalData() {
     const hospData = Papa.parse(this.csvData[this.city], {
       header: true,
       dynamicTyping: true,
@@ -194,6 +194,13 @@ export default class VueComponent extends Vue {
     }).data
 
     const sevenDays = 7
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')
+
+    // maybe data is not loaded yet
+    if (!susceptible.length) return
+
+    const totalPopulation = susceptible[0].y[0]
+    this.factor100k = totalPopulation / 100000.0
 
     this.hospitalSeries = []
 
@@ -211,7 +218,7 @@ export default class VueComponent extends Vue {
           avgSum += hospData[k][column]
         }
         let avgerage = avgSum / 7
-        let rate = (0.1 * Math.round(10.0 * avgerage)) / 35.7458 //TODO: Change to this.factor100k
+        let rate = (0.1 * Math.round(10.0 * avgerage)) / this.factor100k
         infectionRate.push(rate)
         midWeekDates.push(hospData[j - 3]['Datum'])
       }
@@ -242,16 +249,18 @@ export default class VueComponent extends Vue {
         for (let k = j - sevenDays; k <= j; k += 1) {
           avgSum += this.diviData[0].y[k]
         }
-        let avgerage = avgSum / 7 / 35.7458 //TODO: Change to this.factor100k
+        let avgerage = avgSum / 7 / this.factor100k
         const rate = 0.1 * Math.round(10.0 * avgerage)
         infectionRate.push(rate)
         midWeekDates.push(this.diviData[0].x[j - 3])
       }
 
-      this.diviData[0].x = midWeekDates
-      this.diviData[0].y = infectionRate
-
-      this.hospitalSeries.push(this.diviData[0])
+      this.hospitalSeries.push({
+        name: this.diviData[0].name,
+        x: midWeekDates,
+        y: infectionRate,
+        line: this.diviData[0].line,
+      })
     }
   }
 
