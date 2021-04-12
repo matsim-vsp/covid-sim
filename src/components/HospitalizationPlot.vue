@@ -114,17 +114,13 @@ export default class VueComponent extends Vue {
       // have the same color for these metrics.
 
       const midWeekDates = []
-      const infectionRate = []
+      let infectionRate = []
 
-      for (let j = sevenDays + 5; j < item.x.length; j += sevenDays) {
-        let avgSum = 0
-        for (let k = j - sevenDays; k <= j; k += 1) {
-          avgSum += item.y[k]
-        }
-        let avgerage = avgSum / 7
-        const rate = (0.1 * Math.round(10.0 * avgerage)) / this.factor100k
-        infectionRate.push(rate)
-        midWeekDates.push(item.x[j - 3])
+      infectionRate.push(item.y)
+      midWeekDates.push(item.x)
+
+      for (let i = 0; i < infectionRate[0].length; i++) {
+        infectionRate[0][i] = infectionRate[0][i] / this.factor100k
       }
 
       const color = this.colors[item.name]
@@ -136,8 +132,8 @@ export default class VueComponent extends Vue {
 
       const trace = {
         name: 'Model: ' + item.name,
-        x: midWeekDates,
-        y: infectionRate,
+        x: midWeekDates[0],
+        y: infectionRate[0],
         line: item.line,
       }
 
@@ -212,19 +208,14 @@ export default class VueComponent extends Vue {
       const midWeekDates = []
       const infectionRate = []
 
-      for (let j = sevenDays + 5; j < hospData.length; j += sevenDays) {
-        let avgSum = 0
-        for (let k = j - sevenDays; k <= j; k += 1) {
-          avgSum += hospData[k][column]
-        }
-        let avgerage = avgSum / 7
-        let rate = (0.1 * Math.round(10.0 * avgerage)) / this.factor100k
-        infectionRate.push(rate)
-        midWeekDates.push(hospData[j - 3]['Datum'])
+      for (let i = 0; i < hospData.length; i++) {
+        infectionRate.push(hospData[i][column])
+        midWeekDates.push(hospData[i]['Datum'])
       }
 
       for (let j = 0; j < midWeekDates.length; j += 1) {
         midWeekDates[j] = this.reformatDateBerlin(midWeekDates[j])
+        infectionRate[j] = infectionRate[j] / this.factor100k
       }
 
       this.hospitalSeries.push({
