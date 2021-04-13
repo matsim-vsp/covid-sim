@@ -65,11 +65,11 @@ class VegaLiteChart extends Vue {
   }
 
   private async getVizDetails() {
-    this.processInputs()
+    await this.processInputs()
     this.loadingText = ''
   }
 
-  private processInputs() {
+  private async processInputs() {
     // make a deep copy of passed-in definition object
     this.chartYaml = JSON.parse(JSON.stringify(this.yamlDef))
 
@@ -139,13 +139,15 @@ class VegaLiteChart extends Vue {
       padding: { top: 2, left: 8, right: 8, bottom: 8 },
     }
 
-    // console.log({ yaml: this.chartYaml })
-
     // don't embed before we've fetched data from zipfile
-    if (!this.chartYaml.data.url) {
-      vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
-    } else if (this.chartYaml.data.url.indexOf('$RUNS$') === -1) {
-      vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+    try {
+      if (!this.chartYaml.data.url) {
+        await vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+      } else if (this.chartYaml.data.url.indexOf('$RUNS$') === -1) {
+        await vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
+      }
+    } catch (e) {
+      // no chart? no big deal
     }
   }
 }

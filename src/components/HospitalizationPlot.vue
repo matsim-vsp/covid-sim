@@ -77,8 +77,8 @@ export default class VueComponent extends Vue {
 
   private buildPlot() {
     this.cityDetails = this.dataDetails[this.city]
-    this.prepareHospitalData()
     this.updateModelData()
+    this.prepareHospitalData()
   }
 
   @Watch('city') private switchCity() {
@@ -93,8 +93,19 @@ export default class VueComponent extends Vue {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
   }
 
+  private factor100k = 1
+
   @Watch('data') private updateModelData() {
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
+
+    const sevenDays = 7
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')
+
+    // maybe data is not loaded yet
+    if (!susceptible.length) return
+
+    const totalPopulation = susceptible[0].y[0]
+    this.factor100k = totalPopulation / 100000.0
 
     if (!modelData.length) return
 
@@ -109,6 +120,17 @@ export default class VueComponent extends Vue {
     modelData = modelData.map(item => {
       // we are going to mutate the line color (!!!) to ensure all plots on the screen
       // have the same color for these metrics.
+
+      const midWeekDates = []
+      let infectionRate = []
+
+      infectionRate.push(item.y)
+      midWeekDates.push(item.x)
+
+      for (let i = 0; i < infectionRate[0].length; i++) {
+        infectionRate[0][i] = infectionRate[0][i] / this.factor100k
+      }
+
       const color = this.colors[item.name]
       item.line = {
         dash: 'solid',
@@ -118,8 +140,8 @@ export default class VueComponent extends Vue {
 
       const trace = {
         name: 'Model: ' + item.name,
-        x: item.x,
-        y: item.y,
+        x: midWeekDates[0],
+        y: infectionRate[0],
         line: item.line,
       }
 
@@ -132,7 +154,10 @@ export default class VueComponent extends Vue {
         {
           name: 'Hospital Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
-          y: [this.hospitalCapacity[this.city][0], this.hospitalCapacity[this.city][0]],
+          y: [
+            this.hospitalCapacity[this.city][0] / this.factor100k,
+            this.hospitalCapacity[this.city][0] / this.factor100k,
+          ],
           fill: 'none',
           marker: { size: 2 },
           line: {
@@ -143,7 +168,10 @@ export default class VueComponent extends Vue {
         {
           name: 'Hospital Max Reserve Capacity',
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
-          y: [this.hospitalCapacity[this.city][1], this.hospitalCapacity[this.city][1]],
+          y: [
+            this.hospitalCapacity[this.city][1] / this.factor100k,
+            this.hospitalCapacity[this.city][1] / this.factor100k,
+          ],
           fill: 'none',
           marker: { size: 2 },
           line: {
@@ -162,12 +190,21 @@ export default class VueComponent extends Vue {
     // console.log({ dataLines: this.dataLines })
   }
 
-  private prepareHospitalData() {
+  @Watch('data') private prepareHospitalData() {
     const hospData = Papa.parse(this.csvData[this.city], {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
     }).data
+
+    const sevenDays = 7
+    const susceptible = this.data.filter(item => item.name === 'Susceptible')
+
+    // maybe data is not loaded yet
+    if (!susceptible.length) return
+
+    const totalPopulation = susceptible[0].y[0]
+    this.factor100k = totalPopulation / 100000.0
 
     this.hospitalSeries = []
 
@@ -176,10 +213,23 @@ export default class VueComponent extends Vue {
 
       if (this.cityDetails.csvLineNames.length <= i) continue
 
+      const midWeekDates = []
+      const infectionRate = []
+
+      for (let i = 0; i < hospData.length; i++) {
+        infectionRate.push(hospData[i][column])
+        midWeekDates.push(hospData[i]['Datum'])
+      }
+
+      for (let j = 0; j < midWeekDates.length; j += 1) {
+        midWeekDates[j] = this.reformatDateBerlin(midWeekDates[j])
+        infectionRate[j] = infectionRate[j] / this.factor100k
+      }
+
       this.hospitalSeries.push({
         name: this.cityDetails.csvLineNames[i],
-        x: hospData.map(day => this.cityDetails.dateFormatter(day[this.cityDetails.dateColumn])),
-        y: hospData.map(day => day[column]),
+        x: midWeekDates,
+        y: infectionRate,
         line: {
           dash: 'dot',
           width: 2,
@@ -188,8 +238,28 @@ export default class VueComponent extends Vue {
       })
     }
 
-    if (this.diviData.length > 0) {
-      this.hospitalSeries.push(this.diviData[0])
+    const midWeekDates = []
+    const infectionRate = []
+
+    // add dividata, if we have some
+    if (this.diviData.length) {
+      for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
+        let avgSum = 0
+        for (let k = j - sevenDays; k <= j; k += 1) {
+          avgSum += this.diviData[0].y[k]
+        }
+        let avgerage = avgSum / 7 / this.factor100k
+        const rate = 0.1 * Math.round(10.0 * avgerage)
+        infectionRate.push(rate)
+        midWeekDates.push(this.diviData[0].x[j - 3])
+      }
+
+      this.hospitalSeries.push({
+        name: this.diviData[0].name,
+        x: midWeekDates,
+        y: infectionRate,
+        line: this.diviData[0].line,
+      })
     }
   }
 
@@ -226,7 +296,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: this.logScale ? 'log' : 'linear',
       autorange: true,
-      title: 'Hospitalizations',
+      title: 'Hospitalizations / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

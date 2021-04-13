@@ -107,7 +107,7 @@
 
           .hideIt(v-show="showPlot[1]")
             p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-            .plotarea.compact
+            .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               hospitalization-plot.plotsize(v-else
@@ -571,6 +571,8 @@ export default class VueComponent extends Vue {
 
   private isThereABaseRun() {
     const files = this.zipLoader.files
+    if (!files) return
+
     console.log({ ZIPLODER: this.zipLoader })
     const baseFilename = 'sz0' + '.infections.txt.csv'
 
