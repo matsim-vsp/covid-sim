@@ -38,10 +38,11 @@ de:
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
+import Papaparse from 'papaparse'
 import VueSlider from 'vue-slider-component'
+import YAML from 'yaml'
 
 import Colophon from '@/components/Colophon.vue'
 import 'vue-slider-component/theme/default.css'
@@ -61,15 +62,17 @@ export default class VueComponent extends Vue {
 
   private markdownParser = new MarkdownIt()
 
+  private data: any[] = []
+
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
   }
 
-  private async mounted() {
+  private mounted() {
     this.buildPageForURL()
   }
 
-  private buildUI() {
+  private async buildUI() {
     // 1. load .csv file from public_svn/mobilityData/bundeslaender/mobilityData_OverviewBL.csv"
     // 2. Plotly line charts (?) from data, with dropdown to select which Land (default Berlin)
     // 3. Heatmap like the by-age-group plot? Lands on the y-axis and day on the x-axis
@@ -77,6 +80,34 @@ export default class VueComponent extends Vue {
     //    - with today's data?
     //    - Maybe a popup with a little chart maybe? I dunno
     //    - Or maybe a slider to pick the date?
+
+    this.data = await this.loadMobilityData()
+  }
+
+  private async loadMobilityData() {
+    const url = this.public_svn + 'mobilityData/bundeslaender/mobilityData_OverviewBL.csv'
+
+    try {
+      // load from subversion
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      // convert dates to ISO format
+      const withDates = parsed.map(row => {
+        const d = row.date.toString()
+        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+        return row
+      })
+
+      return withDates
+    } catch (e) {
+      console.error(e)
+    }
+    return []
   }
 
   private parseMarkdown(text: string) {
@@ -92,7 +123,7 @@ export default class VueComponent extends Vue {
     this.badPage = false
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = this.public_svn + `mobilityData/config.${lang}.yaml`
+    const url = this.public_svn + `mobilityData/bundeslaender/config.${lang}.yaml`
 
     let responseText = ''
 
