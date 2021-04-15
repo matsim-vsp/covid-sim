@@ -30,6 +30,9 @@
   a(href='https://bmbf.de' target="_blank")
     img(src="@/assets/images/bmbf-logo.png")
 
+  p: router-link(to="/imprint") Imprint
+
+
 </template>
 
 <script lang="ts">
