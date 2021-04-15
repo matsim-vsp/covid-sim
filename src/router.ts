@@ -120,6 +120,10 @@ const routes = [
     component: () => import(/* webpackChunkName: "risk-calcs" */ '@/views/RiskCalculator.vue'),
   },
   {
+    path: '/mobility',
+    component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),
