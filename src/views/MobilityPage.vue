@@ -61,6 +61,24 @@ export default class VueComponent extends Vue {
 
   private markdownParser = new MarkdownIt()
 
+  @Watch('$route') routeChanged(to: Route, from: Route) {
+    this.buildPageForURL()
+  }
+
+  private async mounted() {
+    this.buildPageForURL()
+  }
+
+  private buildUI() {
+    // 1. load .csv file from public_svn/mobilityData/bundeslaender/mobilityData_OverviewBL.csv"
+    // 2. Plotly line charts (?) from data, with dropdown to select which Land (default Berlin)
+    // 3. Heatmap like the by-age-group plot? Lands on the y-axis and day on the x-axis
+    // 4. Shapefile viewer
+    //    - with today's data?
+    //    - Maybe a popup with a little chart maybe? I dunno
+    //    - Or maybe a slider to pick the date?
+  }
+
   private parseMarkdown(text: string) {
     return this.markdownParser.render(text)
   }
@@ -68,14 +86,6 @@ export default class VueComponent extends Vue {
   private get topDescription() {
     if (!this.yaml.description) return ''
     return this.markdownParser.render(this.yaml.description)
-  }
-
-  @Watch('$route') routeChanged(to: Route, from: Route) {
-    this.buildPageForURL()
-  }
-
-  private async mounted() {
-    this.buildPageForURL()
   }
 
   private async buildPageForURL() {
@@ -115,8 +125,6 @@ export default class VueComponent extends Vue {
 
     this.buildUI()
   }
-
-  private buildUI() {}
 }
 </script>
 
