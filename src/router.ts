@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeIndex from '@/views/HomeIndex.vue'
+import Imprint from '@/views/Imprint.vue'
 
 Vue.use(VueRouter)
 
@@ -11,6 +12,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomeIndex,
+  },
+  {
+    path: '/imprint',
+    name: 'Imprint',
+    component: Imprint,
   },
   {
     // REDIRECT for old */covid-sim/* links
