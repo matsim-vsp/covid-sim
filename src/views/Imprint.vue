@@ -13,19 +13,13 @@
 
           .imprint(v-html="imprint")
 
-
-           
-
-
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Colophon from '@/components/Colophon.vue'
-import ReportViewer from '@/components/ReportViewer.vue'
-import VizCard from '@/components/VizCard.vue'
 
-@Component({ components: { Colophon, ReportViewer, VizCard }, props: {} })
+@Component({ components: { Colophon }, props: {} })
 export default class VueComponent extends Vue {
   private imprint = require('@/assets/imprint.en.md')
 }
