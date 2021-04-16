@@ -219,6 +219,7 @@
               :data="vegaChartData[chartKey].data"
             )
 
+        i Run ID: {{ currentRun.RunId }}
   .page-section.content(v-if="bottomNotes")
     .bottom
       h3 Further Notes
