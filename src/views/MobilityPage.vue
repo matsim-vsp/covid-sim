@@ -27,7 +27,25 @@ de:
       .goodpage(v-else)
         p(v-if="yaml.description" v-html="topDescription")
 
-        br
+        .all-plots
+
+          .linear-plot
+            h5 Mobility Rate Comparison
+
+            .plotarea.tall
+                //p.plotsize(v-if="!isZipLoaded") Loading data...
+                //p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                mobility-plot-germany.plotsize(
+                  :data="formattedData" :endDate="endDate" )
+
+            br
+
+            .plotarea.tall
+                //p.plotsize(v-if="!isZipLoaded") Loading data...
+                //p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                mobility-plot-bundeslaender.plotsize(
+                  :data="formattedData" :endDate="endDate" )
+              
 
         h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
@@ -45,14 +63,25 @@ import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
 
 import Colophon from '@/components/Colophon.vue'
+import MobilityPlotGermany from '@/components/MobilityPlotGermany.vue'
+import MobilityPlotBundeslaender from '@/components/MobilityPlotBundeslaender.vue'
 import 'vue-slider-component/theme/default.css'
+import { observable } from 'vue/types/umd'
 
 type MobilityYaml = {
   description?: string
   notes: string[]
 }
 
-@Component({ components: { VueSlider, Colophon }, props: {} })
+interface Bundesland {
+  name: string
+  title: string
+}
+
+@Component({
+  components: { VueSlider, Colophon, MobilityPlotGermany, MobilityPlotBundeslaender },
+  props: {},
+})
 export default class VueComponent extends Vue {
   private badPage = false
   private public_svn =
@@ -63,6 +92,26 @@ export default class VueComponent extends Vue {
   private markdownParser = new MarkdownIt()
 
   private data: any[] = []
+  private endDate = ''
+  private formattedData: any[] = []
+  private allBundeslaender = [
+    'Baden-Württemberg',
+    'Hessen',
+    'Berlin',
+    'Brandenburg',
+    'Sachsen',
+    'Bayern',
+    'Nordrhein-Westfalen',
+    'Hamburg',
+    'Mecklenburg-Vorpommern',
+    'Niedersachsen',
+    'Bremen',
+    'Thüringen',
+    'Saarland',
+    'Sachsen-Anhalt',
+    'Rheinland-Pfalz',
+    'Schleswig-Holstein',
+  ]
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -82,6 +131,67 @@ export default class VueComponent extends Vue {
     //    - Or maybe a slider to pick the date?
 
     this.data = await this.loadMobilityData()
+    this.endDate = this.data[this.data.length - 1]['date']
+    this.formattedData = await this.formatData()
+  }
+
+  private async formatData() {
+    var returnData: any[] = []
+
+    for (let i = 0; i < this.allBundeslaender.length; i++) {
+      var bundesland = {
+        name: this.allBundeslaender[i],
+        date: [],
+        outOfHomeDuration: [],
+        percentageChangeComparedToBeforeCorona: [],
+      }
+      returnData.push(bundesland)
+    }
+
+    var bundesland = {
+      name: 'Deutschland',
+      date: [],
+      outOfHomeDuration: [],
+      percentageChangeComparedToBeforeCorona: [],
+    }
+    returnData.push(bundesland)
+
+    for (let i = 0; i < this.data.length; i++) {
+      this.allBundeslaender.indexOf(this.data[i].BundeslandID)
+      returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].date.push(
+        this.data[i].date
+      )
+      returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].outOfHomeDuration.push(
+        this.data[i].outOfHomeDuration
+      )
+      returnData[
+        this.allBundeslaender.indexOf(this.data[i].BundeslandID)
+      ].percentageChangeComparedToBeforeCorona.push(
+        this.data[i].percentageChangeComparedToBeforeCorona
+      )
+    }
+
+    for (let i = 0; i < returnData[0].date.length; i++) {
+      let avergeOutOfHomeDuration = 0
+      let avergaePercentageChangeComparedToBeforeCorona = 0
+
+      for (let j = 0; j < returnData.length - 1; j++) {
+        avergeOutOfHomeDuration = avergeOutOfHomeDuration + returnData[j].outOfHomeDuration[i]
+        avergaePercentageChangeComparedToBeforeCorona =
+          avergaePercentageChangeComparedToBeforeCorona +
+          returnData[j].percentageChangeComparedToBeforeCorona[i]
+      }
+      avergeOutOfHomeDuration = avergeOutOfHomeDuration / (returnData.length - 1)
+      avergaePercentageChangeComparedToBeforeCorona =
+        avergaePercentageChangeComparedToBeforeCorona / (returnData.length - 1)
+      returnData[16].date.push(returnData[0].date[i])
+      returnData[16].outOfHomeDuration.push(avergeOutOfHomeDuration)
+      returnData[16].percentageChangeComparedToBeforeCorona.push(
+        avergaePercentageChangeComparedToBeforeCorona
+      )
+    }
+
+    return returnData
   }
 
   private async loadMobilityData() {
@@ -179,7 +289,8 @@ export default class VueComponent extends Vue {
 }
 
 .left-area {
-  max-width: 70rem;
+  //max-width: 70rem;
+  width: 1200px;
   margin: 0 auto;
   padding: 2rem 3rem 5rem 3rem;
 }
@@ -293,6 +404,43 @@ li.notes-item {
 
 ul {
   margin-bottom: 1rem;
+}
+
+.linear-plot {
+  margin-top: 0.5rem;
+  margin-left: 0;
+}
+
+h5 {
+  margin-top: 0.5rem;
+}
+
+.plotarea {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 25rem;
+}
+
+.plotarea.tall {
+  grid-template-rows: 29rem;
+}
+
+.plotarea.compact {
+  grid-template-rows: 15rem;
+}
+
+.plotarea.activities {
+  grid-template-rows: 18rem;
+}
+
+.plotsize {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+p.plotsize {
+  z-index: 10;
+  margin: auto auto;
 }
 
 @media only screen and (max-width: 950px) {
