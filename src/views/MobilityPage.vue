@@ -65,16 +65,10 @@ import Colophon from '@/components/Colophon.vue'
 import MobilityPlotGermany from '@/components/MobilityPlotGermany.vue'
 import MobilityPlotBundeslaender from '@/components/MobilityPlotBundeslaender.vue'
 import 'vue-slider-component/theme/default.css'
-import { observable } from 'vue/types/umd'
 
 type MobilityYaml = {
   description?: string
   notes: string[]
-}
-
-interface Bundesland {
-  name: string
-  title: string
 }
 
 @Component({
@@ -92,7 +86,6 @@ export default class VueComponent extends Vue {
 
   private data: any[] = []
   private dataLoadingFail = false
-  private endDate = ''
   private formattedData: any[] = []
   private allBundeslaender = [
     'Baden-Württemberg',
@@ -131,7 +124,6 @@ export default class VueComponent extends Vue {
     //    - Or maybe a slider to pick the date?
 
     this.data = await this.loadMobilityData()
-    this.endDate = this.data[this.data.length - 1]['date']
     this.formattedData = await this.formatData()
   }
 

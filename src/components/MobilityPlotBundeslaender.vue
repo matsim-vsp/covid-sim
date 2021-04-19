@@ -5,29 +5,15 @@ vue-plotly(:data="dataLines" :layout="layout" :options="options")
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
-
-interface City {
-  fromModel: string[]
-  fromCSV: string[]
-  csvLineNames: string[]
-  dateFormatter: Function
-  dateColumn: string
-}
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private endDate!: string
 
   private dataLines: any[] = []
 
   private mounted() {
-    this.buildPlot()
-  }
-
-  private buildPlot() {
     this.updateMobilityData()
   }
 
