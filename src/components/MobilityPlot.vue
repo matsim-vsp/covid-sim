@@ -10,6 +10,8 @@ import VuePlotly from '@statnett/vue-plotly'
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
+  @Prop({ required: true }) private outOfHomeDuration!: boolean
+  @Prop({ required: true }) private yAxisName!: string
 
   private dataLines: any[] = []
 
@@ -24,66 +26,67 @@ export default class VueComponent extends Vue {
     const sevenDaysDates = []
     const sevenDays = 7
 
+    console.log(this.yAxisName)
+
     if (this.data.length == 0) {
       return false
     }
 
-    const germanyIndex = this.data.length - 1
-
-    for (let i = 0; i < this.data[germanyIndex].date.length; i++) {
-      date.push(this.data[germanyIndex].date[i])
+    for (let i = 0; i < this.data[0].date.length; i++) {
+      date.push(this.data[0].date[i])
     }
 
-    for (let j = sevenDays + 5; j < this.data[germanyIndex].date.length; j += sevenDays) {
-      sevenDaysDates.push(this.data[germanyIndex].date[j - 3])
+    for (let j = sevenDays + 5; j < this.data[0].date.length; j += sevenDays) {
+      sevenDaysDates.push(this.data[0].date[j - 3])
     }
 
     for (let i = 0; i < this.data.length; i++) {
       const outOfHomeDuration = []
       const sevenDayOutOfHomeDuration = []
 
-      for (let j = 0; j < this.data[i].date.length; j++) {
-        outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
-      }
-
-      for (let j = sevenDays + 5; j < this.data[i].date.length; j += sevenDays) {
-        let avgSum = 0
-        for (let k = j - sevenDays; k < j; k += 1) {
-          avgSum += this.data[i].outOfHomeDuration[k]
+      if (this.outOfHomeDuration) {
+        for (let j = 0; j < this.data[i].date.length; j++) {
+          outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
         }
-        let avgerage = avgSum / 7
-        const rate = 0.1 * Math.round(10.0 * avgerage)
-        sevenDayOutOfHomeDuration.push(rate)
+
+        for (let j = sevenDays + 5; j < this.data[i].date.length; j += sevenDays) {
+          let avgSum = 0
+          for (let k = j - sevenDays; k < j; k += 1) {
+            avgSum += this.data[i].outOfHomeDuration[k]
+          }
+          let avgerage = avgSum / 7
+          const rate = 0.1 * Math.round(10.0 * avgerage)
+          sevenDayOutOfHomeDuration.push(rate)
+        }
+      } else {
+        for (let j = 0; j < this.data[i].date.length; j++) {
+          outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])
+        }
+
+        for (let j = sevenDays + 5; j < this.data[i].date.length; j += sevenDays) {
+          let avgSum = 0
+          for (let k = j - sevenDays; k < j; k += 1) {
+            avgSum += this.data[i].percentageChangeComparedToBeforeCorona[k]
+          }
+          let avgerage = avgSum / 7
+          const rate = 0.1 * Math.round(10.0 * avgerage)
+          sevenDayOutOfHomeDuration.push(rate)
+        }
       }
 
-      if (i == 16) {
-        mobilityData.push({
-          name: this.data[i].name,
-          x: sevenDaysDates,
-          y: sevenDayOutOfHomeDuration,
-          fill: 'none',
-          marker: { size: 2 },
-          line: {
-            dash: 'line',
-            width: 3,
-            color: 'black',
-          },
-        })
-      } else {
-        mobilityData.push({
-          name: this.data[i].name,
-          x: sevenDaysDates,
-          y: sevenDayOutOfHomeDuration,
-          fill: 'none',
-          marker: { size: 2 },
-          opacity: '0.5',
-          line: {
-            dash: 'dot',
-            width: 1.5,
-            color: this.data[i].name,
-          },
-        })
-      }
+      mobilityData.push({
+        name: this.data[i].name,
+        x: sevenDaysDates,
+        y: sevenDayOutOfHomeDuration,
+        fill: 'none',
+        marker: { size: 2 },
+        opacity: '0.5',
+        line: {
+          dash: 'dot',
+          width: 1.5,
+          color: this.data[i].name,
+        },
+      })
     }
 
     this.dataLines = mobilityData
@@ -110,7 +113,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: 'linear',
       autorange: true,
-      title: 'outOfHomeDuration (7-day average)',
+      title: this.yAxisName,
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

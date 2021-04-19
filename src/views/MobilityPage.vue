@@ -34,16 +34,18 @@ de:
 
             .plotarea.tall
                 p.plotsize(v-if="dataLoadingFail") Data not found...
-                mobility-plot-germany.plotsize(v-else
-                  :data="formattedData" :endDate="endDate" )
+                mobility-plot.plotsize(v-else
+                  :data="formattedData" :outOfHomeDuration="false"
+                  :yAxisName="'percentageChangeComparedToBeforeCorona'")
 
             br
 
             h5 Mobility Rate By Bundesland
             .plotarea.tall
                 p.plotsize(v-if="dataLoadingFail") Data not found...
-                mobility-plot-bundeslaender.plotsize(v-else
-                  :data="formattedData" :endDate="endDate" )
+                mobility-plot.plotsize(v-else
+                  :data="formattedData" :outOfHomeDuration="true"
+                  :yAxisName="'outOfHomeDuration'")
               
 
         h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
@@ -62,8 +64,7 @@ import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
 
 import Colophon from '@/components/Colophon.vue'
-import MobilityPlotGermany from '@/components/MobilityPlotGermany.vue'
-import MobilityPlotBundeslaender from '@/components/MobilityPlotBundeslaender.vue'
+import MobilityPlot from '@/components/MobilityPlot.vue'
 import 'vue-slider-component/theme/default.css'
 
 type MobilityYaml = {
@@ -72,7 +73,7 @@ type MobilityYaml = {
 }
 
 @Component({
-  components: { VueSlider, Colophon, MobilityPlotGermany, MobilityPlotBundeslaender },
+  components: { VueSlider, Colophon, MobilityPlot },
   props: {},
 })
 export default class VueComponent extends Vue {
@@ -140,14 +141,6 @@ export default class VueComponent extends Vue {
       returnData.push(bundesland)
     }
 
-    var bundesland = {
-      name: 'Deutschland',
-      date: [],
-      outOfHomeDuration: [],
-      percentageChangeComparedToBeforeCorona: [],
-    }
-    returnData.push(bundesland)
-
     for (let i = 0; i < this.data.length; i++) {
       this.allBundeslaender.indexOf(this.data[i].BundeslandID)
       returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].date.push(
@@ -160,26 +153,6 @@ export default class VueComponent extends Vue {
         this.allBundeslaender.indexOf(this.data[i].BundeslandID)
       ].percentageChangeComparedToBeforeCorona.push(
         this.data[i].percentageChangeComparedToBeforeCorona
-      )
-    }
-
-    for (let i = 0; i < returnData[0].date.length; i++) {
-      let avergeOutOfHomeDuration = 0
-      let avergaePercentageChangeComparedToBeforeCorona = 0
-
-      for (let j = 0; j < returnData.length - 1; j++) {
-        avergeOutOfHomeDuration = avergeOutOfHomeDuration + returnData[j].outOfHomeDuration[i]
-        avergaePercentageChangeComparedToBeforeCorona =
-          avergaePercentageChangeComparedToBeforeCorona +
-          returnData[j].percentageChangeComparedToBeforeCorona[i]
-      }
-      avergeOutOfHomeDuration = avergeOutOfHomeDuration / (returnData.length - 1)
-      avergaePercentageChangeComparedToBeforeCorona =
-        avergaePercentageChangeComparedToBeforeCorona / (returnData.length - 1)
-      returnData[16].date.push(returnData[0].date[i])
-      returnData[16].outOfHomeDuration.push(avergeOutOfHomeDuration)
-      returnData[16].percentageChangeComparedToBeforeCorona.push(
-        avergaePercentageChangeComparedToBeforeCorona
       )
     }
 
