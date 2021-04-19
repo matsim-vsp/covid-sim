@@ -30,22 +30,22 @@ de:
         .all-plots
 
           .linear-plot
-            h5 Mobility Rate Comparison
+            h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
 
             .plotarea.tall
                 p.plotsize(v-if="dataLoadingFail") Data not found...
                 mobility-plot.plotsize(v-else
                   :data="formattedData" :outOfHomeDuration="false"
-                  :yAxisName="'percentageChangeComparedToBeforeCorona'")
+                  :yAxisName="'Percent [%]'")
 
             br
 
-            h5 Mobility Rate By Bundesland
+            h5 Amount of Time Spent Outside the Home
             .plotarea.tall
                 p.plotsize(v-if="dataLoadingFail") Data not found...
                 mobility-plot.plotsize(v-else
                   :data="formattedData" :outOfHomeDuration="true"
-                  :yAxisName="'outOfHomeDuration'")
+                  :yAxisName="'Time per Day [h]'")
               
 
         h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
