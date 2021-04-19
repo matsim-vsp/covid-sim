@@ -99,6 +99,7 @@ export default class VueComponent extends Vue {
     'Hamburg',
     'Mecklenburg-Vorpommern',
     'Niedersachsen',
+    'Deutschland',
     'Bremen',
     'Thüringen',
     'Saarland',
