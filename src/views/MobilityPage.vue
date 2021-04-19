@@ -289,8 +289,9 @@ export default class VueComponent extends Vue {
 }
 
 .left-area {
-  //max-width: 70rem;
-  width: 1200px;
+  max-width: 70rem;
+  width: 100%;
+  //width: 1200px;
   margin: 0 auto;
   padding: 2rem 3rem 5rem 3rem;
 }
