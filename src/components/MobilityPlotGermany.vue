@@ -64,7 +64,7 @@ export default class VueComponent extends Vue {
       sevenDayDate.push(date[j - 3])
     }
     mobilityData.push({
-      name: 'outOfHomeDuration (7 day average)',
+      name: 'outOfHomeDuration (7-day average)',
       x: sevenDayDate,
       y: sevenDayOutOfHomeDuration,
       fill: 'none',
