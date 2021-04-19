@@ -38,12 +38,18 @@ export default class VueComponent extends Vue {
     const sevenDaysDates = []
     const sevenDays = 7
 
-    for (let i = 0; i < this.data[16].date.length; i++) {
-      date.push(this.data[16].date[i])
+    if (this.data.length == 0) {
+      return false
     }
 
-    for (let j = sevenDays + 5; j < this.data[16].date.length; j += sevenDays) {
-      sevenDaysDates.push(this.data[16].date[j - 3])
+    const germanyIndex = this.data.length - 1
+
+    for (let i = 0; i < this.data[germanyIndex].date.length; i++) {
+      date.push(this.data[germanyIndex].date[i])
+    }
+
+    for (let j = sevenDays + 5; j < this.data[germanyIndex].date.length; j += sevenDays) {
+      sevenDaysDates.push(this.data[germanyIndex].date[j - 3])
     }
 
     for (let i = 0; i < this.data.length; i++) {
@@ -118,7 +124,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: 'linear',
       autorange: true,
-      title: 'outOfHomeDuration',
+      title: 'outOfHomeDuration (7-day average)',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

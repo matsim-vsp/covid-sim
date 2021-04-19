@@ -42,11 +42,17 @@ export default class VueComponent extends Vue {
     const percentageChangeComparedToBeforeCorona = []
     const sevenDayPercentageChangeComparedToBeforeCorona = []
 
-    for (let i = 0; i < this.data[16].date.length; i++) {
-      date.push(this.data[16].date[i])
-      outOfHomeDuration.push(this.data[16].outOfHomeDuration[i])
+    if (this.data.length === 0) {
+      return false
+    }
+
+    const germanyIndex = this.data.length - 1
+
+    for (let i = 0; i < this.data[germanyIndex].date.length; i++) {
+      date.push(this.data[germanyIndex].date[i])
+      outOfHomeDuration.push(this.data[germanyIndex].outOfHomeDuration[i])
       percentageChangeComparedToBeforeCorona.push(
-        this.data[16].percentageChangeComparedToBeforeCorona[i]
+        this.data[germanyIndex].percentageChangeComparedToBeforeCorona[i]
       )
     }
 
@@ -55,13 +61,10 @@ export default class VueComponent extends Vue {
       x: date,
       y: outOfHomeDuration,
       fill: 'none',
-      marker: { size: 2 },
-      opacity: '0.3',
-      line: {
-        dash: 'dot',
-        width: 2,
-        color: '#707',
-      },
+      type: 'scatter',
+      mode: 'markers',
+      marker: { size: 3 },
+      opacity: '0.5',
     })
 
     for (let j = sevenDays + 5; j < outOfHomeDuration.length; j += sevenDays) {

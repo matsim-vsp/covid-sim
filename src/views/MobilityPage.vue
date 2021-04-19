@@ -33,17 +33,16 @@ de:
             h5 Mobility Rate Comparison
 
             .plotarea.tall
-                //p.plotsize(v-if="!isZipLoaded") Loading data...
-                //p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                mobility-plot-germany.plotsize(
+                p.plotsize(v-if="dataLoadingFail") Data not found...
+                mobility-plot-germany.plotsize(v-else
                   :data="formattedData" :endDate="endDate" )
 
             br
 
+            h5 Mobility Rate By Bundesland
             .plotarea.tall
-                //p.plotsize(v-if="!isZipLoaded") Loading data...
-                //p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                mobility-plot-bundeslaender.plotsize(
+                p.plotsize(v-if="dataLoadingFail") Data not found...
+                mobility-plot-bundeslaender.plotsize(v-else
                   :data="formattedData" :endDate="endDate" )
               
 
@@ -92,6 +91,7 @@ export default class VueComponent extends Vue {
   private markdownParser = new MarkdownIt()
 
   private data: any[] = []
+  private dataLoadingFail = false
   private endDate = ''
   private formattedData: any[] = []
   private allBundeslaender = [
@@ -212,9 +212,9 @@ export default class VueComponent extends Vue {
         row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
         return row
       })
-
       return withDates
     } catch (e) {
+      this.dataLoadingFail = true
       console.error(e)
     }
     return []
@@ -441,6 +441,33 @@ h5 {
 p.plotsize {
   z-index: 10;
   margin: auto auto;
+}
+
+.all-plots {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.all-plots {
+  display: flex;
+  flex-direction: column;
+}
+
+.right-side {
+  max-width: 60rem;
+  margin: 0 auto;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.right-side {
+  margin: 0 0.5rem;
+  max-width: none;
 }
 
 @media only screen and (max-width: 950px) {
