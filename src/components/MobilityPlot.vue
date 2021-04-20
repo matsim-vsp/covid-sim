@@ -26,8 +26,6 @@ export default class VueComponent extends Vue {
     const sevenDaysDates = []
     const sevenDays = 7
 
-    console.log(this.yAxisName)
-
     if (this.data.length == 0) {
       return false
     }

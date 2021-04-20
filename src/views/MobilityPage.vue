@@ -88,25 +88,7 @@ export default class VueComponent extends Vue {
   private data: any[] = []
   private dataLoadingFail = false
   private formattedData: any[] = []
-  private allBundeslaender = [
-    'Baden-Württemberg',
-    'Hessen',
-    'Berlin',
-    'Brandenburg',
-    'Sachsen',
-    'Bayern',
-    'Nordrhein-Westfalen',
-    'Hamburg',
-    'Mecklenburg-Vorpommern',
-    'Niedersachsen',
-    'Deutschland',
-    'Bremen',
-    'Thüringen',
-    'Saarland',
-    'Sachsen-Anhalt',
-    'Rheinland-Pfalz',
-    'Schleswig-Holstein',
-  ]
+  private allBundeslaender: any[] = []
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -126,7 +108,19 @@ export default class VueComponent extends Vue {
     //    - Or maybe a slider to pick the date?
 
     this.data = await this.loadMobilityData()
+    this.allBundeslaender = await this.loadBundeslaender()
     this.formattedData = await this.formatData()
+  }
+
+  private async loadBundeslaender() {
+    var returnData: any[] = []
+    for (let i = 0; i < this.data.length; i++) {
+      if (!returnData.includes(this.data[i].BundeslandID)) {
+        returnData.push(this.data[i].BundeslandID)
+      }
+    }
+
+    return returnData
   }
 
   private async formatData() {
