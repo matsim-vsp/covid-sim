@@ -115,7 +115,7 @@
                 :diviData="diviData" :endDate="endDate" )
 
         //- ---------- VIRUS STRAINS -------
-        .linear-plot(v-if="mutationValues.length > 0")
+        .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0")
           h5 {{ cityCap }} Virus Strains
             button.button.is-small.hider(@click="toggleShowPlot(6)") ..
 
@@ -194,7 +194,7 @@
                 :data="data" :layout="layout" :options="options")
 
         //- ---------- AGE GROUP BLOCK CHART ------
-        .linear-plot(v-if="incidenceHeatMapData")
+        .linear-plot(v-if="showByAgePlot && incidenceHeatMapData")
           h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
             button.button.is-small.hider(@click="toggleShowPlot(4)") ..
 
@@ -358,6 +358,14 @@ export default class VueComponent extends Vue {
   private cityDIVI: any = {
     berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
     munich: this.DIVI_URL + 'munich-divi-processed.csv',
+  }
+
+  private get showVirusStrainsPlot() {
+    return this.city !== 'jakarta'
+  }
+
+  private get showByAgePlot() {
+    return this.city !== 'jakarta'
   }
 
   private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
