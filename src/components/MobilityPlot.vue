@@ -72,19 +72,34 @@ export default class VueComponent extends Vue {
         }
       }
 
-      mobilityData.push({
-        name: this.data[i].name,
-        x: sevenDaysDates,
-        y: sevenDayOutOfHomeDuration,
-        fill: 'none',
-        marker: { size: 2 },
-        opacity: '0.5',
-        line: {
-          dash: 'dot',
-          width: 1.5,
-          color: this.data[i].name,
-        },
-      })
+      if (this.data[i].name == 'Deutschland') {
+        mobilityData.push({
+          name: this.data[i].name,
+          x: sevenDaysDates,
+          y: sevenDayOutOfHomeDuration,
+          fill: 'none',
+          marker: { size: 4 },
+          line: {
+            dash: 'line',
+            width: 2,
+            color: 'black',
+          },
+        })
+      } else {
+        mobilityData.push({
+          name: this.data[i].name,
+          x: sevenDaysDates,
+          y: sevenDayOutOfHomeDuration,
+          fill: 'none',
+          marker: { size: 2 },
+          opacity: '0.5',
+          line: {
+            dash: 'dot',
+            width: 1.5,
+            color: this.data[i].name,
+          },
+        })
+      }
     }
 
     this.dataLines = mobilityData
