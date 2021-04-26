@@ -12,15 +12,25 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private outOfHomeDuration!: boolean
   @Prop({ required: true }) private yAxisName!: string
+  @Prop({ required: true }) private plotInterval!: any[]
 
   private dataLines: any[] = []
 
   private mounted() {
-    this.updateMobilityData()
+    this.updateMobilityData(this.plotInterval)
   }
 
-  @Watch('data') private updateMobilityData() {
+  @Watch('plotInterval') private plot() {
+    this.updateMobilityData(this.plotInterval)
+  }
+
+  @Watch('data') private updateMobilityData(plotIntervalData: any[]) {
     var mobilityData: any[] = []
+
+    // Hardcoded stuff
+    if (plotIntervalData.length != 3) {
+      plotIntervalData = [6, 3, 3]
+    }
 
     const date = []
     const sevenDaysDates = []
@@ -34,7 +44,7 @@ export default class VueComponent extends Vue {
       date.push(this.data[0].date[i])
     }
 
-    for (let j = sevenDays + 5; j < this.data[0].date.length; j += sevenDays) {
+    for (let j = sevenDays + plotIntervalData[0]; j < this.data[0].date.length; j += sevenDays) {
       sevenDaysDates.push(this.data[0].date[j - 3])
     }
 
@@ -47,12 +57,16 @@ export default class VueComponent extends Vue {
           outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
         }
 
-        for (let j = sevenDays + 5; j < this.data[i].date.length; j += sevenDays) {
+        for (
+          let j = sevenDays + plotIntervalData[0];
+          j < this.data[i].date.length;
+          j += sevenDays
+        ) {
           let avgSum = 0
-          for (let k = j - sevenDays; k < j; k += 1) {
+          for (let k = j - plotIntervalData[1]; k < j + plotIntervalData[2]; k += 1) {
             avgSum += this.data[i].outOfHomeDuration[k]
           }
-          let avgerage = avgSum / 7
+          let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
           const rate = 0.1 * Math.round(10.0 * avgerage)
           sevenDayOutOfHomeDuration.push(rate)
         }
@@ -61,12 +75,16 @@ export default class VueComponent extends Vue {
           outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])
         }
 
-        for (let j = sevenDays + 5; j < this.data[i].date.length; j += sevenDays) {
+        for (
+          let j = sevenDays + plotIntervalData[0];
+          j < this.data[i].date.length;
+          j += sevenDays
+        ) {
           let avgSum = 0
-          for (let k = j - sevenDays; k < j; k += 1) {
+          for (let k = j - plotIntervalData[1]; k < j + plotIntervalData[2]; k += 1) {
             avgSum += this.data[i].percentageChangeComparedToBeforeCorona[k]
           }
-          let avgerage = avgSum / 7
+          let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
           const rate = 0.1 * Math.round(10.0 * avgerage)
           sevenDayOutOfHomeDuration.push(rate)
         }
