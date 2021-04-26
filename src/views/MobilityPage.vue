@@ -256,7 +256,7 @@ export default class VueComponent extends Vue {
 }
 
 .colophon {
-  padding: 2rem 2rem 1rem 5rem;
+  padding: 2rem 2rem 1rem 2rem;
   text-align: right;
   font-size: 0.85rem;
   background-color: white;
@@ -460,7 +460,7 @@ p.plotsize {
 .button-area {
   display: flex;
   flex-direction: column;
-  margin-right: 3rem;
+  //margin-right: 3rem;
   margin-top: 2rem;
 }
 
@@ -518,6 +518,21 @@ p.plotsize {
   .option-groups {
     grid-template-columns: repeat(1, 1fr);
   }
+
+  .button-area {
+    padding: 1rem 3rem 1rem 3rem;
+    width: auto;
+    margin: 0;
+  }
+
+  .button-choices {
+    width: max-content;
+  }
+
+  .left-area {
+    padding: 2rem 1rem;
+    flex-direction: column;
+  }
 }
 
 @media only screen and (max-width: 640px) {
@@ -532,7 +547,7 @@ p.plotsize {
   .button-area {
     padding: 1rem 3rem 1rem 3rem;
     width: auto;
-    margin: 0;
+    margin: 0rem 0.5rem;
   }
 
   .button-choices {
