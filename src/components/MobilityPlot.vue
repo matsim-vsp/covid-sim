@@ -13,25 +13,23 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private outOfHomeDurationPlot!: boolean
   @Prop({ required: true }) private yAxisName!: string
   @Prop({ required: true }) private plotInterval!: any[]
+  @Prop({ required: true }) private activity!: string
 
   private dataLines: any[] = []
 
   private mounted() {
-    console.log(this.outOfHomeDurationPlot)
-    this.updateMobilityData(this.plotInterval)
+    this.updateMobilityData()
   }
 
-  @Watch('plotInterval') private plot() {
-    this.updateMobilityData(this.plotInterval)
+  @Watch('activity') private changeActivity() {
+    this.layout.yaxis.title = this.yAxisName
+    this.updateMobilityData()
   }
 
-  @Watch('data') private updateMobilityData(plotIntervalData: any[]) {
+  @Watch('data') private updateMobilityData() {
     var mobilityData: any[] = []
 
-    // Hardcoded stuff
-    if (plotIntervalData.length != 3) {
-      plotIntervalData = [6, 3, 3]
-    }
+    var plotIntervalData = this.plotInterval
 
     const date = []
     const sevenDaysDates = []
@@ -55,7 +53,13 @@ export default class VueComponent extends Vue {
 
       if (this.outOfHomeDurationPlot) {
         for (let j = 0; j < this.data[i].date.length; j++) {
-          outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
+          if (this.activity == 'outOfHomeDuration') {
+            outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
+          } else if (this.activity == 'dailyRangePerPerson') {
+            outOfHomeDuration.push(this.data[i].dailyRangePerPerson[j])
+          } else if (this.activity == 'sharePersonLeavingHome') {
+            outOfHomeDuration.push(this.data[i].sharePersonLeavingHome[j])
+          }
         }
 
         for (
@@ -65,7 +69,13 @@ export default class VueComponent extends Vue {
         ) {
           let avgSum = 0
           for (let k = j - plotIntervalData[1]; k < j + plotIntervalData[2]; k += 1) {
-            avgSum += this.data[i].outOfHomeDuration[k]
+            if (this.activity == 'outOfHomeDuration') {
+              avgSum += this.data[i].outOfHomeDuration[k]
+            } else if (this.activity == 'dailyRangePerPerson') {
+              avgSum += this.data[i].dailyRangePerPerson[k]
+            } else if (this.activity == 'sharePersonLeavingHome') {
+              avgSum += this.data[i].sharePersonLeavingHome[k]
+            }
           }
           let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
           const rate = 0.1 * Math.round(10.0 * avgerage)

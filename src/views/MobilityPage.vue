@@ -19,6 +19,12 @@ de:
     colophon.colophon
 
     .left-area
+      .button-area
+         h3 Select Type:
+         .buttons.button-choices
+           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Dauer
+           button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Reiseweite
+           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Anteil mobiler Personen
       .plot-area
         h2 {{ $t('mobility-trends') }}
 
@@ -36,34 +42,38 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]")
+                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]"
+                    :activity="activity")
 
               br
 
-              h5 Amount of Time Spent Outside the Home (Week)
+              h5 {{plotHeading}} (Week)
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
-                    :yAxisName="'Time per Day [h]'" :plotInterval="[6, 3, 3]")
+                    :yAxisName="yAxisNAme" :plotInterval="[6, 3, 3]"
+                    :activity="activity")
 
               br
 
-              h5 Amount of Time Spent Outside the Home (Weekdays)
+              h5 {{plotHeading}} (Weekdays)
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
-                    :yAxisName="'Time per Day [h]'" :plotInterval="[5,2,2]")
+                    :yAxisName="yAxisNAme" :plotInterval="[5,2,2]"
+                    :activity="activity")
 
               br
 
-              h5 Amount of Time Spent Outside the Home (Weekend)
+              h5 {{plotHeading}} (Weekend)
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
-                    :yAxisName="'Time per Day [h]'" :plotInterval="[2, 1, 0]")
+                    :yAxisName="yAxisNAme" :plotInterval="[2, 1, 0]"
+                    :activity="activity")
                 
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
@@ -105,10 +115,16 @@ export default class VueComponent extends Vue {
   private markdownParser = new MarkdownIt()
 
   private data: any[] = []
+  private rangeData: any[] = []
   private dataLoadingFail = false
   private formattedData: any[] = []
   private allBundeslaender: any[] = []
   private plotInterval: any[] = [6, 3, 3]
+  private status = 1
+  private activity = 'outOfHomeDuration'
+  private yAxisNAme = 'Time per Day [h]'
+
+  private plotHeading = 'Amount of Time Spent Outside the Home'
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -129,8 +145,8 @@ export default class VueComponent extends Vue {
 
     this.data = await this.loadMobilityData()
     this.allBundeslaender = await this.loadBundeslaender()
+    this.rangeData = await this.loadRange()
     this.formattedData = await this.formatData()
-    console.log(this.formattedData)
   }
 
   private async loadBundeslaender() {
@@ -144,9 +160,46 @@ export default class VueComponent extends Vue {
     return returnData
   }
 
-  private async setPlotInterval(num1: number, num2: number, num3: number) {
-    var array = [num1, num2, num3]
-    this.plotInterval = array
+  private async clickButton(statusNum: number) {
+    this.status = statusNum
+    if (statusNum == 1) {
+      this.activity = 'outOfHomeDuration'
+      this.yAxisNAme = 'Time per Day [h]'
+    } else if (statusNum == 2) {
+      this.activity = 'dailyRangePerPerson'
+      this.yAxisNAme = 'Distance per Person [km]'
+      this.plotHeading = 'Average distance traveled '
+    } else if (statusNum == 3) {
+      this.activity = 'sharePersonLeavingHome'
+      this.yAxisNAme = 'Percent [%]'
+      this.plotHeading = 'Proportion of mobile persons'
+    }
+  }
+
+  private async loadRange() {
+    const url = this.public_svn + 'mobilityData/bundeslaender/range_OverviewBL.csv'
+
+    try {
+      // load from subversion
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      // convert dates to ISO format
+      const withDates = parsed.map(row => {
+        const d = row.date.toString()
+        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+        return row
+      })
+      return withDates
+    } catch (e) {
+      this.dataLoadingFail = true
+      console.error(e)
+    }
+    return []
   }
 
   private async formatData() {
@@ -158,6 +211,8 @@ export default class VueComponent extends Vue {
         date: [],
         outOfHomeDuration: [],
         percentageChangeComparedToBeforeCorona: [],
+        sharePersonLeavingHome: [],
+        dailyRangePerPerson: [],
       }
       returnData.push(bundesland)
     }
@@ -175,6 +230,16 @@ export default class VueComponent extends Vue {
       ].percentageChangeComparedToBeforeCorona.push(
         this.data[i].percentageChangeComparedToBeforeCorona
       )
+    }
+
+    for (let i = 0; i < this.rangeData.length; i++) {
+      this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
+      returnData[
+        this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
+      ].sharePersonLeavingHome.push(this.rangeData[i].sharePersonLeavingHome)
+      returnData[
+        this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
+      ].dailyRangePerPerson.push(this.rangeData[i].dailyRangePerPerson)
     }
 
     return returnData
@@ -403,6 +468,7 @@ ul {
 
 .linear-plot h5 {
   font-weight: bold;
+  margin-bottom: 0.5rem;
 }
 
 h5 {
