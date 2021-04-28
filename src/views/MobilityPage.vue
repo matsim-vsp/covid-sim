@@ -23,7 +23,7 @@ de:
         h3 Select Interval:
         .buttons.button-choices
           button.button(@click='setPlotInterval(6, 3, 3)') week
-          button.button(@click='setPlotInterval(5, 2, 2)') weeksdays
+          button.button.is-warning(@click='setPlotInterval(5, 2, 2)') weeksdays
           button.button(@click='setPlotInterval(2, 1, 0)') weekend
 
       .plot-area
