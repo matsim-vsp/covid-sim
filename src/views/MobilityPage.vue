@@ -110,6 +110,7 @@ export default class VueComponent extends Vue {
     this.data = await this.loadMobilityData()
     this.allBundeslaender = await this.loadBundeslaender()
     this.formattedData = await this.formatData()
+    console.log(this.formattedData)
   }
 
   private async loadBundeslaender() {
