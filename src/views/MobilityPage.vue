@@ -19,39 +19,58 @@ de:
     colophon.colophon
 
     .left-area
-      h2 {{ $t('mobility-trends') }}
-      h3(:style="{marginBottom: '1rem', color: '#596'}") maybe today's date here?
+      .plot-area
+        h2 {{ $t('mobility-trends') }}
 
-      h3.badpage(v-if="badPage") {{ $t('badpage') }}
+        h3.badpage(v-if="badPage") {{ $t('badpage') }}
 
-      .goodpage(v-else)
-        p(v-if="yaml.description" v-html="topDescription")
+        .goodpage(v-else)
+          p(v-if="yaml.description" v-html="topDescription")
 
-        .all-plots
+          .all-plots
 
-          .linear-plot
-            h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
+            .linear-plot
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Week)
 
-            .plotarea.tall
-                p.plotsize(v-if="dataLoadingFail") Data not found...
-                mobility-plot.plotsize(v-else
-                  :data="formattedData" :outOfHomeDuration="false"
-                  :yAxisName="'Percent [%]'")
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]")
 
-            br
+              br
 
-            h5 Amount of Time Spent Outside the Home
-            .plotarea.tall
-                p.plotsize(v-if="dataLoadingFail") Data not found...
-                mobility-plot.plotsize(v-else
-                  :data="formattedData" :outOfHomeDuration="true"
-                  :yAxisName="'Time per Day [h]'")
-              
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekdays)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[5,2,2]")
 
-        h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
+              br
 
-        ul(v-if="yaml.notes")
-          li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekend)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[2,1,0]")
+
+              br
+
+              h5 Amount of Time Spent Outside the Home
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="true"
+                    :yAxisName="'Time per Day [h]'" :plotInterval="[6, 3, 3]")
+                
+
+          h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
+
+          ul(v-if="yaml.notes")
+            li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
+  
 
 </template>
 
@@ -89,6 +108,7 @@ export default class VueComponent extends Vue {
   private dataLoadingFail = false
   private formattedData: any[] = []
   private allBundeslaender: any[] = []
+  private plotInterval: any[] = [6, 3, 3]
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -122,6 +142,11 @@ export default class VueComponent extends Vue {
     }
 
     return returnData
+  }
+
+  private async setPlotInterval(num1: number, num2: number, num3: number) {
+    var array = [num1, num2, num3]
+    this.plotInterval = array
   }
 
   private async formatData() {
@@ -243,18 +268,21 @@ export default class VueComponent extends Vue {
 }
 
 .colophon {
-  padding: 2rem 2rem 1rem 5rem;
+  padding: 2rem 2rem 1rem 2rem;
   text-align: right;
   font-size: 0.85rem;
   background-color: white;
 }
 
-.left-area {
-  max-width: 70rem;
+.plot-area {
+  max-width: 60rem; //prevc: 70
   width: 100%;
   //width: 1200px;
   margin: 0 auto;
-  padding: 2rem 3rem 5rem 3rem;
+  padding: 2rem 3rem 5rem 3rem; //prev: uncomment
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 h2 {
@@ -373,6 +401,10 @@ ul {
   margin-left: 0;
 }
 
+.linear-plot h5 {
+  font-weight: bold;
+}
+
 h5 {
   margin-top: 0.5rem;
 }
@@ -432,6 +464,68 @@ p.plotsize {
   max-width: none;
 }
 
+.left-area {
+  //background-color: white;
+  display: flex;
+  flex-direction: row;
+  padding-left: 3rem;
+  //padding-bottom: 2rem;
+  width: 100%;
+}
+
+.button-area {
+  display: flex;
+  flex-direction: column;
+  //margin-right: 3rem;
+  margin-top: 2rem;
+}
+
+.button-area h3 {
+  margin-bottom: 1rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.buttons {
+  width: 18rem;
+  background-color: white;
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  z-index: 10;
+  position: sticky;
+  top: $navHeight;
+  padding-bottom: 1rem;
+  padding: 0rem 0.5rem 1rem 0.5rem;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.button:focus {
+  background-color: rgb(39, 112, 223);
+  color: white;
+}
+
+.button-choices {
+  background-color: white;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  //margin-bottom: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 2px;
+}
+
+.button-choices button {
+  font-size: 0.75rem;
+  border-radius: 2px;
+  box-shadow: none;
+  border: 1px, solid, transparent;
+}
+
 @media only screen and (max-width: 950px) {
   .colophon {
     display: none;
@@ -439,6 +533,21 @@ p.plotsize {
 
   .option-groups {
     grid-template-columns: repeat(1, 1fr);
+  }
+
+  .button-area {
+    padding: 1rem 3rem 1rem 3rem;
+    width: auto;
+    margin: 0;
+  }
+
+  .button-choices {
+    width: max-content;
+  }
+
+  .left-area {
+    padding: 2rem 1rem;
+    flex-direction: column;
   }
 }
 
@@ -451,12 +560,32 @@ p.plotsize {
     padding: 2rem 1rem;
   }
 
+  .button-area {
+    padding: 1rem 3rem 1rem 3rem;
+    width: auto;
+    margin: 0rem 0.5rem;
+  }
+
+  .button-choices {
+    width: max-content;
+  }
+
   .left-area {
     padding: 2rem 1rem;
+    flex-direction: column;
   }
 
   .option-groups {
     grid-template-columns: repeat(1, 1fr);
+  }
+
+  .selections-and-charts {
+    flex-direction: column;
+  }
+
+  .plot-area {
+    margin: 0 0.5rem;
+    max-width: none;
   }
 }
 </style>
