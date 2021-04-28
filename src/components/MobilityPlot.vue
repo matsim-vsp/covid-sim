@@ -17,6 +17,7 @@ export default class VueComponent extends Vue {
   private dataLines: any[] = []
 
   private mounted() {
+    console.log(this.plotInterval)
     this.updateMobilityData(this.plotInterval)
   }
 
@@ -70,6 +71,7 @@ export default class VueComponent extends Vue {
           const rate = 0.1 * Math.round(10.0 * avgerage)
           sevenDayOutOfHomeDuration.push(rate)
         }
+        console.log(sevenDayOutOfHomeDuration)
       } else {
         for (let j = 0; j < this.data[i].date.length; j++) {
           outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])

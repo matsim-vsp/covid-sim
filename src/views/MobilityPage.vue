@@ -19,13 +19,6 @@ de:
     colophon.colophon
 
     .left-area
-      .button-area
-        h3 Select Interval:
-        .buttons.button-choices
-          button.button(@click='setPlotInterval(6, 3, 3)') week
-          button.button.is-warning(@click='setPlotInterval(5, 2, 2)') weeksdays
-          button.button(@click='setPlotInterval(2, 1, 0)') weekend
-
       .plot-area
         h2 {{ $t('mobility-trends') }}
 
@@ -37,13 +30,31 @@ de:
           .all-plots
 
             .linear-plot
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Week)
 
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDuration="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="plotInterval")
+                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]")
+
+              br
+
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekdays)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[5,2,2]")
+
+              br
+
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekend)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDuration="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[2,1,0]")
 
               br
 
@@ -52,7 +63,7 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDuration="true"
-                    :yAxisName="'Time per Day [h]'" :plotInterval="plotInterval")
+                    :yAxisName="'Time per Day [h]'" :plotInterval="[6, 3, 3]")
                 
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
@@ -389,6 +400,10 @@ ul {
   margin-left: 0;
 }
 
+.linear-plot h5 {
+  font-weight: bold;
+}
+
 h5 {
   margin-top: 0.5rem;
 }
@@ -449,7 +464,7 @@ p.plotsize {
 }
 
 .left-area {
-  background-color: white;
+  //background-color: white;
   display: flex;
   flex-direction: row;
   padding-left: 3rem;
