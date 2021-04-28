@@ -30,40 +30,40 @@ de:
           .all-plots
 
             .linear-plot
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Week)
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
 
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDuration="false"
+                    :data="formattedData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]")
 
               br
 
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekdays)
+              h5 Amount of Time Spent Outside the Home (Week)
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDuration="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="[5,2,2]")
-
-              br
-
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19 (Weekend)
-              .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
-                  mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDuration="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="[2,1,0]")
-
-              br
-
-              h5 Amount of Time Spent Outside the Home
-              .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
-                  mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDuration="true"
+                    :data="formattedData" :outOfHomeDurationPlot="true"
                     :yAxisName="'Time per Day [h]'" :plotInterval="[6, 3, 3]")
+
+              br
+
+              h5 Amount of Time Spent Outside the Home (Weekdays)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDurationPlot="true"
+                    :yAxisName="'Time per Day [h]'" :plotInterval="[5,2,2]")
+
+              br
+
+              h5 Amount of Time Spent Outside the Home (Weekend)
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDurationPlot="true"
+                    :yAxisName="'Time per Day [h]'" :plotInterval="[2, 1, 0]")
                 
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:

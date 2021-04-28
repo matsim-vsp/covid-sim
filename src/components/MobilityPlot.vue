@@ -10,14 +10,14 @@ import VuePlotly from '@statnett/vue-plotly'
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private outOfHomeDuration!: boolean
+  @Prop({ required: true }) private outOfHomeDurationPlot!: boolean
   @Prop({ required: true }) private yAxisName!: string
   @Prop({ required: true }) private plotInterval!: any[]
 
   private dataLines: any[] = []
 
   private mounted() {
-    console.log(this.plotInterval)
+    console.log(this.outOfHomeDurationPlot)
     this.updateMobilityData(this.plotInterval)
   }
 
@@ -53,7 +53,7 @@ export default class VueComponent extends Vue {
       const outOfHomeDuration = []
       const sevenDayOutOfHomeDuration = []
 
-      if (this.outOfHomeDuration) {
+      if (this.outOfHomeDurationPlot) {
         for (let j = 0; j < this.data[i].date.length; j++) {
           outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
         }
@@ -71,7 +71,6 @@ export default class VueComponent extends Vue {
           const rate = 0.1 * Math.round(10.0 * avgerage)
           sevenDayOutOfHomeDuration.push(rate)
         }
-        console.log(sevenDayOutOfHomeDuration)
       } else {
         for (let j = 0; j < this.data[i].date.length; j++) {
           outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])
