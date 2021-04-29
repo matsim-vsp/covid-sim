@@ -1,11 +1,11 @@
 <i18n>
 en:
   badpage: 'That page not found, sorry!'
-  mobility-trends: 'Mobility trends'
+  mobility-trends: 'Mobility Dashboard'
   remarks: 'Remarks'
 de:
   badpage: 'Seite wurde nicht gefunden.'
-  mobility-trends: 'Mobility trends'
+  mobility-trends: 'Mobility Dashboard'
   remarks: 'Bemerkungen'
 </i18n>
 
@@ -22,9 +22,9 @@ de:
       .button-area
          h3 Select Type:
          .buttons.button-choices
-           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Dauer
-           button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Reiseweite
-           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Anteil mobiler Personen
+           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Out of Home Duration
+           button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Travel Distances
+           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Proportion of Mobile Persons
       .plot-area
         h2 {{ $t('mobility-trends') }}
 
