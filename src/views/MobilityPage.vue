@@ -42,7 +42,7 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
-                    :yAxisName="yAxisNAme" :plotInterval="[6, 3, 3]"
+                    :yAxisName="yAxisNAme" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
 
               br
@@ -52,7 +52,7 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
-                    :yAxisName="yAxisNAme" :plotInterval="[5,2,2]"
+                    :yAxisName="yAxisNAme" :plotInterval="[-2,2,2]"
                     :activity="activity")
 
               br
@@ -73,7 +73,7 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]"
+                    :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
                 
 
@@ -120,7 +120,7 @@ export default class VueComponent extends Vue {
   private dataLoadingFail = false
   private formattedData: any[] = []
   private allBundeslaender: any[] = []
-  private plotInterval: any[] = [6, 3, 3]
+  private plotInterval: any[] = [-1, 3, 3]
   private status = 1
   private activity = 'outOfHomeDuration'
   private yAxisNAme = 'Time per Day [h]'

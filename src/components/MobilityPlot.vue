@@ -31,8 +31,6 @@ export default class VueComponent extends Vue {
 
     var plotIntervalData = this.plotInterval
 
-    console.log(this.data[2])
-
     const date = []
     const sevenDaysDates = []
     const sevenDays = 7
