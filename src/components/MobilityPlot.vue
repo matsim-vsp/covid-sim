@@ -31,6 +31,8 @@ export default class VueComponent extends Vue {
 
     var plotIntervalData = this.plotInterval
 
+    console.log(this.data[2])
+
     const date = []
     const sevenDaysDates = []
     const sevenDays = 7
@@ -68,7 +70,7 @@ export default class VueComponent extends Vue {
           j += sevenDays
         ) {
           let avgSum = 0
-          for (let k = j - plotIntervalData[1]; k < j + plotIntervalData[2]; k += 1) {
+          for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
             if (this.activity == 'outOfHomeDuration') {
               avgSum += this.data[i].outOfHomeDuration[k]
             } else if (this.activity == 'dailyRangePerPerson') {
@@ -77,6 +79,7 @@ export default class VueComponent extends Vue {
               avgSum += this.data[i].sharePersonLeavingHome[k]
             }
           }
+
           let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
           const rate = 0.1 * Math.round(10.0 * avgerage)
           sevenDayOutOfHomeDuration.push(rate)
@@ -92,7 +95,7 @@ export default class VueComponent extends Vue {
           j += sevenDays
         ) {
           let avgSum = 0
-          for (let k = j - plotIntervalData[1]; k < j + plotIntervalData[2]; k += 1) {
+          for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
             avgSum += this.data[i].percentageChangeComparedToBeforeCorona[k]
           }
           let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
