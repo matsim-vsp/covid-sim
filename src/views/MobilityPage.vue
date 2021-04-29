@@ -36,16 +36,6 @@ de:
           .all-plots
 
             .linear-plot
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
-
-              .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
-                  mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDurationPlot="false"
-                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]"
-                    :activity="activity")
-
-              br
 
               h5 {{plotHeading}} (Week)
               .plotarea.tall
@@ -73,6 +63,17 @@ de:
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="true"
                     :yAxisName="yAxisNAme" :plotInterval="[2, 1, 0]"
+                    :activity="activity")
+
+              br
+
+              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
+
+              .plotarea.tall
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  mobility-plot.plotsize(v-else
+                    :data="formattedData" :outOfHomeDurationPlot="false"
+                    :yAxisName="'Percent [%]'" :plotInterval="[6, 3, 3]"
                     :activity="activity")
                 
 
@@ -165,6 +166,7 @@ export default class VueComponent extends Vue {
     if (statusNum == 1) {
       this.activity = 'outOfHomeDuration'
       this.yAxisNAme = 'Time per Day [h]'
+      this.yAxisNAme = 'Amount of Time Spent Outside the Home'
     } else if (statusNum == 2) {
       this.activity = 'dailyRangePerPerson'
       this.yAxisNAme = 'Distance per Person [km]'
