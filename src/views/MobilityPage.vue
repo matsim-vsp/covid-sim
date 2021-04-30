@@ -22,7 +22,7 @@ de:
       .button-area
          h3 Select Type:
          .buttons.button-choices
-           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Out of Home Duration
+           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Duration
            button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Travel Distances
            button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Proportion of Mobile Persons
       .plot-area
