@@ -3,10 +3,32 @@ en:
   badpage: 'That page not found, sorry!'
   mobility-trends: 'Mobility Dashboard'
   remarks: 'Remarks'
+  type: 'Select Type:'
+  duration: 'Duration'
+  distance: 'Travel Distances'
+  proportion: 'Proportion of Mobile Persons'
+  duration-heading: 'Amount of Time Spent Outside the Home'
+  distance-heading: 'Average distance traveled'
+  proportion-heading: 'Proportion of mobile persons'
+  duration-heading-percent: 'Percent Change in Mobility Levels Compared to Pre-COVID-19'
+  week: 'Week'
+  weekday: 'Weekday'
+  weekend: 'Weekend'
 de:
   badpage: 'Seite wurde nicht gefunden.'
   mobility-trends: 'Mobility Dashboard'
   remarks: 'Bemerkungen'
+  type: 'Art auswählen:'
+  duration: 'Dauer'
+  distance: 'Distanz'
+  proportion: 'Anteil mobiler Personen'
+  duration-heading: 'Zeit, die außerhalb des Hauses verbracht wurde'
+  distance-heading: 'Durchschnittlich zurückgelegte Distanz'
+  proportion-heading: 'Anteil mobiler Personen'
+  duration-heading-percent: 'Prozentuale Veränderung des Mobilitätsniveaus im Vergleich zu vor COVID-19'
+  week: 'Woche'
+  weekday: 'Wochentag'
+  weekend: 'Wochenende'
 </i18n>
 
 <template lang="pug">
@@ -20,11 +42,11 @@ de:
 
     .left-area
       .button-area
-         h3 Select Type:
+         h3 {{ $t('type') }}
          .buttons.button-choices
-           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Duration
-           button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Travel Distances
-           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Proportion of Mobile Persons
+           button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') {{ $t('duration') }}
+           button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') {{ $t('distance') }}
+           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') {{ $t('proportion') }}
       .plot-area
         h2 {{ $t('mobility-trends') }}
 
@@ -37,7 +59,9 @@ de:
 
             .linear-plot
 
-              h5 {{plotHeading}} (Week)
+              h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
+              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
+              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
@@ -47,7 +71,9 @@ de:
 
               br
 
-              h5 {{plotHeading}} (Weekdays)
+              h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekday') }})
+              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('weekday') }})
+              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
@@ -57,7 +83,9 @@ de:
 
               br
 
-              h5 {{plotHeading}} (Weekend)
+              h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekend') }})
+              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('weekend') }})
+              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
@@ -67,8 +95,7 @@ de:
 
               br
 
-              h5(v-if="status == 1") Percent Change in Mobility Levels Compared to Pre-COVID-19
-
+              h5(v-if="status == 1") {{ $t('duration-heading-percent') }}
               .plotarea.tall(v-if="status == 1")
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
