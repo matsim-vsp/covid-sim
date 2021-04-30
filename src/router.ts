@@ -130,6 +130,18 @@ const routes = [
     component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
   },
   {
+    path: '/mobility/duration',
+    component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
+  },
+  {
+    path: '/mobility/distance',
+    component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
+  },
+  {
+    path: '/mobility/proportion-mobile-persons',
+    component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),

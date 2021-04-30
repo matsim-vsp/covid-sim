@@ -120,7 +120,6 @@ export default class VueComponent extends Vue {
   private dataLoadingFail = false
   private formattedData: any[] = []
   private allBundeslaender: any[] = []
-  private plotInterval: any[] = [-1, 3, 3]
   private status = 1
   private activity = 'outOfHomeDuration'
   private yAxisNAme = 'Time per Day [h]'
@@ -144,6 +143,8 @@ export default class VueComponent extends Vue {
     //    - Maybe a popup with a little chart maybe? I dunno
     //    - Or maybe a slider to pick the date?
 
+    this.openPage(window.location.href)
+
     this.data = await this.loadMobilityData()
     this.allBundeslaender = await this.loadBundeslaender()
     this.rangeData = await this.loadRange()
@@ -161,20 +162,43 @@ export default class VueComponent extends Vue {
     return returnData
   }
 
+  private async openPage(url: string) {
+    var urlSplit = url.split('/')
+    var urlInfo = urlSplit[urlSplit.length - 1]
+    console.log(urlInfo)
+
+    if (urlInfo == 'duration') {
+      this.clickButton(1)
+    } else if (urlInfo == 'distance') {
+      this.clickButton(2)
+    } else if (urlInfo == 'proportion-mobile-persons') {
+      this.clickButton(3)
+    } else if (urlInfo == 'mobility') {
+      this.clickButton(1)
+    }
+  }
+
   private async clickButton(statusNum: number) {
     this.status = statusNum
     if (statusNum == 1) {
       this.activity = 'outOfHomeDuration'
       this.yAxisNAme = 'Time per Day [h]'
       this.plotHeading = 'Amount of Time Spent Outside the Home'
+      window.history.pushState('duration', 'Title', '/mobility/duration')
     } else if (statusNum == 2) {
       this.activity = 'dailyRangePerPerson'
       this.yAxisNAme = 'Distance per Person [km]'
       this.plotHeading = 'Average distance traveled '
+      window.history.pushState('distance', 'Title', '/mobility/distance')
     } else if (statusNum == 3) {
       this.activity = 'sharePersonLeavingHome'
       this.yAxisNAme = 'Percent [%]'
       this.plotHeading = 'Proportion of mobile persons'
+      window.history.pushState(
+        'proportion-mobile-persons',
+        'Title',
+        '/mobility/proportion-mobile-persons'
+      )
     }
   }
 
