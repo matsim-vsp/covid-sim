@@ -165,8 +165,6 @@ export default class VueComponent extends Vue {
   private async openPage(url: string) {
     var urlSplit = url.split('/')
     var urlInfo = urlSplit[urlSplit.length - 1]
-    console.log(urlInfo)
-
     if (urlInfo == 'duration') {
       this.clickButton(1)
     } else if (urlInfo == 'distance') {
