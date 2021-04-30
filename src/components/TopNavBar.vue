@@ -20,6 +20,12 @@
       @click='clickedBurger')
 
       .navbar-start
+       .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.04.30
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25'") Report runs for Opening Strategies
+      
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.04.09
 
