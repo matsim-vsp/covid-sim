@@ -67,9 +67,9 @@ de:
 
               br
 
-              h5 Percent Change in Mobility Levels Compared to Pre-COVID-19
+              h5(v-if="status == 1") Percent Change in Mobility Levels Compared to Pre-COVID-19
 
-              .plotarea.tall
+              .plotarea.tall(v-if="status == 1")
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
                     :data="formattedData" :outOfHomeDurationPlot="false"
@@ -166,7 +166,7 @@ export default class VueComponent extends Vue {
     if (statusNum == 1) {
       this.activity = 'outOfHomeDuration'
       this.yAxisNAme = 'Time per Day [h]'
-      this.yAxisNAme = 'Amount of Time Spent Outside the Home'
+      this.plotHeading = 'Amount of Time Spent Outside the Home'
     } else if (statusNum == 2) {
       this.activity = 'dailyRangePerPerson'
       this.yAxisNAme = 'Distance per Person [km]'
@@ -535,7 +535,7 @@ p.plotsize {
 .left-area {
   //background-color: white;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   padding-left: 3rem;
   //padding-bottom: 2rem;
   width: 100%;
@@ -544,7 +544,8 @@ p.plotsize {
 .button-area {
   display: flex;
   flex-direction: column;
-  //margin-right: 3rem;
+  width: 864px;
+  margin: 0 auto;
   margin-top: 2rem;
 }
 
@@ -585,6 +586,7 @@ p.plotsize {
   //margin-bottom: 0.25rem;
   padding: 0.5rem;
   border-radius: 2px;
+  width: max-content;
 }
 
 .button-choices button {
