@@ -34,16 +34,11 @@
             a.navbar-item(:href="'/2021-03-19/testing?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29'") Runs for report March 19
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.02.26
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000'") Adaptive restrictions
-            a.navbar-item(:href="'/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes'") Testing strategies
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Older Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000'") 2021.02.26 Adaptive restrictions
+              a.navbar-item(:href="'/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes'") 2021.02.26 Testing strategies
               a.navbar-item(:href="'/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15'") 2021.02.05: Runs for Feb. 5th
               a.navbar-item(:href="'/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346'") 2021.01.15: Curfew options
               a.navbar-item(:href="'/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346'") 2021.01.15: Where we stand post-holidays
@@ -80,6 +75,8 @@
             a.navbar-item(:href="'/timelapse'") 90 Day Time Lapse
 
         router-link.navbar-item(to="/r-calcs-v2/2021-01-24b" :style="{color: 'white'}") Calculator
+
+        router-link.navbar-item(to="/mobility" :style="{color: 'white'}") Mobility
 
         //- .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
         //-   a.navbar-link(:href="'/calculators'")  Calculators
