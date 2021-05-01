@@ -60,8 +60,8 @@ de:
             .linear-plot
 
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
-              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
-              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
+              h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
+              h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
@@ -72,8 +72,8 @@ de:
               br
 
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekday') }})
-              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('weekday') }})
-              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
+              h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekday') }})
+              h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
@@ -84,8 +84,8 @@ de:
               br
 
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekend') }})
-              h5(v-else="status == 2") {{ $t('distance-heading') }} ({{ $t('weekend') }})
-              h5(v-else="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
+              h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekend') }})
+              h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
