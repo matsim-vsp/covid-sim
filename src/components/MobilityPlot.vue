@@ -16,6 +16,24 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private activity!: string
 
   private dataLines: any[] = []
+  private holidays = [
+    '2020-04.10',
+    '2020-04-13',
+    '2020-05-01',
+    '2020-05-21',
+    '2020-06-01',
+    '2020-10-03',
+    '2020-12-25',
+    '2020-12-26',
+    '2021-01-01',
+    '2021-04-02',
+    '2021-04-05',
+    '2021-05-13',
+    '2021-05-24',
+    '2021-10-03',
+    '2021-12-25',
+    '2021-12-26',
+  ]
 
   private mounted() {
     this.updateMobilityData()
@@ -68,6 +86,7 @@ export default class VueComponent extends Vue {
           j += sevenDays
         ) {
           let avgSum = 0
+          let average = 0
           for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
             if (this.activity == 'outOfHomeDuration') {
               avgSum += this.data[i].outOfHomeDuration[k]
@@ -77,9 +96,62 @@ export default class VueComponent extends Vue {
               avgSum += this.data[i].sharePersonLeavingHome[k]
             }
           }
-
-          let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
-          const rate = 0.1 * Math.round(10.0 * avgerage)
+          if (plotIntervalData[0] != -1) {
+            if (plotIntervalData[0] == 2) {
+              let foundDays = 0
+              if (this.holidays.includes(this.data[i].date[j - plotIntervalData[1] - 4])) {
+                // is friday holiday?
+                foundDays += 1
+                if (this.activity == 'outOfHomeDuration') {
+                  avgSum += this.data[i].outOfHomeDuration[j - plotIntervalData[1] - 4]
+                } else if (this.activity == 'dailyRangePerPerson') {
+                  avgSum += this.data[i].dailyRangePerPerson[j - plotIntervalData[1] - 4]
+                } else if (this.activity == 'sharePersonLeavingHome') {
+                  avgSum += this.data[i].sharePersonLeavingHome[j - plotIntervalData[1] - 4]
+                }
+              }
+              if (this.holidays.includes(this.data[i].date[j + plotIntervalData[2] - 2])) {
+                // is monday holiday?
+                foundDays += 1
+                if (this.activity == 'outOfHomeDuration') {
+                  avgSum += this.data[i].outOfHomeDuration[j + plotIntervalData[2] - 2]
+                } else if (this.activity == 'dailyRangePerPerson') {
+                  avgSum += this.data[i].dailyRangePerPerson[j + plotIntervalData[2] - 2]
+                } else if (this.activity == 'sharePersonLeavingHome') {
+                  avgSum += this.data[i].sharePersonLeavingHome[j + plotIntervalData[2] - 2]
+                }
+              }
+              average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 + foundDays)
+            } else {
+              let foundDays = 0
+              if (this.holidays.includes(this.data[i].date[j - plotIntervalData[1] - 4])) {
+                // is friday holiday?
+                foundDays += 1
+                if (this.activity == 'outOfHomeDuration') {
+                  avgSum -= this.data[i].outOfHomeDuration[j - plotIntervalData[1] - 4]
+                } else if (this.activity == 'dailyRangePerPerson') {
+                  avgSum -= this.data[i].dailyRangePerPerson[j - plotIntervalData[1] - 4]
+                } else if (this.activity == 'sharePersonLeavingHome') {
+                  avgSum -= this.data[i].sharePersonLeavingHome[j - plotIntervalData[1] - 4]
+                }
+              }
+              if (this.holidays.includes(this.data[i].date[j + plotIntervalData[2] - 2])) {
+                // is monday holiday?
+                foundDays += 1
+                if (this.activity == 'outOfHomeDuration') {
+                  avgSum -= this.data[i].outOfHomeDuration[j + plotIntervalData[2] - 2]
+                } else if (this.activity == 'dailyRangePerPerson') {
+                  avgSum -= this.data[i].dailyRangePerPerson[j + plotIntervalData[2] - 2]
+                } else if (this.activity == 'sharePersonLeavingHome') {
+                  avgSum -= this.data[i].sharePersonLeavingHome[j + plotIntervalData[2] - 2]
+                }
+              }
+              average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 - foundDays)
+            }
+          } else {
+            average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
+          }
+          const rate = 0.1 * Math.round(10.0 * average)
           sevenDayOutOfHomeDuration.push(rate)
         }
       } else {
@@ -93,11 +165,12 @@ export default class VueComponent extends Vue {
           j += sevenDays
         ) {
           let avgSum = 0
+          let average = 0
           for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
             avgSum += this.data[i].percentageChangeComparedToBeforeCorona[k]
           }
-          let avgerage = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
-          const rate = 0.1 * Math.round(10.0 * avgerage)
+          average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
+          const rate = 0.1 * Math.round(10.0 * average)
           sevenDayOutOfHomeDuration.push(rate)
         }
       }
