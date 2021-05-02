@@ -150,7 +150,6 @@ export default class VueComponent extends Vue {
   private status = 1
   private activity = 'outOfHomeDuration'
   private yAxisNAme = 'Time per Day [h]'
-
   private plotHeading = 'Amount of Time Spent Outside the Home'
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
