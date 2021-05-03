@@ -119,7 +119,7 @@ import MarkdownIt from 'markdown-it'
 import Papaparse from 'papaparse'
 import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
-import { getHolidays } from 'feiertagejs'
+import { getHolidays, Region } from 'feiertagejs'
 
 import Colophon from '@/components/Colophon.vue'
 import MobilityPlot from '@/components/MobilityPlot.vue'
@@ -153,6 +153,25 @@ export default class VueComponent extends Vue {
   private activity = 'outOfHomeDuration'
   private yAxisNAme = 'Time per Day [h]'
   private plotHeading = 'Amount of Time Spent Outside the Home'
+  private bundeslandHoliday: { [id: string]: Region } = {
+    'Baden-Württemberg': 'BW',
+    Hessen: 'HE',
+    Berlin: 'BE',
+    Brandenburg: 'BB',
+    Sachsen: 'SN',
+    Bayern: 'BY',
+    'Nordrhein-Westfalen': 'NW',
+    Hamburg: 'HH',
+    'Mecklenburg-Vorpommern': 'MV',
+    Niedersachsen: 'NI',
+    Deutschland: 'BUND',
+    Bremen: 'HB',
+    Thüringen: 'TH',
+    Saarland: 'SL',
+    'Sachsen-Anhalt': 'ST',
+    'Rheinland-Pfalz': 'RP',
+    'Schleswig-Holstein': 'SH',
+  }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -178,6 +197,8 @@ export default class VueComponent extends Vue {
     this.rangeData = await this.loadRange()
     this.formattedData = await this.formatData()
   }
+
+  // for (let thing of this.data[i])
 
   private async loadBundeslaender() {
     var returnData: any[] = []
@@ -286,145 +307,18 @@ export default class VueComponent extends Vue {
     }
 
     for (let i = 0; i < this.allBundeslaender.length; i++) {
-      if (this.allBundeslaender[i] == 'Baden-Württemberg') {
-        var holidays = getHolidays('2020', 'BW')
-        holidays = holidays.concat(getHolidays('2021', 'BW'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Hessen') {
-        var holidays = getHolidays('2020', 'HE')
-        holidays = holidays.concat(getHolidays('2021', 'HE'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Berlin') {
-        var holidays = getHolidays('2020', 'BE')
-        holidays = holidays.concat(getHolidays('2021', 'BE'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Brandenburg') {
-        var holidays = getHolidays('2020', 'BB')
-        holidays = holidays.concat(getHolidays('2021', 'BB'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Sachsen') {
-        var holidays = getHolidays('2020', 'SN')
-        holidays = holidays.concat(getHolidays('2021', 'SN'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Bayern') {
-        var holidays = getHolidays('2020', 'BY')
-        holidays = holidays.concat(getHolidays('2021', 'BY'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Nordrhein-Westfalen') {
-        var holidays = getHolidays('2020', 'NW')
-        holidays = holidays.concat(getHolidays('2021', 'NW'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Hamburg') {
-        var holidays = getHolidays('2020', 'HH')
-        holidays = holidays.concat(getHolidays('2021', 'HH'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Mecklenburg-Vorpommern') {
-        var holidays = getHolidays('2020', 'MV')
-        holidays = holidays.concat(getHolidays('2021', 'MV'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Niedersachsen') {
-        var holidays = getHolidays('2020', 'NI')
-        holidays = holidays.concat(getHolidays('2021', 'NI'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Deutschland') {
-        var holidays = getHolidays('2020', 'BUND')
-        holidays = holidays.concat(getHolidays('2021', 'BUND'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Bremen') {
-        var holidays = getHolidays('2020', 'HB')
-        holidays = holidays.concat(getHolidays('2021', 'HB'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Thüringen') {
-        var holidays = getHolidays('2020', 'TH')
-        holidays = holidays.concat(getHolidays('2021', 'TH'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Saarland') {
-        var holidays = getHolidays('2020', 'SL')
-        holidays = holidays.concat(getHolidays('2021', 'SL'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Sachsen-Anhalt') {
-        var holidays = getHolidays('2020', 'ST')
-        holidays = holidays.concat(getHolidays('2021', 'ST'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Rheinland-Pfalz') {
-        var holidays = getHolidays('2020', 'RP')
-        holidays = holidays.concat(getHolidays('2021', 'RP'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
-        }
-      } else if (this.allBundeslaender[i] == 'Schleswig-Holstein') {
-        var holidays = getHolidays('2020', 'SH')
-        holidays = holidays.concat(getHolidays('2021', 'SH'))
-        for (let j = 0; j < holidays.length; j++) {
-          returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-            holidays[j].dateString
-          )
+      for (const [key, value] of Object.entries(this.bundeslandHoliday)) {
+        if (this.allBundeslaender[i] == key) {
+          var holidays = getHolidays('2020', value)
+          holidays = holidays.concat(getHolidays('2021', value))
+          for (let j = 0; j < holidays.length; j++) {
+            returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
+              holidays[j].dateString
+            )
+          }
         }
       }
     }
-
     for (let i = 0; i < this.rangeData.length; i++) {
       this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
       returnData[

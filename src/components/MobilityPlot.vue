@@ -209,7 +209,7 @@ export default class VueComponent extends Vue {
     margin: { t: 5, r: 60, b: 0, l: 60 },
     xaxis: {
       fixedrange: window.innerWidth < 700,
-      range: ['2020-03-02', '2021-04-26'],
+      //range: ['2020-03-02', '2021-04-26'],
       type: 'date',
     },
     yaxis: {
