@@ -20,11 +20,13 @@ export default class VueComponent extends Vue {
     '2020-04-10',
     '2020-04-13',
     '2020-05-01',
+    '2020-05-21',
     '2020-06-01',
     '2020-12-25',
     '2021-01-01',
     '2021-04-02',
     '2021-04-05',
+    '2021-05-13',
     '2021-05-24',
   ]
 
@@ -59,7 +61,6 @@ export default class VueComponent extends Vue {
     }
 
     for (let i = 0; i < this.data.length; i++) {
-      let testSum = 0
       const outOfHomeDuration = []
       const sevenDayOutOfHomeDuration = []
 
@@ -91,7 +92,7 @@ export default class VueComponent extends Vue {
               avgSum += this.data[i].sharePersonLeavingHome[k]
             }
             if (plotIntervalData[0] == -2) {
-              if (this.holidays.includes(this.data[i].date[k])) {
+              if (this.data[i].holidays.includes(this.data[i].date[k])) {
                 foundDaysWeek += 1
                 if (this.activity == 'outOfHomeDuration') {
                   avgSum -= this.data[i].outOfHomeDuration[k]
@@ -105,18 +106,24 @@ export default class VueComponent extends Vue {
           }
           if (plotIntervalData[0] == 2) {
             let foundDays = 0
-            if (this.holidays.includes(this.data[i].date[j - plotIntervalData[1] - 4])) {
-              // is friday holiday?
-              foundDays += 1
-              if (this.activity == 'outOfHomeDuration') {
-                avgSum += this.data[i].outOfHomeDuration[j - plotIntervalData[1] - 4]
-              } else if (this.activity == 'dailyRangePerPerson') {
-                avgSum += this.data[i].dailyRangePerPerson[j - plotIntervalData[1] - 4]
-              } else if (this.activity == 'sharePersonLeavingHome') {
-                avgSum += this.data[i].sharePersonLeavingHome[j - plotIntervalData[1] - 4]
+            for (let k = -7; k <= -4; k++) {
+              if (j - plotIntervalData[1] - k >= 0) {
+                if (
+                  this.data[i].holidays.includes(this.data[i].date[j - plotIntervalData[1] + k])
+                ) {
+                  // is thuesday-fridays holiday?
+                  foundDays += 1
+                  if (this.activity == 'outOfHomeDuration') {
+                    avgSum += this.data[i].outOfHomeDuration[j - plotIntervalData[1] + k]
+                  } else if (this.activity == 'dailyRangePerPerson') {
+                    avgSum += this.data[i].dailyRangePerPerson[j - plotIntervalData[1] + k]
+                  } else if (this.activity == 'sharePersonLeavingHome') {
+                    avgSum += this.data[i].sharePersonLeavingHome[j - plotIntervalData[1] + k]
+                  }
+                }
               }
             }
-            if (this.holidays.includes(this.data[i].date[j + plotIntervalData[2] - 2])) {
+            if (this.data[i].holidays.includes(this.data[i].date[j + plotIntervalData[2] - 2])) {
               // is monday holiday?
               foundDays += 1
               if (this.activity == 'outOfHomeDuration') {
@@ -128,16 +135,12 @@ export default class VueComponent extends Vue {
               }
             }
             average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 + foundDays)
-            testSum += plotIntervalData[1] + plotIntervalData[2] + 1 + foundDays
           } else {
             average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 - foundDaysWeek)
-            testSum += plotIntervalData[1] + plotIntervalData[2] + 1 - foundDaysWeek
           }
           const rate = 0.1 * Math.round(10.0 * average)
-
           sevenDayOutOfHomeDuration.push(rate)
         }
-        console.log(testSum)
       } else {
         for (let j = 0; j < this.data[i].date.length; j++) {
           outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])
