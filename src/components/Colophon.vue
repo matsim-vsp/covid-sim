@@ -20,7 +20,7 @@
 
   .team Contact
 
-  p.nonbreak: a(href="mailto:covid19@vsp.tu-berlin.de") covid19@vsp.tu-berlin.de
+  p.nonbreak: a(href="mailto:ricardo.ewert.vsp@posteo.net") ricardo.ewert.vsp@posteo.net
 
   .team Partners
 
