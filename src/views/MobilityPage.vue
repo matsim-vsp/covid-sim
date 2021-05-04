@@ -14,6 +14,9 @@ en:
   week: 'Week'
   weekday: 'Weekday'
   weekend: 'Weekend'
+  y-axis-one: 'Zeit pro Tag [h]'
+  y-axis-two: 'Distanz pro Person [km/h]'
+  y-axis-percent: 'Prozent [%]'
 de:
   badpage: 'Seite wurde nicht gefunden.'
   mobility-trends: 'Mobility Dashboard'
@@ -29,6 +32,9 @@ de:
   week: 'Woche'
   weekday: 'Wochentag'
   weekend: 'Wochenende'
+  y-axis-one: 'Time per Day [h]'
+  y-axis-two: 'Distance per Person [km/h]'
+  y-axis-percent: 'Percent [%]'
 </i18n>
 
 <template lang="pug">
@@ -328,7 +334,6 @@ export default class VueComponent extends Vue {
         this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
       ].dailyRangePerPerson.push(this.rangeData[i].dailyRangePerPerson)
     }
-    console.log(returnData)
     return returnData
   }
 
