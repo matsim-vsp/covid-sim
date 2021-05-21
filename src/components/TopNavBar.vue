@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.05.21
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-05-20/bmbf?b1351inf=1.8&b1351VaccinationEffectiveness=70%25&vaccinationCompliance=80%25&revaccinationDate=no'") Report runs for Virus mutations and revaccination
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.04.30
 
           .navbar-dropdown
