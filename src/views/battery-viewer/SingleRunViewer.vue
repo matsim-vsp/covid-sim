@@ -207,6 +207,36 @@
                 :data="incidenceHeatMapData"
               )
 
+                //- ---------- LEISURE OUTDOOR FRACTION ------
+        .linear-plot(v-if="leisurOutdoorFractionData.length")
+          h5 Leisure Outdoor Fraction
+            button.button.is-small.hider(@click="toggleShowPlot(11)") ..
+
+          .hideIt(v-show="showPlot[11]")
+            .plotarea(style="grid-template-rows: 18rem")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              leisure-outdoor-fraction.plotsize(v-else
+                :data="leisurOutdoorFractionData"
+                :logScale="false"
+                :endDate="endDate"
+                )
+
+          //- ---------- WEEKLY TESTS ------
+        .linear-plot(v-if="weeklyTestsData.length")
+          h5 Weekly Tests
+            button.button.is-small.hider(@click="toggleShowPlot(12)") ..
+
+          .hideIt(v-show="showPlot[12]")
+            .plotarea(style="grid-template-rows: 18rem")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              weekly-tests.plotsize(v-else
+                :data="weeklyTestsData"
+                :endDate="endDate"
+                )
+        
+      
         //- ---------- VEGA BOTTOM CHARTS ------
         .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
           .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
@@ -248,6 +278,8 @@ import RValueTwo from '@/components/RValueTwo.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
+import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
+import WeeklyTests from '@/components/WeeklyTests.vue'
 import { RunYaml } from '@/Globals'
 
 interface Measure {
@@ -275,6 +307,8 @@ interface VegaChartDefinition {
     VegaLiteChart,
     VuePlotly,
     WeeklyInfectionsPlot,
+    LeisureOutdoorFraction,
+    WeeklyTests,
   },
 })
 export default class VueComponent extends Vue {
@@ -306,6 +340,8 @@ export default class VueComponent extends Vue {
     8: true,
     9: true,
     10: true,
+    11: true,
+    12: true,
   }
 
   private MAX_DAYS = 1000
@@ -688,6 +724,8 @@ export default class VueComponent extends Vue {
   private hospitalData: any[] = []
   private rValues: any[] = []
   private incidenceHeatMapData: string = ''
+  private leisurOutdoorFractionData: any[] = []
+  private weeklyTestsData: any[] = []
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
@@ -704,6 +742,10 @@ export default class VueComponent extends Vue {
     this.loadRValues(this.currentRun)
 
     this.loadInfectionsByActivityType(this.currentRun)
+
+    this.loadWeeklyTests(this.currentRun)
+
+    this.loadLeisurOutdoorFraction(this.currentRun)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
@@ -877,6 +919,50 @@ export default class VueComponent extends Vue {
       if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
     } catch (e) {
       console.log('RVALUES: no', filename)
+    }
+  }
+
+  private hasLeisurOutdoorFraction = false
+
+  private async loadLeisurOutdoorFraction(currentRun: any) {
+    this.leisurOutdoorFractionData = []
+    this.hasLeisurOutdoorFraction = false
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.outdoorFraction.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.leisurOutdoorFractionData = z.data
+      if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
+    } catch (e) {
+      console.log('LeisurOutdoorFraction: no', filename)
+    }
+  }
+
+  private hasWeeklyTests = false
+
+  private async loadWeeklyTests(currentRun: any) {
+    this.weeklyTestsData = []
+    this.hasWeeklyTests = false
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.infections.txt.csv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.weeklyTestsData = z.data
+      if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
+    } catch (e) {
+      console.log('WeeklyTests: no', filename)
     }
   }
 
