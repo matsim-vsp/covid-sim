@@ -37,8 +37,6 @@ export default class VueComponent extends Vue {
     for (const value of this.data) {
       var date = new Date(value.date)
       var dayNUmber = date.getDay()
-      console.log(dayNUmber)
-
       if (dayNUmber == 1) {
         WeekSum = 0
         countDays = 0
