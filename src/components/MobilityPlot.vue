@@ -56,9 +56,15 @@ export default class VueComponent extends Vue {
       date.push(this.data[0].date[i])
     }
 
-    for (let j = sevenDays + plotIntervalData[0]; j < this.data[0].date.length; j += sevenDays) {
+    for (
+      let j = sevenDays + plotIntervalData[0];
+      j < this.data[0].date.length + 4; // bug fix added + 4
+      j += sevenDays
+    ) {
       sevenDaysDates.push(this.data[0].date[j - 3])
     }
+
+    console.log(sevenDaysDates)
 
     for (let i = 0; i < this.data.length; i++) {
       const outOfHomeDuration = []
@@ -77,7 +83,7 @@ export default class VueComponent extends Vue {
 
         for (
           let j = sevenDays + plotIntervalData[0];
-          j < this.data[i].date.length;
+          j < this.data[i].date.length + 4; // bug fix added + 4
           j += sevenDays
         ) {
           let avgSum = 0
