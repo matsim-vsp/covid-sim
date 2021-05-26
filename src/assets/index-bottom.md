@@ -32,6 +32,8 @@ Other regularly updated information sources:
 
 - https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte
 
+- https://www.covid19.statistik.uni-muenchen.de/projekte/index.html
+
 Nice visualizations of any kind related to COVID-19:
  
  - https://infogram.com/covid19-cases-eu-1hdw2jw11xyj4l0
