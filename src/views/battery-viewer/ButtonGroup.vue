@@ -17,7 +17,12 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private options!: any[]
-  @Prop({ required: true }) private measure!: { measure: string; title: string; order?: string }
+  @Prop({ required: true }) private measure!: {
+    measure: string
+    title: string
+    order?: string
+    asPercent?: boolean
+  }
 
   private selectedValue: string = ''
   private stops: any[] = []
@@ -73,6 +78,9 @@ export default class VueComponent extends Vue {
 
     // one last test: if none of the numbers had decimals, don't use percent
     if (usePercent && !hasDecimal) usePercent = false
+
+    // one more last test haha: if asPercent is present, respect it
+    if (this.measure.asPercent !== undefined) usePercent = this.measure.asPercent
 
     // build labels
     for (const x of this.options) {
