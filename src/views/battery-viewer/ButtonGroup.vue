@@ -46,9 +46,9 @@ export default class VueComponent extends Vue {
     this.updateOptions()
   }
 
-  @Watch('options') private updateOptions() {
-    let experiments = []
-    if (!this.options) return
+  private usePercent() {
+    // if asPercent is present, respect it
+    if (this.measure.asPercent !== undefined) return this.measure.asPercent
 
     // if the options are (a) all numbers and (b) all 0.0 > x > 1.0, then use %
     // otherwise treat as text
@@ -79,15 +79,18 @@ export default class VueComponent extends Vue {
     // one last test: if none of the numbers had decimals, don't use percent
     if (usePercent && !hasDecimal) usePercent = false
 
-    // one more last test haha: if asPercent is present, respect it
-    if (this.measure.asPercent !== undefined) usePercent = this.measure.asPercent
+    return usePercent
+  }
+
+  @Watch('options') private updateOptions() {
+    let experiments = []
+    if (!this.options) return
 
     // build labels
     for (const x of this.options) {
-      let label = usePercent ? '' + Math.round(x * 100) + '%' : '' + x
-
-      this.showButtons = true
+      let label = this.usePercent() ? `${Math.round(x * 100)}%` : `${x}`
       experiments.push(label)
+      this.showButtons = true
     }
 
     if (experiments[0].startsWith('+')) experiments.sort()
