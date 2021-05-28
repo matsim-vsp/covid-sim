@@ -70,8 +70,11 @@ export default class VueComponent extends Vue {
       type: 'date',
       range: ['2020-02-09', this.endDate],
     },
+    legend: {
+      orientation: 'h',
+    },
     yaxis: {
-      title: 'Age',
+      title: 'Incidence',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
