@@ -13,26 +13,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: string
   @Prop({ required: true }) private endDate!: string
 
-  private maximumValue = 2000
-
   private dataMatrix: any[] = []
-
-  // log of 'Hot' Colorscale from
-  // https://github.com/plotly/plotly.js/blob/master/src/components/colorscale/scales.js
-  // [0.0, 'rgb(255,255,255)'],
-  // [0.4, 'rgb(255,210,0)'],
-  // [0.7, 'rgb(230,0,0)'],
-  // [1.0, 'rgb(0,0,0)'],
-
-  private logColorScale = [
-    [0.0, 'rgb(255,255,255)'],
-    [0.01, 'rgb(250,210,0)'],
-    [0.1, 'rgb(240,120,0)'],
-    [0.2, 'rgb(230,0,0)'],
-    //[0.9999999, 'rgb(0,0,0)'],
-    //[1.0, 'rgb(255,255,255)'],
-    [1.0, 'rgb(0,0,0)'],
-  ]
 
   private mounted() {
     this.buildHeatMap()
@@ -67,20 +48,14 @@ export default class VueComponent extends Vue {
     }
 
     matrix = transpose(matrix)
-    matrix[0][0] = this.maximumValue
 
-    this.dataMatrix = [
-      {
-        type: 'heatmap',
+    for (var i = matrix.length - 1; i >= 0; i--) {
+      this.dataMatrix.push({
         x,
-        y,
-        z: matrix,
-        colorscale: this.logColorScale, // 'Hot', // 'YlOrRed', // 'Hot',
-        // reversescale: true,
-        showscale: false,
-        hoverongaps: false,
-      },
-    ]
+        y: matrix[i],
+        name: y[i],
+      })
+    }
   }
 
   private layout = {
@@ -121,7 +96,7 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'heatmap',
+      filename: 'incidenceByAgeGroupOverTime',
       width: 1200,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor

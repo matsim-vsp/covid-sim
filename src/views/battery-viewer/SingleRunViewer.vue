@@ -207,6 +207,20 @@
                 :data="incidenceHeatMapData"
               )
 
+        //- ---------- AGE GROUP LINE CHART ------
+        .linear-plot(v-if="showByAgePlot && incidenceHeatMapData")
+          h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
+            button.button.is-small.hider(@click="toggleShowPlot(13)") ..
+
+          .hideIt(v-show="showPlot[13]")
+            .plotarea(style="grid-template-rows: 18rem")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              age-group-line-chart.plotsize(v-else
+                :endDate="endDate"
+                :data="incidenceHeatMapData"
+              )
+
                 //- ---------- LEISURE OUTDOOR FRACTION ------
         .linear-plot(v-if="leisurOutdoorFractionData.length")
           h5 Leisure Outdoor Fraction
@@ -237,17 +251,7 @@
                 )
         
       
-        //- ---------- VEGA BOTTOM CHARTS ------
-        .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-          .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
-            vega-lite-chart.plotsize(
-              :baseUrl="BATTERY_URL"
-              :runId="runId"
-              :configFile="chartKey"
-              :logScale="logScale"
-              :yamlDef="vegaChartData[chartKey].yaml"
-              :data="vegaChartData[chartKey].data"
-            )
+
 
         i Run ID: {{ currentRun.RunId }}
   .page-section.content(v-if="bottomNotes")
@@ -280,6 +284,7 @@ import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
+import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import { RunYaml } from '@/Globals'
 
 interface Measure {
@@ -309,6 +314,7 @@ interface VegaChartDefinition {
     WeeklyInfectionsPlot,
     LeisureOutdoorFraction,
     WeeklyTests,
+    AgeGroupLineChart,
   },
 })
 export default class VueComponent extends Vue {
@@ -342,6 +348,7 @@ export default class VueComponent extends Vue {
     10: true,
     11: true,
     12: true,
+    13: true,
   }
 
   private MAX_DAYS = 1000
@@ -725,7 +732,7 @@ export default class VueComponent extends Vue {
   private rValues: any[] = []
   private incidenceHeatMapData: string = ''
   private leisurOutdoorFractionData: any[] = []
-  private weeklyTestsData: any[] = []
+  private weeklyTestsData: any[] = [] // includes nReVaccinated values
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
@@ -756,8 +763,27 @@ export default class VueComponent extends Vue {
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
 
+    this.addDataFromInfectionsCSVToData('nReVaccinated')
+
     this.updateTotalInfected()
     this.updateVegaCharts()
+  }
+
+  private addDataFromInfectionsCSVToData(valueName: string) {
+    if (this.weeklyTestsData.length) {
+      var dates = []
+      var values = []
+      for (var i = 0; i < this.weeklyTestsData.length; i++) {
+        dates[i] = this.weeklyTestsData[i].date
+        values[i] = this.weeklyTestsData[i].nReVaccinated
+      }
+      var nReVaccinated = {
+        name: valueName,
+        x: dates,
+        y: values,
+      }
+      this.data.push(nReVaccinated)
+    }
   }
 
   private updateVegaCharts() {

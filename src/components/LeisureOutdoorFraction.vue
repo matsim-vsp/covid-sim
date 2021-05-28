@@ -25,7 +25,6 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.showData()
-    console.log('UPDATE')
   }
 
   private showData() {
