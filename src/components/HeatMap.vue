@@ -31,7 +31,7 @@ export default class VueComponent extends Vue {
     [0.2, 'rgb(230,0,0)'],
     //[0.9999999, 'rgb(0,0,0)'],
     //[1.0, 'rgb(255,255,255)'],
-    [1.0, 'rgb(0,0,0)'],
+    [1.0, 'rgb(0,0,0)'], // comment this line out and add the two above will fix the "color bug"
   ]
 
   private mounted() {
