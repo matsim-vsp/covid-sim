@@ -12,6 +12,7 @@ import { log, transpose } from 'mathjs'
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: string
   @Prop({ required: true }) private endDate!: string
+  @Prop({ required: true }) private logScale!: boolean
 
   private dataMatrix: any[] = []
 
@@ -21,6 +22,22 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.buildHeatMap()
+  }
+
+  @Watch('logScale') updateScale() {
+    this.layout.yaxis = this.logScale
+      ? {
+          //fixedrange: window.innerWidth < 700,
+          type: 'log',
+          //range: [Math.log10(2), Math.log10(5000)],
+          title: 'Incidence',
+        }
+      : {
+          //fixedrange: window.innerWidth < 700,
+          type: 'linear',
+          //autorange: true,
+          title: 'Incidence',
+        }
   }
 
   private buildHeatMap() {
@@ -75,6 +92,7 @@ export default class VueComponent extends Vue {
     },
     yaxis: {
       title: 'Incidence',
+      type: 'log',
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

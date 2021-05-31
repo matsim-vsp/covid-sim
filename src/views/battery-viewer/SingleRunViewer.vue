@@ -219,7 +219,7 @@
               age-group-line-chart.plotsize(v-else
                 :endDate="endDate"
                 :data="incidenceHeatMapData"
-              )
+                :logScale="logScale")
 
                 //- ---------- LEISURE OUTDOOR FRACTION ------
         .linear-plot(v-if="leisurOutdoorFractionData.length")
