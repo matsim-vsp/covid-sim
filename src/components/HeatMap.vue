@@ -29,9 +29,9 @@ export default class VueComponent extends Vue {
     [0.01, 'rgb(250,210,0)'],
     [0.1, 'rgb(240,120,0)'],
     [0.2, 'rgb(230,0,0)'],
-    //[0.9999999, 'rgb(0,0,0)'],
-    //[1.0, 'rgb(255,255,255)'],
-    [1.0, 'rgb(0,0,0)'], // comment this line out and add the two above will fix the "color bug"
+    [0.9999999, 'rgb(0,0,0)'],
+    [1.0, 'rgb(255,255,255)'],
+    //[1.0, 'rgb(0,0,0)'], // comment this line out and add the two above will fix the "color bug"
   ]
 
   private mounted() {
