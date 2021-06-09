@@ -59,10 +59,10 @@ export default class VueComponent extends Vue {
 
   private layout = {
     mapbox: {
-      center: { lon: 10.3, lat: 51.3 },
-      zoom: 5.3,
-      //center: { lon: -73.6, lat: 45.505 },
-      //zoom: 13,
+      //center: { lon: 10.3, lat: 51.3 },
+      //zoom: 5.3,
+      center: { lon: -73.6, lat: 45.505 },
+      zoom: 10,
       style: 'basic',
       layers: [
         {
