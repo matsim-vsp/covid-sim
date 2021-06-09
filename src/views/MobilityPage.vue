@@ -108,6 +108,12 @@ de:
                     :data="formattedData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
+
+              br
+
+              h5 Test
+              .plotarea.map
+                  mobility-map.plotsize()
                 
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
@@ -129,6 +135,7 @@ import { getHolidays, Region } from 'feiertagejs'
 
 import Colophon from '@/components/Colophon.vue'
 import MobilityPlot from '@/components/MobilityPlot.vue'
+import MobilityMap from '@/components/MobilityMap.vue'
 import 'vue-slider-component/theme/default.css'
 import { concat } from 'js-coroutines'
 
@@ -138,7 +145,7 @@ type MobilityYaml = {
 }
 
 @Component({
-  components: { VueSlider, Colophon, MobilityPlot },
+  components: { VueSlider, Colophon, MobilityPlot, MobilityMap },
   props: {},
 })
 export default class VueComponent extends Vue {
@@ -575,6 +582,10 @@ h5 {
 
 .plotarea.tall {
   grid-template-rows: 29rem;
+}
+
+.plotarea.map {
+  grid-template-rows: 49rem;
 }
 
 .plotarea.compact {
