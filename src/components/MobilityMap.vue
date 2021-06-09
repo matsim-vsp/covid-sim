@@ -20,8 +20,8 @@ export default class VueComponent extends Vue {
   }
 
   private async loadData() {
-    var names = []
-    var geometries = []
+    //var names = []
+    //var geometries = []
 
     var data = {
       type: 'feature',
@@ -37,13 +37,11 @@ export default class VueComponent extends Vue {
     const jsonData = await response.json()
 
     for (var i = 0; i < jsonData.features.length; i++) {
-      geometries.push(jsonData.features[i].geometry.coordinates[0][0])
-      names.push(jsonData.features[i].properties.name_2)
+      //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
+      //names.push(jsonData.features[i].properties.name_2)
       data.geometry.coordinates = jsonData.features[i].geometry.coordinates
       this.layout.mapbox.layers[0].source.features.push(data)
     }
-
-    //this.layout.mapbox.layers[0].source.features.push(jsonData.features[i])
 
     console.log(this.layout.mapbox.layers[0].source.features)
 
