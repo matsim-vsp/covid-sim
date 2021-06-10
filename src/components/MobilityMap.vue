@@ -36,12 +36,14 @@ export default class VueComponent extends Vue {
     )
     const jsonData = await response.json()
 
-    for (var i = 0; i < jsonData.features.length; i++) {
-      //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
-      //names.push(jsonData.features[i].properties.name_2)
-      data.geometry.coordinates = jsonData.features[i].geometry.coordinates
-      this.layout.mapbox.layers[0].source.features.push(data)
-    }
+    // for (var i = 0; i < jsonData.features.length; i++) {
+    //   //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
+    //   //names.push(jsonData.features[i].properties.name_2)
+    //   data.geometry.coordinates = jsonData.features[i].geometry.coordinates
+    //   this.layout.mapbox.layers[0].source.features.push(data)
+    // }
+
+    this.layout.mapbox.layers[0].source = jsonData
 
     console.log(this.layout.mapbox.layers[0].source.features)
 
@@ -59,10 +61,8 @@ export default class VueComponent extends Vue {
 
   private layout = {
     mapbox: {
-      //center: { lon: 10.3, lat: 51.3 },
-      //zoom: 5.3,
-      center: { lon: -73.6, lat: 45.505 },
-      zoom: 10,
+      center: { lon: 10.3, lat: 51.3 },
+      zoom: 5.2,
       style: 'basic',
       layers: [
         {
