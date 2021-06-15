@@ -192,7 +192,7 @@ export default class VueComponent extends Vue {
   private mobility = '/LK_mobilityData_'
   private timeline = '/LK_nightHoursSum_'
   private weekdays = 'weekdays.csv'
-  private weekdaysTimeline = 'weekdays.csv.csv'
+  private weekdaysTimeline = 'weekdays.csv'
   private weekends = 'weekends.csv'
   private weekly = 'weekly.csv'
   private selectedLandkreisOne = 'Berlin'

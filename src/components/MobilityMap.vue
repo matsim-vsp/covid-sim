@@ -59,6 +59,8 @@ export default class VueComponent extends Vue {
       var name
       if (key.startsWith('Kreis')) {
         name = key.substring(6)
+      } else if (key == 'Landkreis Rostock') {
+        name = 'Landkreis Rostock'
       } else if (key.startsWith('Landkreis')) {
         name = key.substring(10)
       } else if (key == 'Nienburg/Weser') {
@@ -108,6 +110,16 @@ export default class VueComponent extends Vue {
     // }
 
     //this.layout.mapbox.layers[0].source = jsonData
+
+    // Change Data from GeoJSON
+
+    if (
+      jsonData.features[0].properties.name_2 == 'Rostock' &&
+      jsonData.features[0].properties.type_2 == 'Landkreis Rostock'
+    ) {
+      jsonData.features[0].properties.name_2 = 'Landkreis Rostock'
+    }
+
     this.data[0].geojson = jsonData
 
     return jsonData
