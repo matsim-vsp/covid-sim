@@ -1,6 +1,6 @@
 <template lang="pug">
 
-vue-plotly(:data="data", :layout="layout", :options="config")
+vue-plotly(:data="data", :layout="layout", :options="config" @click="handleClick")
 
 </template>
 
@@ -24,6 +24,21 @@ export default class VueComponent extends Vue {
   private mounted() {
     this.jsonData = this.loadData()
     this.updateMap()
+  }
+
+  private handleClick(event: any) {
+    console.log(event)
+    try {
+      // according to Plot.ly docs the points[] array should exist:
+      // https://plotly.com/javascript/plotlyjs-events/
+      const location = event.points[0].location
+      console.log('User clicked on:', location)
+
+      // send the event upstream!
+      this.$emit('landkreisClicked', location)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   @Watch('startDate') private updateStartDate() {

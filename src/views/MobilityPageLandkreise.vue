@@ -148,13 +148,15 @@ de:
               h5 {{ $t('germany-map') }}
                 .plotarea.map
                   mobility-map.plotsize(
-                    :landkreisData="allData", :startDate="startdate", :endDate="enddate" :time="weekInterval")
+                    :landkreisData="allData", :startDate="startdate", :endDate="enddate" :time="weekInterval"
+                    @landkreisClicked="handleLandkreisClicked"
+                  )
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
           ul(v-if="yaml.notes")
             li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
-  
+
 
 </template>
 
@@ -241,6 +243,10 @@ export default class VueComponent extends Vue {
 
   @Watch('enddate') printEndDate() {
     console.log(this.enddate)
+  }
+
+  private handleLandkreisClicked(landkreis: string) {
+    console.log('GOT EVENT:', landkreis)
   }
 
   private async loadAllData() {
