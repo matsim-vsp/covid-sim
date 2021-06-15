@@ -142,6 +142,26 @@ const routes = [
     component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
   },
   {
+    path: '/mobility-counties',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/duration',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/distance',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/proportion-mobile-persons',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),

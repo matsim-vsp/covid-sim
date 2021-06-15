@@ -108,14 +108,7 @@ de:
                     :data="formattedData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
-
-              br
-
-              h5 Test
-              .plotarea.map
-                  mobility-map.plotsize()
                 
-
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
           ul(v-if="yaml.notes")
