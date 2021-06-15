@@ -190,11 +190,15 @@ export default class VueComponent extends Vue {
   private mobility = '/LK_mobilityData_'
   private timeline = '/LK_nightHoursSum_'
   private weekdays = 'weekdays.csv'
-  private weekdaysTimeline = 'weekdays.csv.csv'
+  private weekdaysTimeline = 'weekdays.csv'
   private weekends = 'weekends.csv'
   private weekly = 'weekly.csv'
   private selectedLandkreisOne = 'Berlin'
   private selectedLandkreisTwo = 'Rostock'
+
+  private minWeekMobility = 10000
+  private maxWeekMobility = 0
+  private absolutDiff = 0
 
   private startdate = ''
   private enddate = ''
@@ -273,6 +277,9 @@ export default class VueComponent extends Vue {
     this.loadAllLandkreise()
 
     this.combineData()
+
+    this.absolutDiff = this.maxWeekMobility - this.minWeekMobility
+    console.log(this.absolutDiff)
 
     this.updateLandkreisNames()
   }
@@ -369,6 +376,12 @@ export default class VueComponent extends Vue {
       var date = this.timelineWeekends[i].date
       var area = this.timelineWeekends[i].area
       var sum = this.timelineWeekends[i]['22-5']
+      if (sum > this.maxWeekMobility) {
+        this.maxWeekMobility = sum
+      }
+      if (sum < this.minWeekMobility) {
+        this.minWeekMobility = sum
+      }
       this.allData[area]['weekend'][date].endHomeActs = sum
     }
 
@@ -376,6 +389,12 @@ export default class VueComponent extends Vue {
       var date = this.timelineyWeekdays[i].date
       var area = this.timelineyWeekdays[i].area
       var sum = this.timelineyWeekdays[i]['22-5']
+      if (sum > this.maxWeekMobility) {
+        this.maxWeekMobility = sum
+      }
+      if (sum < this.minWeekMobility) {
+        this.minWeekMobility = sum
+      }
       this.allData[area]['weekday'][date].endHomeActs = sum
     }
 
@@ -383,6 +402,12 @@ export default class VueComponent extends Vue {
       var date = this.timelineWeekly[i].date
       var area = this.timelineWeekly[i].area
       var sum = this.timelineWeekly[i]['22-5']
+      if (sum > this.maxWeekMobility) {
+        this.maxWeekMobility = sum
+      }
+      if (sum < this.minWeekMobility) {
+        this.minWeekMobility = sum
+      }
       if (date != '2021-06-06') {
         this.allData[area]['week'][date].endHomeActs = sum
       }
@@ -398,6 +423,7 @@ export default class VueComponent extends Vue {
   }
 
   private async loadLandkreiseTimeline(url: string) {
+    console.log(url)
     try {
       // load from subversion
       const rawData = await fetch(url).then(response => response.text())
