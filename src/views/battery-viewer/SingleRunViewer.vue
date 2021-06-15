@@ -221,7 +221,7 @@
                 :data="incidenceHeatMapData"
                 :logScale="logScale")
 
-                //- ---------- LEISURE OUTDOOR FRACTION ------
+        //- ---------- LEISURE OUTDOOR FRACTION ------
         .linear-plot(v-if="leisurOutdoorFractionData.length")
           h5 Leisure Outdoor Fraction
             button.button.is-small.hider(@click="toggleShowPlot(11)") ..
@@ -249,9 +249,18 @@
                 :data="weeklyTestsData"
                 :endDate="endDate"
                 )
-        
-      
 
+        //- ---------- VEGA PLOTS ------
+        .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+          .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
+            vega-lite-chart.plotsize(
+              :baseUrl="BATTERY_URL"
+              :runId="runId"
+              :configFile="chartKey"
+              :logScale="logScale"
+              :yamlDef="vegaChartData[chartKey].yaml"
+              :data="vegaChartData[chartKey].data"
+            )
 
         i Run ID: {{ currentRun.RunId }}
   .page-section.content(v-if="bottomNotes")

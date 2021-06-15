@@ -1,8 +1,14 @@
 const reports: { md: string; title: string; url: string; html: string }[] = [
   {
+    md: '/reports/report-2021-05-21.md',
+    title: '21 May 2021',
+    url: 'https://doi.org/10.14279/depositonce-11941',
+    html: '',
+  },
+  {
     md: '/reports/report-2021-04-30.md',
     title: '30 April 2021',
-    url: 'https://svn.vsp.tu-berlin.de/repos/public-svn/publications/vspwp/2021/21-12/',
+    url: 'https://doi.org/10.14279/depositonce-11890',
     html: '',
   },
   {

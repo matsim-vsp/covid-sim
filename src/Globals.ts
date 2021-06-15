@@ -81,6 +81,7 @@ export interface RunYaml {
       title: string
       order?: string
       options?: number[]
+      asPercent?: boolean
     }[]
   }[]
 }
