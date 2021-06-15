@@ -28,7 +28,7 @@ de:
   duration-heading: 'Zeit, die au√üerhalb des Hauses verbracht wurde'
   distance-heading: 'Durchschnittlich zur√ºckgelegte Distanz'
   proportion-heading: 'Anteil mobiler Personen'
-  duration-heading-percent: 'Prozentuale Ver‰nderung der Dauer auﬂh‰usiger Aktivit‰ten im Vergleich zu vor COVID-19'
+  duration-heading-percent: 'Prozentuale Ver√§nderung der Dauer au√üh√§usiger Aktivit√§ten im Vergleich zu vor COVID-19'
   week: 'Woche'
   weekday: 'Wochentag'
   weekend: 'Wochenende'
