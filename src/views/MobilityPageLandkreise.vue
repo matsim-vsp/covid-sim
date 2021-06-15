@@ -80,7 +80,10 @@ de:
            select.select-menue(v-model='enddate')
             option(v-for="date in allWeekdayDates") {{ date }}
          .dateselect.date-choices
-           select.select-menue(v-model='selectedLandkreis')
+           select.select-menue(v-model='selectedLandkreisOne')
+            option(v-for="element in allLandkreise") {{ element }}
+         .dateselect.date-choices
+           select.select-menue(v-model='selectedLandkreisTwo')
             option(v-for="element in allLandkreise") {{ element }}
           
           
@@ -103,9 +106,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
-                    :landkreis="selectedLandkreis" :data="allData"
+                    :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'week'"
-                    :yAxisName="yAxisNAme")
+                    :yAxisName="yAxisNAme" :landkreisTwo="selectedLandkreisTwo")
 
               br
 
@@ -115,9 +118,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
-                    :landkreis="selectedLandkreis" :data="allData"
+                    :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekday'"
-                    :yAxisName="yAxisNAme")
+                    :yAxisName="yAxisNAme" :landkreisTwo="selectedLandkreisTwo")
 
               br
 
@@ -127,9 +130,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
-                    :landkreis="selectedLandkreis" :data="allData"
+                    :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekend'"
-                    :yAxisName="yAxisNAme")
+                    :yAxisName="yAxisNAme" :landkreisTwo="selectedLandkreisTwo")
 
               br
 
@@ -137,8 +140,8 @@ de:
               .plotarea.tall(v-if="status == 1")
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
-                    :landkreis="selectedLandkreis" :data="allData"
-                    :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'")
+                    :landkreis="selectedLandkreisOne" :data="allData"
+                    :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'" :landkreisTwo="selectedLandkreisTwo")
 
               br
 
@@ -190,7 +193,8 @@ export default class VueComponent extends Vue {
   private weekdaysTimeline = 'weekdays.csv.csv'
   private weekends = 'weekends.csv'
   private weekly = 'weekly.csv'
-  private selectedLandkreis = ''
+  private selectedLandkreisOne = ''
+  private selectedLandkreisTwo = ''
 
   private startdate = ''
   private enddate = ''
@@ -219,10 +223,6 @@ export default class VueComponent extends Vue {
   private yAxisNAme = 'Time per Day [h]'
   private plotHeading = 'Amount of Time Spent Outside the Home'
   private dataLoadingFail = false
-
-  @Watch('selectedLandkreis') printLandkreis() {
-    console.log(this.selectedLandkreis)
-  }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()

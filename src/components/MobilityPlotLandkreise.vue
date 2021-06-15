@@ -12,6 +12,7 @@ import { X, Y } from 'vega-lite/build/src/channel'
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private landkreis!: string
+  @Prop({ required: true }) private landkreisTwo!: string
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private week!: string
   @Prop({ required: true }) private kind!: string
@@ -37,6 +38,10 @@ export default class VueComponent extends Vue {
     this.updateMobilityLandkreis()
   }
 
+  @Watch('landkreisTwo') private updateMobilityLandkreisTwo() {
+    this.updateMobilityLandkreis()
+  }
+
   @Watch('landkreis') private updateMobilityLandkreis() {
     var mobilityData: any[] = []
     var tempData
@@ -47,8 +52,6 @@ export default class VueComponent extends Vue {
         tempData = value
       }
     }
-
-    console.log(this.kind)
 
     if (this.week != 'weekk') {
       if (tempData !== undefined) {
@@ -63,7 +66,7 @@ export default class VueComponent extends Vue {
       }
     }
 
-    mobilityData[0] = {
+    mobilityData.push({
       name: this.landkreis,
       x: xData,
       y: ydata,
@@ -73,7 +76,40 @@ export default class VueComponent extends Vue {
         dash: 'line',
         width: 2,
       },
+    })
+
+    var xDataTwo: any[] = []
+    var ydataTwo: any[] = []
+    for (const [key, value] of Object.entries(this.data)) {
+      if (key == this.landkreisTwo) {
+        tempData = value
+      }
     }
+
+    if (this.week != 'weekk') {
+      if (tempData !== undefined) {
+        for (const [key, value] of Object.entries(tempData)) {
+          if (key == this.week) {
+            for (const [key2, value2] of Object.entries(value as object)) {
+              xDataTwo.push(key2)
+              ydataTwo.push(value2[this.kind])
+            }
+          }
+        }
+      }
+    }
+
+    mobilityData.push({
+      name: this.landkreisTwo,
+      x: xDataTwo,
+      y: ydataTwo,
+      fill: 'none',
+      marker: { size: 4 },
+      line: {
+        dash: 'line',
+        width: 2,
+      },
+    })
 
     this.dataLines = mobilityData
   }
