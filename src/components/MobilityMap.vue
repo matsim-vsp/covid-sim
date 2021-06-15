@@ -1,6 +1,6 @@
 <template lang="pug">
 
-vue-plotly(:data="data", :layout="layout", :options="config")
+vue-plotly(:data="data", :layout="layout", :options="config" @click="handleClick")
 
 </template>
 
@@ -26,6 +26,21 @@ export default class VueComponent extends Vue {
     this.updateMap()
   }
 
+  private handleClick(event: any) {
+    console.log(event)
+    try {
+      // according to Plot.ly docs the points[] array should exist:
+      // https://plotly.com/javascript/plotlyjs-events/
+      const location = event.points[0].location
+      console.log('User clicked on:', location)
+
+      // send the event upstream!
+      this.$emit('landkreisClicked', location)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   @Watch('startDate') private updateStartDate() {
     this.updateMap()
   }
@@ -44,6 +59,8 @@ export default class VueComponent extends Vue {
       var name
       if (key.startsWith('Kreis')) {
         name = key.substring(6)
+      } else if (key == 'Landkreis Rostock') {
+        name = 'Landkreis Rostock'
       } else if (key.startsWith('Landkreis')) {
         name = key.substring(10)
       } else if (key == 'Nienburg/Weser') {
@@ -93,6 +110,16 @@ export default class VueComponent extends Vue {
     // }
 
     //this.layout.mapbox.layers[0].source = jsonData
+
+    // Change Data from GeoJSON
+
+    if (
+      jsonData.features[0].properties.name_2 == 'Rostock' &&
+      jsonData.features[0].properties.type_2 == 'Landkreis Rostock'
+    ) {
+      jsonData.features[0].properties.name_2 = 'Landkreis Rostock'
+    }
+
     this.data[0].geojson = jsonData
 
     return jsonData
