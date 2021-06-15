@@ -193,8 +193,8 @@ export default class VueComponent extends Vue {
   private weekdaysTimeline = 'weekdays.csv.csv'
   private weekends = 'weekends.csv'
   private weekly = 'weekly.csv'
-  private selectedLandkreisOne = ''
-  private selectedLandkreisTwo = ''
+  private selectedLandkreisOne = 'Berlin'
+  private selectedLandkreisTwo = 'Rostock'
 
   private startdate = ''
   private enddate = ''
