@@ -110,6 +110,7 @@ import Colophon from '@/components/Colophon.vue'
 import 'vue-slider-component/theme/default.css'
 
 import allCalculators from '@/assets/calculators'
+import { PUBLIC_SVN } from '@/Globals'
 
 type RCalcYaml = {
   description?: string
@@ -122,9 +123,6 @@ type RCalcYaml = {
 
 @Component({ components: { VueSlider, Colophon }, props: {} })
 export default class VueComponent extends Vue {
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
-
   private calcId = ''
 
   private yaml: RCalcYaml = { baseValue: 0, optionGroups: {}, additiveGroups: {}, notes: [] }
@@ -177,7 +175,7 @@ export default class VueComponent extends Vue {
     this.calcId = this.$route.params.rcalc
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = this.public_svn + `r-calculator/${this.calcId}.${lang}.yaml`
+    const url = PUBLIC_SVN + `r-calculator/${this.calcId}.${lang}.yaml`
 
     let responseText = ''
 

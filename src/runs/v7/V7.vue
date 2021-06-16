@@ -27,6 +27,7 @@ import * as moment from 'moment'
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import SectionViewer from './ChartSelector.vue'
+import { PUBLIC_SVN } from '@/Globals'
 
 @Component({
   components: {
@@ -92,8 +93,7 @@ export default class V7 extends Vue {
     return notes.substring(i + this.plotTag.length)
   }
 
-  private RKI_URL =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/RKI/'
+  private RKI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
 
   private cityCSV: any = {
     berlin: this.RKI_URL + 'berlin-cases.csv',

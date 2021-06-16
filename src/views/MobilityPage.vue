@@ -108,13 +108,13 @@ de:
                     :data="formattedData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
-                
+
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
           ul(v-if="yaml.notes")
             li.notes-item(v-for="line in yaml.notes" v-html="parseMarkdown(line)")
-  
+
 
 </template>
 
@@ -131,6 +131,7 @@ import Colophon from '@/components/Colophon.vue'
 import MobilityPlot from '@/components/MobilityPlot.vue'
 import 'vue-slider-component/theme/default.css'
 import { concat } from 'js-coroutines'
+import { PUBLIC_SVN } from '@/Globals'
 
 type MobilityYaml = {
   description?: string
@@ -143,8 +144,6 @@ type MobilityYaml = {
 })
 export default class VueComponent extends Vue {
   private badPage = false
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
 
   private yaml: MobilityYaml = { description: '', notes: [] }
 
@@ -256,7 +255,7 @@ export default class VueComponent extends Vue {
   }
 
   private async loadRange() {
-    const url = this.public_svn + 'mobilityData/bundeslaender/range_OverviewBL.csv'
+    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/range_OverviewBL.csv'
 
     try {
       // load from subversion
@@ -338,7 +337,7 @@ export default class VueComponent extends Vue {
   }
 
   private async loadMobilityData() {
-    const url = this.public_svn + 'mobilityData/bundeslaender/mobilityData_OverviewBL.csv'
+    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/mobilityData_OverviewBL.csv'
 
     try {
       // load from subversion
@@ -376,7 +375,7 @@ export default class VueComponent extends Vue {
     this.badPage = false
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = this.public_svn + `mobilityData/bundeslaender/config.${lang}.yaml`
+    const url = PUBLIC_SVN + `mobilityData/bundeslaender/config.${lang}.yaml`
 
     let responseText = ''
 

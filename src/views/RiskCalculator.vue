@@ -97,6 +97,8 @@ import MarkdownIt from 'markdown-it'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
+import { PUBLIC_SVN } from '@/Globals'
+
 type RiskYaml = {
   description: string
   calibrationParam: number
@@ -123,9 +125,6 @@ type RiskYaml = {
 
 @Component({ components: { VueSlider }, props: {} })
 export default class VueComponent extends Vue {
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
-
   private calcId = ''
 
   private yaml: RiskYaml = {
@@ -160,7 +159,7 @@ export default class VueComponent extends Vue {
     this.calcId = this.$route.params.rcalc
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = this.public_svn + `risk-calculator/${this.calcId}.${lang}.yaml`
+    const url = PUBLIC_SVN + `risk-calculator/${this.calcId}.${lang}.yaml`
 
     let responseText = ''
 

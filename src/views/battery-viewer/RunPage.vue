@@ -39,7 +39,7 @@ import * as moment from 'moment'
 
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import SingleRunViewer from './SingleRunViewer.vue'
-import { RunYaml } from '@/Globals'
+import { RunYaml, PUBLIC_SVN } from '@/Globals'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import { Route } from 'vue-router'
 
@@ -56,8 +56,6 @@ interface Breadcrumb {
 })
 export default class VueComponent extends Vue {
   private publicPath = '/'
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/battery/'
 
   private badPage = false
 
@@ -114,7 +112,7 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private svnRoot = new SVNFileSystem(this.public_svn)
+  private svnRoot = new SVNFileSystem(PUBLIC_SVN + 'battery/')
 
   private buildBreadcrumbs(folder: string) {
     const crumbs: Breadcrumb[] = []
@@ -199,7 +197,7 @@ export default class VueComponent extends Vue {
 
   // this will throw an error if /path/metadata.yaml is not found
   private async loadYaml(path: string) {
-    const url = this.public_svn + path + '/metadata.yaml'
+    const url = PUBLIC_SVN + 'battery/' + path + '/metadata.yaml'
 
     const response = await fetch(url)
     const text = await response.text()

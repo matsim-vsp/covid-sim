@@ -15,6 +15,7 @@ import Papa from 'papaparse'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
+import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -32,9 +33,7 @@ export default class VueComponent extends Vue {
   private zipLoader: any
   private isZipLoaded = false
 
-  private PUBLIC_SVN =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
-  private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
+  private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
   private MAX_DAYS = 1000
 

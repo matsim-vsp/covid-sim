@@ -294,7 +294,7 @@ import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
-import { RunYaml } from '@/Globals'
+import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
   measure: string
@@ -377,13 +377,10 @@ export default class VueComponent extends Vue {
 
   private publicPath = '/'
 
-  private PUBLIC_SVN =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
-
-  private BATTERY_URL = this.PUBLIC_SVN + 'battery/'
-  private RKI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
-  private DIVI_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
-  private JAKARTA_URL = this.PUBLIC_SVN + 'original-data/Fallzahlen/Other/'
+  private BATTERY_URL = PUBLIC_SVN + 'battery/'
+  private RKI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
+  private DIVI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
+  private JAKARTA_URL = PUBLIC_SVN + 'original-data/Fallzahlen/Other/'
 
   private isUsingRealDates = false
   private endDate = '2020-08-31'
@@ -725,6 +722,7 @@ export default class VueComponent extends Vue {
     // this.isZipLoaded = false
 
     const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
+    console.log({ filepath })
     const zloader = new ZipLoader(filepath)
     await zloader.load()
 
