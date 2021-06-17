@@ -19,7 +19,10 @@ en:
   y-axis-percent: 'Prozent [%]'
   start-date: 'Start Date'
   end-date: 'End Date'
-  germany-map: 'Overview map'
+  germany-map: 'Difference Map'
+  county: 'County Comparison'
+  tart-end-date: 'Start- and End-Date'
+  time: 'Time period'
 de:
   badpage: 'Seite wurde nicht gefunden.'
   mobility-trends: 'Mobility Dashboard'
@@ -31,7 +34,7 @@ de:
   duration-heading: 'Zeit, die außerhalb des Hauses verbracht wurde'
   distance-heading: 'Durchschnittlich zurückgelegte Distanz'
   proportion-heading: 'Anteil mobiler Personen'
-  duration-heading-percent: 'Prozentuale Veränderung des Mobilitätsniveaus im Vergleich zu vor COVID-19'
+  duration-heading-percent: 'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19'
   week: 'Woche'
   weekday: 'Wochentag'
   weekend: 'Wochenende'
@@ -40,7 +43,10 @@ de:
   y-axis-percent: 'Percent [%]'
   start-date: 'Start-Datum'
   end-date: 'End-Datum'
-  germany-map: 'Übersichtskarte'
+  germany-map: 'Differenzkarte'
+  county: 'Landkreis Vergleich'
+  start-end-date: 'Start- und Enddatum'
+  time: 'Zeitraum'
 </i18n>
 
 <template lang="pug">
@@ -59,32 +65,38 @@ de:
            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') {{ $t('duration') }}
            button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') {{ $t('distance') }}
            button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') {{ $t('proportion') }}
+         h3 {{ $t('time') }}
          .buttons.button-choices
            button.button(:class="{'is-link' : statusTime == 4}" @click='clickButton(4)') {{ $t('week') }}
            button.button(:class="{'is-link' : statusTime == 5}" @click='clickButton(5)') {{ $t('weekday') }}
            button.button(:class="{'is-link' : statusTime == 6}" @click='clickButton(6)') {{ $t('weekend') }}
-         .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
-           p {{ $t('start-date') }}
-           select.select-menue(v-model='startdate')
-            option(v-for="date in allWeekDates") {{ date }}
-         .dateselect.date-choices(v-if="statusTime == 5")
-           p {{ $t('start-date') }}
-           select.select-menue(v-model='startdate')
-            option(v-for="date in allWeekdayDates") {{ date }}
-         .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
-           p {{ $t('end-date') }}
-           select.select-menue(v-model='enddate')
-            option(v-for="date in allWeekDates") {{ date }}
-         .dateselect.date-choices(v-if="statusTime == 5")
-           p {{ $t('end-date') }}
-           select.select-menue(v-model='enddate')
-            option(v-for="date in allWeekdayDates") {{ date }}
-         .dateselect.date-choices
-           select.select-menue(v-model='selectedLandkreisOne')
-            option(v-for="element in allLandkreise") {{ element }}
-         .dateselect.date-choices
-           select.select-menue(v-model='selectedLandkreisTwo')
-            option(v-for="element in allLandkreise") {{ element }}
+         h3 {{ $t('county') }}
+         .button-row
+          .dateselect.date-choices
+            select.select-menue(v-model='selectedLandkreisOne')
+              option(v-for="element in allLandkreise") {{ element }}
+          .dateselect.date-choices
+            select.select-menue(v-model='selectedLandkreisTwo')
+              option(v-for="element in allLandkreise") {{ element }}
+         h3 {{ $t('start-end-date') }}
+         .button-row
+          .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
+            
+            select.select-menue(v-model='startdate')
+              option(v-for="date in allWeekDates") {{ date }}
+          .dateselect.date-choices(v-if="statusTime == 5")
+            
+            select.select-menue(v-model='startdate')
+              option(v-for="date in allWeekdayDates") {{ date }}
+          .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
+            
+            select.select-menue(v-model='enddate')
+              option(v-for="date in allWeekDates") {{ date }}
+          .dateselect.date-choices(v-if="statusTime == 5")
+            
+            select.select-menue(v-model='enddate')
+              option(v-for="date in allWeekdayDates") {{ date }}
+         
           
           
 
@@ -99,6 +111,15 @@ de:
           .all-plots
 
             .linear-plot
+
+              h5 {{ $t('germany-map') }}
+                .plotarea.map
+                  mobility-map.plotsize(
+                    :landkreisData="allData", :startDate="startdate", :endDate="enddate" :time="weekInterval"
+                    @landkreisClicked="handleLandkreisClicked"
+                  )
+
+              br
 
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
@@ -143,14 +164,9 @@ de:
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'" :landkreisTwo="selectedLandkreisTwo")
 
-              br
+              
 
-              h5 {{ $t('germany-map') }}
-                .plotarea.map
-                  mobility-map.plotsize(
-                    :landkreisData="allData", :startDate="startdate", :endDate="enddate" :time="weekInterval"
-                    @landkreisClicked="handleLandkreisClicked"
-                  )
+              
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
@@ -190,6 +206,7 @@ export default class VueComponent extends Vue {
 
   private landkreise = this.public_svn + 'mobilityData/landkreise'
   private mobility = '/LK_mobilityData_'
+  private range = '/LK_Range_'
   private timeline = '/LK_nightHoursSum_'
   private weekdays = 'weekdays.csv'
   private weekdaysTimeline = 'weekdays.csv'
@@ -202,8 +219,13 @@ export default class VueComponent extends Vue {
   private maxWeekMobility = 0
   private absolutDiff = 0
 
-  private startdate = ''
-  private enddate = ''
+  private startdate = '2020-03-08'
+  private enddate = '2020-03-08'
+
+  private startDateWeek = ''
+  private endDateWeek = ''
+  private startDateWeekday = ''
+  private endDateWeekday = ''
 
   private yaml: MobilityYaml = { description: '', notes: [] }
 
@@ -212,6 +234,10 @@ export default class VueComponent extends Vue {
   private mobilityWeekdays: any[] = []
   private mobilityWeekends: any[] = []
   private mobilityWeekly: any[] = []
+
+  private rangeWeeends: any[] = []
+  private rangeWeekly: any[] = []
+  private rangeWeekdays: any[] = []
 
   private timelineyWeekdays: any[] = []
   private timelineWeekends: any[] = []
@@ -235,8 +261,7 @@ export default class VueComponent extends Vue {
   }
 
   private mounted() {
-    this.clickButton(1)
-    this.clickButton(4)
+    this.openPage(window.location.href)
     this.buildPageForURL()
     this.loadAllData()
   }
@@ -280,14 +305,29 @@ export default class VueComponent extends Vue {
 
     //this.mobilityWeekdays[i].date
 
+    this.rangeWeeends = await this.loadRangeData(this.landkreise + this.range + this.weekends)
+    this.rangeWeekly = await this.loadRangeData(this.landkreise + this.range + this.weekly)
+    this.rangeWeekdays = await this.loadRangeData(this.landkreise + this.range + this.weekdays)
+
     this.loadAllLandkreise()
 
     this.combineData()
 
+    console.log(this.combineData)
+
     this.absolutDiff = this.maxWeekMobility - this.minWeekMobility
-    console.log(this.absolutDiff)
 
     this.updateLandkreisNames()
+
+    if (this.statusTime == 4 || this.statusTime == 6) {
+      this.startdate = this.allWeekDates[0]
+      this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
+    } else if (this.statusTime == 5) {
+      this.startdate = this.allWeekdayDates[0]
+      this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
+    }
+
+    this.allData.sort()
   }
 
   private async buildUI() {
@@ -309,6 +349,32 @@ export default class VueComponent extends Vue {
     */
   }
 
+  private async loadRangeData(url: string) {
+    try {
+      // load from subversion
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      // convert dates to ISO format
+
+      const withDates = parsed.map(row => {
+        const d = row.date.toString()
+        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+        return row
+      })
+
+      return withDates
+    } catch (e) {
+      this.dataLoadingFail = true
+      console.error(e)
+    }
+    return []
+  }
+
   private updateLandkreisNames() {}
 
   private async combineData() {
@@ -323,41 +389,51 @@ export default class VueComponent extends Vue {
       var landkreis = this.mobilityWeekends[i].Landkreis
       var date = this.mobilityWeekends[i].date
       var duration = this.mobilityWeekends[i].outOfHomeDuration
+      var dailyRange = this.rangeWeeends[i].dailyRangePerPerson
+      var sharePerson = this.rangeWeeends[i].sharePersonLeavingHome
 
-      if (!this.allWeekDates.includes(date) && date != '2021-06-06') {
+      if (!this.allWeekDates.includes(date)) {
         this.allWeekDates.push(date)
       }
 
-      this.allData[landkreis]['weekend'][date] = {
-        outOfHomeDuration: duration,
-        percentageChangeComparedToBeforeCorona: this.mobilityWeekends[i]
-          .percentageChangeComparedToBeforeCorona,
-        sharePersonLeavingHome: 0,
-        dailyRangePerPerson: 0,
-        endHomeActs: 0,
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['weekend'][date] = {
+          outOfHomeDuration: duration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekends[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
       }
     }
 
     for (var i = 0; i < this.mobilityWeekdays.length; i++) {
       var landkreis = this.mobilityWeekdays[i].Landkreis
       var date = this.mobilityWeekdays[i].date
+      var dailyRange = this.rangeWeekdays[i].dailyRangePerPerson
+      var sharePerson = this.rangeWeekdays[i].sharePersonLeavingHome
       if (!this.allWeekdayDates.includes(date)) {
         this.allWeekdayDates.push(date)
       }
       var duration = this.mobilityWeekdays[i].outOfHomeDuration
-      this.allData[landkreis]['weekday'][date] = {
-        outOfHomeDuration: this.mobilityWeekends[i].outOfHomeDuration,
-        percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
-          .percentageChangeComparedToBeforeCorona,
-        sharePersonLeavingHome: 0,
-        dailyRangePerPerson: 0,
-        endHomeActs: 0,
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['weekday'][date] = {
+          outOfHomeDuration: this.mobilityWeekends[i].outOfHomeDuration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
       }
     }
 
     for (var i = 0; i < this.mobilityWeekly.length; i++) {
       var landkreis = this.mobilityWeekly[i].Landkreis
-      var date = this.mobilityWeekly[i].date
+      var date = this.rangeWeekly[i].date
+      var dailyRange = this.rangeWeekly[i].dailyRangePerPerson
+      var sharePerson = this.rangeWeeends[i].sharePersonLeavingHome
       if (landkreis == 'Landkreis St, Wendel') {
         landkreis = 'Landkreis St. Wendel'
       } else if (landkreis == 'Cottbus - Chó?ebuz') {
@@ -368,13 +444,15 @@ export default class VueComponent extends Vue {
         duration = parseFloat(duration.replace(',', '.'))
       }
 
-      this.allData[landkreis]['week'][date] = {
-        outOfHomeDuration: duration,
-        percentageChangeComparedToBeforeCorona: this.mobilityWeekly[i]
-          .percentageChangeComparedToBeforeCorona,
-        sharePersonLeavingHome: 0,
-        dailyRangePerPerson: 0,
-        endHomeActs: 0,
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['week'][date] = {
+          outOfHomeDuration: duration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekly[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
       }
     }
 
@@ -382,54 +460,68 @@ export default class VueComponent extends Vue {
       var date = this.timelineWeekends[i].date
       var area = this.timelineWeekends[i].area
       var sum = this.timelineWeekends[i]['22-5']
-      if (sum > this.maxWeekMobility) {
-        this.maxWeekMobility = sum
+
+      if (this.allData[area] !== undefined) {
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+          console.log(area)
+          console.log(sum)
+        }
+        this.allData[area]['weekend'][date].endHomeActs = sum
       }
-      if (sum < this.minWeekMobility) {
-        this.minWeekMobility = sum
-      }
-      this.allData[area]['weekend'][date].endHomeActs = sum
     }
 
     for (var i = 0; i < this.timelineyWeekdays.length; i++) {
       var date = this.timelineyWeekdays[i].date
       var area = this.timelineyWeekdays[i].area
       var sum = this.timelineyWeekdays[i]['22-5']
-      if (sum > this.maxWeekMobility) {
-        this.maxWeekMobility = sum
+      if (this.allData[area] !== undefined) {
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+          console.log(area)
+          console.log(sum)
+        }
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
+        this.allData[area]['weekday'][date].endHomeActs = sum
       }
-      if (sum < this.minWeekMobility) {
-        this.minWeekMobility = sum
-      }
-      this.allData[area]['weekday'][date].endHomeActs = sum
     }
 
     for (var i = 0; i < this.timelineWeekly.length; i++) {
       var date = this.timelineWeekly[i].date
       var area = this.timelineWeekly[i].area
       var sum = this.timelineWeekly[i]['22-5']
-      if (sum > this.maxWeekMobility) {
-        this.maxWeekMobility = sum
-      }
-      if (sum < this.minWeekMobility) {
-        this.minWeekMobility = sum
-      }
-      if (date != '2021-06-06') {
+      if (this.allData[area] !== undefined) {
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+          console.log(area)
+          console.log(sum)
+        }
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
         this.allData[area]['week'][date].endHomeActs = sum
       }
     }
+    console.log(this.minWeekMobility)
+    console.log(this.maxWeekMobility)
   }
 
   private async loadAllLandkreise() {
     for (var i = 0; i < 402; i++) {
       var landkreis = this.mobilityWeekends[i].Landkreis
-      this.allLandkreise.push(landkreis)
+      if (landkreis != 'Landau in der Pfalz') {
+        this.allLandkreise.push(landkreis)
+      }
     }
     this.allLandkreise.sort()
   }
 
   private async loadLandkreiseTimeline(url: string) {
-    console.log(url)
     try {
       // load from subversion
       const rawData = await fetch(url).then(response => response.text())
@@ -456,7 +548,6 @@ export default class VueComponent extends Vue {
   }
 
   private async loadLandkreisData(url: string) {
-    console.log(url)
     try {
       // load from subversion
       const rawData = await fetch(url).then(response => response.text())
@@ -498,16 +589,29 @@ export default class VueComponent extends Vue {
   */
 
   private async openPage(url: string) {
+    console.log('HELLO')
     var urlSplit = url.split('/')
-    var urlInfo = urlSplit[urlSplit.length - 2]
-    if (urlInfo == 'duration') {
+    console.log(urlSplit)
+    var urlInfo = urlSplit[urlSplit.length - 3]
+    if (urlSplit.includes('duration')) {
+      console.log('duration')
       this.clickButton(1)
-    } else if (urlInfo == 'distance') {
+    } else if (urlSplit.includes('distance')) {
+      console.log('distance')
       this.clickButton(2)
-    } else if (urlInfo == 'proportion-mobile-persons') {
+    } else if (urlSplit.includes('proportion-mobile-persons')) {
+      console.log('proportion-mobile-persons')
       this.clickButton(3)
-    } else if (urlInfo == 'mobility-counties') {
+    } else {
       this.clickButton(1)
+    }
+    if (urlSplit.includes('week')) {
+      this.clickButton(4)
+    } else if (urlSplit.includes('weekend')) {
+      this.clickButton(6)
+    } else if (urlSplit.includes('weekday')) {
+      this.clickButton(5)
+    } else {
       this.clickButton(4)
     }
   }
@@ -526,10 +630,16 @@ export default class VueComponent extends Vue {
       if (statusNum == 4) {
         this.weekInterval = 'week'
         window.history.pushState(kind + 'week', 'Title', '/mobility-counties' + kind + '/week')
+        this.startdate = this.allWeekDates[0]
+        this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
       } else if (statusNum == 5) {
+        this.startdate = this.allWeekdayDates[0]
+        this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
         this.weekInterval = 'weekday'
         window.history.pushState('weekday', 'Title', '/mobility-counties' + kind + '/weekday')
       } else if (statusNum == 6) {
+        this.startdate = this.allWeekDates[0]
+        this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
         this.weekInterval = 'weekend'
         window.history.pushState('weekend', 'Title', '/mobility-counties' + kind + '/weekend')
       }
@@ -922,6 +1032,7 @@ p.plotsize {
   padding: 0.6rem 0rem 0.5rem 0.6rem;
   border-radius: 2px;
   width: max-content;
+  margin-right: 2rem;
 }
 
 .date-choices .date {
@@ -945,6 +1056,10 @@ p.plotsize {
 
 .select-menue option {
   width: min;
+}
+
+.button-row {
+  display: flex;
 }
 
 @media only screen and (max-width: 950px) {

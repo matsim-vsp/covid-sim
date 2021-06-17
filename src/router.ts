@@ -147,17 +147,47 @@ const routes = [
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },
   {
-    path: '/mobility-counties/duration',
+    path: '/mobility-counties/duration/week',
     component: () =>
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },
   {
-    path: '/mobility-counties/distance',
+    path: '/mobility-counties/distance/week',
     component: () =>
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },
   {
-    path: '/mobility-counties/proportion-mobile-persons',
+    path: '/mobility-counties/proportion-mobile-persons/week',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/duration/weekday',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/distance/weekday',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/proportion-mobile-persons/weekday',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/duration/weekend',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/distance/weekend',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/proportion-mobile-persons/weekend',
     component: () =>
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },

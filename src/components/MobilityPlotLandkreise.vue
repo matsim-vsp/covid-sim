@@ -21,7 +21,7 @@ export default class VueComponent extends Vue {
   private dataLines: any[] = []
 
   private mounted() {
-    this.updateMobilityLandkreis()
+    this.loadPlots()
   }
 
   @Watch('dataLines') private checkData() {
@@ -30,19 +30,24 @@ export default class VueComponent extends Vue {
 
   @Watch('kind') private changeActivity() {
     this.layout.yaxis.title = this.yAxisName
-    this.updateMobilityData()
+    this.loadPlots()
   }
 
   @Watch('data') private updateMobilityData() {
     this.layout.yaxis.title = this.yAxisName
-    this.updateMobilityLandkreis()
+
+    this.loadPlots()
   }
 
   @Watch('landkreisTwo') private updateMobilityLandkreisTwo() {
-    this.updateMobilityLandkreis()
+    this.loadPlots()
   }
 
   @Watch('landkreis') private updateMobilityLandkreis() {
+    this.loadPlots()
+  }
+
+  private loadPlots() {
     var mobilityData: any[] = []
     var tempData
     var xData: any[] = []
@@ -86,14 +91,12 @@ export default class VueComponent extends Vue {
       }
     }
 
-    if (this.week != 'weekk') {
-      if (tempData !== undefined) {
-        for (const [key, value] of Object.entries(tempData)) {
-          if (key == this.week) {
-            for (const [key2, value2] of Object.entries(value as object)) {
-              xDataTwo.push(key2)
-              ydataTwo.push(value2[this.kind])
-            }
+    if (tempData !== undefined) {
+      for (const [key, value] of Object.entries(tempData)) {
+        if (key == this.week) {
+          for (const [key2, value2] of Object.entries(value as object)) {
+            xDataTwo.push(key2)
+            ydataTwo.push(value2[this.kind])
           }
         }
       }

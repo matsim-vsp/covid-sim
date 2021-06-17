@@ -83,8 +83,9 @@ export default class VueComponent extends Vue {
       ) {
       } else {
         data.push(
-          value[this.time][this.endDate].outOfHomeDuration -
-            value[this.time][this.startDate].outOfHomeDuration
+          value[this.time][this.endDate].endHomeActs *
+            (100 / value[this.time][this.startDate].endHomeActs) -
+            100
         )
         this.data[0].locations = locations
         this.data[0].z = data
@@ -113,12 +114,15 @@ export default class VueComponent extends Vue {
 
     // Change Data from GeoJSON
 
+    /*
+
     if (
       jsonData.features[0].properties.name_2 == 'Rostock' &&
       jsonData.features[0].properties.type_2 == 'Landkreis Rostock'
     ) {
       jsonData.features[0].properties.name_2 = 'Landkreis Rostock'
     }
+    */
 
     this.data[0].geojson = jsonData
 
@@ -132,29 +136,36 @@ export default class VueComponent extends Vue {
       featureidkey: '',
       z: [1, 2],
       geojson: [],
+      zmid: 0,
+      zmin: -40,
+      zmax: 40,
     },
   ]
 
   private layout = {
     mapbox: {
       center: { lon: 10.3, lat: 51.3 },
-      zoom: 5.2,
+      zoom: 5.3,
       style: 'basic',
     },
-    //margin: { t: 10, r: 10, b: 10, l: 60 },
-    margin: { t: 0, r: 0, b: 0, l: 0 },
+    margin: { t: 5, r: 0, b: 0, l: 0 },
     paper_bgcolor: 'rgb(236,239,242)',
-    showlegend: true,
-    legend: {
-      x: 0,
-      xanchor: 'right',
-      y: 0,
+    coloraxis: {
+      cauto: false,
+      cmin: -5,
+      cmax: 5,
     },
-    hoverinfo: 'featureidkey' + 'locations',
   }
 
   private config = {
     mapboxAccessToken: this.MAPBOX_TOKEN,
+    toImageButtonOptions: {
+      format: 'svg', // one of png, svg, jpeg, webp
+      filename: 'germany_mobility',
+      width: 800,
+      height: 900,
+      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+    },
   }
 }
 </script>
