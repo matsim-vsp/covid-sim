@@ -90,6 +90,12 @@
 
         router-link.navbar-item(to="/mobility" :style="{color: 'white'}") Mobility
 
+        //-.navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+        //-  a.navbar-link  Mobility
+        //-  .navbar-dropdown
+        //-    a.navbar-item(:href="'/mobility'") Mobility State
+        //-    a.navbar-item(:href="'/mobility-counties/'") Mobility County
+
         //- .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
         //-   a.navbar-link(:href="'/calculators'")  Calculators
         //-   .navbar-dropdown
