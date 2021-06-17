@@ -108,12 +108,7 @@ de:
                     :data="formattedData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity")
-<<<<<<< HEAD
-
-
-=======
                 
->>>>>>> mobility
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
           ul(v-if="yaml.notes")
