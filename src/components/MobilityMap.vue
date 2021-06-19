@@ -15,13 +15,21 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private startDate!: string
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private time!: string
+  @Prop({ required: true }) private activity!: string
   MAPBOX_TOKEN =
     'pk.eyJ1IjoidnNwLXR1LWJlcmxpbiIsImEiOiJjamNpemh1bmEzNmF0MndudHI5aGFmeXpoIn0.u9f04rjFo7ZbWiSceTTXyA'
 
   private jsonData = {}
   private test = ''
 
+  private logColorScale = [
+    [0.0, 'rgb(255,0,0)'],
+    [0.5, 'rgb(255,255,255)'],
+    [1.0, 'rgb(0,128,0)'],
+  ]
+
   private mounted() {
+    console.log(this.activity)
     this.jsonData = this.loadData()
     this.updateMap()
   }
@@ -41,6 +49,11 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('activity') private updateActivity() {
+    console.log(this.activity)
+    this.updateMap()
+  }
+
   @Watch('startDate') private updateStartDate() {
     this.updateMap()
   }
@@ -55,6 +68,8 @@ export default class VueComponent extends Vue {
   @Watch('landkreisData') private updateMap() {
     var locations = []
     var data = []
+    var localActivity = this.activity
+    console.log(localActivity)
     for (const [key, value] of Object.entries(this.landkreisData)) {
       var name
       if (key.startsWith('Kreis')) {
@@ -82,11 +97,21 @@ export default class VueComponent extends Vue {
         value[this.time][this.startDate] === undefined
       ) {
       } else {
-        data.push(
-          value[this.time][this.endDate].endHomeActs *
-            (100 / value[this.time][this.startDate].endHomeActs) -
-            100
-        )
+        if (this.startDate == this.endDate) {
+          data.push(value[this.time][this.endDate][this.activity])
+          this.data[0].zmin = 0
+          this.data[0].zmax = 0
+          this.data[0].colorscale = [['ylorbr']]
+        } else {
+          data.push(
+            value[this.time][this.endDate][this.activity] *
+              (100 / value[this.time][this.startDate][this.activity]) -
+              100
+          )
+          this.data[0].colorscale = this.logColorScale
+          this.data[0].zmin = -40
+          this.data[0].zmax = 40
+        }
         this.data[0].locations = locations
         this.data[0].z = data
         this.data[0].featureidkey = 'properties.name_2'
@@ -136,9 +161,9 @@ export default class VueComponent extends Vue {
       featureidkey: '',
       z: [1, 2],
       geojson: [],
-      zmid: 0,
       zmin: -40,
       zmax: 40,
+      colorscale: this.logColorScale,
     },
   ]
 

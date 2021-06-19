@@ -53,6 +53,7 @@ de:
            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') {{ $t('duration') }}
            button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') {{ $t('distance') }}
            button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') {{ $t('proportion') }}
+           button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') Ausgangssperre
       .plot-area
         h2 {{ $t('mobility-trends') }}
 

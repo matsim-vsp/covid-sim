@@ -65,11 +65,12 @@ de:
            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') {{ $t('duration') }}
            button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') {{ $t('distance') }}
            button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') {{ $t('proportion') }}
+           button.button(:class="{'is-link' : status == 4}" @click='clickButton(4)') Ausgangssperre
          h3 {{ $t('time') }}
          .buttons.button-choices
-           button.button(:class="{'is-link' : statusTime == 4}" @click='clickButton(4)') {{ $t('week') }}
-           button.button(:class="{'is-link' : statusTime == 5}" @click='clickButton(5)') {{ $t('weekday') }}
-           button.button(:class="{'is-link' : statusTime == 6}" @click='clickButton(6)') {{ $t('weekend') }}
+           button.button(:class="{'is-link' : statusTime == 5}" @click='clickButton(5)') {{ $t('week') }}
+           button.button(:class="{'is-link' : statusTime == 6}" @click='clickButton(6)') {{ $t('weekday') }}
+           button.button(:class="{'is-link' : statusTime == 7}" @click='clickButton(7)') {{ $t('weekend') }}
          h3 {{ $t('county') }}
          .button-row
           .dateselect.date-choices
@@ -80,19 +81,19 @@ de:
               option(v-for="element in allLandkreise") {{ element }}
          h3 {{ $t('start-end-date') }}
          .button-row
-          .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
+          .dateselect.date-choices(v-if="statusTime == 5 || statusTime == 7")
             
             select.select-menue(v-model='startdate')
               option(v-for="date in allWeekDates") {{ date }}
-          .dateselect.date-choices(v-if="statusTime == 5")
+          .dateselect.date-choices(v-if="statusTime == 6")
             
             select.select-menue(v-model='startdate')
               option(v-for="date in allWeekdayDates") {{ date }}
-          .dateselect.date-choices(v-if="statusTime == 4 || statusTime == 6")
+          .dateselect.date-choices(v-if="statusTime == 5 || statusTime == 7")
             
             select.select-menue(v-model='enddate')
               option(v-for="date in allWeekDates") {{ date }}
-          .dateselect.date-choices(v-if="statusTime == 5")
+          .dateselect.date-choices(v-if="statusTime == 6")
             
             select.select-menue(v-model='enddate')
               option(v-for="date in allWeekdayDates") {{ date }}
@@ -115,7 +116,7 @@ de:
               h5 {{ $t('germany-map') }}
                 .plotarea.map
                   mobility-map.plotsize(
-                    :landkreisData="allData", :startDate="startdate", :endDate="enddate" :time="weekInterval"
+                    :landkreisData="allData", :activity="activity", :startDate="startdate", :endDate="enddate" :time="weekInterval"
                     @landkreisClicked="handleLandkreisClicked"
                   )
 
@@ -124,6 +125,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
+              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('week') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -136,6 +138,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
+              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('weekday') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -148,6 +151,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
+              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('weekend') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -249,7 +253,7 @@ export default class VueComponent extends Vue {
 
   private allData: any[] = []
   private status = 1
-  private statusTime = 4
+  private statusTime = 5
   private weekInterval = 'week'
   private activity = 'outOfHomeDuration'
   private yAxisNAme = 'Time per Day [h]'
@@ -319,10 +323,10 @@ export default class VueComponent extends Vue {
 
     this.updateLandkreisNames()
 
-    if (this.statusTime == 4 || this.statusTime == 6) {
+    if (this.statusTime == 5 || this.statusTime == 7) {
       this.startdate = this.allWeekDates[0]
       this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
-    } else if (this.statusTime == 5) {
+    } else if (this.statusTime == 6) {
       this.startdate = this.allWeekdayDates[0]
       this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
     }
@@ -498,8 +502,6 @@ export default class VueComponent extends Vue {
       if (this.allData[area] !== undefined) {
         if (sum > this.maxWeekMobility) {
           this.maxWeekMobility = sum
-          console.log(area)
-          console.log(sum)
         }
         if (sum < this.minWeekMobility) {
           this.minWeekMobility = sum
@@ -507,8 +509,6 @@ export default class VueComponent extends Vue {
         this.allData[area]['week'][date].endHomeActs = sum
       }
     }
-    console.log(this.minWeekMobility)
-    console.log(this.maxWeekMobility)
   }
 
   private async loadAllLandkreise() {
@@ -589,35 +589,33 @@ export default class VueComponent extends Vue {
   */
 
   private async openPage(url: string) {
-    console.log('HELLO')
     var urlSplit = url.split('/')
     console.log(urlSplit)
     var urlInfo = urlSplit[urlSplit.length - 3]
     if (urlSplit.includes('duration')) {
-      console.log('duration')
       this.clickButton(1)
     } else if (urlSplit.includes('distance')) {
-      console.log('distance')
       this.clickButton(2)
     } else if (urlSplit.includes('proportion-mobile-persons')) {
-      console.log('proportion-mobile-persons')
       this.clickButton(3)
+    } else if (urlSplit.includes('ausgangssperre')) {
+      this.clickButton(4)
     } else {
       this.clickButton(1)
     }
     if (urlSplit.includes('week')) {
-      this.clickButton(4)
+      this.clickButton(5)
     } else if (urlSplit.includes('weekend')) {
       this.clickButton(6)
     } else if (urlSplit.includes('weekday')) {
-      this.clickButton(5)
+      this.clickButton(7)
     } else {
-      this.clickButton(4)
+      this.clickButton(5)
     }
   }
 
   private async clickButton(statusNum: number) {
-    if (statusNum > 3) {
+    if (statusNum > 4) {
       var kind = ''
       if (this.status == 1) {
         kind = '/duration'
@@ -625,19 +623,21 @@ export default class VueComponent extends Vue {
         kind = '/distance'
       } else if (this.status == 3) {
         kind = '/proportion-mobile-persons'
+      } else if (this.status == 4) {
+        kind = '/ausgangssperre'
       }
       this.statusTime = statusNum
-      if (statusNum == 4) {
+      if (statusNum == 5) {
         this.weekInterval = 'week'
         window.history.pushState(kind + 'week', 'Title', '/mobility-counties' + kind + '/week')
         this.startdate = this.allWeekDates[0]
         this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
-      } else if (statusNum == 5) {
+      } else if (statusNum == 6) {
         this.startdate = this.allWeekdayDates[0]
         this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
         this.weekInterval = 'weekday'
         window.history.pushState('weekday', 'Title', '/mobility-counties' + kind + '/weekday')
-      } else if (statusNum == 6) {
+      } else if (statusNum == 7) {
         this.startdate = this.allWeekDates[0]
         this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
         this.weekInterval = 'weekend'
@@ -645,11 +645,11 @@ export default class VueComponent extends Vue {
       }
     } else {
       var kind = ''
-      if (this.statusTime == 4) {
+      if (this.statusTime == 5) {
         kind = '/week'
-      } else if (this.statusTime == 5) {
-        kind = '/weekday'
       } else if (this.statusTime == 6) {
+        kind = '/weekday'
+      } else if (this.statusTime == 7) {
         kind = '/weekend'
       }
       this.status = statusNum
@@ -671,6 +671,15 @@ export default class VueComponent extends Vue {
           'proportion-mobile-persons' + kind,
           'Title',
           '/mobility-counties/proportion-mobile-persons' + kind
+        )
+      } else if (statusNum == 4) {
+        this.activity = 'endHomeActs'
+        this.yAxisNAme = 'AENDERN'
+        this.plotHeading = 'AENDERN'
+        window.history.pushState(
+          'ausgangssperre' + kind,
+          'Title',
+          '/mobility-counties/ausgangssperre' + kind
         )
       }
     }
