@@ -192,6 +192,21 @@ const routes = [
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },
   {
+    path: '/mobility-counties/nightly-activity/week',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/nightly-activity/weekday',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
+    path: '/mobility-counties/nightly-activity/weekend',
+    component: () =>
+      import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),
