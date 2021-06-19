@@ -11,6 +11,7 @@ en:
   distance-heading: 'Average distance traveled'
   proportion-heading: 'Proportion of mobile persons'
   duration-heading-percent: 'Percent Change in Mobility Levels Compared to Pre-COVID-19'
+  nightly-activity: 'Nighttime activities (10 p.m. - 5 a.m.)'
   week: 'Week'
   weekday: 'Weekday'
   weekend: 'Weekend'
@@ -35,6 +36,7 @@ de:
   distance-heading: 'Durchschnittlich zurückgelegte Distanz'
   proportion-heading: 'Anteil mobiler Personen'
   duration-heading-percent: 'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19'
+  nightly-activity: 'Nächtliche Aktivitäten (22.00 - 5.00 Uhr)'
   week: 'Woche'
   weekday: 'Wochentag'
   weekend: 'Wochenende'
@@ -65,7 +67,7 @@ de:
            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') {{ $t('duration') }}
            button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') {{ $t('distance') }}
            button.button(:class="{'is-link' : status == 3}" @click='clickButton(3)') {{ $t('proportion') }}
-           button.button(:class="{'is-link' : status == 4}" @click='clickButton(4)') Ausgangssperre
+           button.button(:class="{'is-link' : status == 4}" @click='clickButton(4)') {{ $t('nightly-activity') }}
          h3 {{ $t('time') }}
          .buttons.button-choices
            button.button(:class="{'is-link' : statusTime == 5}" @click='clickButton(5)') {{ $t('week') }}
@@ -97,6 +99,11 @@ de:
             
             select.select-menue(v-model='enddate')
               option(v-for="date in allWeekdayDates") {{ date }}
+
+         h3(v-if="yaml.info"): b {{ $t('remarks') }}:
+
+         ul(v-if="yaml.info")
+          li.notes-item(v-for="line in yaml.info" v-html="parseMarkdown(line)")
          
           
           
@@ -125,7 +132,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
-              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('week') }})
+              h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('week') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -138,7 +145,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
-              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('weekday') }})
+              h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekday') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -151,7 +158,7 @@ de:
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
-              h5(v-else-if="status == 4") Ausgangssperre ({{ $t('weekend') }})
+              h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekend') }})
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
@@ -193,10 +200,12 @@ import MobilityPlot from '@/components/MobilityPlot.vue'
 import MobilityPlotLandkreise from '@/components/MobilityPlotLandkreise.vue'
 import MobilityMap from '@/components/MobilityMap.vue'
 import 'vue-slider-component/theme/default.css'
+import { string } from 'mathjs'
 
 type MobilityYaml = {
   description?: string
   notes: string[]
+  info: string[]
 }
 
 @Component({
@@ -231,7 +240,7 @@ export default class VueComponent extends Vue {
   private startDateWeekday = ''
   private endDateWeekday = ''
 
-  private yaml: MobilityYaml = { description: '', notes: [] }
+  private yaml: MobilityYaml = { description: '', notes: [], info: [] }
 
   private markdownParser = new MarkdownIt()
 
@@ -316,10 +325,6 @@ export default class VueComponent extends Vue {
     this.loadAllLandkreise()
 
     this.combineData()
-
-    console.log(this.combineData)
-
-    this.absolutDiff = this.maxWeekMobility - this.minWeekMobility
 
     this.updateLandkreisNames()
 
@@ -598,7 +603,7 @@ export default class VueComponent extends Vue {
       this.clickButton(2)
     } else if (urlSplit.includes('proportion-mobile-persons')) {
       this.clickButton(3)
-    } else if (urlSplit.includes('ausgangssperre')) {
+    } else if (urlSplit.includes('nightly-activity')) {
       this.clickButton(4)
     } else {
       this.clickButton(1)
@@ -624,7 +629,7 @@ export default class VueComponent extends Vue {
       } else if (this.status == 3) {
         kind = '/proportion-mobile-persons'
       } else if (this.status == 4) {
-        kind = '/ausgangssperre'
+        kind = '/nightly-activity'
       }
       this.statusTime = statusNum
       if (statusNum == 5) {
@@ -677,9 +682,9 @@ export default class VueComponent extends Vue {
         this.yAxisNAme = 'AENDERN'
         this.plotHeading = 'AENDERN'
         window.history.pushState(
-          'ausgangssperre' + kind,
+          'nightly-activity' + kind,
           'Title',
-          '/mobility-counties/ausgangssperre' + kind
+          '/mobility-counties/nightly-activity' + kind
         )
       }
     }
@@ -698,7 +703,7 @@ export default class VueComponent extends Vue {
     this.badPage = false
 
     const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = this.public_svn + `mobilityData/bundeslaender/config.${lang}.yaml`
+    const url = this.public_svn + `mobilityData/landkreise/config.${lang}.yaml`
 
     let responseText = ''
 
@@ -963,6 +968,7 @@ p.plotsize {
   width: 864px;
   margin: 0 auto;
   margin-top: 2rem;
+  position: sticky;
 }
 
 .button-area h3 {
@@ -980,7 +986,7 @@ p.plotsize {
   flex-direction: column;
   padding-top: 1rem;
   z-index: 10;
-  position: sticky;
+  //position: sticky;
   top: $navHeight;
   padding-bottom: 1rem;
   padding: 0rem 0.5rem 1rem 0.5rem;
@@ -998,7 +1004,7 @@ p.plotsize {
   flex-direction: column;
   padding-top: 1rem;
   z-index: 10;
-  position: sticky;
+  //position: sticky;
   top: $navHeight;
   padding-bottom: 1rem;
   padding: 0.5rem 0.5rem 0.5rem 0.5rem;

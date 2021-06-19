@@ -76,6 +76,12 @@ export default class VueComponent extends Vue {
         name = key.substring(6)
       } else if (key == 'Landkreis Rostock') {
         name = 'Landkreis Rostock'
+      } else if (key == 'Landkreis Regensburg') {
+        name = 'Landkreis Regensburg'
+      } else if (key == 'Landkreis Rosenheim') {
+        name = 'Landkreis Rosenheim'
+      } else if (key == 'Landkreis München') {
+        name = 'Landkreis München'
       } else if (key.startsWith('Landkreis')) {
         name = key.substring(10)
       } else if (key == 'Nienburg/Weser') {
@@ -117,6 +123,7 @@ export default class VueComponent extends Vue {
         this.data[0].featureidkey = 'properties.name_2'
       }
     }
+    console.log(this.data[0].locations, this.data[0].z)
   }
 
   private async loadData() {
@@ -128,26 +135,37 @@ export default class VueComponent extends Vue {
     )
     const jsonData = await response.json()
 
-    // for (var i = 0; i < jsonData.features.length; i++) {
-    //   //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
-    //   //names.push(jsonData.features[i].properties.name_2)
-    //   data.geometry.coordinates = jsonData.features[i].geometry.coordinates
-    //   this.layout.mapbox.layers[0].source.features.push(data)
-    // }
-
     //this.layout.mapbox.layers[0].source = jsonData
 
     // Change Data from GeoJSON
 
-    /*
-
-    if (
-      jsonData.features[0].properties.name_2 == 'Rostock' &&
-      jsonData.features[0].properties.type_2 == 'Landkreis Rostock'
-    ) {
-      jsonData.features[0].properties.name_2 = 'Landkreis Rostock'
+    for (var i = 0; i < jsonData.features.length; i++) {
+      if (
+        jsonData.features[i].properties.name_2 == 'Rostock' &&
+        jsonData.features[i].properties.type_2 == 'Landkreis'
+      ) {
+        jsonData.features[i].properties.name_2 = 'Landkreis Rostock'
+      }
+      if (
+        jsonData.features[i].properties.name_2 == 'Regensburg' &&
+        jsonData.features[i].properties.type_2 == 'Landkreis'
+      ) {
+        jsonData.features[i].properties.name_2 = 'Landkreis Regensburg'
+      }
+      if (
+        jsonData.features[i].properties.name_2 == 'Rosenheim' &&
+        jsonData.features[i].properties.type_2 == 'Landkreis'
+      ) {
+        jsonData.features[i].properties.name_2 = 'Landkreis Rosenheim'
+      }
+      if (jsonData.features[i].properties.name_2 == 'München(Landkreis)') {
+        jsonData.features[i].properties.name_2 = 'Landkreis München'
+      }
+      //   //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
+      console.log(jsonData.features[i].properties.name_2)
+      //   data.geometry.coordinates = jsonData.features[i].geometry.coordinates
+      //   this.layout.mapbox.layers[0].source.features.push(data)
     }
-    */
 
     this.data[0].geojson = jsonData
 
