@@ -49,7 +49,7 @@ The method used by MATSIM-Episim is available on the front page at <https://mats
 
 ### For more information
 
-Please email us at [ricardo.ewert.vsp@posteo.net](mailto:ricardo.ewert.vsp@posteo.net) for more information.
+Please email us at [ewert@vsp.tu-berlin.de](mailto:ewert@vsp.tu-berlin.de) for more information.
 
 The main website is at [matsim-vsp.github.io](https://covid-sim.info) is under heavy development as we build new versions of the Episim model.
 

@@ -20,7 +20,7 @@
 
   .team Contact
 
-  p.nonbreak: a(href="mailto:ricardo.ewert.vsp@posteo.net") ricardo.ewert.vsp@posteo.net
+  p.nonbreak: a(href="mailto:ewert@vsp.tu-berlin.de") ewert@vsp.tu-berlin.de
 
   .team Partners
 
