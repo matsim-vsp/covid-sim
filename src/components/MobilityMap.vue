@@ -16,6 +16,8 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private time!: string
   @Prop({ required: true }) private activity!: string
+  @Prop({ required: false }) private mapping!: any
+
   MAPBOX_TOKEN =
     'pk.eyJ1IjoidnNwLXR1LWJlcmxpbiIsImEiOiJjamNpemh1bmEzNmF0MndudHI5aGFmeXpoIn0.u9f04rjFo7ZbWiSceTTXyA'
 
@@ -29,7 +31,6 @@ export default class VueComponent extends Vue {
   ]
 
   private mounted() {
-    console.log(this.activity)
     this.jsonData = this.loadData()
     this.updateMap()
   }
@@ -49,8 +50,11 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('mapping') newMapping() {
+    this.updateMap()
+  }
+
   @Watch('activity') private updateActivity() {
-    console.log(this.activity)
     this.updateMap()
   }
 
@@ -66,64 +70,42 @@ export default class VueComponent extends Vue {
     this.updateMap()
   }
   @Watch('landkreisData') private updateMap() {
-    var locations = []
-    var data = []
-    var localActivity = this.activity
-    console.log(localActivity)
-    for (const [key, value] of Object.entries(this.landkreisData)) {
-      var name
-      if (key.startsWith('Kreis')) {
-        name = key.substring(6)
-      } else if (key == 'Landkreis Rostock') {
-        name = 'Landkreis Rostock'
-      } else if (key == 'Landkreis Regensburg') {
-        name = 'Landkreis Regensburg'
-      } else if (key == 'Landkreis Rosenheim') {
-        name = 'Landkreis Rosenheim'
-      } else if (key == 'Landkreis München') {
-        name = 'Landkreis München'
-      } else if (key.startsWith('Landkreis')) {
-        name = key.substring(10)
-      } else if (key == 'Nienburg/Weser') {
-        name = 'Nienburg (Weser)'
-      } else if (key == 'Lindau') {
-        name = 'Lindau (Bodensee)'
-      } else if (key == 'Rhein-Neuss') {
-        name = 'Rhein-Kreis Neuss'
-      } else if (key == 'Altenkirchen') {
-        name = 'Altenkirchen (Westerwald)'
-      } else if (key == 'St, Wendel') {
-        name = 'St. Wendel'
-      } else {
-        name = key
-      }
-      locations.push(name)
-      if (
-        value[this.time][this.endDate] === undefined ||
-        value[this.time][this.startDate] === undefined
-      ) {
-      } else {
-        if (this.startDate == this.endDate) {
-          data.push(value[this.time][this.endDate][this.activity])
-          this.data[0].zmin = 0
-          this.data[0].zmax = 0
-          this.data[0].colorscale = [['ylorbr']]
+    if (this.mapping !== undefined) {
+      var locations = []
+      var data = []
+      var localActivity = this.activity
+      for (const [key, value] of Object.entries(this.landkreisData)) {
+        var id
+        id = this.mapping[key]
+        locations.push(id)
+        if (
+          value[this.time][this.endDate] === undefined ||
+          value[this.time][this.startDate] === undefined
+        ) {
         } else {
-          data.push(
-            value[this.time][this.endDate][this.activity] *
-              (100 / value[this.time][this.startDate][this.activity]) -
-              100
-          )
-          this.data[0].colorscale = this.logColorScale
-          this.data[0].zmin = -40
-          this.data[0].zmax = 40
+          if (this.startDate == this.endDate) {
+            data.push(value[this.time][this.endDate][this.activity])
+            this.data[0].zmin = 0
+            this.data[0].zmax = 0
+            this.data[0].colorscale = [['ylorbr']]
+          } else {
+            data.push(
+              value[this.time][this.endDate][this.activity] *
+                (100 / value[this.time][this.startDate][this.activity]) -
+                100
+            )
+            this.data[0].colorscale = this.logColorScale
+            this.data[0].zmin = -40
+            this.data[0].zmax = 40
+          }
+          this.data[0].locations = locations
+          this.data[0].z = data
+          this.data[0].featureidkey = 'properties.id_2'
         }
-        this.data[0].locations = locations
-        this.data[0].z = data
-        this.data[0].featureidkey = 'properties.name_2'
       }
+    } else {
+      console.log('Mapping not defined')
     }
-    console.log(this.data[0].locations, this.data[0].z)
   }
 
   private async loadData() {
@@ -162,7 +144,6 @@ export default class VueComponent extends Vue {
         jsonData.features[i].properties.name_2 = 'Landkreis München'
       }
       //   //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
-      console.log(jsonData.features[i].properties.name_2)
       //   data.geometry.coordinates = jsonData.features[i].geometry.coordinates
       //   this.layout.mapbox.layers[0].source.features.push(data)
     }

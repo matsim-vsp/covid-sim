@@ -124,7 +124,7 @@ de:
                 .plotarea.map
                   mobility-map.plotsize(
                     :landkreisData="allData", :activity="activity", :startDate="startdate", :endDate="enddate" :time="weekInterval"
-                    @landkreisClicked="handleLandkreisClicked"
+                    :mapping="mappingData" @landkreisClicked="handleLandkreisClicked"
                   )
 
               br
@@ -173,7 +173,8 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
-                    :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'" :landkreisTwo="selectedLandkreisTwo")
+                    :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'" 
+                    :landkreisTwo="selectedLandkreisTwo")
 
               
 
@@ -259,6 +260,7 @@ export default class VueComponent extends Vue {
   private allLandkreise: any[] = []
   private allWeekDates: any[] = []
   private allWeekdayDates: any[] = []
+  private mappingData = {} as any
 
   private allData: any[] = []
   private status = 1
@@ -324,6 +326,9 @@ export default class VueComponent extends Vue {
 
     this.loadAllLandkreise()
 
+    this.mappingData = await this.mappingGeojsonToCsv(this.landkreise + '/mapping_shape_to_csv.csv')
+    console.log(this.mappingData)
+
     this.combineData()
 
     this.updateLandkreisNames()
@@ -382,6 +387,30 @@ export default class VueComponent extends Vue {
       console.error(e)
     }
     return []
+  }
+
+  private async mappingGeojsonToCsv(url: string) {
+    var returnObj = {} as any
+    try {
+      // load from subversion
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      parsed.map(row => {
+        const csvName = row.csv_name
+        const jsonID = row.id_2
+        returnObj[csvName] = jsonID
+      })
+
+      return returnObj
+    } catch (e) {
+      this.dataLoadingFail = true
+      console.error(e)
+    }
   }
 
   private updateLandkreisNames() {}
@@ -476,8 +505,6 @@ export default class VueComponent extends Vue {
         }
         if (sum > this.maxWeekMobility) {
           this.maxWeekMobility = sum
-          console.log(area)
-          console.log(sum)
         }
         this.allData[area]['weekend'][date].endHomeActs = sum
       }
@@ -490,8 +517,6 @@ export default class VueComponent extends Vue {
       if (this.allData[area] !== undefined) {
         if (sum > this.maxWeekMobility) {
           this.maxWeekMobility = sum
-          console.log(area)
-          console.log(sum)
         }
         if (sum < this.minWeekMobility) {
           this.minWeekMobility = sum
