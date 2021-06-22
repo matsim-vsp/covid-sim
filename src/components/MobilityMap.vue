@@ -36,7 +36,6 @@ export default class VueComponent extends Vue {
   }
 
   private handleClick(event: any) {
-    console.log(event)
     try {
       // according to Plot.ly docs the points[] array should exist:
       // https://plotly.com/javascript/plotlyjs-events/

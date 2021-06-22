@@ -261,6 +261,7 @@ export default class VueComponent extends Vue {
   private allWeekDates: any[] = []
   private allWeekdayDates: any[] = []
   private mappingData = {} as any
+  private mappingDataReverse = {} as any
 
   private allData: any[] = []
   private status = 1
@@ -270,6 +271,13 @@ export default class VueComponent extends Vue {
   private yAxisNAme = 'Time per Day [h]'
   private plotHeading = 'Amount of Time Spent Outside the Home'
   private dataLoadingFail = false
+
+  private queryParameter = {
+    county_one: '',
+    county_two: '',
+    date_one: '',
+    date_two: '',
+  }
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
@@ -281,16 +289,8 @@ export default class VueComponent extends Vue {
     this.loadAllData()
   }
 
-  @Watch('startdate') printDate() {
-    console.log(this.startdate)
-  }
-
-  @Watch('enddate') printEndDate() {
-    console.log(this.enddate)
-  }
-
-  private handleLandkreisClicked(landkreis: string) {
-    console.log('GOT EVENT:', landkreis)
+  private handleLandkreisClicked(landkreis: number) {
+    this.selectedLandkreisOne = this.mappingDataReverse[landkreis]
   }
 
   private async loadAllData() {
@@ -327,7 +327,9 @@ export default class VueComponent extends Vue {
     this.loadAllLandkreise()
 
     this.mappingData = await this.mappingGeojsonToCsv(this.landkreise + '/mapping_shape_to_csv.csv')
-    console.log(this.mappingData)
+    this.mappingDataReverse = await this.mappingGeojsonToCsvReversed(
+      this.landkreise + '/mapping_shape_to_csv.csv'
+    )
 
     this.combineData()
 
@@ -345,35 +347,17 @@ export default class VueComponent extends Vue {
   }
 
   private async buildUI() {
-    // 1. load .csv file from public_svn/mobilityData/bundeslaender/mobilityData_OverviewBL.csv"
-    // 2. Plotly line charts (?) from data, with dropdown to select which Land (default Berlin)
-    // 3. Heatmap like the by-age-group plot? Lands on the y-axis and day on the x-axis
-    // 4. Shapefile viewer
-    //    - with today's data?
-    //    - Maybe a popup with a little chart maybe? I dunno
-    //    - Or maybe a slider to pick the date?
-
     this.openPage(window.location.href)
-
-    /*
-    this.data = await this.loadMobilityData()
-    this.allBundeslaender = await this.loadBundeslaender()
-    this.rangeData = await this.loadRange()
-    this.formattedData = await this.formatData()
-    */
   }
 
   private async loadRangeData(url: string) {
     try {
-      // load from subversion
       const rawData = await fetch(url).then(response => response.text())
       const parsed = Papaparse.parse(rawData, {
         header: true,
         dynamicTyping: true,
         skipEmptyLines: true,
       }).data
-
-      // convert dates to ISO format
 
       const withDates = parsed.map(row => {
         const d = row.date.toString()
@@ -389,10 +373,32 @@ export default class VueComponent extends Vue {
     return []
   }
 
+  private async mappingGeojsonToCsvReversed(url: string) {
+    var returnObj = {} as any
+    try {
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      parsed.map(row => {
+        const csvName = row.csv_name
+        const jsonID = row.id_2
+        returnObj[jsonID] = csvName
+      })
+
+      return returnObj
+    } catch (e) {
+      this.dataLoadingFail = true
+      console.error(e)
+    }
+  }
+
   private async mappingGeojsonToCsv(url: string) {
     var returnObj = {} as any
     try {
-      // load from subversion
       const rawData = await fetch(url).then(response => response.text())
       const parsed = Papaparse.parse(rawData, {
         header: true,
@@ -619,8 +625,32 @@ export default class VueComponent extends Vue {
   */
 
   private async openPage(url: string) {
-    var urlSplit = url.split('/')
-    console.log(urlSplit)
+    var querySetting = this.$route.query
+    if (querySetting.date_one !== undefined) {
+      this.startdate = querySetting.date_one as string
+      this.queryParameter.date_one = querySetting.date_one as string
+    }
+    if (querySetting.date_two !== undefined) {
+      this.enddate = querySetting.date_two as string
+      this.queryParameter.date_two = querySetting.date_two as string
+    }
+    if (querySetting.county_one !== undefined) {
+      this.selectedLandkreisOne = querySetting.county_one as string
+      this.queryParameter.county_one = querySetting.county_one as string
+    } else {
+      this.selectedLandkreisOne = 'Berlin'
+      this.queryParameter.county_one = 'Berlin'
+    }
+
+    if (querySetting.county_two !== undefined) {
+      this.selectedLandkreisTwo = querySetting.county_two as string
+      this.queryParameter.county_two = querySetting.county_two as string
+    } else {
+      this.selectedLandkreisTwo = 'Rostock'
+      this.queryParameter.county_two = 'Rostock'
+    }
+
+    var urlSplit = url.split('?')[0].split('/')
     var urlInfo = urlSplit[urlSplit.length - 3]
     if (urlSplit.includes('duration')) {
       this.clickButton(1)
@@ -635,16 +665,51 @@ export default class VueComponent extends Vue {
     }
     if (urlSplit.includes('week')) {
       this.clickButton(5)
-    } else if (urlSplit.includes('weekend')) {
-      this.clickButton(6)
     } else if (urlSplit.includes('weekday')) {
+      this.clickButton(6)
+    } else if (urlSplit.includes('weekend')) {
       this.clickButton(7)
     } else {
       this.clickButton(5)
     }
   }
 
+  @Watch('startdate') async updateStartDate() {
+    this.queryParameter.date_one = await this.startdate
+    console.log(this.queryParameter)
+    this.clickButton(this.statusTime)
+  }
+
+  @Watch('enddate') updateEndDate() {
+    this.queryParameter.date_two = this.enddate
+    this.clickButton(this.statusTime)
+  }
+
+  @Watch('selectedLandkreisOne') updateLandkreisOne() {
+    this.queryParameter.county_one = this.selectedLandkreisOne
+    this.clickButton(this.statusTime)
+  }
+
+  @Watch('selectedLandkreisTwo') updateLandkreisTwo() {
+    this.queryParameter.county_two = this.selectedLandkreisTwo
+    this.clickButton(this.statusTime)
+  }
+
   private async clickButton(statusNum: number) {
+    var queryStatement = '?'
+
+    for (const [key, value] of Object.entries(this.queryParameter)) {
+      if (value != '' && value !== undefined) {
+        queryStatement += key + '=' + value + '&'
+      }
+    }
+
+    if (queryStatement[queryStatement.length - 1] == '?') {
+      queryStatement = ''
+    } else if (queryStatement[queryStatement.length - 1] == '&') {
+      queryStatement = queryStatement.substr(0, queryStatement.length - 1)
+    }
+
     if (statusNum > 4) {
       var kind = ''
       if (this.status == 1) {
@@ -659,19 +724,43 @@ export default class VueComponent extends Vue {
       this.statusTime = statusNum
       if (statusNum == 5) {
         this.weekInterval = 'week'
-        window.history.pushState(kind + 'week', 'Title', '/mobility-counties' + kind + '/week')
-        this.startdate = this.allWeekDates[0]
-        this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
+        window.history.pushState(
+          kind + 'week',
+          'Title',
+          '/mobility-counties' + kind + '/week' + queryStatement
+        )
+        if (this.startdate != '') {
+          this.startdate = this.allWeekDates[0]
+        }
+        if (this.enddate != '') {
+          this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
+        }
       } else if (statusNum == 6) {
-        this.startdate = this.allWeekdayDates[0]
-        this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
+        if (this.startdate != '') {
+          this.startdate = this.allWeekdayDates[0]
+        }
+        if (this.enddate != '') {
+          this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
+        }
         this.weekInterval = 'weekday'
-        window.history.pushState('weekday', 'Title', '/mobility-counties' + kind + '/weekday')
+        window.history.pushState(
+          'weekday',
+          'Title',
+          '/mobility-counties' + kind + '/weekday' + queryStatement
+        )
       } else if (statusNum == 7) {
-        this.startdate = this.allWeekDates[0]
-        this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
+        if (this.startdate != '') {
+          this.startdate = this.allWeekDates[0]
+        }
+        if (this.enddate != '') {
+          this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
+        }
         this.weekInterval = 'weekend'
-        window.history.pushState('weekend', 'Title', '/mobility-counties' + kind + '/weekend')
+        window.history.pushState(
+          'weekend',
+          'Title',
+          '/mobility-counties' + kind + '/weekend' + queryStatement
+        )
       }
     } else {
       var kind = ''
@@ -687,12 +776,20 @@ export default class VueComponent extends Vue {
         this.activity = 'outOfHomeDuration'
         this.yAxisNAme = 'Time per Day [h]'
         this.plotHeading = 'Amount of Time Spent Outside the Home'
-        window.history.pushState('duration' + kind, 'Title', '/mobility-counties/duration' + kind)
+        window.history.pushState(
+          'duration' + kind,
+          'Title',
+          '/mobility-counties/duration' + kind + queryStatement
+        )
       } else if (statusNum == 2) {
         this.activity = 'dailyRangePerPerson'
         this.yAxisNAme = 'Distance per Person [km]'
         this.plotHeading = 'Average distance traveled '
-        window.history.pushState('distance' + kind, 'Title', '/mobility-counties/distance' + kind)
+        window.history.pushState(
+          'distance' + kind,
+          'Title',
+          '/mobility-counties/distance' + kind + queryStatement
+        )
       } else if (statusNum == 3) {
         this.activity = 'sharePersonLeavingHome'
         this.yAxisNAme = 'Percent [%]'
@@ -700,7 +797,7 @@ export default class VueComponent extends Vue {
         window.history.pushState(
           'proportion-mobile-persons' + kind,
           'Title',
-          '/mobility-counties/proportion-mobile-persons' + kind
+          '/mobility-counties/proportion-mobile-persons' + kind + queryStatement
         )
       } else if (statusNum == 4) {
         this.activity = 'endHomeActs'
@@ -709,7 +806,7 @@ export default class VueComponent extends Vue {
         window.history.pushState(
           'nightly-activity' + kind,
           'Title',
-          '/mobility-counties/nightly-activity' + kind
+          '/mobility-counties/nightly-activity' + kind + queryStatement
         )
       }
     }
