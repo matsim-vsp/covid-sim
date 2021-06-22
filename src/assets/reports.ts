@@ -2,7 +2,7 @@ const reports: { md: string; title: string; url: string; html: string }[] = [
   {
     md: '/reports/report-2021-06-18.md',
     title: '18 June 2021',
-    url: 'https://svn.vsp.tu-berlin.de/repos/public-svn/publications/vspwp/2021/21-16/2021-06-18%20MODUS-COVID%20Bericht.pdf',
+    url: 'https://doi.org/10.14279/depositonce-12053',
     html: '',
   },
   {
