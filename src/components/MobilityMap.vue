@@ -23,6 +23,10 @@ export default class VueComponent extends Vue {
 
   private jsonData = {}
   private test = ''
+  private landkreiseUrl = '/landkreise-in-germany.geojson'
+  private bundeslandUrl = '/Bundesländer_2016_ew.json'
+  private svnUrl =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/landkreise-in-germany'
 
   private logColorScale = [
     [0.0, 'rgb(200,32,38)'],
@@ -31,7 +35,8 @@ export default class VueComponent extends Vue {
   ]
 
   private mounted() {
-    this.jsonData = this.loadData()
+    this.loadData(this.svnUrl + this.landkreiseUrl)
+    //this.loadBundesland(this.svnUrl + this.bundeslandUrl)
     this.updateMap()
   }
 
@@ -121,15 +126,22 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private async loadData() {
+  private async loadData(url: string) {
     const response = await fetch(
       'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/landkreise-in-germany/landkreise-in-germany.geojson'
     )
     const jsonData = await response.json()
 
     this.data[0].geojson = jsonData
+  }
 
-    return jsonData
+  private async loadBundesland(url: string) {
+    const response = await fetch(
+      'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/landkreise-in-germany/Bundesländer_2016_ew.json'
+    )
+    const jsonData = await response.json()
+
+    this.data[1].geojson = jsonData
   }
 
   private data = [

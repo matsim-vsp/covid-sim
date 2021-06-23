@@ -73,14 +73,6 @@ de:
            button.button(:class="{'is-link' : statusTime == 5}" @click='clickButton(5)') {{ $t('week') }}
            button.button(:class="{'is-link' : statusTime == 6}" @click='clickButton(6)') {{ $t('weekday') }}
            button.button(:class="{'is-link' : statusTime == 7}" @click='clickButton(7)') {{ $t('weekend') }}
-         h3 {{ $t('county') }}
-         .button-row
-          .dateselect.date-choices
-            select.select-menue(v-model='selectedLandkreisOne')
-              option(v-for="element in allLandkreise") {{ element }}
-          .dateselect.date-choices
-            select.select-menue(v-model='selectedLandkreisTwo')
-              option(v-for="element in allLandkreise") {{ element }}
          h3 {{ $t('start-end-date') }}
          .button-row
           .dateselect.date-choices(v-if="statusTime == 5 || statusTime == 7")
@@ -128,6 +120,16 @@ de:
                   )
 
               br
+
+              .button-area
+                h3 {{ $t('county') }}
+                .button-row
+                    .dateselect.date-choices
+                      select.select-menue(v-model='selectedLandkreisOne')
+                        option(v-for="element in allLandkreise") {{ element }}
+                    .dateselect.date-choices
+                      select.select-menue(v-model='selectedLandkreisTwo')
+                        option(v-for="element in allLandkreise") {{ element }}
 
               h5(v-if="status == 1") {{ $t('duration-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 2") {{ $t('distance-heading') }} ({{ $t('week') }})
@@ -285,8 +287,7 @@ export default class VueComponent extends Vue {
 
   private async mounted() {
     await this.loadAllData()
-    this.openPage(window.location.href)
-    this.buildPageForURL()
+    await this.buildPageForURL()
   }
 
   private handleLandkreisClicked(landkreis: number) {
@@ -344,6 +345,8 @@ export default class VueComponent extends Vue {
     }
 
     this.allData.sort()
+    await this.openPage(window.location.href)
+    console.log(window.location.href)
   }
 
   private async buildUI() {
@@ -651,6 +654,7 @@ export default class VueComponent extends Vue {
     }
 
     var urlSplit = url.split('?')[0].split('/')
+    console.log(urlSplit)
     var urlInfo = urlSplit[urlSplit.length - 3]
     if (urlSplit.includes('duration')) {
       this.clickButton(1)
