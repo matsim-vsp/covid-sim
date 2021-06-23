@@ -72,11 +72,13 @@ export default class VueComponent extends Vue {
     if (this.mapping !== undefined) {
       var locations = []
       var data = []
+      var names = []
       var localActivity = this.activity
       for (const [key, value] of Object.entries(this.landkreisData)) {
         var id
         id = this.mapping[key]
         locations.push(id)
+        names.push(key)
         if (
           value[this.time][this.endDate] === undefined ||
           value[this.time][this.startDate] === undefined
@@ -87,6 +89,16 @@ export default class VueComponent extends Vue {
             this.data[0].zmin = 0
             this.data[0].zmax = 0
             this.data[0].colorscale = [['ylorbr']]
+            if (this.activity == 'endHomeActs') {
+              this.data[0].colorbar.title.text =
+                'Per day of out-of-home activity between 10 p.m. and 5 a.m. per 1,000 inhabitants'
+            } else if (this.activity == 'sharePersonLeavingHome') {
+              this.data[0].colorbar.title.text = 'Percent [%]'
+            } else if (this.activity == 'dailyRangePerPerson') {
+              this.data[0].colorbar.title.text = 'Distance per Person [km]'
+            } else if (this.activity == 'outOfHomeDuration') {
+              this.data[0].colorbar.title.text = 'Time per Day [h]'
+            }
           } else {
             data.push(
               value[this.time][this.endDate][this.activity] *
@@ -96,10 +108,12 @@ export default class VueComponent extends Vue {
             this.data[0].colorscale = this.logColorScale
             this.data[0].zmin = -40
             this.data[0].zmax = 40
+            this.data[0].colorbar.title.text = 'Percentage change [%]'
           }
           this.data[0].locations = locations
           this.data[0].z = data
           this.data[0].featureidkey = 'properties.id_2'
+          this.data[0].text = names
         }
       }
     } else {
@@ -108,44 +122,10 @@ export default class VueComponent extends Vue {
   }
 
   private async loadData() {
-    //var names = []
-    //var geometries = []
-
     const response = await fetch(
       'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/landkreise-in-germany/landkreise-in-germany.geojson'
     )
     const jsonData = await response.json()
-
-    //this.layout.mapbox.layers[0].source = jsonData
-
-    // Change Data from GeoJSON
-
-    for (var i = 0; i < jsonData.features.length; i++) {
-      if (
-        jsonData.features[i].properties.name_2 == 'Rostock' &&
-        jsonData.features[i].properties.type_2 == 'Landkreis'
-      ) {
-        jsonData.features[i].properties.name_2 = 'Landkreis Rostock'
-      }
-      if (
-        jsonData.features[i].properties.name_2 == 'Regensburg' &&
-        jsonData.features[i].properties.type_2 == 'Landkreis'
-      ) {
-        jsonData.features[i].properties.name_2 = 'Landkreis Regensburg'
-      }
-      if (
-        jsonData.features[i].properties.name_2 == 'Rosenheim' &&
-        jsonData.features[i].properties.type_2 == 'Landkreis'
-      ) {
-        jsonData.features[i].properties.name_2 = 'Landkreis Rosenheim'
-      }
-      if (jsonData.features[i].properties.name_2 == 'München(Landkreis)') {
-        jsonData.features[i].properties.name_2 = 'Landkreis München'
-      }
-      //   //geometries.push(jsonData.features[i].geometry.coordinates[0][0])
-      //   data.geometry.coordinates = jsonData.features[i].geometry.coordinates
-      //   this.layout.mapbox.layers[0].source.features.push(data)
-    }
 
     this.data[0].geojson = jsonData
 
@@ -159,9 +139,14 @@ export default class VueComponent extends Vue {
       featureidkey: '',
       z: [1, 2],
       geojson: [],
+      text: ['a', 'b'],
       zmin: -40,
       zmax: 40,
       colorscale: this.logColorScale,
+      hoverinfo: 'z' + 'text',
+      colorbar: {
+        title: { text: 'Percentage change', side: 'right', font: { size: 15 } },
+      },
     },
   ]
 

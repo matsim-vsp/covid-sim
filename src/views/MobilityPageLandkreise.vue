@@ -283,10 +283,10 @@ export default class VueComponent extends Vue {
     this.buildPageForURL()
   }
 
-  private mounted() {
+  private async mounted() {
+    await this.loadAllData()
     this.openPage(window.location.href)
     this.buildPageForURL()
-    this.loadAllData()
   }
 
   private handleLandkreisClicked(landkreis: number) {
@@ -674,8 +674,9 @@ export default class VueComponent extends Vue {
     }
   }
 
-  @Watch('startdate') async updateStartDate() {
-    this.queryParameter.date_one = await this.startdate
+  @Watch('startdate') updateStartDate() {
+    this.queryParameter.date_one = this.startdate
+    console.log((this.queryParameter.date_one = this.startdate))
     console.log(this.queryParameter)
     this.clickButton(this.statusTime)
   }
@@ -729,17 +730,17 @@ export default class VueComponent extends Vue {
           'Title',
           '/mobility-counties' + kind + '/week' + queryStatement
         )
-        if (this.startdate != '') {
+        if (!this.allWeekDates.includes(this.startdate)) {
           this.startdate = this.allWeekDates[0]
         }
-        if (this.enddate != '') {
+        if (!this.allWeekDates.includes(this.enddate)) {
           this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
         }
       } else if (statusNum == 6) {
-        if (this.startdate != '') {
+        if (!this.allWeekdayDates.includes(this.startdate)) {
           this.startdate = this.allWeekdayDates[0]
         }
-        if (this.enddate != '') {
+        if (!this.allWeekdayDates.includes(this.enddate)) {
           this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
         }
         this.weekInterval = 'weekday'
@@ -749,10 +750,10 @@ export default class VueComponent extends Vue {
           '/mobility-counties' + kind + '/weekday' + queryStatement
         )
       } else if (statusNum == 7) {
-        if (this.startdate != '') {
+        if (!this.allWeekDates.includes(this.startdate)) {
           this.startdate = this.allWeekDates[0]
         }
-        if (this.enddate != '') {
+        if (!this.allWeekDates.includes(this.enddate)) {
           this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
         }
         this.weekInterval = 'weekend'
@@ -801,7 +802,8 @@ export default class VueComponent extends Vue {
         )
       } else if (statusNum == 4) {
         this.activity = 'endHomeActs'
-        this.yAxisNAme = 'AENDERN'
+        this.yAxisNAme =
+          'Per day of out-of-home activity between 10 p.m. and 5 a.m. <br> per 1,000 inhabitants'
         this.plotHeading = 'AENDERN'
         window.history.pushState(
           'nightly-activity' + kind,
