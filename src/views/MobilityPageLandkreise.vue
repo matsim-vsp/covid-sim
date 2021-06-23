@@ -227,7 +227,7 @@ export default class VueComponent extends Vue {
   private weekends = 'weekends.csv'
   private weekly = 'weekly.csv'
   private selectedLandkreisOne = 'Berlin'
-  private selectedLandkreisTwo = 'Rostock'
+  private selectedLandkreisTwo = 'Deutschland'
 
   private minWeekMobility = 10000
   private maxWeekMobility = 0
@@ -646,8 +646,8 @@ export default class VueComponent extends Vue {
       this.selectedLandkreisTwo = querySetting.county_two as string
       this.queryParameter.county_two = querySetting.county_two as string
     } else {
-      this.selectedLandkreisTwo = 'Rostock'
-      this.queryParameter.county_two = 'Rostock'
+      this.selectedLandkreisTwo = 'Deutschland'
+      this.queryParameter.county_two = 'Deutschland'
     }
 
     var urlSplit = url.split('?')[0].split('/')
