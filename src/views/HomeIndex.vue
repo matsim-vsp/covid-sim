@@ -120,6 +120,13 @@ export default class VueComponent extends Vue {
   private modelruns: any[] = [
     {
       url:
+        '/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25',
+      date: 'Released: 16 July 2021',
+      title: 'Report runs July 16',
+      subtitle: 'School measures after the holidays',
+    },
+    {
+      url:
         '/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no',
       date: 'Released: 18 June 2021',
       title: 'Report runs June 18',

@@ -21,12 +21,17 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.07.16
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25'") Report runs for School measures after the holidays
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.06.18
 
           .navbar-dropdown
             a.navbar-item(:href="'/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no'") Report runs for Virus Mutations
 
- 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.05.21
 
