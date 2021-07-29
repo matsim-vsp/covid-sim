@@ -17,6 +17,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private week!: string
   @Prop({ required: true }) private kind!: string
   @Prop({ required: true }) private yAxisName!: string
+  @Prop({ required: false }) private percent!: boolean
 
   private dataLines: any[] = []
 
@@ -58,13 +59,28 @@ export default class VueComponent extends Vue {
       }
     }
 
-    if (this.week != 'weekk') {
-      if (tempData !== undefined) {
-        for (const [key, value] of Object.entries(tempData)) {
-          if (key == this.week) {
-            for (const [key2, value2] of Object.entries(value as object)) {
-              xData.push(key2)
-              ydata.push(value2[this.kind])
+    if (this.percent) {
+      if (this.week != 'weeek') {
+        if (tempData !== undefined) {
+          for (const [key, value] of Object.entries(tempData)) {
+            if (key == this.week) {
+              for (const [key2, value2] of Object.entries(value as object)) {
+                xData.push(key2)
+                ydata.push(value2['percentageChangeComparedToBeforeCorona'])
+              }
+            }
+          }
+        }
+      }
+    } else {
+      if (this.week != 'weeek') {
+        if (tempData !== undefined) {
+          for (const [key, value] of Object.entries(tempData)) {
+            if (key == this.week) {
+              for (const [key2, value2] of Object.entries(value as object)) {
+                xData.push(key2)
+                ydata.push(value2[this.kind])
+              }
             }
           }
         }
@@ -91,12 +107,25 @@ export default class VueComponent extends Vue {
       }
     }
 
-    if (tempData !== undefined) {
-      for (const [key, value] of Object.entries(tempData)) {
-        if (key == this.week) {
-          for (const [key2, value2] of Object.entries(value as object)) {
-            xDataTwo.push(key2)
-            ydataTwo.push(value2[this.kind])
+    if (this.percent) {
+      if (tempData !== undefined) {
+        for (const [key, value] of Object.entries(tempData)) {
+          if (key == this.week) {
+            for (const [key2, value2] of Object.entries(value as object)) {
+              xDataTwo.push(key2)
+              ydataTwo.push(value2['percentageChangeComparedToBeforeCorona'])
+            }
+          }
+        }
+      }
+    } else {
+      if (tempData !== undefined) {
+        for (const [key, value] of Object.entries(tempData)) {
+          if (key == this.week) {
+            for (const [key2, value2] of Object.entries(value as object)) {
+              xDataTwo.push(key2)
+              ydataTwo.push(value2[this.kind])
+            }
           }
         }
       }

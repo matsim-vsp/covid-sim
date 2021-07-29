@@ -10,7 +10,7 @@ en:
   duration-heading: 'Amount of Time Spent Outside the Home'
   distance-heading: 'Average distance traveled'
   proportion-heading: 'Proportion of mobile persons'
-  duration-heading-percent: 'Percent Change in Mobility Levels Compared to Pre-COVID-19'
+  duration-heading-percent: 'Percent Change in Mobility Levels Compared to Pre-COVID-19 (Week)'
   nightly-activity: 'Nighttime activities (10 p.m. - 5 a.m.)'
   week: 'Week'
   weekday: 'Weekday'
@@ -35,7 +35,7 @@ de:
   duration-heading: 'Zeit, die außerhalb des Hauses verbracht wurde'
   distance-heading: 'Durchschnittlich zurückgelegte Distanz'
   proportion-heading: 'Anteil mobiler Personen'
-  duration-heading-percent: 'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19'
+  duration-heading-percent: 'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19 (Woche)'
   nightly-activity: 'Nächtliche Aktivitäten (22.00 - 5.00 Uhr)'
   week: 'Woche'
   weekday: 'Wochentag'
@@ -175,8 +175,8 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
-                    :kind="activity" :week="'weekend'" :yAxisName="'Percent [%]'" 
-                    :landkreisTwo="selectedLandkreisTwo")
+                    :kind="activity" :week="'week'" :yAxisName="'Percent [%]'" 
+                    :landkreisTwo="selectedLandkreisTwo" :percent="true")
 
               
 
@@ -347,6 +347,7 @@ export default class VueComponent extends Vue {
     this.allData.sort()
     await this.openPage(window.location.href)
     console.log(window.location.href)
+    console.log(this.allData)
   }
 
   private async buildUI() {
@@ -424,7 +425,7 @@ export default class VueComponent extends Vue {
 
   private updateLandkreisNames() {}
 
-  private async combineData() {
+  private combineData() {
     for (var i = 0; i < this.allLandkreise.length; i++) {
       this.allData[this.allLandkreise[i]] = []
       this.allData[this.allLandkreise[i]]['week'] = []
@@ -466,7 +467,7 @@ export default class VueComponent extends Vue {
       var duration = this.mobilityWeekdays[i].outOfHomeDuration
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
-          outOfHomeDuration: this.mobilityWeekends[i].outOfHomeDuration,
+          outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
           percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
             .percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
