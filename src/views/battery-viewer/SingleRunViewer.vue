@@ -205,6 +205,7 @@
               heat-map.plotsize(v-else
                 :endDate="endDate"
                 :data="incidenceHeatMapData"
+                :heatMapMaxValue="runYaml.heatMapMaxValue"
               )
 
         //- ---------- AGE GROUP LINE CHART ------
