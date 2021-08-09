@@ -136,7 +136,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('week') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'week'"
@@ -149,7 +149,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekday') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekday'"
@@ -162,7 +162,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekend') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekend'"
@@ -172,7 +172,7 @@ de:
 
               h5(v-if="status == 1") {{ $t('duration-heading-percent') }}
               .plotarea.tall(v-if="status == 1")
-                  p.plotsize(v-if="dataLoadingFail") Data not found...
+                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'week'" :yAxisName="'Percent [%]'" 
@@ -509,6 +509,8 @@ export default class VueComponent extends Vue {
       }
     }
 
+    console.log(this.allData)
+
     for (var i = 0; i < this.timelineWeekends.length; i++) {
       var date = this.timelineWeekends[i].date
       var area = this.timelineWeekends[i].area
@@ -521,7 +523,7 @@ export default class VueComponent extends Vue {
         if (sum > this.maxWeekMobility) {
           this.maxWeekMobility = sum
         }
-        this.allData[area]['weekend'][date].endHomeActs = sum
+        //this.allData[area].weekend[date].endHomeActs = sum
       }
     }
 
@@ -536,8 +538,7 @@ export default class VueComponent extends Vue {
         if (sum < this.minWeekMobility) {
           this.minWeekMobility = sum
         }
-        this.allData[area]['weekday'][date].endHomeActs = sum
-        console.log(sum)
+        //this.allData[area]['weekday'][date].endHomeActs = sum
       }
     }
 
@@ -552,7 +553,7 @@ export default class VueComponent extends Vue {
         if (sum < this.minWeekMobility) {
           this.minWeekMobility = sum
         }
-        this.allData[area]['week'][date].endHomeActs = sum
+        //this.allData[area]['week'][date].endHomeActs = sum
       }
     }
   }
