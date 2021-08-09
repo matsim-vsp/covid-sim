@@ -472,11 +472,7 @@ export default class VueComponent extends Vue {
       //console.log(duration)
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
-<<<<<<< HEAD
           outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
-=======
-          outOfHomeDuration: duration,
->>>>>>> mobility
           percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
             .percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
