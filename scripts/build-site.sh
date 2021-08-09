@@ -61,6 +61,10 @@ BERLIN_CODE="11000"
 printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../berlin-divi-processed.csv
 grep $BERLIN_CODE *.csv  |  sort  >>  ../berlin-divi-processed.csv
 
+COLOGNE_CODE="5315"
+printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../cologne-divi-processed.csv
+grep $COLOGNE_CODE *.csv  |  sort  >>  ../cologne-divi-processed.csv
+
 MUNICH_CODE="9162"
 printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../munich-divi-processed.csv
 grep $MUNICH_CODE *.csv  |  sort  >>  ../munich-divi-processed.csv
