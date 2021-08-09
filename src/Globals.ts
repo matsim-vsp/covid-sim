@@ -71,6 +71,8 @@ export interface RunYaml {
   // these are for new version
   defaultStartDate?: string
   startDates?: string[]
+  //heat map max
+  heatMapMaxValue?: number
   // these are for everything
   optionGroups: {
     day?: number

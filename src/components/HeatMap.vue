@@ -12,6 +12,7 @@ import { log, transpose } from 'mathjs'
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: string
   @Prop({ required: true }) private endDate!: string
+  @Prop({ required: false }) private heatMapMaxValue!: number
 
   private maximumValue = 2000
 
@@ -29,7 +30,7 @@ export default class VueComponent extends Vue {
     [0.01, 'rgb(250,210,0)'],
     [0.1, 'rgb(240,120,0)'],
     [0.2, 'rgb(230,0,0)'],
-    [0.9999999, 'rgb(0,0,0)'],
+    [0.99999999, 'rgb(0,0,0)'],
     [1.0, 'rgb(255,255,255)'],
     //[1.0, 'rgb(0,0,0)'], // comment this line out and add the two above will fix the "color bug"
   ]
@@ -77,13 +78,14 @@ export default class VueComponent extends Vue {
         z: matrix,
         colorscale: this.logColorScale, // 'Hot', // 'YlOrRed', // 'Hot',
         // reversescale: true,
-        showscale: false,
+        showscale: true,
         hoverongaps: false,
       },
     ]
   }
 
   private layout = {
+    showlegend: true,
     autosize: true,
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',

@@ -14,21 +14,10 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private yAxisName!: string
   @Prop({ required: true }) private plotInterval!: any[]
   @Prop({ required: true }) private activity!: string
+  @Prop({ required: true }) private time!: string
+  @Prop({ required: true }) private loadPage!: string
 
   private dataLines: any[] = []
-  private holidays = [
-    '2020-04-10',
-    '2020-04-13',
-    '2020-05-01',
-    '2020-05-21',
-    '2020-06-01',
-    '2020-12-25',
-    '2021-01-01',
-    '2021-04-02',
-    '2021-04-05',
-    '2021-05-13',
-    '2021-05-24',
-  ]
 
   private mounted() {
     this.updateMobilityData()
@@ -39,140 +28,37 @@ export default class VueComponent extends Vue {
     this.updateMobilityData()
   }
 
+  @Watch('loadPage') private loadPageFirst() {
+    console.log(this.data)
+    this.updateMobilityData()
+  }
+
   @Watch('data') private updateMobilityData() {
     var mobilityData: any[] = []
+    var kind = this.activity
 
-    var plotIntervalData = this.plotInterval
-
-    const date = []
-    const sevenDaysDates = []
-    const sevenDays = 7
-
-    if (this.data.length == 0) {
-      return false
+    if (!this.outOfHomeDurationPlot) {
+      kind = 'percentageChangeComparedToBeforeCorona'
     }
 
-    for (let i = 0; i < this.data[0].date.length; i++) {
-      date.push(this.data[0].date[i])
-    }
+    for (const [key, value] of Object.entries(this.data)) {
+      var xData: any[] = []
+      var ydata: any[] = []
+      const name = key
 
-    for (
-      let j = sevenDays + plotIntervalData[0];
-      j < this.data[0].date.length + 4; // bug fix added + 4
-      j += sevenDays
-    ) {
-      sevenDaysDates.push(this.data[0].date[j - 3])
-    }
-
-    console.log(sevenDaysDates)
-
-    for (let i = 0; i < this.data.length; i++) {
-      const outOfHomeDuration = []
-      const sevenDayOutOfHomeDuration = []
-
-      if (this.outOfHomeDurationPlot) {
-        for (let j = 0; j < this.data[i].date.length; j++) {
-          if (this.activity == 'outOfHomeDuration') {
-            outOfHomeDuration.push(this.data[i].outOfHomeDuration[j])
-          } else if (this.activity == 'dailyRangePerPerson') {
-            outOfHomeDuration.push(this.data[i].dailyRangePerPerson[j])
-          } else if (this.activity == 'sharePersonLeavingHome') {
-            outOfHomeDuration.push(this.data[i].sharePersonLeavingHome[j])
-          }
-        }
-
-        for (
-          let j = sevenDays + plotIntervalData[0];
-          j < this.data[i].date.length + 4; // bug fix added + 4
-          j += sevenDays
-        ) {
-          let avgSum = 0
-          let average = 0
-          let foundDaysWeek = 0
-          for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
-            if (this.activity == 'outOfHomeDuration') {
-              avgSum += this.data[i].outOfHomeDuration[k]
-            } else if (this.activity == 'dailyRangePerPerson') {
-              avgSum += this.data[i].dailyRangePerPerson[k]
-            } else if (this.activity == 'sharePersonLeavingHome') {
-              avgSum += this.data[i].sharePersonLeavingHome[k]
-            }
-            if (plotIntervalData[0] == -2) {
-              if (this.data[i].holidays.includes(this.data[i].date[k])) {
-                foundDaysWeek += 1
-                if (this.activity == 'outOfHomeDuration') {
-                  avgSum -= this.data[i].outOfHomeDuration[k]
-                } else if (this.activity == 'dailyRangePerPerson') {
-                  avgSum -= this.data[i].dailyRangePerPerson[k]
-                } else if (this.activity == 'sharePersonLeavingHome') {
-                  avgSum -= this.data[i].sharePersonLeavingHome[k]
-                }
-              }
-            }
-          }
-          if (plotIntervalData[0] == 2) {
-            let foundDays = 0
-            for (let k = -7; k <= -4; k++) {
-              if (j - plotIntervalData[1] - k >= 0) {
-                if (
-                  this.data[i].holidays.includes(this.data[i].date[j - plotIntervalData[1] + k])
-                ) {
-                  // is thuesday-fridays holiday?
-                  foundDays += 1
-                  if (this.activity == 'outOfHomeDuration') {
-                    avgSum += this.data[i].outOfHomeDuration[j - plotIntervalData[1] + k]
-                  } else if (this.activity == 'dailyRangePerPerson') {
-                    avgSum += this.data[i].dailyRangePerPerson[j - plotIntervalData[1] + k]
-                  } else if (this.activity == 'sharePersonLeavingHome') {
-                    avgSum += this.data[i].sharePersonLeavingHome[j - plotIntervalData[1] + k]
-                  }
-                }
-              }
-            }
-            if (this.data[i].holidays.includes(this.data[i].date[j + plotIntervalData[2] - 2])) {
-              // is monday holiday?
-              foundDays += 1
-              if (this.activity == 'outOfHomeDuration') {
-                avgSum += this.data[i].outOfHomeDuration[j + plotIntervalData[2] - 2]
-              } else if (this.activity == 'dailyRangePerPerson') {
-                avgSum += this.data[i].dailyRangePerPerson[j + plotIntervalData[2] - 2]
-              } else if (this.activity == 'sharePersonLeavingHome') {
-                avgSum += this.data[i].sharePersonLeavingHome[j + plotIntervalData[2] - 2]
-              }
-            }
-            average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 + foundDays)
-          } else {
-            average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1 - foundDaysWeek)
-          }
-          const rate = 0.1 * Math.round(10.0 * average)
-          sevenDayOutOfHomeDuration.push(rate)
-        }
-      } else {
-        for (let j = 0; j < this.data[i].date.length; j++) {
-          outOfHomeDuration.push(this.data[i].percentageChangeComparedToBeforeCorona[j])
-        }
-
-        for (
-          let j = sevenDays + plotIntervalData[0];
-          j < this.data[i].date.length;
-          j += sevenDays
-        ) {
-          let avgSum = 0
-          let average = 0
-          for (let k = j - plotIntervalData[1] - 3; k <= j + plotIntervalData[2] - 3; k += 1) {
-            avgSum += this.data[i].percentageChangeComparedToBeforeCorona[k]
-          }
-          average = avgSum / (plotIntervalData[1] + plotIntervalData[2] + 1)
-          const rate = 0.1 * Math.round(10.0 * average)
-          sevenDayOutOfHomeDuration.push(rate)
+      for (const [key2, value2] of Object.entries(value as Object)) {
+        if (key2 == this.time) {
+          xData = Object.keys(value2)
+          xData.forEach(element => {
+            ydata.push(value2[element][kind])
+          })
         }
       }
-
-      if (this.data[i].name == 'Deutschland') {
+      if (name == 'Deutschland') {
         mobilityData.push({
-          name: this.data[i].name,
-          x: sevenDaysDates,
-          y: sevenDayOutOfHomeDuration,
+          name: name,
+          x: xData,
+          y: ydata,
           fill: 'none',
           marker: { size: 4 },
           line: {
@@ -183,21 +69,20 @@ export default class VueComponent extends Vue {
         })
       } else {
         mobilityData.push({
-          name: this.data[i].name,
-          x: sevenDaysDates,
-          y: sevenDayOutOfHomeDuration,
+          name: name,
+          x: xData,
+          y: ydata,
           fill: 'none',
           marker: { size: 2 },
           opacity: '0.5',
           line: {
             dash: 'dot',
             width: 1.5,
-            color: this.data[i].name,
+            color: name,
           },
         })
       }
     }
-
     this.dataLines = mobilityData
   }
 
