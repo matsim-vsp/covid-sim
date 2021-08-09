@@ -71,9 +71,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDurationPlot="true"
+                    :data="allData" :outOfHomeDurationPlot="true"
                     :yAxisName="yAxisNAme" :plotInterval="[-1, 3, 3]"
-                    :activity="activity")
+                    :activity="activity" :time="'week'" :loadPage="loadPage")
 
               br
 
@@ -83,9 +83,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDurationPlot="true"
+                    :data="allData" :outOfHomeDurationPlot="true"
                     :yAxisName="yAxisNAme" :plotInterval="[-2,2,2]"
-                    :activity="activity")
+                    :activity="activity" :time="'weekday'" :loadPage="loadPage")
 
               br
 
@@ -95,9 +95,9 @@ de:
               .plotarea.tall
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDurationPlot="true"
+                    :data="allData" :outOfHomeDurationPlot="true"
                     :yAxisName="yAxisNAme" :plotInterval="[2, 1, 0]"
-                    :activity="activity")
+                    :activity="activity" :time="'weekend'" :loadPage="loadPage")
 
               br
 
@@ -105,9 +105,9 @@ de:
               .plotarea.tall(v-if="status == 1")
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot.plotsize(v-else
-                    :data="formattedData" :outOfHomeDurationPlot="false"
+                    :data="allData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
-                    :activity="activity")
+                    :activity="activity" :time="'week'" :loadPage="loadPage")
                 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
@@ -132,6 +132,7 @@ import MobilityMap from '@/components/MobilityMap.vue'
 import 'vue-slider-component/theme/default.css'
 import { concat } from 'js-coroutines'
 import { PUBLIC_SVN } from '@/Globals'
+import { all } from 'mathjs'
 
 type MobilityYaml = {
   description?: string
@@ -145,10 +146,35 @@ type MobilityYaml = {
 export default class VueComponent extends Vue {
   private badPage = false
 
+  private public_svn =
+    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
+
+  private bundeslaender = this.public_svn + 'mobilityData/bundeslaender'
+  private mobility = '/mobilityData_OverviewBL_'
+  private range = '/range_OverviewBL_'
+  private weekdays = 'weekdays.csv'
+  private weekends = 'weekends.csv'
+  private weekly = 'weekly.csv'
+
+  private mobilityWeekdays: any[] = []
+  private mobilityWeekends: any[] = []
+  private mobilityWeekly: any[] = []
+
+  private timelineyWeekdays: any[] = []
+  private timelineWeekends: any[] = []
+  private timelineWeekly: any[] = []
+
+  private allBundeslaenderNew: any[] = []
+
   private yaml: MobilityYaml = { description: '', notes: [] }
 
-  private markdownParser = new MarkdownIt()
+  private allData: any[] = []
+  private loadPage = 'Start Loading'
 
+  private minWeekMobility = 10000
+  private maxWeekMobility = 0
+
+  private markdownParser = new MarkdownIt()
   private data: any[] = []
   private rangeData: any[] = []
   private dataLoadingFail = false
@@ -187,33 +213,128 @@ export default class VueComponent extends Vue {
   }
 
   private async buildUI() {
-    // 1. load .csv file from public_svn/mobilityData/bundeslaender/mobilityData_OverviewBL.csv"
-    // 2. Plotly line charts (?) from data, with dropdown to select which Land (default Berlin)
-    // 3. Heatmap like the by-age-group plot? Lands on the y-axis and day on the x-axis
-    // 4. Shapefile viewer
-    //    - with today's data?
-    //    - Maybe a popup with a little chart maybe? I dunno
-    //    - Or maybe a slider to pick the date?
-
     this.openPage(window.location.href)
 
-    this.data = await this.loadMobilityData()
-    this.allBundeslaender = await this.loadBundeslaender()
-    this.rangeData = await this.loadRange()
-    this.formattedData = await this.formatData()
+    this.mobilityWeekends = await this.loadLandkreisData(
+      this.bundeslaender + this.mobility + this.weekends
+    )
+
+    this.mobilityWeekly = await this.loadLandkreisData(
+      this.bundeslaender + this.mobility + this.weekly
+    )
+
+    this.mobilityWeekdays = await this.loadLandkreisData(
+      this.bundeslaender + this.mobility + this.weekdays
+    )
+
+    this.timelineWeekends = await this.loadLandkreiseTimeline(
+      this.bundeslaender + this.range + this.weekends
+    )
+
+    this.timelineyWeekdays = await this.loadLandkreiseTimeline(
+      this.bundeslaender + this.range + this.weekdays
+    )
+
+    this.timelineWeekly = await this.loadLandkreiseTimeline(
+      this.bundeslaender + this.range + this.weekly
+    )
+
+    this.loadAllLandkreise()
+
+    this.combineData()
+    this.loadPage = 'Loaded'
   }
 
-  // for (let thing of this.data[i])
+  private async loadLandkreisData(url: string) {
+    try {
+      // load from subversion
+      const rawData = await fetch(url).then(response => response.text())
+      const parsed = Papaparse.parse(rawData, {
+        delimiter: ';',
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
 
-  private async loadBundeslaender() {
-    var returnData: any[] = []
-    for (let i = 0; i < this.data.length; i++) {
-      if (!returnData.includes(this.data[i].BundeslandID)) {
-        returnData.push(this.data[i].BundeslandID)
+      // convert dates to ISO format
+      const withDates = parsed.map(row => {
+        const d = row.date.toString()
+        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+        return row
+      })
+      return withDates
+    } catch (e) {
+      this.dataLoadingFail = true
+      console.error(e)
+    }
+    return []
+  }
+
+  private async combineData() {
+    for (var i = 0; i < this.allBundeslaenderNew.length; i++) {
+      this.allData[this.allBundeslaenderNew[i]] = []
+      this.allData[this.allBundeslaenderNew[i]]['week'] = []
+      this.allData[this.allBundeslaenderNew[i]]['weekend'] = []
+      this.allData[this.allBundeslaenderNew[i]]['weekday'] = []
+    }
+
+    for (var i = 0; i < this.mobilityWeekends.length; i++) {
+      var landkreis = this.mobilityWeekends[i].BundeslandID
+      var date = this.mobilityWeekends[i].date
+      var duration = this.mobilityWeekends[i].outOfHomeDuration
+      var dailyRange = this.timelineWeekends[i].dailyRangePerPerson
+      var sharePerson = this.timelineWeekends[i].sharePersonLeavingHome
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['weekend'][date] = {
+          outOfHomeDuration: duration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekends[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
       }
     }
 
-    return returnData
+    for (var i = 0; i < this.mobilityWeekdays.length; i++) {
+      var landkreis = this.mobilityWeekdays[i].BundeslandID
+      var date = this.mobilityWeekdays[i].date
+      var dailyRange = this.timelineyWeekdays[i].dailyRangePerPerson
+      var sharePerson = this.timelineyWeekdays[i].sharePersonLeavingHome
+      var duration = this.mobilityWeekdays[i].outOfHomeDuration
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['weekday'][date] = {
+          outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
+      }
+    }
+
+    for (var i = 0; i < this.mobilityWeekly.length; i++) {
+      var landkreis = this.mobilityWeekly[i].BundeslandID
+      var date = this.mobilityWeekly[i].date
+      var dailyRange = this.timelineWeekly[i].dailyRangePerPerson
+      var sharePerson = this.timelineWeekly[i].sharePersonLeavingHome
+      var duration = this.mobilityWeekly[i].outOfHomeDuration
+      if (typeof duration == 'string') {
+        duration = parseFloat(duration.replace(',', '.'))
+      }
+
+      if (this.allData[landkreis] !== undefined) {
+        this.allData[landkreis]['week'][date] = {
+          outOfHomeDuration: duration,
+          percentageChangeComparedToBeforeCorona: this.mobilityWeekly[i]
+            .percentageChangeComparedToBeforeCorona,
+          sharePersonLeavingHome: sharePerson,
+          dailyRangePerPerson: dailyRange,
+          endHomeActs: 0,
+        }
+      }
+    }
   }
 
   private async openPage(url: string) {
@@ -254,9 +375,15 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private async loadRange() {
-    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/range_OverviewBL.csv'
+  private async loadAllLandkreise() {
+    for (var i = 0; i < 402; i++) {
+      var bl = this.mobilityWeekends[i].BundeslandID
+      this.allBundeslaenderNew.push(bl)
+    }
+    this.allBundeslaenderNew.sort()
+  }
 
+  private async loadLandkreiseTimeline(url: string) {
     try {
       // load from subversion
       const rawData = await fetch(url).then(response => response.text())
@@ -267,11 +394,13 @@ export default class VueComponent extends Vue {
       }).data
 
       // convert dates to ISO format
+
       const withDates = parsed.map(row => {
         const d = row.date.toString()
-        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+        row.date = `20${d.substring(6, 8)}-${d.substring(3, 5)}-${d.substring(0, 2)}`
         return row
       })
+
       return withDates
     } catch (e) {
       this.dataLoadingFail = true
@@ -280,64 +409,8 @@ export default class VueComponent extends Vue {
     return []
   }
 
-  private async formatData() {
-    var returnData: any[] = []
-
-    for (let i = 0; i < this.allBundeslaender.length; i++) {
-      var bundesland = {
-        name: this.allBundeslaender[i],
-        date: [],
-        outOfHomeDuration: [],
-        percentageChangeComparedToBeforeCorona: [],
-        sharePersonLeavingHome: [],
-        dailyRangePerPerson: [],
-        holidays: [],
-      }
-      returnData.push(bundesland)
-    }
-
-    for (let i = 0; i < this.data.length; i++) {
-      this.allBundeslaender.indexOf(this.data[i].BundeslandID)
-      returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].date.push(
-        this.data[i].date
-      )
-      returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].outOfHomeDuration.push(
-        this.data[i].outOfHomeDuration
-      )
-      returnData[
-        this.allBundeslaender.indexOf(this.data[i].BundeslandID)
-      ].percentageChangeComparedToBeforeCorona.push(
-        this.data[i].percentageChangeComparedToBeforeCorona
-      )
-    }
-
-    for (let i = 0; i < this.allBundeslaender.length; i++) {
-      for (const [key, value] of Object.entries(this.bundeslandHoliday)) {
-        if (this.allBundeslaender[i] == key) {
-          var holidays = getHolidays('2020', value)
-          holidays = holidays.concat(getHolidays('2021', value))
-          for (let j = 0; j < holidays.length; j++) {
-            returnData[this.allBundeslaender.indexOf(this.data[i].BundeslandID)].holidays.push(
-              holidays[j].dateString
-            )
-          }
-        }
-      }
-    }
-    for (let i = 0; i < this.rangeData.length; i++) {
-      this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
-      returnData[
-        this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
-      ].sharePersonLeavingHome.push(this.rangeData[i].sharePersonLeavingHome)
-      returnData[
-        this.allBundeslaender.indexOf(this.rangeData[i].BundeslandID)
-      ].dailyRangePerPerson.push(this.rangeData[i].dailyRangePerPerson)
-    }
-    return returnData
-  }
-
-  private async loadMobilityData() {
-    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/mobilityData_OverviewBL.csv'
+  private async loadRange() {
+    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/range_OverviewBL.csv'
 
     try {
       // load from subversion
