@@ -315,6 +315,8 @@ export default class VueComponent extends Vue {
       this.landkreise + this.timeline + this.weekdaysTimeline
     )
 
+    console.log(this.timelineyWeekdays)
+
     this.timelineWeekly = await this.loadLandkreiseTimeline(
       this.landkreise + this.timeline + this.weekly
     )
@@ -333,6 +335,8 @@ export default class VueComponent extends Vue {
     )
 
     this.combineData()
+
+    console.log(this.allData)
 
     this.updateLandkreisNames()
 
@@ -465,9 +469,14 @@ export default class VueComponent extends Vue {
         this.allWeekdayDates.push(date)
       }
       var duration = this.mobilityWeekdays[i].outOfHomeDuration
+      //console.log(duration)
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
+<<<<<<< HEAD
           outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
+=======
+          outOfHomeDuration: duration,
+>>>>>>> mobility
           percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
             .percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
@@ -481,7 +490,7 @@ export default class VueComponent extends Vue {
       var landkreis = this.mobilityWeekly[i].Landkreis
       var date = this.rangeWeekly[i].date
       var dailyRange = this.rangeWeekly[i].dailyRangePerPerson
-      var sharePerson = this.rangeWeeends[i].sharePersonLeavingHome
+      var sharePerson = this.rangeWeekly[i].sharePersonLeavingHome
       if (landkreis == 'Landkreis St, Wendel') {
         landkreis = 'Landkreis St. Wendel'
       } else if (landkreis == 'Cottbus - Chó?ebuz') {
@@ -532,6 +541,7 @@ export default class VueComponent extends Vue {
           this.minWeekMobility = sum
         }
         this.allData[area]['weekday'][date].endHomeActs = sum
+        console.log(sum)
       }
     }
 
