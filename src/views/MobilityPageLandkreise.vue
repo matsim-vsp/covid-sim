@@ -136,7 +136,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('week') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('week') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'week'"
@@ -149,7 +149,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekday') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekday') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekday'"
@@ -162,7 +162,7 @@ de:
               h5(v-else-if="status == 3") {{ $t('proportion-heading') }} ({{ $t('weekend') }})
               h5(v-else-if="status == 4") {{ $t('nightly-activity') }} ({{ $t('weekend') }})
               .plotarea.tall
-                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'weekend'"
@@ -172,7 +172,7 @@ de:
 
               h5(v-if="status == 1") {{ $t('duration-heading-percent') }}
               .plotarea.tall(v-if="status == 1")
-                  p.plotsize(v-if="dataLoadingFail || status == 4") Data not found...
+                  p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
                     :kind="activity" :week="'week'" :yAxisName="'Percent [%]'" 
@@ -315,13 +315,9 @@ export default class VueComponent extends Vue {
       this.landkreise + this.timeline + this.weekdaysTimeline
     )
 
-    console.log(this.timelineyWeekdays)
-
     this.timelineWeekly = await this.loadLandkreiseTimeline(
       this.landkreise + this.timeline + this.weekly
     )
-
-    //this.mobilityWeekdays[i].date
 
     this.rangeWeeends = await this.loadRangeData(this.landkreise + this.range + this.weekends)
     this.rangeWeekly = await this.loadRangeData(this.landkreise + this.range + this.weekly)
@@ -336,7 +332,7 @@ export default class VueComponent extends Vue {
 
     this.combineData()
 
-    console.log(this.allData)
+    await this.addTimeLine()
 
     this.updateLandkreisNames()
 
@@ -351,7 +347,6 @@ export default class VueComponent extends Vue {
     this.allData.sort()
     await this.openPage(window.location.href)
     console.log(window.location.href)
-    console.log(this.allData)
   }
 
   private async buildUI() {
@@ -429,6 +424,63 @@ export default class VueComponent extends Vue {
 
   private updateLandkreisNames() {}
 
+  private async addTimeLine() {
+    for (var i = 0; i < this.timelineWeekends.length; i++) {
+      var date = this.timelineWeekends[i].date
+      var area = this.timelineWeekends[i].area
+      var sum = this.timelineWeekends[i]['22-5']
+
+      if (this.allData[area] !== undefined) {
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+        }
+        if (this.allData[area]['weekend'][date] === undefined) {
+        } else {
+          this.allData[area].weekend[date].endHomeActs = sum
+        }
+      }
+    }
+
+    for (var i = 0; i < this.timelineyWeekdays.length; i++) {
+      var date = this.timelineyWeekdays[i].date
+      var area = this.timelineyWeekdays[i].area
+      var sum = this.timelineyWeekdays[i]['22-5']
+      if (this.allData[area] !== undefined) {
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+        }
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
+        if (this.allData[area]['weekday'][date] === undefined) {
+        } else {
+          this.allData[area].weekday[date].endHomeActs = sum
+        }
+      }
+    }
+
+    for (var i = 0; i < this.timelineWeekly.length; i++) {
+      var date = this.timelineWeekly[i].date
+      var area = this.timelineWeekly[i].area
+      var sum = this.timelineWeekly[i]['22-5']
+      if (this.allData[area] !== undefined) {
+        if (sum > this.maxWeekMobility) {
+          this.maxWeekMobility = sum
+        }
+        if (sum < this.minWeekMobility) {
+          this.minWeekMobility = sum
+        }
+        if (this.allData[area]['week'][date] === undefined) {
+        } else {
+          this.allData[area].week[date].endHomeActs = sum
+        }
+      }
+    }
+  }
+
   private combineData() {
     for (var i = 0; i < this.allLandkreise.length; i++) {
       this.allData[this.allLandkreise[i]] = []
@@ -469,7 +521,6 @@ export default class VueComponent extends Vue {
         this.allWeekdayDates.push(date)
       }
       var duration = this.mobilityWeekdays[i].outOfHomeDuration
-      //console.log(duration)
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
           outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
@@ -506,54 +557,6 @@ export default class VueComponent extends Vue {
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,
         }
-      }
-    }
-
-    console.log(this.allData)
-
-    for (var i = 0; i < this.timelineWeekends.length; i++) {
-      var date = this.timelineWeekends[i].date
-      var area = this.timelineWeekends[i].area
-      var sum = this.timelineWeekends[i]['22-5']
-
-      if (this.allData[area] !== undefined) {
-        if (sum < this.minWeekMobility) {
-          this.minWeekMobility = sum
-        }
-        if (sum > this.maxWeekMobility) {
-          this.maxWeekMobility = sum
-        }
-        //this.allData[area].weekend[date].endHomeActs = sum
-      }
-    }
-
-    for (var i = 0; i < this.timelineyWeekdays.length; i++) {
-      var date = this.timelineyWeekdays[i].date
-      var area = this.timelineyWeekdays[i].area
-      var sum = this.timelineyWeekdays[i]['22-5']
-      if (this.allData[area] !== undefined) {
-        if (sum > this.maxWeekMobility) {
-          this.maxWeekMobility = sum
-        }
-        if (sum < this.minWeekMobility) {
-          this.minWeekMobility = sum
-        }
-        //this.allData[area]['weekday'][date].endHomeActs = sum
-      }
-    }
-
-    for (var i = 0; i < this.timelineWeekly.length; i++) {
-      var date = this.timelineWeekly[i].date
-      var area = this.timelineWeekly[i].area
-      var sum = this.timelineWeekly[i]['22-5']
-      if (this.allData[area] !== undefined) {
-        if (sum > this.maxWeekMobility) {
-          this.maxWeekMobility = sum
-        }
-        if (sum < this.minWeekMobility) {
-          this.minWeekMobility = sum
-        }
-        //this.allData[area]['week'][date].endHomeActs = sum
       }
     }
   }
