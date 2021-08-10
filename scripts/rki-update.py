@@ -84,6 +84,19 @@ munich = (
 
 munich.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
+# Köln
+fname = "cologne-cases.csv"
+print(fname)
+cologne = (
+    csv
+    >> filter_by(X.Landkreis == "SK Köln")
+    >> group_by(X.Landkreis, X.year, X.month, X.day)
+    >> summarize(cases=X.AnzahlFall.sum())
+    >> arrange(X.year, X.month, X.day)
+)
+
+cologne.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+
 
 # Heinsberg
 fname = "heinsberg-cases.csv"
