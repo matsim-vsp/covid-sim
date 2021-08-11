@@ -54,6 +54,8 @@ export default class VueComponent extends Vue {
   private calculateObserved(factor100k: number) {
     if (this.observed.length === 0) return
 
+    console.log(this.observed)
+
     // for each data source, let's draw some dots
     for (const source of this.observed) {
       // Don't scale the 150x pre-scaled line, it's already been scaled!
@@ -77,6 +79,7 @@ export default class VueComponent extends Vue {
       // RKI meldedatum and infection data start on different days of the week.
       const offsetRKIDate: { [id: string]: number } = {
         'RKI Berlin Infections': 11,
+        'RKI Cologne Infections': 11,
         'RKI-Meldedatum Berlin': 12,
         'Observed Infections': 12,
       }
