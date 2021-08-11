@@ -70,6 +70,33 @@ mberlin = (
 
 mberlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
+# Koeln
+fname = "cologne-cases.csv"
+print(fname)
+berlin = (
+    csv
+    >> filter_by(X.Bundesland == "Berlin")
+    >> group_by(X.Bundesland, X.year, X.month, X.day)
+    >> summarize(cases=X.AnzahlFall.sum())
+    >> arrange(X.year, X.month, X.day)
+)
+
+berlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+
+# Koeln - Meldedatum
+fname = "cologne-cases-meldedatum.csv"
+print(fname)
+mberlin = (
+    csv
+    >> filter_by(X.Bundesland == "Berlin")
+    >> group_by(X.Bundesland, X.myear, X.mmonth, X.mday)
+    >> summarize(cases=X.AnzahlFall.sum())
+    >> arrange(X.myear, X.mmonth, X.mday)
+    >> rename(year=X.myear, month=X.mmonth, day=X.mday)
+)
+
+mberlin.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+
 
 # München
 fname = "munich-cases.csv"

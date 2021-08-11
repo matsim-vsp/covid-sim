@@ -391,6 +391,7 @@ export default class VueComponent extends Vue {
     munich: this.RKI_URL + 'munich-cases.csv',
     heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
     jakarta: this.JAKARTA_URL + 'jakarta-cases.CSV',
+    cologne: this.RKI_URL + 'cologne-cases.csv',
   }
 
   private cityCSVMeldedatum: any = {
@@ -408,6 +409,7 @@ export default class VueComponent extends Vue {
   private cityDIVI: any = {
     berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
     munich: this.DIVI_URL + 'munich-divi-processed.csv',
+    cologne: this.DIVI_URL + 'cologne-divi-processed.csv',
   }
 
   private get showVirusStrainsPlot() {
@@ -1088,7 +1090,10 @@ export default class VueComponent extends Vue {
     }
 
     // // Add RKI Detection-Rate-Trend Data
-    if (this.city === 'berlin' && this.rkiDetectionRateData.x) {
+    if (
+      (this.city === 'berlin' && this.rkiDetectionRateData.x) ||
+      (this.city === 'cologne' && this.rkiDetectionRateData.x)
+    ) {
       serieses.push(this.rkiDetectionRateData)
     }
 
