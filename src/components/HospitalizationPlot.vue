@@ -55,10 +55,10 @@ export default class VueComponent extends Vue {
     },
     cologne: {
       fromModel: ['Seriously Sick', 'Critical'],
-      fromCSV: ['Stationär'],
-      csvLineNames: ['Reported: Cologne Hospitalized'],
-      dateFormatter: this.reformatDateMunich,
-      dateColumn: 'Tag',
+      fromCSV: ['Stationäre Behandlung', 'Intensivmedizin'],
+      csvLineNames: ['Reported: Cologne Hospitalized', 'Reported: Cologne Intensive Care'],
+      dateFormatter: this.reformatDateBerlin,
+      dateColumn: 'Datum',
     },
     jakarta: {
       fromModel: ['Seriously Sick', 'Critical'],
@@ -278,6 +278,12 @@ export default class VueComponent extends Vue {
   }
 
   private reformatDateMunich(day: string) {
+    const pieces = day.split('-')
+    const date = '20' + pieces[2] + '-' + pieces[1] + '-' + pieces[0]
+    return date
+  }
+
+  private reformatDateCologne(day: string) {
     const pieces = day.split('-')
     const date = '20' + pieces[2] + '-' + pieces[1] + '-' + pieces[0]
     return date
