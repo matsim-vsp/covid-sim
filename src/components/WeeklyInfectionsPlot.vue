@@ -181,14 +181,14 @@ export default class VueComponent extends Vue {
         name: 'Model',
         x: midWeekDates, // susceptible.x.slice(averagingPeriod),
         y: infectionRate,
-        type: 'scatter',
-        mode: 'markers',
+        // type: 'scatter',
+        // mode: 'markers',
         marker: { size: 3, color: '#32c' },
-        // line: {
-        //   width: 1.5,
-        //   color: '#329',
-        //   shape: 'hvh',
-        // },
+        line: {
+          width: 1.5,
+          color: '#329',
+          // shape: 'hvh',
+        },
       },
     ]
 
