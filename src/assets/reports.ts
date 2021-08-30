@@ -2,7 +2,7 @@ const reports: { md: string; title: string; url: string; html: string }[] = [
   {
     md: '/reports/report-2021-08-27.md',
     title: '27 August 2021',
-    url: 'https://svn.vsp.tu-berlin.de/repos/public-svn/publications/vspwp/2021/21-20/',
+    url: 'https://doi.org/10.14279/depositonce-12321',
     html: '',
   },
   {
