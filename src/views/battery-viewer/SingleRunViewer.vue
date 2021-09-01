@@ -100,6 +100,21 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- CASES COMPARISION -------
+        .linear-plot(v-if="showIncidenceComp")
+          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
+            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+
+          .hideIt(v-show="showPlot[0]")
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.tall
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
+              :observed="observedCases"
+              :rkiDetectionData="rkiDetectionRateData"
+              :logScale="logScale")
+
         //- ---------- HOSPITALIZATION RATES
         .linear-plot(v-if="city !== 'heinsberg'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
@@ -292,6 +307,7 @@ import RValueTwo from '@/components/RValueTwo.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
+import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
@@ -322,6 +338,7 @@ interface VegaChartDefinition {
     VegaLiteChart,
     VuePlotly,
     WeeklyInfectionsPlot,
+    WeeklyInfectionByVaccination,
     LeisureOutdoorFraction,
     WeeklyTests,
     AgeGroupLineChart,
@@ -550,6 +567,8 @@ export default class VueComponent extends Vue {
   private observedCases: any[] = []
   private diviData: any[] = []
 
+  private showIncidenceComp = false
+
   private toggleShowPlot(which: number) {
     this.showPlot[which] = !this.showPlot[which]
     console.log(this.showPlot)
@@ -648,18 +667,30 @@ export default class VueComponent extends Vue {
 
   private labels: any = {
     nSusceptible: 'Susceptible',
+    nSusceptibleVaccinated: 'SusceptibleVaccinated',
     nInfectedButNotContagious: 'Infected, not contagious',
     nContagious: 'Contagious',
+    nContagiousVaccinated: 'ContagiousVaccinated',
     nShowingSymptoms: 'Showing Symptoms',
+    nShowingSymptomsVaccinated: 'ShowingSymptomsVaccinated',
     nSeriouslySick: 'Seriously Sick',
+    nSeriouslySickVaccinated: 'SeriouslySickVaccinated',
     nCritical: 'Critical',
+    nCriticalVaccinated: 'CriticalVaccinated',
     nTotalInfected: 'Total Infected',
+    nTotalInfectedVaccinated: 'TotalInfectedVaccinated',
     nInfectedCumulative: 'Infected Cumulative',
+    nInfectedCumulativeVaccinated: 'InfectedCumulativeVaccinated',
     nRecovered: 'Recovered',
     nInQuarantine: 'In Quarantine',
     nHospitalCumulative: 'Cumulative Hospitalized',
     nShowingSymptomsCumulative: 'Showing Symptoms Cum.',
+    nShowingSymptomsCumulativeVaccinated: 'ShowingSymptomsCumulativeVaccinated',
     nVaccinated: 'Vaccinated',
+    nContagiousCumulativeVaccinated: 'ContagiousCumulativeVaccinated',
+    nSeriouslySickCumulativeVaccinated: 'SeriouslySickCumulativeVaccinated',
+    nCriticalCumulativeVaccinated: 'CriticalCumulativeVaccinated',
+    nRecoveredVaccinated: 'RecoveredVaccinated',
   }
 
   private async mounted() {
@@ -1080,6 +1111,12 @@ export default class VueComponent extends Vue {
 
       const y: number[] = this.unpack(data, column)
       serieses.push({ x, y, name })
+    }
+
+    if (serieses[1].y[0] === undefined) {
+      this.showIncidenceComp = false
+    } else {
+      this.showIncidenceComp = true
     }
 
     // Add Observed Data
