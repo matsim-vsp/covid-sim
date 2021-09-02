@@ -147,75 +147,71 @@ export default class VueComponent extends Vue {
       ungeimpft.push(einwohner[i] - geimpft[i])
     }
 
-    let nShowingSymptomsCumulative: any = this.data.filter(
-      item => item.name === 'Showing Symptoms Cum.'
+    // KH
+
+    // Seriously Sick, Critical, SeriouslySickVaccinated, CriticalVaccinated
+    let seriouslySick: any = this.data.filter(item => item.name === 'Seriously Sick')[0]
+    let critical: any = this.data.filter(item => item.name === 'Critical')[0]
+    let seriouslySickVaccinated: any = this.data.filter(
+      item => item.name === 'SeriouslySickVaccinated'
     )[0]
-    let nShowingSymptomsCumulativeVaccinated: any = this.data.filter(
-      item => item.name === 'ShowingSymptomsCumulativeVaccinated'
-    )[0]
+    let criticalVaccinated: any = this.data.filter(item => item.name === 'CriticalVaccinated')[0]
 
-    console.log(nShowingSymptomsCumulative)
+    var kh = []
+    var kh_geimpft = []
+    var kh_ungeimpft = []
 
-    var newCases = []
-    var newCasesVac = []
-    var newCasesUnvac = []
-    var dateNewCases = []
+    const totalPopulation = susceptible.y[0]
+    let factor100k = totalPopulation / 100000.0
 
-    for (var i = 7; i < nShowingSymptomsCumulative.x.length; i++) {
-      dateNewCases.push(nShowingSymptomsCumulative.x[i])
-      newCases.push(nShowingSymptomsCumulative.y[i] - nShowingSymptomsCumulative.y[i - 7])
-      newCasesVac.push(
-        nShowingSymptomsCumulativeVaccinated.y[i] - nShowingSymptomsCumulativeVaccinated.y[i - 7]
-      )
+    for (var i = 0; i < seriouslySick.x.length; i++) {
+      kh.push((seriouslySick.y[i] + critical.y[i]) * factor100k)
+      kh_geimpft.push(seriouslySickVaccinated.y[i] + criticalVaccinated.y[i])
     }
 
-    for (var i = 0; i < newCases.length; i++) {
-      newCasesUnvac.push(newCases[i] - newCasesVac[i])
+    for (var i = 0; i < kh.length; i++) {
+      kh_ungeimpft.push(kh[i] - kh_geimpft[i])
     }
 
+    var total = []
     var geimpft_v_1 = []
     var geimpft_v_2 = []
     var ungeimpft_v_1 = []
     var ungeimpft_v_2 = []
-    var inzident = []
 
-    for (var i = 0; i < newCases.length; i++) {
-      newCasesUnvac.push(newCases[i] - newCasesVac[i])
-    }
-
-    for (var i = 0; i < newCases.length; i++) {
-      geimpft_v_1.push(newCasesVac[i] / (einwohner[i + 7] / 100000))
-      geimpft_v_2.push(newCasesVac[i] / (geimpft[i + 7] / 100000))
-      ungeimpft_v_1.push(newCasesUnvac[i] / (einwohner[i + 7] / 100000))
-      ungeimpft_v_2.push(newCasesUnvac[i] / (ungeimpft[i + 7] / 100000))
-      inzident.push(newCases[i] / (einwohner[i + 7] / 100000))
+    for (var i = 0; i < kh.length; i++) {
+      geimpft_v_1.push(kh_geimpft[i] / (einwohner[i] / 100000))
+      geimpft_v_2.push(kh_geimpft[i] / (geimpft[i] / 100000))
+      ungeimpft_v_1.push(kh_ungeimpft[i] / (einwohner[i] / 100000))
+      ungeimpft_v_2.push(kh_ungeimpft[i] / (ungeimpft[i] / 100000))
+      total.push(kh[i] / (einwohner[i] / 100000))
     }
 
     this.dataLines = [
       {
-        name: 'vaccinated_v_1',
-        x: dateNewCases,
+        name: 'KH / 100k vaccinated_v_1',
+        x: date,
         y: geimpft_v_1,
       },
       {
-        name: 'vaccinated_v_2',
-        x: dateNewCases,
+        name: 'KH / 100k vaccinated_v_2',
+        x: date,
         y: geimpft_v_2,
       },
       {
-        name: 'unvaccinated_v_1',
-        x: dateNewCases,
+        name: 'KH / 100k unvaccinated_v_1',
+        x: date,
         y: ungeimpft_v_1,
       },
       {
-        name: 'unvaccinated_v_2',
-        x: dateNewCases,
+        name: 'KH / 100k unvaccinated_v_2',
+        x: date,
         y: ungeimpft_v_2,
       },
       {
-        name: 'incidence (total)',
-        x: dateNewCases,
-        y: inzident,
+        name: 'KH / 100k',
+        x: date,
+        y: total,
         line: {
           // color: '#ddbbbb',
           color: 'black',
@@ -253,7 +249,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: 'log',
       autorange: false,
-      range: [Math.log10(2), Math.log10(5000)],
+      range: [0, Math.log10(5000)],
       title: '7-Day Infections / 100k Pop.',
     } as any,
     plot_bgcolor: '#f8f8f8',

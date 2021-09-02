@@ -129,6 +129,21 @@
                 :data="hospitalData" :logScale="logScale" :city="city"
                 :diviData="diviData" :endDate="endDate" )
 
+        //- ---------- CASES COMPARISION -------
+        .linear-plot(v-if="showIncidenceComp")
+          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
+            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+
+          .hideIt(v-show="showPlot[0]")
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.tall
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              hospitalization-vaccination-comparison.plotsize(v-else :data="data"  :endDate="endDate"
+              :observed="observedCases"
+              :rkiDetectionData="rkiDetectionRateData"
+              :logScale="logScale")
+
         //- ---------- VIRUS STRAINS -------
         .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0")
           h5 {{ cityCap }} Virus Strains
@@ -206,7 +221,7 @@
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               vue-plotly.plotsize(v-else
-                :data="data" :layout="layout" :options="options")
+                :data="dataHealth" :layout="layout" :options="options")
 
         //- ---------- AGE GROUP BLOCK CHART ------
         .linear-plot(v-if="showByAgePlot && incidenceHeatMapData")
@@ -308,6 +323,7 @@ import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
+import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
@@ -339,6 +355,7 @@ interface VegaChartDefinition {
     VuePlotly,
     WeeklyInfectionsPlot,
     WeeklyInfectionByVaccination,
+    HospitalizationVaccinationComparison,
     LeisureOutdoorFraction,
     WeeklyTests,
     AgeGroupLineChart,
@@ -560,6 +577,7 @@ export default class VueComponent extends Vue {
   private currentRun: any = {}
 
   private data: any[] = []
+  private dataHealth: any[] = []
 
   private measureOptions: any = {}
   private runLookup: any = {}
@@ -777,6 +795,21 @@ export default class VueComponent extends Vue {
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
+    const ignoreRowHealth = [
+      'SusceptibleVaccinated',
+      'ContagiousVaccinated',
+      'ShowingSymptomsVaccinated',
+      'SeriouslySickVaccinated',
+      'CriticalVaccinated',
+      'TotalInfectedVaccinated',
+      'InfectedCumulativeVaccinated',
+      'ShowingSymptomsCumulativeVaccinated',
+      'ContagiousCumulativeVaccinated',
+      'SeriouslySickCumulativeVaccinated',
+      'CriticalCumulativeVaccinated',
+      'RecoveredVaccinated',
+      'Cumulative Hospitalized',
+    ]
 
     // load run dataset
     const csv: any[] = await this.loadCSVs(this.currentRun)
@@ -808,6 +841,7 @@ export default class VueComponent extends Vue {
 
     this.updateTotalInfected()
     this.updateVegaCharts()
+    this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
   }
 
   private addDataFromInfectionsCSVToData(valueName: string) {
