@@ -103,9 +103,9 @@
         //- ---------- CASES COMPARISION -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+            button.button.is-small.hider(@click="toggleShowPlot(14)") ..
 
-          .hideIt(v-show="showPlot[0]")
+          .hideIt(v-show="showPlot[14]")
             //p New persons showing symptoms (model) vs. new cases (reality)
             .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -131,10 +131,10 @@
 
         //- ---------- CASES COMPARISION BY VACCINATION -------
         .linear-plot(v-if="showIncidenceComp")
-          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+          h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
+            button.button.is-small.hider(@click="toggleShowPlot(15)") ..
 
-          .hideIt(v-show="showPlot[0]")
+          .hideIt(v-show="showPlot[15]")
             //p New persons showing symptoms (model) vs. new cases (reality)
             .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -393,6 +393,8 @@ export default class VueComponent extends Vue {
     11: true,
     12: true,
     13: true,
+    14: true,
+    15: true,
   }
 
   private MAX_DAYS = 1000
