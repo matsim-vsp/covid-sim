@@ -129,7 +129,7 @@
                 :data="hospitalData" :logScale="logScale" :city="city"
                 :diviData="diviData" :endDate="endDate" )
 
-        //- ---------- CASES COMPARISION -------
+        //- ---------- CASES COMPARISION BY VACCINATION -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
             button.button.is-small.hider(@click="toggleShowPlot(0)") ..
