@@ -2,7 +2,7 @@ const reports: { md: string; title: string; url: string; html: string }[] = [
   {
     md: '/reports/report-2021-09-03.md',
     title: '03 Sep 2021',
-    url: 'https://doi.org/10.14279/depositonce-12321',
+    url: 'https://doi.org/10.14279/depositonce-12336',
     html: '',
   },
   {
