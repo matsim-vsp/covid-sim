@@ -21,6 +21,13 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.09.03
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") Fall measures (endog. activity reductions)
+            a.navbar-item(:href="'/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") Fall measures (no activity reductions)
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.07.16
 
           .navbar-dropdown
@@ -45,16 +52,11 @@
             a.navbar-item(:href="'/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25'") Report runs for Opening Strategies
       
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.04.09
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 1.8 higher infectivity of B117
-            a.navbar-item(:href="'/2021-04-09/bmbf-2.0?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 2.0 higher infectivity of B117
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  Older Versions
+          a.navbar-link  Other Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 1.8 higher infectivity of B117
+              a.navbar-item(:href="'/2021-04-09/bmbf-2.0?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") Report runs with 2.0 higher infectivity of B117
               a.navbar-item(:href="'/2021-03-19/testing?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29'") Runs for report March 19
               a.navbar-item(:href="'/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000'") 2021.02.26 Adaptive restrictions
               a.navbar-item(:href="'/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes'") 2021.02.26 Testing strategies

@@ -66,6 +66,14 @@ Travis-CI is configured to automatically build the site with **every push to mas
 
 - Travis config is in `.travis.yml`
 
+### Issues
+
+I (kn) need to fix the npm version on something older.  The command is
+```
+nvm use --lts
+```
+Needed to install `nvm` to make this work.  Can't remember how I did that; possibly through macports.
+
 ## Project Layout
 
 - `/src`: all TypeScript and Vue files go here
