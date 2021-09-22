@@ -100,7 +100,24 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
-        //- ---------- CASES COMPARISION -------
+        //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
+        .linear-plot
+          h5 {{ cityCap }} Hospitalization New Cases
+            button.button.is-small.hider(@click="toggleShowPlot(15)") ..
+
+          .hideIt(v-show="showPlot[15]")
+            p 7-day moving average
+            .plotarea.tall
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              hospitalization-7-day-new-cases-plot.plotsize(v-else
+               :data="data"
+               :endDate="endDate"
+               :city="city"
+               :logScale="logScale"
+              )
+
+        //- ---------- VACCINATED / UNVACCINATED -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
             button.button.is-small.hider(@click="toggleShowPlot(14)") ..
@@ -315,6 +332,7 @@ import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HeatMap from '@/components/HeatMap.vue'
 import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
+import Hospitalization7DayNewCasesPlot from '@/components/Hospitalization7DayNewCasesPlot.vue'
 import InfectionsByActivityType from '@/components/InfectionsByActivityType.vue'
 import MutationsPlot from '@/components/MutationsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
@@ -347,6 +365,7 @@ interface VegaChartDefinition {
     ButtonGroup,
     HeatMap,
     HospitalizationPlot,
+    Hospitalization7DayNewCasesPlot,
     InfectionsByActivityType,
     MutationsPlot,
     RValuePlot,
@@ -395,6 +414,11 @@ export default class VueComponent extends Vue {
     13: true,
     14: true,
     15: true,
+    16: true,
+    17: true,
+    18: true,
+    19: true,
+    20: true,
   }
 
   private MAX_DAYS = 1000
@@ -694,6 +718,7 @@ export default class VueComponent extends Vue {
     nShowingSymptoms: 'Showing Symptoms',
     nShowingSymptomsVaccinated: 'ShowingSymptomsVaccinated',
     nSeriouslySick: 'Seriously Sick',
+    nSeriouslySickCumulative: 'Seriously Sick Cumulative',
     nSeriouslySickVaccinated: 'SeriouslySickVaccinated',
     nCritical: 'Critical',
     nCriticalVaccinated: 'CriticalVaccinated',
@@ -776,7 +801,6 @@ export default class VueComponent extends Vue {
     // this.isZipLoaded = false
 
     const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
-    console.log({ filepath })
     const zloader = new ZipLoader(filepath)
     await zloader.load()
 
