@@ -38,15 +38,22 @@ export default class VueComponent extends Vue {
     }
 
     // 0,1,2 *3* 4,5,6
-    const center = 3 * 8
+    const centerElement = 3
+    const threads = 8
+    const center = centerElement * threads
     // yyyyyy This should be "3".  However, the new thread-based version of episim writes out every date line 8 times.  In consequence, one needs to
     // average over 8 times the index range.  Someone who knows how to program this better should average based on date and not based on index. And/or
     // the original input data gets cleaned up.  Note that it cannot stay the way it is now this since it averages too much in the older plots
     // (although I have to say that it is bad, but not terrible).  kai, aug'21
 
+    // The lingering problem of the old runs is still present, but the previous
+    // calculation had the wrong denominator (it divided by 6*8 instead of 7*8).
+    // And also the x-coords were not shifted by the centering value.  bc, sep'21
     for (let index = center; index < x.length - center; index++) {
       const average =
-        y.slice(index - center, index + center).reduce((a, b) => a + b, 0) / 2 / center
+        y.slice(index - center, index + center).reduce((a, b) => a + b, 0) /
+        (1 + 2 * centerElement) /
+        threads
       avgR.push(average)
     }
 
@@ -62,7 +69,7 @@ export default class VueComponent extends Vue {
         name: 'leisureOutdoorFraction',
         mode: 'line',
         type: 'scatter',
-        x: x,
+        x: x.slice(center, x.length - center),
         y: avgR,
       },
     ]
