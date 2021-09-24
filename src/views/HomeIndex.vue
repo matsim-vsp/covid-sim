@@ -119,29 +119,35 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
+      url: '/cologne/2021-09-22/1?leisureUnv=no',
+      date: 'Released: 24 Sep 2021',
+      title: 'Cologne',
+      subtitle: 'Cologne: Measures for fall',
+    },
+    {
       url:
-        'https://covid-sim.info/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+        '/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
       date: 'Released: 2 Sep 2021',
       title: 'Report runs Sep 3',
       subtitle: 'Measures for fall',
     },
     {
       url:
-        'https://covid-sim.info/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+        '/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
       date: 'Released: 2 Sep 2021',
       title: 'Report runs Sep 3',
       subtitle: 'Measures for fall',
     },
     {
       url:
-        'https://covid-sim.info/2021-09-02/3?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+        '/2021-09-02/3?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
       date: 'Released: 2 Sep 2021',
       title: 'Report runs Sep 3',
       subtitle: 'Measures for fall',
     },
     {
       url:
-        'https://covid-sim.info/2021-09-02/4?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+        '/2021-09-02/4?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
       date: 'Released: 2 Sep 2021',
       title: 'Report runs Sep 3',
       subtitle: 'Measures for fall',
