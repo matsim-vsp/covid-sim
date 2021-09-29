@@ -47,14 +47,14 @@ export default class VueComponent extends Vue {
 
     this.dataLines = [
       {
-        name: 'leisureOutdoorFraction',
+        name: 'Daily value',
         mode: 'markers',
         type: 'scatter',
         x: x,
         y: y,
       },
       {
-        name: 'leisureOutdoorFraction',
+        name: '7-day average',
         mode: 'line',
         type: 'scatter',
         x: x.slice(center, x.length - center),
@@ -85,7 +85,7 @@ export default class VueComponent extends Vue {
       type: 'linear',
       //autorange: true,
       range: [-0.1, 1.1],
-      title: 'nInfected',
+      title: 'Leisure outdoor fraction ',
       hoverformat: '.3f',
     },
     plot_bgcolor: '#f8f8f8',
