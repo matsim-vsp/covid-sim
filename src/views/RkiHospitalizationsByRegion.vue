@@ -141,6 +141,8 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     console.log('hospital. hello')
+    console.log(this.csvText)
+
     this.buildPageForURL()
   }
 
