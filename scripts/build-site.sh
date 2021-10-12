@@ -15,6 +15,12 @@ RKI_FILE=https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a
 
 wget -nv -O rki.csv $RKI_FILE
 
+# fetch the RKI hospitalization data from Github, data is in:
+# https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland
+echo BUILD: Fetch latest RKI hospitalization stats from Github
+git clone https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland COVID-Hospitalization
+ls COVID-Hospitalization/Archiv | tail -1 > src/assets/rki-deutschland-hospitalization.csv
+
 echo BUILD: Create [city]-cases.csv files
 # create the [city]-cases.csv files
 python3 scripts/rki-update.py rki.csv
