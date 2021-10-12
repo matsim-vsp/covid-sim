@@ -52,12 +52,12 @@ de:
 
         .goodpage(v-else)
           h2 RKI Hospitalization Data
-          p Double-click a region name to show data for that line only.
+          p Data from the Robert Koch Institute (RKI) in Germany. Double-click a region name to show data for that line only.
 
           h5 Scale:
           .buttons.button-choices
-            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Log
             button.button(:class="{'is-link' : status == 2}" @click='clickButton(2)') Linear
+            button.button(:class="{'is-link' : status == 1}" @click='clickButton(1)') Log
 
           .all-plots
 
@@ -254,7 +254,6 @@ export default class VueComponent extends Vue {
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
       fixedrange: window.innerWidth < 700,
-      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {
@@ -262,7 +261,7 @@ export default class VueComponent extends Vue {
       // fixedrange: window.innerWidth < 700,
       type: this.status === 1 ? 'log' : 'linear',
       // range: [Math.log10(0.01), Math.log10(2)],
-      title: 'Multiplier',
+      title: 'Hospitalization',
       hoverformat: '.3f',
     },
     plot_bgcolor: '#f8f8f8',
