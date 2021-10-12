@@ -19,7 +19,7 @@ wget -nv -O rki.csv $RKI_FILE
 # https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland
 echo BUILD: Fetch latest RKI hospitalization stats from Github
 git clone https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland COVID-Hospitalization
-ls COVID-Hospitalization/Archiv | tail -1 > src/assets/rki-deutschland-hospitalization.csv
+cp COVID-Hospitalization/Archiv/`ls COVID-Hospitalization/Archiv | tail -1` > src/assets/rki-deutschland-hospitalization.csv
 
 echo BUILD: Create [city]-cases.csv files
 # create the [city]-cases.csv files
