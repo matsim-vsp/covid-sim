@@ -133,11 +133,14 @@ export default class VueComponent extends Vue {
 
   private status = 1
 
+  private csvText = require('@/assets/rki-deutschland-hospitalization.csv').default
+
   @Watch('$route') routeChanged(to: Route, from: Route) {
     this.buildPageForURL()
   }
 
   private mounted() {
+    console.log('hospital. hello')
     this.buildPageForURL()
   }
 
@@ -227,15 +230,14 @@ export default class VueComponent extends Vue {
   private async buildPageForURL() {
     this.badPage = false
 
-    const csvText = require('@/assets/rki-deutschland-hospitalization.csv').default
-
-    this.hospitalData = Papaparse.parse(csvText, {
+    this.hospitalData = Papaparse.parse(this.csvText, {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
       comments: '#',
     }).data
 
+    console.log({ hospitaldata: this.hospitalData })
     this.buildUI()
   }
 
