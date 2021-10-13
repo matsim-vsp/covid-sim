@@ -100,6 +100,21 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- VACCINATED / UNVACCINATED -------
+        .linear-plot(v-if="showIncidenceComp")
+          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
+            button.button.is-small.hider(@click="toggleShowPlot(14)") ..
+
+          .hideIt(v-show="showPlot[14]")
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.tall
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
+              :observed="observedCases"
+              :rkiDetectionData="rkiDetectionRateData"
+              :logScale="logScale")
+
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
         .linear-plot
           h5 {{ cityCap }} Hospitalization New Cases
@@ -116,21 +131,6 @@
                :city="city"
                :logScale="logScale"
               )
-
-        //- ---------- VACCINATED / UNVACCINATED -------
-        .linear-plot(v-if="showIncidenceComp")
-          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(14)") ..
-
-          .hideIt(v-show="showPlot[14]")
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
-              :observed="observedCases"
-              :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale")
 
         //- ---------- HOSPITALIZATION RATES
         .linear-plot(v-if="city !== 'heinsberg'")
