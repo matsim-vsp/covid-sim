@@ -33,8 +33,8 @@ export default class VueComponent extends Vue {
 
   private bundeslandCSV = require('@/assets/rki-deutschland-hospitalization.csv').default
   private bundeslandIncidenceRateLookup: { [id: string]: any } = {
-    berlin: { name: 'Berlin', population: 3664088 },
-    cologne: { name: 'Nordrhein-Westfalen', population: 17912134 },
+    berlin: { name: 'Berlin' },
+    cologne: { name: 'Nordrhein-Westfalen' },
   }
 
   private mounted() {
@@ -187,7 +187,7 @@ export default class VueComponent extends Vue {
     this.dataLines.push({
       name: 'Observed: ' + region.name + ' (RKI)',
       x: regionData.map(row => row['Datum']),
-      y: regionData.map(row => (100000.0 * row['7T_Hospitalisierung_Faelle']) / region.population),
+      y: regionData.map(row => row['7T_Hospitalisierung_Inzidenz']),
       type: 'scatter',
       // mode: 'markers',
       marker: { size: 4, color: '#ada' },
