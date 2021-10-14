@@ -126,11 +126,6 @@ const routes = [
     component: () => import(/* webpackChunkName: "risk-calcs" */ '@/views/RiskCalculator.vue'),
   },
   {
-    path: '/hospital',
-    component: () =>
-      import(/* webpackChunkName: "hospital" */ '@/views/RkiHospitalizationsByRegion.vue'),
-  },
-  {
     path: '/mobility',
     component: () => import(/* webpackChunkName: "mobility" */ '@/views/MobilityPage.vue'),
   },

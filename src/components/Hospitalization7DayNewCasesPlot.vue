@@ -31,14 +31,22 @@ export default class VueComponent extends Vue {
     cologne: this.originalDataUrl + 'Cologne/cologne-hospital.csv',
   }
 
+  private bundeslandCSV = require('@/assets/rki-deutschland-hospitalization.csv').default
+  private bundeslandIncidenceRateLookup: { [id: string]: any } = {
+    berlin: { name: 'Berlin', population: 3664088 },
+    cologne: { name: 'Nordrhein-Westfalen', population: 17912134 },
+  }
+
   private mounted() {
     this.updateScale()
     this.fetchRealHospitalizationRates()
     this.calculate()
+    this.fetchBundeslandIncidenceRates()
   }
 
   @Watch('data') private updateModelData() {
     this.calculate()
+    this.fetchBundeslandIncidenceRates()
   }
 
   @Watch('city') private async fetchRealHospitalizationRates() {
@@ -71,8 +79,9 @@ export default class VueComponent extends Vue {
       }
     } catch (e) {
       console.error(e)
-      return
     }
+
+    return
   }
 
   @Watch('logScale') updateScale() {
@@ -158,6 +167,31 @@ export default class VueComponent extends Vue {
       console.log(e)
       return
     }
+  }
+
+  private async fetchBundeslandIncidenceRates() {
+    // only add Bundesland data if we are looking at data for a city with a Bundesland
+    if (!this.bundeslandIncidenceRateLookup[this.city]) return
+    const region = this.bundeslandIncidenceRateLookup[this.city]
+
+    const csvData = Papaparse.parse(this.bundeslandCSV, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      comments: '#',
+    }).data
+
+    const allAges = csvData.filter(row => row['Altersgruppe'] === '00+')
+    const regionData = allAges.filter(row => row['Bundesland'] === region.name)
+
+    this.dataLines.push({
+      name: 'Observed: ' + region.name + ' (RKI)',
+      x: regionData.map(row => row['Datum']),
+      y: regionData.map(row => (100000.0 * row['7T_Hospitalisierung_Faelle']) / region.population),
+      type: 'scatter',
+      // mode: 'markers',
+      marker: { size: 4, color: '#ada' },
+    })
   }
 
   private layout: any = {
