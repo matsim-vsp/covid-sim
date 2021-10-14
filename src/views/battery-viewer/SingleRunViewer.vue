@@ -41,6 +41,11 @@
           | {{ this.endDate }}:
         p.infected {{ prettyInfected }}
 
+        h5.cumulative R-Value on
+        p.r-value-date(v-if="!editingRValue" @click="editRValue") {{ this.summaryRValueDate }}:
+        input.input.r-input(v-if="editingRValue" size=10 :value="this.summaryRValueDate")
+        p.infected {{ summaryRValue }}
+
     .right-side
       //- ------- ACTIVITY LEVELS
       .linear-plot.activity(v-if="showActivityLevels")
@@ -397,6 +402,10 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
+  private DEFAULT_R_VALUE_DATE = '2020-04-01'
+  private summaryRValueDate = ''
+  private summaryRValue = ''
+
   private showPlot: any = {
     0: true,
     1: true,
@@ -521,6 +530,8 @@ export default class VueComponent extends Vue {
 
   @Watch('runYaml') private async switchYaml() {
     if (!this.runYaml.city) return
+
+    this.summaryRValueDate = this.runYaml.rValueDate || this.DEFAULT_R_VALUE_DATE
 
     this.clearZipLoaderLookups()
     this.isUsingRealDates = false
@@ -1047,6 +1058,22 @@ export default class VueComponent extends Vue {
     } catch (e) {
       console.log('RVALUES: no', filename)
     }
+
+    this.updateSummaryRValue()
+  }
+
+  private async updateSummaryRValue() {
+    const result = this.rValues.filter(row => row.date === this.summaryRValueDate)
+    if (result.length) {
+      this.summaryRValue = '' + Math.round(1000 * result[0].rValue) / 1000
+    } else {
+      this.summaryRValue = ''
+    }
+  }
+
+  private editingRValue = false
+  private editRValue() {
+    this.showRValue = true
   }
 
   private hasLeisurOutdoorFraction = false
@@ -1791,6 +1818,23 @@ p.subhead {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
+}
+
+.r-value-date {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-left: 0.1rem;
+  border: 2px solid #ffffff00;
+  border-radius: 6px;
+  padding: 0.25rem 0.25rem;
+}
+
+.r-value-date:hover {
+  border: 2px solid #4c5fb8;
+}
+
+.r-input {
+  font-size: 1.1rem;
 }
 
 @media only screen and (max-width: 1024px) {

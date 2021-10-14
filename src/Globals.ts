@@ -73,6 +73,8 @@ export interface RunYaml {
   startDates?: string[]
   //heat map max
   heatMapMaxValue?: number
+  // Starting date for left-panel R-Value statistic
+  rValueDate?: string
   // these are for everything
   optionGroups: {
     day?: number
