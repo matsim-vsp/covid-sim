@@ -1073,7 +1073,7 @@ export default class VueComponent extends Vue {
 
   private editingRValue = false
   private editRValue() {
-    this.showRValue = true
+    this.editingRValue = true
   }
 
   private hasLeisurOutdoorFraction = false
@@ -1830,7 +1830,7 @@ p.subhead {
 }
 
 .r-value-date:hover {
-  border: 2px solid #4c5fb8;
+  // border: 2px solid #4c5fb8;
 }
 
 .r-input {
