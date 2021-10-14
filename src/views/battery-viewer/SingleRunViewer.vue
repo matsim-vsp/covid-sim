@@ -41,9 +41,8 @@
           | {{ this.endDate }}:
         p.infected {{ prettyInfected }}
 
-        h5.cumulative R-Value on
-        p.r-value-date(v-if="!editingRValue" @click="editRValue") {{ this.summaryRValueDate }}:
-        input.input.r-input(v-if="editingRValue" size=10 :value="this.summaryRValueDate")
+        h5.cumulative R-Value on:
+        input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
         p.infected {{ summaryRValue }}
 
     .right-side
@@ -514,6 +513,10 @@ export default class VueComponent extends Vue {
         console.error({ e })
       }
     }
+  }
+
+  @Watch('summaryRValueDate') private handleRValueBoxChanged() {
+    this.updateSummaryRValue()
   }
 
   @Watch('chartYamlFiles') private async handleChartListChanged() {
@@ -1069,11 +1072,6 @@ export default class VueComponent extends Vue {
     } else {
       this.summaryRValue = ''
     }
-  }
-
-  private editingRValue = false
-  private editRValue() {
-    this.editingRValue = true
   }
 
   private hasLeisurOutdoorFraction = false
@@ -1830,7 +1828,7 @@ p.subhead {
 }
 
 .r-value-date:hover {
-  // border: 2px solid #4c5fb8;
+  border: 2px solid #4c5fb8;
 }
 
 .r-input {
