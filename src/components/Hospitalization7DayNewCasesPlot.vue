@@ -99,8 +99,6 @@ export default class VueComponent extends Vue {
   private calculate() {
     this.$emit('method', this.lagDays + '-day moving average')
 
-    console.log({ data: this.data })
-
     this.dataLines = []
     const x: any[] = []
     const hospitalized: any[] = []
@@ -109,10 +107,8 @@ export default class VueComponent extends Vue {
       const susceptible = this.data.filter(v => v.name === 'Susceptible')[0]
       const totalPopulation = susceptible.y[0]
       const factor100k = totalPopulation / 100000.0
-      console.log({ factor100k })
 
       const seriouslySickCumul = this.data.filter(v => v.name === 'Seriously Sick Cumulative')[0]
-      console.log({ seriouslySickCumul })
 
       for (let day = this.lagDays; day < seriouslySickCumul.x.length; day++) {
         x.push(seriouslySickCumul.x[day])
@@ -162,9 +158,8 @@ export default class VueComponent extends Vue {
           marker: { size: 4, color: '#f08' },
         })
       }
-      console.log({ dataLines: this.dataLines })
     } catch (e) {
-      console.log(e)
+      console.error(e)
       return
     }
   }
