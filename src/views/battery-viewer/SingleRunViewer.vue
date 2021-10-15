@@ -197,6 +197,8 @@
                 :endDate="endDate"
                 :logScale="false"
                 :rValues="rValues"
+                :rValueDate="summaryRValueDate"
+                @avgR="gotNewSummaryRValue"
                 @method="switchRMethod")
 
         //- ---------- R VALUES 2 -------
@@ -513,10 +515,6 @@ export default class VueComponent extends Vue {
         console.error({ e })
       }
     }
-  }
-
-  @Watch('summaryRValueDate') private handleRValueBoxChanged() {
-    this.updateSummaryRValue()
   }
 
   @Watch('chartYamlFiles') private async handleChartListChanged() {
@@ -944,6 +942,10 @@ export default class VueComponent extends Vue {
     this.cumulativeInfected = Math.max(...infectedCumulative.y)
   }
 
+  private gotNewSummaryRValue(v: string) {
+    this.summaryRValue = v
+  }
+
   private sliderChanged(measure: any, value: any) {
     // console.log(measure, value)
     this.currentSituation[measure] = value
@@ -1060,17 +1062,6 @@ export default class VueComponent extends Vue {
       if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
     } catch (e) {
       console.log('RVALUES: no', filename)
-    }
-
-    this.updateSummaryRValue()
-  }
-
-  private async updateSummaryRValue() {
-    const result = this.rValues.filter(row => row.date === this.summaryRValueDate)
-    if (result.length) {
-      this.summaryRValue = '' + Math.round(1000 * result[0].rValue) / 1000
-    } else {
-      this.summaryRValue = ''
     }
   }
 

@@ -13,6 +13,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private rValues!: any[]
+  @Prop({ required: true }) private rValueDate!: string
 
   private color = '#04f'
 
@@ -22,14 +23,23 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.calculateRvalues()
+    this.updateSummaryRValue()
   }
 
   @Watch('data') private updateModelData() {
     this.calculateRvalues()
+    this.updateSummaryRValue()
   }
 
   @Watch('rValues') private updateRValues() {
     this.calculateRvalues()
+    this.updateSummaryRValue()
+  }
+
+  @Watch('rValueDate') private updateSummaryRValue() {
+    const index = this.avg7dayLookup.date.indexOf(this.rValueDate)
+    const rValue = index < 0 ? '' : '' + Math.round(1000 * this.avg7dayLookup.avgR[index]) / 1000
+    this.$emit('avgR', rValue)
   }
 
   @Watch('logScale') updateScale() {
@@ -106,7 +116,12 @@ export default class VueComponent extends Vue {
         marker: { color: '#c44', size: 3 },
       },
     ]
+
+    // save the 7-day average so we can query it later for the summary stats
+    this.avg7dayLookup = { date: x.slice(center), avgR }
   }
+
+  private avg7dayLookup: { date: string[]; avgR: number[] } = { date: [], avgR: [] }
 
   /**
    * We are calculating a four day running R-value as our best guess.
