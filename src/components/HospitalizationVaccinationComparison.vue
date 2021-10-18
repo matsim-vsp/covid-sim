@@ -192,21 +192,33 @@ export default class VueComponent extends Vue {
         name: 'KH / 100k vaccinated_v_1',
         x: date,
         y: geimpft_v_1,
+        line: {
+          dash: 'dash',
+        }
       },
       {
         name: 'KH / 100k vaccinated_v_2',
         x: date,
         y: geimpft_v_2,
+        line: {
+          width: 3,
+        }
       },
       {
         name: 'KH / 100k unvaccinated_v_1',
         x: date,
         y: ungeimpft_v_1,
+        line: {
+          dash: 'dash',
+        }
       },
       {
         name: 'KH / 100k unvaccinated_v_2',
         x: date,
         y: ungeimpft_v_2,
+        line: {
+          width: 3,
+        }
       },
       {
         name: 'KH / 100k',

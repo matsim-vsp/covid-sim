@@ -403,7 +403,7 @@ export default class VueComponent extends Vue {
   private city: string = ''
   private offset: number[] = []
 
-  private DEFAULT_R_VALUE_DATE = '2020-04-01'
+  private DEFAULT_R_VALUE_DATE = '2020-10-15'
   private summaryRValueDate = ''
   private summaryRValue = ''
 
