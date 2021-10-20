@@ -57,7 +57,7 @@ export default class VueComponent extends Vue {
   }
 
   private async prepareData() {
-    //this.dataLines2 = []
+    // this.dataLines2 = []
     var foundHeader = false
     var header: any[] = []
     var color: any[] = []
@@ -67,13 +67,15 @@ export default class VueComponent extends Vue {
     var gamma: any[] = []
     var delta: any[] = []
     var wild: any[] = []
+
     if (this.city == 'cologne') {
       this.cityName = 'Cologne'
     } else if (this.city == 'berlin') {
       this.cityName = 'Berlin'
     }
+
     if (this.city != '') {
-      this.svnUrl = this.originalDataUrl + this.cityName + '/' + 'VOC_' + this.cityName + '.csv'
+      this.svnUrl = this.originalDataUrl + this.cityName + '/VOC_' + this.cityName + '.csv'
 
       const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
       const VOCData = Papa.parse(rawVOCData, {
@@ -247,7 +249,7 @@ export default class VueComponent extends Vue {
       }
 
       if (this.city == 'cologne') {
-        this.dataLines2.push({
+        this.lineDataLookup[header[5]] = {
           x: date,
           y: wild,
           name: header[5],
@@ -256,10 +258,10 @@ export default class VueComponent extends Vue {
           mode: 'lines+markers',
           marker: { size: 5 },
           opacity: 0.5,
-        })
+        }
       }
 
-      this.dataLines2.push({
+      this.lineDataLookup[header[1]] = {
         x: date,
         y: alpha,
         name: header[1],
@@ -268,8 +270,8 @@ export default class VueComponent extends Vue {
         mode: 'lines+markers',
         marker: { size: 5 },
         opacity: 0.5,
-      })
-      this.dataLines2.push({
+      }
+      this.lineDataLookup[header[2]] = {
         x: date,
         y: beta,
         name: header[2],
@@ -278,8 +280,8 @@ export default class VueComponent extends Vue {
         mode: 'lines+markers',
         marker: { size: 5 },
         opacity: 0.5,
-      })
-      this.dataLines2.push({
+      }
+      this.lineDataLookup[header[3]] = {
         x: date,
         y: gamma,
         name: header[3],
@@ -288,8 +290,8 @@ export default class VueComponent extends Vue {
         mode: 'lines+markers',
         marker: { size: 5 },
         opacity: 0.5,
-      })
-      this.dataLines2.push({
+      }
+      this.lineDataLookup[header[4]] = {
         x: date,
         y: delta,
         name: header[4],
@@ -298,11 +300,15 @@ export default class VueComponent extends Vue {
         mode: 'lines+markers',
         marker: { size: 5 },
         opacity: 0.5,
-      })
-      this.layout.xaxis.range = [date[0], date[date.length - 1]]
+      }
+      this.dataLines2 = Object.values(this.lineDataLookup)
+
+      // *** CAUSES INFINITE LAYOUT LOOP
+      // this.layout.xaxis.range = [date[0], date[date.length - 1]]
     }
-    console.log(this.dataLines2)
   }
+
+  private lineDataLookup: any = {}
 
   private calculateValues() {
     if (!this.strainValues.length) return
@@ -318,6 +324,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines = []
     this.dataLines2 = []
+    this.lineDataLookup = {}
 
     // // build totals
     for (let i = 7; i < this.strainValues.length; i += 7) {
@@ -374,13 +381,14 @@ export default class VueComponent extends Vue {
       marker: { size: 4 },
     })
 
-    this.dataLines2.push({
+    this.lineDataLookup['% ' + strain] = {
       name: '% ' + strain,
       x: x,
       y: t,
       // mode: 'markers',
       // marker: { size: 4 },
-    })
+    }
+    this.dataLines2 = Object.values(this.lineDataLookup)
   }
 
   private reformatDate(day: string) {
@@ -390,8 +398,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    // barmode: 'stack',
-    //height: 500,
     autosize: true,
     showlegend: true,
     legend: {
@@ -418,7 +424,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
-    // height: 210,
     autosize: true,
     showlegend: true,
     legend: {
