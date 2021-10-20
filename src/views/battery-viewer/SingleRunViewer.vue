@@ -88,7 +88,6 @@
               @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
       .all-plots
-
         //- ---------- CASES COMPARISION -------
         .linear-plot
           h5 {{ cityCap }} Cases Comparison
@@ -180,6 +179,7 @@
                 :endDate="endDate"
                 :logScale="logScale"
                 :strainValues="mutationValues"
+                :city="city"
               )
 
         //- ---------- R-VALUES -------
@@ -429,6 +429,7 @@ export default class VueComponent extends Vue {
     18: true,
     19: true,
     20: true,
+    21: true,
   }
 
   private MAX_DAYS = 1000

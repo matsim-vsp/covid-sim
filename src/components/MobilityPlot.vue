@@ -29,7 +29,6 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('loadPage') private loadPageFirst() {
-    console.log(this.data)
     this.updateMobilityData()
   }
 
