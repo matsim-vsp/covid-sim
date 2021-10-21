@@ -8,6 +8,8 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
+import Papa from 'papaparse'
+import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -15,6 +17,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private strainValues!: any[]
   @Prop({ required: true }) private data!: any[]
+  @Prop({ required: true }) private city!: string
 
   private color = '#04f'
 
@@ -22,6 +25,10 @@ export default class VueComponent extends Vue {
   private dataLines2: any[] = []
 
   private factor100k = 1
+
+  private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
+  private cityName = ''
+  private svnUrl = ''
 
   private mounted() {
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
@@ -45,6 +52,264 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('city') updateCity() {
+    this.calculateValues()
+  }
+
+  private async prepareData() {
+    // this.dataLines2 = []
+    var foundHeader = false
+    var header: any[] = []
+    var color: any[] = []
+    var date: any[] = []
+    var alpha: any[] = []
+    var beta: any[] = []
+    var gamma: any[] = []
+    var delta: any[] = []
+    var wild: any[] = []
+
+    if (this.city == 'cologne') {
+      this.cityName = 'Cologne'
+    } else if (this.city == 'berlin') {
+      this.cityName = 'Berlin'
+    }
+
+    if (this.city != '') {
+      this.svnUrl = this.originalDataUrl + this.cityName + '/VOC_' + this.cityName + '.csv'
+
+      const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
+      const VOCData = Papa.parse(rawVOCData, {
+        //header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        delimiter: ',',
+      }).data
+
+      var alphaTempDouble = 0
+      var betaTempDouble = 0
+      var gammaTempDouble = 0
+      var deltaTempDouble = 0
+      var wildTempDouble = 0
+      var countDays = 0
+
+      for (var i = 0; i < VOCData.length; i++) {
+        if (
+          !(
+            VOCData[i][0] == null &&
+            VOCData[i][1] == null &&
+            VOCData[i][2] == null &&
+            VOCData[i][3] == null &&
+            VOCData[i][4] == null
+          )
+        ) {
+          if (!foundHeader) {
+            if (this.city == 'cologne') {
+              header.push(VOCData[i][0])
+              header.push(VOCData[i][5])
+              header.push(VOCData[i][4])
+              header.push(VOCData[i][3])
+              header.push(VOCData[i][2])
+              header.push(VOCData[i][1])
+            } else {
+              header.push(VOCData[i][0])
+              header.push(VOCData[i][1])
+              header.push(VOCData[i][2])
+              header.push(VOCData[i][3])
+              header.push(VOCData[i][4])
+            }
+            foundHeader = true
+          } else {
+            if (this.city == 'cologne' && VOCData[i][0] == '\n2021-08-01') {
+              break
+            } else {
+              countDays += 1
+              if (this.city == 'cologne') {
+                var dateTemp = VOCData[i][0]
+                var alphaTemp = VOCData[i][5]
+                var betaTemp = VOCData[i][4]
+                var gammaTemp = VOCData[i][3]
+                var deltaTemp = VOCData[i][2]
+                var wildTemp = VOCData[i][1]
+              } else {
+                var dateTemp = VOCData[i][0]
+                var alphaTemp = VOCData[i][1]
+                var betaTemp = VOCData[i][2]
+                var gammaTemp = VOCData[i][3]
+                var deltaTemp = VOCData[i][4]
+              }
+              if (dateTemp.startsWith('\n')) {
+                dateTemp = dateTemp.substring(1)
+              }
+
+              if (alphaTemp == null) {
+                alphaTemp = 0
+              } else {
+                if (typeof alphaTemp == 'string') {
+                  alphaTemp = alphaTemp.substring(0, alphaTemp.length - 1)
+                  alphaTemp = alphaTemp.replace(',', '.')
+                  alphaTemp = parseFloat(alphaTemp)
+                }
+              }
+
+              if (betaTemp == null) {
+                betaTemp = 0
+              } else {
+                if (typeof betaTemp == 'string') {
+                  betaTemp = betaTemp.substring(0, betaTemp.length - 1)
+                  betaTemp = betaTemp.replace(',', '.')
+                  betaTemp = parseFloat(betaTemp)
+                }
+              }
+
+              if (gammaTemp == null) {
+                gammaTemp = 0
+              } else {
+                if (typeof gammaTemp == 'string') {
+                  gammaTemp = gammaTemp.substring(0, gammaTemp.length - 1)
+                  gammaTemp = gammaTemp.replace(',', '.')
+                  gammaTemp = parseFloat(gammaTemp)
+                }
+              }
+
+              if (deltaTemp == null) {
+                deltaTemp = 0
+              } else {
+                if (typeof deltaTemp == 'string') {
+                  deltaTemp = deltaTemp.substring(0, deltaTemp.length - 1)
+                  deltaTemp = deltaTemp.replace(',', '.')
+                  deltaTemp = parseFloat(deltaTemp)
+                }
+              }
+
+              if (this.city == 'cologne') {
+                if (wildTemp == null) {
+                  wildTemp = 0
+                } else {
+                  if (typeof wildTemp == 'string') {
+                    wildTemp = wildTemp.substring(0, wildTemp.length - 1)
+                    wildTemp = wildTemp.replace(',', '.')
+                    wildTemp = parseFloat(wildTemp)
+                  }
+                }
+              }
+
+              alphaTempDouble += alphaTemp
+              betaTempDouble += betaTemp
+              gammaTempDouble += gammaTemp
+              deltaTempDouble += deltaTemp
+              if (this.city == 'cologne') {
+                wildTempDouble += wildTemp
+              }
+
+              if (countDays == 7 && this.city == 'cologne') {
+                date.push(dateTemp)
+                alpha.push((alphaTempDouble * 100) / 7)
+                beta.push((betaTempDouble * 100) / 7)
+                gamma.push((gammaTempDouble * 100) / 7)
+                delta.push((deltaTempDouble * 100) / 7)
+                wild.push((wildTempDouble * 100) / 7)
+
+                countDays = 0
+                alphaTempDouble = 0
+                betaTempDouble = 0
+                gammaTempDouble = 0
+                deltaTempDouble = 0
+                wildTempDouble = 0
+              } else if (this.city == 'berlin') {
+                date.push(dateTemp)
+                alpha.push(alphaTempDouble)
+                beta.push(betaTempDouble)
+                gamma.push(gammaTempDouble)
+                delta.push(deltaTempDouble)
+
+                alphaTempDouble = 0
+                betaTempDouble = 0
+                gammaTempDouble = 0
+                deltaTempDouble = 0
+              }
+            }
+          }
+        }
+      }
+
+      // chnage names
+      if (this.city == 'cologne') {
+        header = [
+          'Date',
+          '% B117 Reported',
+          '% Delta Reported',
+          '% Gamma Reported',
+          '% MUTB Reported',
+          '% SARS_CoV_2 Reported',
+        ]
+        color = ['', 'blue', '', '', '', 'red']
+      } else if (this.city == 'berlin') {
+        header = ['Date', '% B117 Reported', 'Beta', 'Gamma', 'MUTB Reported']
+        color = ['', '', '', '', '']
+      }
+
+      if (this.city == 'cologne') {
+        this.lineDataLookup[header[5]] = {
+          x: date,
+          y: wild,
+          name: header[5],
+          color: color[5],
+          type: 'scatter',
+          mode: 'lines+markers',
+          marker: { size: 5 },
+          opacity: 0.5,
+        }
+      }
+
+      this.lineDataLookup[header[1]] = {
+        x: date,
+        y: alpha,
+        name: header[1],
+        color: color[1],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[2]] = {
+        x: date,
+        y: beta,
+        name: header[2],
+        color: color[2],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[3]] = {
+        x: date,
+        y: gamma,
+        name: header[3],
+        color: color[3],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[4]] = {
+        x: date,
+        y: delta,
+        name: header[4],
+        color: color[4],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.dataLines2 = Object.values(this.lineDataLookup)
+
+      // *** CAUSES INFINITE LAYOUT LOOP
+      // this.layout.xaxis.range = [date[0], date[date.length - 1]]
+    }
+  }
+
+  private lineDataLookup: any = {}
+
   private calculateValues() {
     if (!this.strainValues.length) return
 
@@ -59,6 +324,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines = []
     this.dataLines2 = []
+    this.lineDataLookup = {}
 
     // // build totals
     for (let i = 7; i < this.strainValues.length; i += 7) {
@@ -79,6 +345,7 @@ export default class VueComponent extends Vue {
     for (const strain of strains) {
       this.calculateValueForStrain(strain)
     }
+    this.prepareData()
   }
 
   private calculateValueForStrain(strain: string) {
@@ -114,13 +381,14 @@ export default class VueComponent extends Vue {
       marker: { size: 4 },
     })
 
-    this.dataLines2.push({
+    this.lineDataLookup['% ' + strain] = {
       name: '% ' + strain,
       x: x,
       y: t,
       // mode: 'markers',
       // marker: { size: 4 },
-    })
+    }
+    this.dataLines2 = Object.values(this.lineDataLookup)
   }
 
   private reformatDate(day: string) {
@@ -130,8 +398,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    // barmode: 'stack',
-    // height: 250,
     autosize: true,
     showlegend: true,
     legend: {
@@ -158,7 +424,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
-    // height: 210,
     autosize: true,
     showlegend: true,
     legend: {
