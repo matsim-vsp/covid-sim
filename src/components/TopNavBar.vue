@@ -40,15 +40,10 @@
             a.navbar-item(:href="'/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25'") Report runs for School measures after the holidays
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.06.18
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no'") Report runs for Virus Mutations
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  Other Versions
           .navbar-dropdown
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no'") 2021.06.18 Report runs for Virus Mutations            
               a.navbar-item(:href="'/2021-05-20/bmbf?b1351inf=1.8&b1351VaccinationEffectiveness=70%25&vaccinationCompliance=80%25&revaccinationDate=no'") 2021.05.21 Virus Mutations and Revaccination
               a.navbar-item(:href="'/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25'") 2021.04.30 Opening Strategies
               a.navbar-item(:href="'/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes'") 2021.04.09 Runs with 1.8 higher infectivity of B117
