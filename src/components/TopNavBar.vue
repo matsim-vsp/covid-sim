@@ -21,10 +21,16 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.10.22
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no'") Booster vaccinations
+            
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.09.24
 
           .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2021-09-22/1?leisureUnv=no'") 2021.09.24: Cologne measures for fall
+            a.navbar-item(:href="'/cologne/2021-09-22/1?leisureUnv=no'") Cologne measures for fall
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.09.03
