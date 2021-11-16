@@ -206,7 +206,7 @@ export default class VueComponent extends Vue {
         y: geimpft_v_2,
         line: {
           width: 3,
-        }
+        },
       },
       {
         name: 'unvaccinated_v_1',
@@ -222,7 +222,7 @@ export default class VueComponent extends Vue {
         y: ungeimpft_v_2,
         line: {
           width: 3,
-        }
+        },
       },
       {
         name: 'incidence (total)',
