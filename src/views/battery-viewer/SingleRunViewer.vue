@@ -1476,9 +1476,7 @@ export default class VueComponent extends Vue {
       runLookup[lookupKey] = row
     }
 
-    let order = ''
     for (const measure of Object.keys(measures)) {
-      order += measure + '-'
       measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) =>
         a < b ? -1 : 1
       )
@@ -1486,6 +1484,9 @@ export default class VueComponent extends Vue {
 
     this.runLookup = runLookup
     this.measureOptions = measures
+
+    // Runs v8 and v9 require this because they don't have an sz0 run:
+    this.currentRun = infoTxt[0].RunId
   }
 
   private mdParser = new MarkdownIt()
