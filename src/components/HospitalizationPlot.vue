@@ -5,8 +5,9 @@ vue-plotly(:data="dataLines" :layout="layout" :options="options")
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import Papa from 'papaparse'
+import Papaparse from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
+import { PUBLIC_SVN } from '@/Globals'
 
 interface City {
   fromModel: string[]
@@ -34,6 +35,17 @@ export default class VueComponent extends Vue {
   private hospitalCapacity: any = {
     berlin: [1252, 1694],
   }
+
+  private observedHospitalizationConfig: {
+    [id: string]: { svnPath: string; legendText: string; csvCasesColumn: string }
+  } = {
+    cologne: {
+      svnPath: 'original-data/hospital-cases/cologne/KoelnAllgemeinpatienten.csv',
+      csvCasesColumn: 'allgemeinpatienten',
+      legendText: 'Reported: Hospitalizations (City)',
+    },
+  }
+  private extraHospitalData?: any
 
   private dataDetails: { [id: string]: City } = {
     berlin: {
@@ -80,6 +92,7 @@ export default class VueComponent extends Vue {
   private cityDetails: City = this.dataDetails.berlin
 
   private mounted() {
+    this.prepareAdditionalHospitalData()
     this.buildPlot()
   }
 
@@ -199,7 +212,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('data') private prepareHospitalData() {
-    const hospData = Papa.parse(this.csvData[this.city], {
+    const hospData = Papaparse.parse(this.csvData[this.city], {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -268,6 +281,36 @@ export default class VueComponent extends Vue {
         y: infectionRate,
         line: this.diviData[0].line,
       })
+    }
+
+    if (this.extraHospitalData) this.hospitalSeries.push(this.extraHospitalData)
+  }
+
+  private async prepareAdditionalHospitalData() {
+    if (this.observedHospitalizationConfig[this.city]) {
+      const config = this.observedHospitalizationConfig[this.city]
+      const url = PUBLIC_SVN + config.svnPath
+
+      const rawData = await fetch(url).then(async data => await data.text())
+      const csvData = Papaparse.parse(rawData, {
+        header: true,
+        dynamicTyping: false,
+        skipEmptyLines: true,
+      }).data
+
+      const series = {
+        name: config.legendText,
+        x: csvData.map(row => row.date.split('T')[0]),
+        y: csvData.map(row => parseFloat(row[config.csvCasesColumn])),
+        line: {
+          dash: 'dot',
+          width: 2,
+          color: 'rgb(255,100,100)',
+        },
+      }
+      this.extraHospitalData = series
+      this.hospitalSeries.push(series)
+      this.dataLines.push(series)
     }
   }
 
