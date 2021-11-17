@@ -301,7 +301,7 @@ export default class VueComponent extends Vue {
       const series = {
         name: config.legendText,
         x: csvData.map(row => row.date.split('T')[0]),
-        y: csvData.map(row => parseFloat(row[config.csvCasesColumn])),
+        y: csvData.map(row => parseFloat(row[config.csvCasesColumn]) / this.factor100k),
         line: {
           dash: 'dot',
           width: 2,
