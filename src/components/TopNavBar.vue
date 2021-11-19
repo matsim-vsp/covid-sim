@@ -21,6 +21,13 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.11.19
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected'") Measures without activity reductions
+            a.navbar-item(:href="'/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected'") Measures with activity reductions
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.10.22
 
           .navbar-dropdown
