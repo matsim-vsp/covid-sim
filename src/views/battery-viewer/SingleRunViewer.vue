@@ -118,6 +118,21 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- VACCINATION / BOOSTER RATES -------
+        .linear-plot(v-if="showIncidenceComp")
+          h5 {{ cityCap }} Vaccination Rates and Booster Rates
+            button.button.is-small.hider(@click="toggleShowPlot(17)") ..
+
+          .hideIt(v-show="showPlot[17]")
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
+              :observed="observedCases"
+              :rkiDetectionData="rkiDetectionRateData"
+              :logScale="logScale")
+
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
         .linear-plot
           h5 {{ cityCap }} Hospitalization New Cases
@@ -152,9 +167,9 @@
         //- ---------- CASES COMPARISION BY VACCINATION -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(15)") ..
+            button.button.is-small.hider(@click="toggleShowPlot(16)") ..
 
-          .hideIt(v-show="showPlot[15]")
+          .hideIt(v-show="showPlot[16]")
             //p New persons showing symptoms (model) vs. new cases (reality)
             .plotarea.tall
               p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -346,6 +361,7 @@ import RValueTwo from '@/components/RValueTwo.vue'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
+import VaccinationRates from '@/components/VaccinationRates.vue'
 import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
 import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
@@ -384,6 +400,7 @@ interface VegaChartDefinition {
     LeisureOutdoorFraction,
     WeeklyTests,
     AgeGroupLineChart,
+    VaccinationRates,
   },
 })
 export default class VueComponent extends Vue {
@@ -749,6 +766,7 @@ export default class VueComponent extends Vue {
     nSeriouslySickCumulativeVaccinated: 'SeriouslySickCumulativeVaccinated',
     nCriticalCumulativeVaccinated: 'CriticalCumulativeVaccinated',
     nRecoveredVaccinated: 'RecoveredVaccinated',
+    nReVaccinated: 'Boosted',
   }
 
   private async mounted() {
