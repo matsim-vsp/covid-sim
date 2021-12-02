@@ -73,11 +73,3 @@ cd ../..
 echo BUILD: Finally lets build the site
 yarn install
 yarn run build && yarn run test:unit
-
-
-
-
-
-cd .. # Now in Fallzahlen folder
-svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Autobuild: $TIMESTAMP"
-cd .. # Now in root folder
