@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------
-# build-travis.sh:
+# build-site.sh:
 # copy files to the right places and then use yarn to build the site
-# Requires $SVN_USER and $SVN_PASSWORD env variables to be set
+# Requires $SVN_USER and $SVN_PASSWORD env variables
 # -----------------------------------------------------
 # set strict mode: fail smart, don't hide pipe errors
 set -xeuo pipefail
@@ -43,54 +43,41 @@ cp Fallzahlen/Berlin/berlin-hospital.csv src/assets
 cp Fallzahlen/Other/*.csv src/assets
 
 echo BUILD: Process DIVI Cases
-# --- process DIVI cases for Berlin.
-# 1. fetch existing csv's from SVN:
-svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
-    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/DIVI/
 
-echo BUILD: Scrape CSVs from DIVI site
+cd Fallzahlen/DIVI
 
-# ---- DIVI site scraping is blocked now. Commenting this out for now. -bc
+export SRC="https://diviexchange.blob.core.windows.net/%24web/zeitreihe-tagesdaten.csv"
+export OUT="zeitreihe-tagesdaten.csv"
+wget -qO - ${SRC} > $OUT
 
-# # 2. scrape most recent csv from website:
-# cd DIVI/Daily_reports
-# export SRC="https://www.divi.de"
-# export FOLDER="/divi-intensivregister-tagesreport-archiv-csv"
+export HEADER=$(head -1 $OUT)
 
-# wget -qO - ${SRC}${FOLDER} > datafile
-# grep "\"DIVI\-" < datafile > datafile2
+BERLIN_CODE="11000"
+printf "$HEADER\n" > berlin-divi-processed.csv
+grep $BERLIN_CODE $OUT | sort  >>  berlin-divi-processed.csv
 
-# head -1 datafile2 \
-#   | awk -v src=$SRC -F "\"" '// {print $4 ".csv", src $2}' \
-#   | xargs wget -qO
+COLOGNE_CODE="5315"
+printf "$HEADER\n" > cologne-divi-processed.csv
+grep $COLOGNE_CODE $OUT | sort  >>  cologne-divi-processed.csv
 
-# echo BUILD: Grep files into processed.csvs
+MUNICH_CODE="9162"
+printf "$HEADER\n" > munich-divi-processed.csv
+grep $MUNICH_CODE $OUT | sort  >>  munich-divi-processed.csv
 
-# BERLIN_CODE="11000"
-# printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../berlin-divi-processed.csv
-# grep $BERLIN_CODE *.csv  |  sort  >>  ../berlin-divi-processed.csv
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Autobuild: $TIMESTAMP"
 
-# COLOGNE_CODE="5315"
-# printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../cologne-divi-processed.csv
-# grep $COLOGNE_CODE *.csv  |  sort  >>  ../cologne-divi-processed.csv
-
-# MUNICH_CODE="9162"
-# printf "csv,gemeindeschluessel,anzahl_meldebereiche,faelle_covid_aktuell,faelle_covid_aktuell_beatmet,anzahl_standorte,betten_frei,betten_belegt,daten_stand\n" > ../munich-divi-processed.csv
-# grep $MUNICH_CODE *.csv  |  sort  >>  ../munich-divi-processed.csv
-
-# echo BUILD: svn add and commit
-
-# svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
-
-# cd ../..
-
-# svn st | sed -rn '/^\?/s/^.{8}(.+)$/\1/p' | xargs -r svn add
-# svn st | sed -rn '/^!/s/^.{8}(.+)$/\1/p' | xargs -r svn rm
-
-# svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "DIVI autobuild: $TIMESTAMP" DIVI
+# Back to root folder
+cd ../..
 
 # DONE WITH PREP! Build the site.
 echo BUILD: Finally lets build the site
 yarn install
 yarn run build && yarn run test:unit
 
+
+
+
+
+cd .. # Now in Fallzahlen folder
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Autobuild: $TIMESTAMP"
+cd .. # Now in root folder

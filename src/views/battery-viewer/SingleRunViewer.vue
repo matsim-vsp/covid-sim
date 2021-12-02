@@ -1252,10 +1252,7 @@ export default class VueComponent extends Vue {
     // pull the cases field out of the CSV
     for (const datapoint of data) {
       try {
-        const datenstand = datapoint.daten_stand
-        const day = datenstand.substring(0, 10)
-        // cumulative += datapoint.faelle_covid_aktuell
-        // cases.push(cumulative)
+        const day = datapoint.date
         if (datapoint.faelle_covid_aktuell) {
           dates.push(day)
           cases.push(datapoint.faelle_covid_aktuell)
@@ -1276,7 +1273,6 @@ export default class VueComponent extends Vue {
       },
     })
 
-    // console.log({ DIVI_DATA: serieses })
     return serieses
   }
 
