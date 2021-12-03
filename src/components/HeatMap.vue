@@ -82,6 +82,7 @@ export default class VueComponent extends Vue {
         hoverongaps: false,
       },
     ]
+    console.log(this.dataMatrix)
   }
 
   private layout = {

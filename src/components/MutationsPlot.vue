@@ -10,6 +10,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import Papa from 'papaparse'
 import { PUBLIC_SVN } from '@/Globals'
+import { string } from 'mathjs'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -30,12 +31,36 @@ export default class VueComponent extends Vue {
   private cityName = ''
   private svnUrl = ''
 
+  private dataVOC = {
+    cityName: String,
+    data: [],
+    date: [],
+    config: {},
+  }
+
+  private berlinHeader = [
+    'Date',
+    'Alpha (B.1.1.7)',
+    'Beta (B.1.351)',
+    'Gamma (P.1)',
+    'Delta (B.1.617.2)',
+  ]
+  private cologneHeader = [
+    'Date',
+    'Wildtyp Fälle pro Tag (%)',
+    'Delta (B.1.617) Fälle pro Tag (%)',
+    'Gama (B.1.1.28 P1) Fälle pro Tag (%)',
+    'Beta (B.1.351) Fälle pro Tag (%)',
+    'Alpha (B.1.1.7) Fälle pro Tag (%)',
+  ]
+
   private mounted() {
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
     const totalPopulation = susceptible.y[0]
     this.factor100k = totalPopulation / 100000.0
 
     this.calculateValues()
+    //this.readBerlinData()
   }
 
   @Watch('strainValues') private updateRValues() {
@@ -54,6 +79,33 @@ export default class VueComponent extends Vue {
 
   @Watch('city') updateCity() {
     this.calculateValues()
+  }
+
+  private async readBerlinData() {
+    var returnData = []
+
+    if (this.city != '') {
+      const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
+      const VOCData = Papa.parse(rawVOCData, {
+        //header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        delimiter: ',',
+      }).data
+
+      console.log(VOCData)
+
+      for (var i = 0; i < this.berlinHeader.length; i++) {
+        var dataObject = {
+          cityName: String,
+          data: [],
+          date: [],
+          color: String,
+          mutationsName: String,
+        }
+      }
+      for (var i = 1; i < VOCData.length; i++) {}
+    }
   }
 
   private async prepareData() {
@@ -232,7 +284,7 @@ export default class VueComponent extends Vue {
         }
       }
 
-      // chnage names
+      // change names
       if (this.city == 'cologne') {
         header = [
           'Date',
@@ -242,10 +294,10 @@ export default class VueComponent extends Vue {
           '% MUTB Reported',
           '% SARS_CoV_2 Reported',
         ]
-        color = ['', 'blue', '', '', '', 'red']
+        color = ['', '#fc812a', '', '', '#d33030', '#2a78b2']
       } else if (this.city == 'berlin') {
         header = ['Date', '% B117 Reported', 'Beta', 'Gamma', 'MUTB Reported']
-        color = ['', '', '', '', '']
+        color = ['', '#fc812a', '', '', '#d33030']
       }
 
       if (this.city == 'cologne') {
@@ -253,10 +305,9 @@ export default class VueComponent extends Vue {
           x: date,
           y: wild,
           name: header[5],
-          color: color[5],
           type: 'scatter',
           mode: 'lines+markers',
-          marker: { size: 5 },
+          marker: { size: 5, color: color[5] },
           opacity: 0.5,
         }
       }
@@ -265,10 +316,9 @@ export default class VueComponent extends Vue {
         x: date,
         y: alpha,
         name: header[1],
-        color: color[1],
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { size: 5 },
+        marker: { size: 5, color: color[1] },
         opacity: 0.5,
       }
       this.lineDataLookup[header[2]] = {
@@ -278,7 +328,7 @@ export default class VueComponent extends Vue {
         color: color[2],
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { size: 5 },
+        marker: { size: 5, color: color[2] },
         opacity: 0.5,
       }
       this.lineDataLookup[header[3]] = {
@@ -288,7 +338,7 @@ export default class VueComponent extends Vue {
         color: color[3],
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { size: 5 },
+        marker: { size: 5, color: color[3] },
         opacity: 0.5,
       }
       this.lineDataLookup[header[4]] = {
@@ -298,10 +348,11 @@ export default class VueComponent extends Vue {
         color: color[4],
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { size: 5 },
+        marker: { size: 5, color: color[4] },
         opacity: 0.5,
       }
       this.dataLines2 = Object.values(this.lineDataLookup)
+      console.log(this.dataLines2)
 
       // *** CAUSES INFINITE LAYOUT LOOP
       // this.layout.xaxis.range = [date[0], date[date.length - 1]]
@@ -428,6 +479,7 @@ export default class VueComponent extends Vue {
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: -0.15,
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
