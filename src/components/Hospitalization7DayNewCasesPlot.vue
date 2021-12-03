@@ -182,7 +182,9 @@ export default class VueComponent extends Vue {
     this.dataLines.push({
       name: 'Observed: ' + region.name + ' (RKI)',
       x: regionData.map(row => row['Datum']),
-      y: regionData.map(row => row['7T_Hospitalisierung_Inzidenz']),
+      y: regionData.map(
+        row => row['fixierte_7T_Hospitalisierung_Inzidenz'] || row['7T_Hospitalisierung_Inzidenz']
+      ),
       type: 'scatter',
       // mode: 'markers',
       marker: { size: 4, color: '#ada' },
