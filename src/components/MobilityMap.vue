@@ -28,10 +28,16 @@ export default class VueComponent extends Vue {
   private svnUrl =
     'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/landkreise-in-germany'
 
-  private logColorScale = [
+  private logColorScaleOld = [
     [0.0, 'rgb(200,32,38)'],
     [0.5, 'rgb(243,240,159)'],
     [1.0, 'rgb(20,137,73)'],
+  ]
+
+  private logColorScale = [
+    [0.0, 'rgb(20,137,73)'],
+    [0.5, 'rgb(243,240,159)'],
+    [1.0, 'rgb(200,32,38)'],
   ]
 
   private mounted() {
