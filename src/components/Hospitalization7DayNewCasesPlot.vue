@@ -187,17 +187,16 @@ export default class VueComponent extends Vue {
           row['aktualisierte_7T_Hospitalisierung_Inzidenz'] || row['7T_Hospitalisierung_Inzidenz']
       ),
       type: 'scatter',
-      // mode: 'markers',
-      marker: { size: 4, color: '#8d8' },
+      marker: { size: 4, color: '#4c6' },
+      line: { width: 2, dash: 'dot' },
     })
     this.dataLines.push({
       name: 'Adjusted: ' + region.name + ' (RKI)',
       x: regionData.map(row => row['Datum']),
       y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
       type: 'scatter',
-      // mode: 'markers',
-      marker: { size: 4, color: '#080' },
-      line: { dash: 'dot' },
+      marker: { color: '#4c6' },
+      line: { width: 1.5 },
     })
   }
 
