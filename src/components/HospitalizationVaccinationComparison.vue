@@ -40,7 +40,7 @@ export default class VueComponent extends Vue {
       ? {
           fixedrange: window.innerWidth < 700,
           type: 'log',
-          range: [Math.log10(2), Math.log10(5000)],
+          range: [Math.log10(2), Math.log10(10000)],
           title: 'Hospitalizations / 100k Pop.',
         }
       : {
@@ -261,7 +261,7 @@ export default class VueComponent extends Vue {
       fixedrange: window.innerWidth < 700,
       type: 'log',
       autorange: false,
-      range: [0, Math.log10(5000)],
+      range: [0, Math.log10(10000)],
       title: 'Hospitalizations / 100k Pop.',
     } as any,
     plot_bgcolor: '#f8f8f8',
