@@ -40,7 +40,7 @@ export default class VueComponent extends Vue {
       ? {
           fixedrange: window.innerWidth < 700,
           type: 'log',
-          range: [Math.log10(2), Math.log10(5000)],
+          range: [Math.log10(2), Math.log10(10000)],
           title: '7-Day Infections / 100k Pop.',
         }
       : {
