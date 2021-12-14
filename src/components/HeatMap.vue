@@ -78,14 +78,14 @@ export default class VueComponent extends Vue {
         z: matrix,
         colorscale: this.logColorScale, // 'Hot', // 'YlOrRed', // 'Hot',
         // reversescale: true,
-        showscale: true,
+        showscale: false,
         hoverongaps: false,
       },
     ]
   }
 
   private layout = {
-    showlegend: true,
+    showlegend: false,
     autosize: true,
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -102,6 +102,7 @@ export default class VueComponent extends Vue {
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
+    // legend: { orientation: 'h' },
   }
 
   private options = {

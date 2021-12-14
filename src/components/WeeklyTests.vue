@@ -77,6 +77,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       fixedrange: window.innerWidth < 700,
       type: 'date',
+      range: ['2020-02-09', this.endDate],
     },
     yaxis: {
       // fixedrange: window.innerWidth < 700,
