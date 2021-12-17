@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2021.12.17
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25'") Measures and Omicron variant. Report Dec. 17
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.11.19
 
           .navbar-dropdown
