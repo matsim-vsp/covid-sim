@@ -103,6 +103,39 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- VACCINE EFFECTIVENESS -------
+        .linear-plot(v-if="showVaccineEffectivenessFields.length")
+          h5 {{ cityCap }} Vaccine Effectiveness
+            button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+
+          .hideIt(v-show="showPlot[18]")
+            p mRNA Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vaccine-effectiveness-plot(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="false"
+                :vaccineEffectivenessData="vaccineEffectivenessData"
+                :vaccineEffectivenessFields="showVaccineEffectivenessFields"
+                vaccineType="mRNA"
+              )
+
+          .hideIt(v-show="showPlot[18]")
+            p Vector Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vaccine-effectiveness-plot.plotsize(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="false"
+                :vaccineEffectivenessData="vaccineEffectivenessData"
+                :vaccineEffectivenessFields="showVaccineEffectivenessFields"
+                vaccineType="vector"
+              )
+
         //- ---------- VACCINATED / UNVACCINATED -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
@@ -362,6 +395,7 @@ import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import VaccinationRates from '@/components/VaccinationRates.vue'
+import VaccineEffectivenessPlot from '@/components/VaccinationEffectivenessPlot.vue'
 import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
 import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
@@ -401,6 +435,7 @@ interface VegaChartDefinition {
     WeeklyTests,
     AgeGroupLineChart,
     VaccinationRates,
+    VaccineEffectivenessPlot,
   },
 })
 export default class VueComponent extends Vue {
@@ -873,6 +908,8 @@ export default class VueComponent extends Vue {
     // zip might not yet be loaded
     if (csv.length === 0) return
 
+    this.loadVaccineEffectivenessData(this.currentRun)
+
     this.loadIncidenceHeatMapData(this.currentRun)
 
     this.loadMutationValues(this.currentRun)
@@ -1103,6 +1140,31 @@ export default class VueComponent extends Vue {
       if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
     } catch (e) {
       console.log('LeisurOutdoorFraction: no', filename)
+    }
+  }
+
+  private vaccineEffectivenessData: any[] = []
+  private showVaccineEffectivenessFields: string[] = []
+
+  private async loadVaccineEffectivenessData(currentRun: any) {
+    this.vaccineEffectivenessData = []
+    this.showVaccineEffectivenessFields = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.post.vaccineEff.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      if (z.meta.fields.indexOf('day') > -1) {
+        this.vaccineEffectivenessData = z.data
+        this.showVaccineEffectivenessFields = z.meta.fields
+      }
+    } catch (e) {
+      console.log('NO VaccineEffectiveness:', filename)
     }
   }
 
