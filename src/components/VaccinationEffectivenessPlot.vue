@@ -7,7 +7,6 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import moment from 'moment'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -52,7 +51,7 @@ export default class VueComponent extends Vue {
     if (this.vaccineEffectivenessData.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    // this.layout.xaxis.range = ['2020-02-09', this.endDate]
 
     const lines = { day: [] } as { [id: string]: any[] }
 
@@ -62,12 +61,13 @@ export default class VueComponent extends Vue {
     columns.forEach(col => (lines[col] = [] as number[]))
 
     for (const row of this.vaccineEffectivenessData) {
-      const date = moment(this.startDate)
-        .add(row.day, 'days')
-        .format('YYYY-MM-DD')
-
-      lines.day.push(date)
-      columns.forEach(col => lines[col].push(Math.round(10000 * row[col]) / 100))
+      lines.day.push(row.day)
+      columns.forEach(col => {
+        let v = row[col]
+        lines[col].push(row[col])
+        // if (!v) lines[col].push(NaN)
+        // else lines[col].push(100 * row[col])
+      })
     }
 
     this.dataLines = []
@@ -93,26 +93,26 @@ export default class VueComponent extends Vue {
     autosize: true,
     showlegend: true,
     legend: {
-      orientation: 'h',
+      orientation: 'v',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
+    margin: { t: 5, r: 10, b: 35, l: 60 },
     xaxis: {
       fixedrange: window.innerWidth < 700,
-      range: ['2020-02-09', '2020-12-31'],
-      type: 'date',
+      autorange: true,
+      title: 'Days since vaccination',
     },
     yaxis: {
       // note this gets overwritten when the scale changes - see updateScale()
       fixedrange: window.innerWidth < 700,
       type: 'linear',
-      autorange: false,
-      range: [0, 100],
-      title: this.vaccineType + ' Effectiveness %',
+      autorange: true,
+      // range: [0, 100],
+      title: this.vaccineType + ' Effectiveness',
     } as any,
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
