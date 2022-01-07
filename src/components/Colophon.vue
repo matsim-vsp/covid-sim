@@ -10,9 +10,8 @@
   p Sebastian Müller
   p Christian Rakow
   p Ricardo Ewert
-  p Ihab Kaddoura
+  p Sydney Paltra
   p Billy Charlton
-  p Tilmann Schlenther
 
   .team MATSim-EpiSim
 
