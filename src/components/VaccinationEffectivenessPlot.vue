@@ -7,6 +7,9 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
+import Papaparse from 'papaparse'
+
+import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -21,10 +24,16 @@ export default class VueComponent extends Vue {
 
   private lagDays = 1
 
+  private observedColumn = {
+    mRNA: 'mRNA-Delta',
+    vector: 'Vector-Delta',
+  } as any
+
   private dataLines: any[] = []
 
   private mounted() {
     this.calculateValues()
+    this.addObservedData()
   }
 
   @Watch('vaccineEffectivenessData') private updateModelData() {
@@ -61,6 +70,9 @@ export default class VueComponent extends Vue {
     columns.forEach(col => (lines[col] = [] as number[]))
 
     for (const row of this.vaccineEffectivenessData) {
+      // if all we have is a day and a blank record, skip it
+      if (Object.keys(row).length === 1) continue
+
       lines.day.push(row.day)
       columns.forEach(col => {
         let v = row[col]
@@ -80,6 +92,36 @@ export default class VueComponent extends Vue {
         line: { width: 1 },
       })
     })
+  }
+
+  private async addObservedData() {
+    try {
+      const url = PUBLIC_SVN + 'original-data/vaccine-effectiveness/nordstroem-paper.tsv'
+      const data = await (await fetch(url)).text()
+
+      const rows = Papaparse.parse(data, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const columnName = this.observedColumn[this.vaccineType]
+
+      const observedLine = {
+        name: 'Nordström: ' + columnName,
+        x: rows.map(row => row.day),
+        y: rows.map(row => row[columnName]),
+        line: {
+          dash: 'dot',
+          width: 2,
+          color: '#f4c',
+        },
+      }
+
+      this.dataLines.push(observedLine)
+    } catch (e) {
+      console.warn(e)
+    }
   }
 
   private reformatDate(day: string) {
