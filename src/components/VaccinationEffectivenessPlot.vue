@@ -33,7 +33,6 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.calculateValues()
-    this.addObservedData()
   }
 
   @Watch('vaccineEffectivenessData') private updateModelData() {
@@ -92,9 +91,19 @@ export default class VueComponent extends Vue {
         line: { width: 1 },
       })
     })
+
+    this.addObservedData()
   }
 
+  private observedLine: any
+
   private async addObservedData() {
+    // already have it?
+    if (this.observedLine) {
+      this.dataLines.push(this.observedLine)
+      return
+    }
+
     try {
       const url = PUBLIC_SVN + 'original-data/vaccine-effectiveness/nordstroem-paper.tsv'
       const data = await (await fetch(url)).text()
@@ -107,7 +116,7 @@ export default class VueComponent extends Vue {
 
       const columnName = this.observedColumn[this.vaccineType]
 
-      const observedLine = {
+      this.observedLine = {
         name: 'Nordström: ' + columnName,
         x: rows.map(row => row.day),
         y: rows.map(row => row[columnName]),
@@ -117,11 +126,11 @@ export default class VueComponent extends Vue {
           color: '#f4c',
         },
       }
-
-      this.dataLines.push(observedLine)
     } catch (e) {
       console.warn(e)
     }
+
+    this.dataLines.push(this.observedLine)
   }
 
   private reformatDate(day: string) {
