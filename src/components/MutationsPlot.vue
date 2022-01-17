@@ -27,7 +27,6 @@ export default class VueComponent extends Vue {
   private factor100k = 1
 
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
-  private cityName = ''
   private svnUrl = ''
 
   private mounted() {
@@ -67,15 +66,16 @@ export default class VueComponent extends Vue {
     var gamma: any[] = []
     var delta: any[] = []
     var wild: any[] = []
+    var omicron: any[] = []
 
     if (this.city == 'cologne') {
-      this.cityName = 'Cologne'
+        this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
     } else if (this.city == 'berlin') {
-      this.cityName = 'Berlin'
+        this.svnUrl = this.originalDataUrl + 'Berlin/VOC_Berlin.csv'
     }
 
     if (this.city != '') {
-      this.svnUrl = this.originalDataUrl + this.cityName + '/VOC_' + this.cityName + '.csv'
+
 
       const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
       const VOCData = Papa.parse(rawVOCData, {
@@ -89,6 +89,7 @@ export default class VueComponent extends Vue {
       var betaTempDouble = 0
       var gammaTempDouble = 0
       var deltaTempDouble = 0
+      var omicronTempDouble = 0
       var wildTempDouble = 0
       var countDays = 0
 
@@ -119,17 +120,27 @@ export default class VueComponent extends Vue {
             }
             foundHeader = true
           } else {
-            if (this.city == 'cologne' && VOCData[i][0] == '\n2021-08-01') {
-              break
+            // Data has a gap and is continued at this date
+            if (this.city == 'cologne' && VOCData[i][0] == '2021-12-06') {
+              countDays = 1;
+              alphaTempDouble = 0;
+              betaTempDouble = 0;
+              gammaTempDouble = 0;
+              deltaTempDouble = 0;
+              omicronTempDouble = 0;
+              wildTempDouble = 0;
             } else {
               countDays += 1
-              if (this.city == 'cologne') {
+            }
+
+            if (this.city == 'cologne') {
                 var dateTemp = VOCData[i][0]
                 var alphaTemp = VOCData[i][5]
                 var betaTemp = VOCData[i][4]
                 var gammaTemp = VOCData[i][3]
                 var deltaTemp = VOCData[i][2]
                 var wildTemp = VOCData[i][1]
+                var omicronTemp = VOCData[i][6]
               } else {
                 var dateTemp = VOCData[i][0]
                 var alphaTemp = VOCData[i][1]
@@ -137,9 +148,8 @@ export default class VueComponent extends Vue {
                 var gammaTemp = VOCData[i][3]
                 var deltaTemp = VOCData[i][4]
               }
-              if (dateTemp.startsWith('\n')) {
-                dateTemp = dateTemp.substring(1)
-              }
+
+              dateTemp = dateTemp.trim()
 
               if (alphaTemp == null) {
                 alphaTemp = 0
@@ -191,6 +201,15 @@ export default class VueComponent extends Vue {
                     wildTemp = parseFloat(wildTemp)
                   }
                 }
+
+                if (omicronTemp == null) {
+                  omicronTemp = 0
+                } else {
+                  if (typeof omicronTemp == 'string') {
+                    omicronTemp = parseFloat(omicronTemp)
+                  }
+                }
+
               }
 
               alphaTempDouble += alphaTemp
@@ -199,6 +218,7 @@ export default class VueComponent extends Vue {
               deltaTempDouble += deltaTemp
               if (this.city == 'cologne') {
                 wildTempDouble += wildTemp
+                omicronTempDouble += omicronTemp
               }
 
               if (countDays == 7 && this.city == 'cologne') {
@@ -208,6 +228,7 @@ export default class VueComponent extends Vue {
                 gamma.push((gammaTempDouble * 100) / 7)
                 delta.push((deltaTempDouble * 100) / 7)
                 wild.push((wildTempDouble * 100) / 7)
+                omicron.push((omicronTempDouble * 100) / 7)
 
                 countDays = 0
                 alphaTempDouble = 0
@@ -215,6 +236,7 @@ export default class VueComponent extends Vue {
                 gammaTempDouble = 0
                 deltaTempDouble = 0
                 wildTempDouble = 0
+                omicronTempDouble = 0
               } else if (this.city == 'berlin') {
                 date.push(dateTemp)
                 alpha.push(alphaTempDouble)
@@ -227,7 +249,7 @@ export default class VueComponent extends Vue {
                 gammaTempDouble = 0
                 deltaTempDouble = 0
               }
-            }
+            
           }
         }
       }
@@ -241,8 +263,9 @@ export default class VueComponent extends Vue {
           '% Gamma Reported',
           '% MUTB Reported',
           '% SARS_CoV_2 Reported',
+          '% Omicron Reported'
         ]
-        color = ['', 'blue', '', '', '', 'red']
+        color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
         header = ['Date', '% B117 Reported', 'Beta', 'Gamma', 'MUTB Reported']
         color = ['', '', '', '', '']
@@ -301,6 +324,17 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
+      this.lineDataLookup[header[6]] = {
+        x: date,
+        y: omicron,
+        name: header[6],
+        color: color[6],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+
       this.dataLines2 = Object.values(this.lineDataLookup)
 
       // *** CAUSES INFINITE LAYOUT LOOP
