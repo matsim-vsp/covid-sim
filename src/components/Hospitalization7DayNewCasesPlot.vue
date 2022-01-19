@@ -1,5 +1,5 @@
 <template lang="pug">
-vue-plotly(:data="dataLines" :layout="layout" :options="options")
+vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -42,6 +42,13 @@ export default class VueComponent extends Vue {
     this.fetchRealHospitalizationRates()
     this.calculate()
     this.fetchBundeslandIncidenceRates()
+  }
+
+  private handleRelayout(event: any) {
+    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+      this.calculate()
+      this.fetchBundeslandIncidenceRates()
+    }
   }
 
   @Watch('data') private updateModelData() {

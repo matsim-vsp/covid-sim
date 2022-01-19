@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
-  vue-plotly(:data="dataLines2" :layout="layout2" :options="options")
+  vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+  vue-plotly(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -22,6 +22,12 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.calculateValues()
+  }
+
+  private handleRelayout(event: any) {
+    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+      this.calculateValues()
+    }
   }
 
   @Watch('values') private updateValues() {
