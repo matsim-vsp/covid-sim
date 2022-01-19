@@ -1,6 +1,6 @@
 <template lang="pug">
 .my-vue-component
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly(:data="dataLines" :layout="layout" :options="options"  @relayout="handleRelayout")
 
 </template>
 
@@ -33,6 +33,12 @@ export default class VueComponent extends Vue {
     } catch (e) {
       console.warn('VACCINATION/BOOSTER data not found')
       // maybe this run doesn't have vaccinations or boosters
+    }
+  }
+
+  private handleRelayout(event: any) {
+    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+      this.calculateValues()
     }
   }
 

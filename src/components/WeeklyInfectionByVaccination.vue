@@ -1,12 +1,13 @@
 <template lang="pug">
 #vue-component
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
 
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
+import { e } from 'mathjs'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -29,6 +30,12 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.calculateValues()
+  }
+
+  private handleRelayout(event: any) {
+    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+      this.calculateValues()
+    }
   }
 
   @Watch('data') private updateModelData() {
