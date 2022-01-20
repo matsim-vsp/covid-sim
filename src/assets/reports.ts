@@ -1,5 +1,11 @@
 const reports: { md: string; title: string; url: string; html: string }[] = [
   {
+    md: '/reports/report-2022-01-20.md',
+    title: '17 Dec 2021',
+    url: 'http://dx.doi.org/10.14279/depositonce-14951',
+    html: '',
+  },
+  {
     md: '/reports/report-2021-12-17.md',
     title: '17 Dec 2021',
     url: 'http://dx.doi.org/10.14279/depositonce-12856.2',
@@ -31,7 +37,7 @@ const reports: { md: string; title: string; url: string; html: string }[] = [
   },
   {
     md: '/reports/report-2021-08-27.md',
-    title: '27 August 2021',
+    title: '27 Aug 2021',
     url: 'https://doi.org/10.14279/depositonce-12321',
     html: '',
   },

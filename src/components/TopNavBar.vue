@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2022.01.20
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current'") Immune status and leisure measures. Report Jan. 20
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2021.12.17
 
           .navbar-dropdown
