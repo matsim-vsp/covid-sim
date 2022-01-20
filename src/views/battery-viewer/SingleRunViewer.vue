@@ -105,7 +105,7 @@
 
         //- ---------- VACCINE EFFECTIVENESS -------
         .linear-plot(v-if="showVaccineEffectivenessFields.length")
-          h5 {{ cityCap }} Vaccine Effectiveness
+          h5 {{ cityCap }} Vaccine Effectiveness (against infection)
             button.button.is-small.hider(@click="toggleShowPlot(18)") ..
 
           .hideIt(v-show="showPlot[18]")

@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
-  vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options")
+  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -27,7 +27,6 @@ export default class VueComponent extends Vue {
   private factor100k = 1
 
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
-  private cityName = ''
   private svnUrl = ''
 
   private mounted() {
@@ -36,6 +35,12 @@ export default class VueComponent extends Vue {
     this.factor100k = totalPopulation / 100000.0
 
     this.calculateValues()
+  }
+
+  private handleRelayout(event: any) {
+    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+      this.calculateValues()
+    }
   }
 
   @Watch('strainValues') private updateRValues() {
@@ -67,16 +72,15 @@ export default class VueComponent extends Vue {
     var gamma: any[] = []
     var delta: any[] = []
     var wild: any[] = []
+    var omicron: any[] = []
 
     if (this.city == 'cologne') {
-      this.cityName = 'Cologne'
+      this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
     } else if (this.city == 'berlin') {
-      this.cityName = 'Berlin'
+      this.svnUrl = this.originalDataUrl + 'Berlin/VOC_Berlin.csv'
     }
 
     if (this.city != '') {
-      this.svnUrl = this.originalDataUrl + this.cityName + '/VOC_' + this.cityName + '.csv'
-
       const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
       const VOCData = Papa.parse(rawVOCData, {
         //header: true,
@@ -89,6 +93,7 @@ export default class VueComponent extends Vue {
       var betaTempDouble = 0
       var gammaTempDouble = 0
       var deltaTempDouble = 0
+      var omicronTempDouble = 0
       var wildTempDouble = 0
       var countDays = 0
 
@@ -119,114 +124,133 @@ export default class VueComponent extends Vue {
             }
             foundHeader = true
           } else {
-            if (this.city == 'cologne' && VOCData[i][0] == '\n2021-08-01') {
-              break
+            // Data has a gap and is continued at this date
+            if (this.city == 'cologne' && VOCData[i][0] == '2021-12-06') {
+              countDays = 1
+              alphaTempDouble = 0
+              betaTempDouble = 0
+              gammaTempDouble = 0
+              deltaTempDouble = 0
+              omicronTempDouble = 0
+              wildTempDouble = 0
             } else {
               countDays += 1
-              if (this.city == 'cologne') {
-                var dateTemp = VOCData[i][0]
-                var alphaTemp = VOCData[i][5]
-                var betaTemp = VOCData[i][4]
-                var gammaTemp = VOCData[i][3]
-                var deltaTemp = VOCData[i][2]
-                var wildTemp = VOCData[i][1]
-              } else {
-                var dateTemp = VOCData[i][0]
-                var alphaTemp = VOCData[i][1]
-                var betaTemp = VOCData[i][2]
-                var gammaTemp = VOCData[i][3]
-                var deltaTemp = VOCData[i][4]
-              }
-              if (dateTemp.startsWith('\n')) {
-                dateTemp = dateTemp.substring(1)
-              }
+            }
 
-              if (alphaTemp == null) {
-                alphaTemp = 0
+            if (this.city == 'cologne') {
+              var dateTemp = VOCData[i][0]
+              var alphaTemp = VOCData[i][5]
+              var betaTemp = VOCData[i][4]
+              var gammaTemp = VOCData[i][3]
+              var deltaTemp = VOCData[i][2]
+              var wildTemp = VOCData[i][1]
+              var omicronTemp = VOCData[i][6]
+            } else {
+              var dateTemp = VOCData[i][0]
+              var alphaTemp = VOCData[i][1]
+              var betaTemp = VOCData[i][2]
+              var gammaTemp = VOCData[i][3]
+              var deltaTemp = VOCData[i][4]
+            }
+
+            dateTemp = dateTemp.trim()
+
+            if (alphaTemp == null) {
+              alphaTemp = 0
+            } else {
+              if (typeof alphaTemp == 'string') {
+                alphaTemp = alphaTemp.substring(0, alphaTemp.length - 1)
+                alphaTemp = alphaTemp.replace(',', '.')
+                alphaTemp = parseFloat(alphaTemp)
+              }
+            }
+
+            if (betaTemp == null) {
+              betaTemp = 0
+            } else {
+              if (typeof betaTemp == 'string') {
+                betaTemp = betaTemp.substring(0, betaTemp.length - 1)
+                betaTemp = betaTemp.replace(',', '.')
+                betaTemp = parseFloat(betaTemp)
+              }
+            }
+
+            if (gammaTemp == null) {
+              gammaTemp = 0
+            } else {
+              if (typeof gammaTemp == 'string') {
+                gammaTemp = gammaTemp.substring(0, gammaTemp.length - 1)
+                gammaTemp = gammaTemp.replace(',', '.')
+                gammaTemp = parseFloat(gammaTemp)
+              }
+            }
+
+            if (deltaTemp == null) {
+              deltaTemp = 0
+            } else {
+              if (typeof deltaTemp == 'string') {
+                deltaTemp = deltaTemp.substring(0, deltaTemp.length - 1)
+                deltaTemp = deltaTemp.replace(',', '.')
+                deltaTemp = parseFloat(deltaTemp)
+              }
+            }
+
+            if (this.city == 'cologne') {
+              if (wildTemp == null) {
+                wildTemp = 0
               } else {
-                if (typeof alphaTemp == 'string') {
-                  alphaTemp = alphaTemp.substring(0, alphaTemp.length - 1)
-                  alphaTemp = alphaTemp.replace(',', '.')
-                  alphaTemp = parseFloat(alphaTemp)
+                if (typeof wildTemp == 'string') {
+                  wildTemp = wildTemp.substring(0, wildTemp.length - 1)
+                  wildTemp = wildTemp.replace(',', '.')
+                  wildTemp = parseFloat(wildTemp)
                 }
               }
 
-              if (betaTemp == null) {
-                betaTemp = 0
+              if (omicronTemp == null) {
+                omicronTemp = 0
               } else {
-                if (typeof betaTemp == 'string') {
-                  betaTemp = betaTemp.substring(0, betaTemp.length - 1)
-                  betaTemp = betaTemp.replace(',', '.')
-                  betaTemp = parseFloat(betaTemp)
+                if (typeof omicronTemp == 'string') {
+                  omicronTemp = parseFloat(omicronTemp)
                 }
               }
+            }
 
-              if (gammaTemp == null) {
-                gammaTemp = 0
-              } else {
-                if (typeof gammaTemp == 'string') {
-                  gammaTemp = gammaTemp.substring(0, gammaTemp.length - 1)
-                  gammaTemp = gammaTemp.replace(',', '.')
-                  gammaTemp = parseFloat(gammaTemp)
-                }
-              }
+            alphaTempDouble += alphaTemp
+            betaTempDouble += betaTemp
+            gammaTempDouble += gammaTemp
+            deltaTempDouble += deltaTemp
+            if (this.city == 'cologne') {
+              wildTempDouble += wildTemp
+              omicronTempDouble += omicronTemp
+            }
 
-              if (deltaTemp == null) {
-                deltaTemp = 0
-              } else {
-                if (typeof deltaTemp == 'string') {
-                  deltaTemp = deltaTemp.substring(0, deltaTemp.length - 1)
-                  deltaTemp = deltaTemp.replace(',', '.')
-                  deltaTemp = parseFloat(deltaTemp)
-                }
-              }
+            if (countDays == 7 && this.city == 'cologne') {
+              date.push(dateTemp)
+              alpha.push((alphaTempDouble * 100) / 7)
+              beta.push((betaTempDouble * 100) / 7)
+              gamma.push((gammaTempDouble * 100) / 7)
+              delta.push((deltaTempDouble * 100) / 7)
+              wild.push((wildTempDouble * 100) / 7)
+              omicron.push((omicronTempDouble * 100) / 7)
 
-              if (this.city == 'cologne') {
-                if (wildTemp == null) {
-                  wildTemp = 0
-                } else {
-                  if (typeof wildTemp == 'string') {
-                    wildTemp = wildTemp.substring(0, wildTemp.length - 1)
-                    wildTemp = wildTemp.replace(',', '.')
-                    wildTemp = parseFloat(wildTemp)
-                  }
-                }
-              }
+              countDays = 0
+              alphaTempDouble = 0
+              betaTempDouble = 0
+              gammaTempDouble = 0
+              deltaTempDouble = 0
+              wildTempDouble = 0
+              omicronTempDouble = 0
+            } else if (this.city == 'berlin') {
+              date.push(dateTemp)
+              alpha.push(alphaTempDouble)
+              beta.push(betaTempDouble)
+              gamma.push(gammaTempDouble)
+              delta.push(deltaTempDouble)
 
-              alphaTempDouble += alphaTemp
-              betaTempDouble += betaTemp
-              gammaTempDouble += gammaTemp
-              deltaTempDouble += deltaTemp
-              if (this.city == 'cologne') {
-                wildTempDouble += wildTemp
-              }
-
-              if (countDays == 7 && this.city == 'cologne') {
-                date.push(dateTemp)
-                alpha.push((alphaTempDouble * 100) / 7)
-                beta.push((betaTempDouble * 100) / 7)
-                gamma.push((gammaTempDouble * 100) / 7)
-                delta.push((deltaTempDouble * 100) / 7)
-                wild.push((wildTempDouble * 100) / 7)
-
-                countDays = 0
-                alphaTempDouble = 0
-                betaTempDouble = 0
-                gammaTempDouble = 0
-                deltaTempDouble = 0
-                wildTempDouble = 0
-              } else if (this.city == 'berlin') {
-                date.push(dateTemp)
-                alpha.push(alphaTempDouble)
-                beta.push(betaTempDouble)
-                gamma.push(gammaTempDouble)
-                delta.push(deltaTempDouble)
-
-                alphaTempDouble = 0
-                betaTempDouble = 0
-                gammaTempDouble = 0
-                deltaTempDouble = 0
-              }
+              alphaTempDouble = 0
+              betaTempDouble = 0
+              gammaTempDouble = 0
+              deltaTempDouble = 0
             }
           }
         }
@@ -241,8 +265,9 @@ export default class VueComponent extends Vue {
           '% Gamma Reported',
           '% MUTB Reported',
           '% SARS_CoV_2 Reported',
+          '% Omicron Reported',
         ]
-        color = ['', 'blue', '', '', '', 'red']
+        color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
         header = ['Date', '% B117 Reported', 'Beta', 'Gamma', 'MUTB Reported']
         color = ['', '', '', '', '']
@@ -301,6 +326,17 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
+      this.lineDataLookup[header[6]] = {
+        x: date,
+        y: omicron,
+        name: header[6],
+        color: color[6],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+
       this.dataLines2 = Object.values(this.lineDataLookup)
 
       // *** CAUSES INFINITE LAYOUT LOOP
