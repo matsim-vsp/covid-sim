@@ -1,7 +1,7 @@
 const reports: { md: string; title: string; url: string; html: string }[] = [
   {
     md: '/reports/report-2022-01-20.md',
-    title: '17 Dec 2021',
+    title: '20 Jan 2022',
     url: 'http://dx.doi.org/10.14279/depositonce-14951',
     html: '',
   },
