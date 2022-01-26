@@ -110,12 +110,14 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      fixedrange: window.innerWidth < 700,
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {
-      fixedrange: window.innerWidth < 700,
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       type: this.logScale ? 'log' : 'linear',
       title: 'Number of Infections',
       hoverformat: '.1f',
@@ -138,12 +140,14 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 5, l: 60 },
     xaxis: {
-      fixedrange: window.innerWidth < 700,
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {
-      fixedrange: window.innerWidth < 700,
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       type: 'linear',
       title: '% Share',
       hoverformat: '.1f',

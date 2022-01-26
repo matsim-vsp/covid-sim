@@ -81,12 +81,14 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      fixedrange: window.innerWidth < 700,
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       type: 'date',
       range: ['2020-02-09', this.endDate],
     },
     yaxis: {
       // fixedrange: window.innerWidth < 700,
+      fixedrange: true,
       type: 'linear',
       autorange: [0, 200000],
       title: 'nTested',

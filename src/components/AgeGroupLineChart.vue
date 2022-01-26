@@ -34,12 +34,14 @@ export default class VueComponent extends Vue {
     this.layout.yaxis = this.logScale
       ? {
           //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
           type: 'log',
           //range: [Math.log10(2), Math.log10(5000)],
           title: 'Incidence',
         }
       : {
           //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
           type: 'linear',
           //autorange: true,
           title: 'Incidence',
@@ -92,6 +94,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       type: 'date',
       range: ['2020-02-09', this.endDate],
+      fixedrange: true,
     },
     legend: {
       orientation: 'h',
@@ -99,6 +102,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       title: 'Incidence',
       type: 'log',
+      fixedrange: true,
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

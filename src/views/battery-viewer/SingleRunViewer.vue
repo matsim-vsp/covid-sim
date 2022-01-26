@@ -701,10 +701,12 @@ export default class VueComponent extends Vue {
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
       range: ['2020-02-09', '2020-12-31'],
+      fixedrange: true,
       type: 'date',
     },
     yaxis: {
       type: this.logScale ? 'log' : 'linear',
+      fixedrange: true,
       autorange: true,
       title: 'Population',
     },

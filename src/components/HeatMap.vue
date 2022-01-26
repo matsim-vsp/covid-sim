@@ -96,9 +96,11 @@ export default class VueComponent extends Vue {
     xaxis: {
       type: 'date',
       range: ['2020-02-09', this.endDate],
+      fixedrange: true,
     },
     yaxis: {
       title: 'Age',
+      fixedrange: true,
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
