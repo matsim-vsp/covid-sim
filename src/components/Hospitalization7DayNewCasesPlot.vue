@@ -104,7 +104,7 @@ export default class VueComponent extends Vue {
   }
 
   private calculate() {
-    this.$emit('method', this.lagDays + '-day moving average')
+    this.$emit('method', this.lagDays + '-day Hospitalizations / 100k Pop.')
 
     this.dataLines = []
     const x: any[] = []
