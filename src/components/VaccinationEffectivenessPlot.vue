@@ -17,8 +17,9 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: any
   @Prop({ required: true }) private vaccineEffectivenessData!: any[]
   @Prop({ required: true }) private vaccineEffectivenessFields!: string[]
-  @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private vaccineType!: string
+
+  private logScale = false
 
   private color = ['#094', '#0c4']
 
@@ -75,11 +76,15 @@ export default class VueComponent extends Vue {
       if (Object.keys(row).length === 1) continue
 
       lines.day.push(row.day)
+
       columns.forEach(col => {
+        // lines[col].push(100.0 * row[col])
         let v = row[col]
-        lines[col].push(row[col])
-        // if (!v) lines[col].push(NaN)
-        // else lines[col].push(100 * row[col])
+        if (v == undefined) {
+          lines[col].push(NaN)
+        } else {
+          lines[col].push(Math.round(10000 * row[col]) / 100)
+        }
       })
     }
 
@@ -121,7 +126,7 @@ export default class VueComponent extends Vue {
       this.observedLine = {
         name: 'Nordström: ' + columnName,
         x: rows.map(row => row.day),
-        y: rows.map(row => row[columnName]),
+        y: rows.map(row => 100 * row[columnName]),
         line: {
           dash: 'dot',
           width: 2,
@@ -165,8 +170,8 @@ export default class VueComponent extends Vue {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
       type: 'linear',
-      autorange: true,
-      // range: [0, 100],
+      // autorange: true,
+      range: [0, 100],
       title: this.vaccineType + ' Effectiveness',
     } as any,
     plot_bgcolor: '#f8f8f8',
