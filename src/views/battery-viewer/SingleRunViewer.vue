@@ -136,6 +136,24 @@
                 vaccineType="vector"
               )
 
+        //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
+        .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length")
+          h5 {{ cityCap }} Vaccine Effectiveness Vs. Strain
+            button.button.is-small.hider(@click="toggleShowPlot(19)") ..
+
+          .hideIt(v-show="showPlot[19]")
+            //- p mRNA Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vaccine-effectiveness-vs-strain(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="false"
+                :vaccineEffectivenessData="vaccineEffectivenessVsStrainData"
+                :vaccineEffectivenessFields="showVaccineEffectivenessVsStrainFields"
+              )
+
         //- ---------- VACCINATED / UNVACCINATED -------
         .linear-plot(v-if="showIncidenceComp")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
@@ -396,6 +414,7 @@ import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import VaccinationRates from '@/components/VaccinationRates.vue'
 import VaccineEffectivenessPlot from '@/components/VaccinationEffectivenessPlot.vue'
+import VaccineEffectivenessVsStrain from '@/components/VaccinationEffectivenessVsStrain.vue'
 import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
 import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
@@ -436,6 +455,7 @@ interface VegaChartDefinition {
     AgeGroupLineChart,
     VaccinationRates,
     VaccineEffectivenessPlot,
+    VaccineEffectivenessVsStrain,
   },
 })
 export default class VueComponent extends Vue {
@@ -912,6 +932,8 @@ export default class VueComponent extends Vue {
 
     this.loadVaccineEffectivenessData(this.currentRun)
 
+    this.loadVaccineEffectivenessVsStrainData(this.currentRun)
+
     this.loadIncidenceHeatMapData(this.currentRun)
 
     this.loadMutationValues(this.currentRun)
@@ -1167,6 +1189,31 @@ export default class VueComponent extends Vue {
       }
     } catch (e) {
       console.log('NO VaccineEffectiveness:', filename)
+    }
+  }
+
+  private vaccineEffectivenessVsStrainData: any[] = []
+  private showVaccineEffectivenessVsStrainFields: string[] = []
+
+  private async loadVaccineEffectivenessVsStrainData(currentRun: any) {
+    this.vaccineEffectivenessVsStrainData = []
+    this.showVaccineEffectivenessVsStrainFields = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.post.ve.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      if (z.meta.fields.indexOf('day') > -1) {
+        this.vaccineEffectivenessVsStrainData = z.data
+        this.showVaccineEffectivenessVsStrainFields = z.meta.fields
+      }
+    } catch (e) {
+      console.log('NO VaccineEffectivenessVsStrain:', filename)
     }
   }
 
