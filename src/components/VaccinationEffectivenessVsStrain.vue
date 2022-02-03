@@ -57,19 +57,23 @@ export default class VueComponent extends Vue {
         }
   }
 
+  private skipVariants = ['wildtypeVe', 'alphaVe']
+
   private calculateValues() {
     if (this.vaccineEffectivenessData.length === 0) return
 
     const lines = { day: [] } as { [id: string]: any[] }
 
     const columns = this.vaccineEffectivenessFields.slice(1)
-    // .filter(col => col.startsWith(this.vaccineType))
+    // .filter(col => skipVariants.indexOf(col) === -1)
 
     columns.forEach(col => (lines[col] = [] as number[]))
 
     for (const row of this.vaccineEffectivenessData) {
       // if all we have is a day and a blank record, skip it
       if (Object.keys(row).length === 1) continue
+
+      if (row.day > 400) continue
 
       lines.day.push(row.day)
 
@@ -92,6 +96,7 @@ export default class VueComponent extends Vue {
         x: lines.day,
         y: lines[col],
         line: { width: 1 },
+        visible: this.skipVariants.indexOf(col) > -1 ? 'legendonly' : 'true',
       })
     })
 
