@@ -89,6 +89,7 @@ export default class VueComponent extends Vue {
     }
 
     this.dataLines = []
+    this.isObservedAdded = false
 
     columns.forEach(col => {
       this.dataLines.push({
@@ -103,10 +104,11 @@ export default class VueComponent extends Vue {
   }
 
   private observedLine: any
+  private isObservedAdded = false
 
   private async addObservedData() {
     // already have it?
-    if (this.observedLine) {
+    if (this.observedLine && !this.isObservedAdded) {
       this.dataLines.push(this.observedLine)
       return
     }
@@ -137,7 +139,10 @@ export default class VueComponent extends Vue {
       console.warn(e)
     }
 
-    this.dataLines.push(this.observedLine)
+    if (!this.isObservedAdded) {
+      this.dataLines.push(this.observedLine)
+      this.isObservedAdded = true
+    }
   }
 
   private reformatDate(day: string) {
