@@ -504,7 +504,7 @@ export default class VueComponent extends Vue {
     21: true,
   }
 
-  private MAX_DAYS = 1000
+  private MAX_DAYS = 1500
   private cumulativeInfected = 0
 
   private isZipLoaded = false
