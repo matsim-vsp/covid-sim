@@ -73,6 +73,8 @@ export default class VueComponent extends Vue {
     var delta: any[] = []
     var wild: any[] = []
     var omicron: any[] = []
+    var ba1: any[] = []
+    var ba2: any[] = []
 
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
@@ -94,6 +96,8 @@ export default class VueComponent extends Vue {
       var gammaTempDouble = 0
       var deltaTempDouble = 0
       var omicronTempDouble = 0
+      var ba1TempDouble = 0
+      var ba2TempDouble = 0
       var wildTempDouble = 0
       var countDays = 0
 
@@ -133,6 +137,8 @@ export default class VueComponent extends Vue {
               deltaTempDouble = 0
               omicronTempDouble = 0
               wildTempDouble = 0
+              ba1TempDouble = 0
+              ba2TempDouble = 0
             } else {
               countDays += 1
             }
@@ -145,6 +151,8 @@ export default class VueComponent extends Vue {
               var deltaTemp = VOCData[i][2]
               var wildTemp = VOCData[i][1]
               var omicronTemp = VOCData[i][6]
+              var ba1Temp = VOCData[i][7]
+              var ba2Temp = VOCData[i][8]
             } else {
               var dateTemp = VOCData[i][0]
               var alphaTemp = VOCData[i][1]
@@ -213,6 +221,22 @@ export default class VueComponent extends Vue {
                   omicronTemp = parseFloat(omicronTemp)
                 }
               }
+
+              if(ba1Temp == null) {
+                ba1Temp = 0
+              } else {
+                if (typeof ba1Temp == 'string') {
+                  ba1Temp = parseFloat(ba1Temp)
+                }
+              }
+
+              if(ba2Temp == null) {
+                ba2Temp = 0
+              } else {
+                if (typeof ba2Temp == 'string') {
+                  ba2Temp = parseFloat(ba2Temp)
+                }
+              }
             }
 
             alphaTempDouble += alphaTemp
@@ -222,6 +246,8 @@ export default class VueComponent extends Vue {
             if (this.city == 'cologne') {
               wildTempDouble += wildTemp
               omicronTempDouble += omicronTemp
+              ba1TempDouble += ba1Temp
+              ba2TempDouble += ba2Temp
             }
 
             if (countDays == 7 && this.city == 'cologne') {
@@ -232,6 +258,8 @@ export default class VueComponent extends Vue {
               delta.push((deltaTempDouble * 100) / 7)
               wild.push((wildTempDouble * 100) / 7)
               omicron.push((omicronTempDouble * 100) / 7)
+              ba1.push(ba1TempDouble * 100 / 7)
+              ba2.push(ba2TempDouble * 100 / 7)
 
               countDays = 0
               alphaTempDouble = 0
@@ -240,6 +268,9 @@ export default class VueComponent extends Vue {
               deltaTempDouble = 0
               wildTempDouble = 0
               omicronTempDouble = 0
+              ba1TempDouble = 0
+              ba2TempDouble = 0
+
             } else if (this.city == 'berlin') {
               date.push(dateTemp)
               alpha.push(alphaTempDouble)
@@ -266,6 +297,8 @@ export default class VueComponent extends Vue {
           '% MUTB Reported',
           '% SARS_CoV_2 Reported',
           '% Omicron Reported',
+          '% BA.1 Reported',
+          '% BA.2 Reported'
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -331,6 +364,26 @@ export default class VueComponent extends Vue {
         y: omicron,
         name: header[6],
         color: color[6],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[7]] = {
+        x: date,
+        y: ba1,
+        name: header[7],
+        color: color[7],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[8]] = {
+        x: date,
+        y: ba2,
+        name: header[8],
+        color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
         marker: { size: 5 },
