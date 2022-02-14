@@ -50,9 +50,11 @@ export default class VueComponent extends Vue {
   @Watch('logScale') updateScale() {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
+      this.layout2.yaxis.type = 'log'
       // this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)]
     } else {
       this.layout.yaxis.type = 'linear'
+      this.layout2.yaxis.type = 'linear'
       // this.layout.yaxis.range = [0, 1.5]
     }
   }
@@ -222,7 +224,7 @@ export default class VueComponent extends Vue {
                 }
               }
 
-              if(ba1Temp == null) {
+              if (ba1Temp == null) {
                 ba1Temp = 0
               } else {
                 if (typeof ba1Temp == 'string') {
@@ -230,7 +232,7 @@ export default class VueComponent extends Vue {
                 }
               }
 
-              if(ba2Temp == null) {
+              if (ba2Temp == null) {
                 ba2Temp = 0
               } else {
                 if (typeof ba2Temp == 'string') {
@@ -258,8 +260,8 @@ export default class VueComponent extends Vue {
               delta.push((deltaTempDouble * 100) / 7)
               wild.push((wildTempDouble * 100) / 7)
               omicron.push((omicronTempDouble * 100) / 7)
-              ba1.push(ba1TempDouble * 100 / 7)
-              ba2.push(ba2TempDouble * 100 / 7)
+              ba1.push((ba1TempDouble * 100) / 7)
+              ba2.push((ba2TempDouble * 100) / 7)
 
               countDays = 0
               alphaTempDouble = 0
@@ -270,7 +272,6 @@ export default class VueComponent extends Vue {
               omicronTempDouble = 0
               ba1TempDouble = 0
               ba2TempDouble = 0
-
             } else if (this.city == 'berlin') {
               date.push(dateTemp)
               alpha.push(alphaTempDouble)
@@ -298,7 +299,7 @@ export default class VueComponent extends Vue {
           '% SARS_CoV_2 Reported',
           '% Omicron Reported',
           '% BA.1 Reported',
-          '% BA.2 Reported'
+          '% BA.2 Reported',
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -535,7 +536,9 @@ export default class VueComponent extends Vue {
     yaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      type: 'linear',
+      //type: 'linear',
+      type: this.logScale ? 'log' : 'linear',
+      tickformat: '.01r',
       title: '% of Cases',
     },
     plot_bgcolor: '#f8f8f8',
