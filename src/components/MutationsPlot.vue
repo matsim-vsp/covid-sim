@@ -51,11 +51,13 @@ export default class VueComponent extends Vue {
     if (this.logScale) {
       this.layout.yaxis.type = 'log'
       this.layout2.yaxis.type = 'log'
-      // this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)]
+      //this.layout2.yaxis.range = [0.01, 2]
+      this.layout2.yaxis.range = [Math.log10(0.01), Math.log10(100)]
     } else {
       this.layout.yaxis.type = 'linear'
       this.layout2.yaxis.type = 'linear'
-      // this.layout.yaxis.range = [0, 1.5]
+      //this.layout2.yaxis.range = [0.01, 100]
+      this.layout2.yaxis.range = [0, 100]
     }
   }
 
@@ -535,10 +537,12 @@ export default class VueComponent extends Vue {
     },
     yaxis: {
       //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
+      //fixedrange: true,
       //type: 'linear',
+      //range: [0.01, 100],
+      range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
       type: this.logScale ? 'log' : 'linear',
-      tickformat: '.01r',
+      //tickformat: '.01r',
       title: '% of Cases',
     },
     plot_bgcolor: '#f8f8f8',
