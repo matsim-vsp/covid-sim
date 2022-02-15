@@ -492,6 +492,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
+    height: 200, // this _should_ adjust automatically, but somehow it does not for me.  kai, feb'22
     autosize: true,
     showlegend: true,
     legend: {
