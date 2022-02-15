@@ -2,6 +2,7 @@
 .mutations-plots
   vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
   vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot2(:data="dataLines2" :layout="layout3" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -48,17 +49,17 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('logScale') updateScale() {
-    if (this.logScale) {
-      this.layout.yaxis.type = 'log'
-      this.layout2.yaxis.type = 'log'
-      //this.layout2.yaxis.range = [0.01, 2]
-      this.layout2.yaxis.range = [Math.log10(0.01), Math.log10(100)]
-    } else {
-      this.layout.yaxis.type = 'linear'
-      this.layout2.yaxis.type = 'linear'
-      //this.layout2.yaxis.range = [0.01, 100]
-      this.layout2.yaxis.range = [0, 100]
-    }
+    // if (this.logScale) {
+    //   this.layout.yaxis.type = 'log'
+    //   this.layout2.yaxis.type = 'log'
+    //   //this.layout2.yaxis.range = [0.01, 2]
+    //   this.layout2.yaxis.range = [Math.log10(0.01), Math.log10(100)]
+    // } else {
+    //   this.layout.yaxis.type = 'linear'
+    //   this.layout2.yaxis.type = 'linear'
+    //   //this.layout2.yaxis.range = [0.01, 100]
+    //   this.layout2.yaxis.range = [0, 100]
+    // }
   }
 
   @Watch('city') updateCity() {
@@ -464,6 +465,7 @@ export default class VueComponent extends Vue {
     // set end date
     this.layout.xaxis.range = ['2020-02-09', this.endDate]
     this.layout2.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout3.xaxis.range = ['2020-02-09', this.endDate]
 
     this.dataLines.push({
       name: strain,
@@ -518,6 +520,40 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
+    height: 200,
+    autosize: true,
+    showlegend: true,
+    legend: {
+      orientation: 'h',
+    },
+    font: {
+      family: 'Roboto,Arial,Helvetica,sans-serif',
+      size: 12,
+      color: '#000',
+    },
+    margin: { t: 5, r: 10, b: 5, l: 60 },
+    xaxis: {
+      //fixedrange: window.innerWidth < 700,
+      fixedrange: true,
+      range: ['2020-02-09', '2020-12-31'],
+      type: 'date',
+    },
+    yaxis: {
+      //fixedrange: window.innerWidth < 700,
+      //fixedrange: true,
+      type: 'linear',
+      range: [0.01, 100],
+      // range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
+      // type: this.logScale ? 'log' : 'linear',
+      //tickformat: '.01r',
+      title: '% of Cases',
+    },
+    plot_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8',
+  }
+
+  private layout3 = {
+    height: 200,
     autosize: true,
     showlegend: true,
     legend: {
@@ -540,8 +576,10 @@ export default class VueComponent extends Vue {
       //fixedrange: true,
       //type: 'linear',
       //range: [0.01, 100],
-      range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
-      type: this.logScale ? 'log' : 'linear',
+      // range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
+      // type: this.logScale ? 'log' : 'linear',
+      range:[Math.log10(0.01), Math.log10(100)] ,
+      type:  'log' ,
       //tickformat: '.01r',
       title: '% of Cases',
     },
