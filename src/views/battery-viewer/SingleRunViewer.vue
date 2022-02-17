@@ -184,6 +184,20 @@
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
 
+        //- ---------- VACCINATION PER TYPE -------
+        .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0")
+          h5 {{ cityCap }} Vaccination per Type
+            button.button.is-small.hider(@click="toggleShowPlot(22)") ..
+
+          .hideIt(v-show="showPlot[22]")
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              vaccination-per-type.plotsize(v-else :endDate="endDate"
+              :logScale="logScale"
+              :vaccinations="vaccinationPerType")
+
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
         .linear-plot
           h5 {{ cityCap }} Hospitalization New Cases
@@ -415,6 +429,7 @@ import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import VaccinationRates from '@/components/VaccinationRates.vue'
 import VaccineEffectivenessPlot from '@/components/VaccinationEffectivenessPlot.vue'
 import VaccineEffectivenessVsStrain from '@/components/VaccinationEffectivenessVsStrain.vue'
+import VaccinationPerType from '@/components/VaccinationPerType.vue'
 import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
 import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
@@ -456,6 +471,7 @@ interface VegaChartDefinition {
     VaccinationRates,
     VaccineEffectivenessPlot,
     VaccineEffectivenessVsStrain,
+    VaccinationPerType,
   },
 })
 export default class VueComponent extends Vue {
@@ -502,6 +518,7 @@ export default class VueComponent extends Vue {
     19: true,
     20: true,
     21: true,
+    22: true,
   }
 
   private MAX_DAYS = 1500
@@ -938,6 +955,8 @@ export default class VueComponent extends Vue {
 
     this.loadMutationValues(this.currentRun)
 
+    this.loadVaccinationPerType(this.currentRun)
+
     this.loadRValues(this.currentRun)
 
     this.loadInfectionsByActivityType(this.currentRun)
@@ -1236,6 +1255,27 @@ export default class VueComponent extends Vue {
       if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
     } catch (e) {
       console.log('WeeklyTests: no', filename)
+    }
+  }
+
+  private vaccinationPerType: any[] = []
+
+  private async loadVaccinationPerType(currentRun: any) {
+    this.vaccinationPerType = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.vaccinations.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.vaccinationPerType = z.data
+      console.log(this.vaccinationPerType)
+    } catch (e) {
+      console.log('Vaccination Per Type: no', filename)
     }
   }
 
