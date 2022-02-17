@@ -46,40 +46,128 @@ export default class VueComponent extends Vue {
     const omicronUpdate = []
     const vector = []
 
-    for (let i = 0; i < this.vaccinations.length; i++) {
-      date.push(this.vaccinations[i].date)
-      generic.push(this.vaccinations[i].generic)
-      mRNA.push(this.vaccinations[i].mRNA)
-      natural.push(this.vaccinations[i].natural)
-      omicronUpdate.push(this.vaccinations[i].omicronUpdate)
-      vector.push(this.vaccinations[i].vector)
+    // 7-day average
+    const dateAvg = []
+    const genericAvg = []
+    const mRNAAvg = []
+    const naturalAvg = []
+    const omicronUpdateAvg = []
+    const vectorAvg = []
+
+    for (let i = 7; i < this.vaccinations.length; i += 7) {
+      console.log(this.vaccinations[i].date)
+
+      var genericTemp =
+        this.vaccinations[i].generic +
+        this.vaccinations[i - 1].generic +
+        this.vaccinations[i - 2].generic +
+        this.vaccinations[i - 3].generic +
+        this.vaccinations[i - 4].generic +
+        this.vaccinations[i - 5].generic +
+        this.vaccinations[i - 6].generic
+      var mRNATemp =
+        this.vaccinations[i].mRNA +
+        this.vaccinations[i - 1].mRNA +
+        this.vaccinations[i - 2].mRNA +
+        this.vaccinations[i - 3].mRNA +
+        this.vaccinations[i - 4].mRNA +
+        this.vaccinations[i - 5].mRNA +
+        this.vaccinations[i - 6].mRNA
+      var naturalTemp =
+        this.vaccinations[i].natural +
+        this.vaccinations[i - 1].natural +
+        this.vaccinations[i - 2].natural +
+        this.vaccinations[i - 3].natural +
+        this.vaccinations[i - 4].natural +
+        this.vaccinations[i - 5].natural +
+        this.vaccinations[i - 6].natural
+      var omicronUpdateTemp =
+        this.vaccinations[i].omicronUpdate +
+        this.vaccinations[i - 1].omicronUpdate +
+        this.vaccinations[i - 2].omicronUpdate +
+        this.vaccinations[i - 3].omicronUpdate +
+        this.vaccinations[i - 4].omicronUpdate +
+        this.vaccinations[i - 5].omicronUpdate +
+        this.vaccinations[i - 6].omicronUpdate
+      var vectorTemp =
+        this.vaccinations[i].vector +
+        this.vaccinations[i - 1].vector +
+        this.vaccinations[i - 2].vector +
+        this.vaccinations[i - 3].vector +
+        this.vaccinations[i - 4].vector +
+        this.vaccinations[i - 5].vector +
+        this.vaccinations[i - 6].vector
+
+      dateAvg.push(this.vaccinations[i].date)
+      genericAvg.push(genericTemp / 7)
+      mRNAAvg.push(mRNATemp / 7)
+      naturalAvg.push(naturalTemp / 7)
+      omicronUpdateAvg.push(omicronUpdateTemp / 7)
+      vectorAvg.push(vectorTemp / 7)
     }
+
+    // for (let i = 0; i < this.vaccinations.length; i++) {
+    //   date.push(this.vaccinations[i].date)
+    //   generic.push(this.vaccinations[i].generic)
+    //   mRNA.push(this.vaccinations[i].mRNA)
+    //   natural.push(this.vaccinations[i].natural)
+    //   omicronUpdate.push(this.vaccinations[i].omicronUpdate)
+    //   vector.push(this.vaccinations[i].vector)
+    // }
+
+    // this.dataLines = [
+    //   {
+    //     name: 'generic',
+    //     x: date,
+    //     y: generic,
+    //   },
+    //   {
+    //     name: 'mRNA',
+    //     x: date,
+    //     y: mRNA,
+    //   },
+    //   {
+    //     name: 'natural',
+    //     x: date,
+    //     y: natural,
+    //   },
+    //   {
+    //     name: 'omicronUpdate',
+    //     x: date,
+    //     y: omicronUpdate,
+    //   },
+    //   {
+    //     name: 'vector',
+    //     x: date,
+    //     y: vector,
+    //   },
+    // ]
 
     this.dataLines = [
       {
         name: 'generic',
-        x: date,
-        y: generic,
+        x: dateAvg,
+        y: genericAvg,
       },
       {
         name: 'mRNA',
-        x: date,
-        y: mRNA,
+        x: dateAvg,
+        y: mRNAAvg,
       },
       {
         name: 'natural',
-        x: date,
-        y: natural,
+        x: dateAvg,
+        y: naturalAvg,
       },
       {
         name: 'omicronUpdate',
-        x: date,
-        y: omicronUpdate,
+        x: dateAvg,
+        y: omicronUpdateAvg,
       },
       {
         name: 'vector',
-        x: date,
-        y: vector,
+        x: dateAvg,
+        y: vectorAvg,
       },
     ]
   }
@@ -110,7 +198,7 @@ export default class VueComponent extends Vue {
       type: this.logScale ? 'log' : 'linear',
       autorange: true,
       //range: [0, 100],
-      title: 'vaccinations per day',
+      title: '7-Day Vaccinations per Day',
     } as any,
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',

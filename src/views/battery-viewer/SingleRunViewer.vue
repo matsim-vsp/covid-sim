@@ -190,6 +190,7 @@
             button.button.is-small.hider(@click="toggleShowPlot(22)") ..
 
           .hideIt(v-show="showPlot[22]")
+          p 7 day average
             //p New persons showing symptoms (model) vs. new cases (reality)
             .plotarea.compact
               p.plotsize(v-if="!isZipLoaded") Loading data...
