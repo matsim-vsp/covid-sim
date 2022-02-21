@@ -55,8 +55,6 @@ export default class VueComponent extends Vue {
     const vectorAvg = []
 
     for (let i = 7; i < this.vaccinations.length; i += 7) {
-      console.log(this.vaccinations[i].date)
-
       var genericTemp =
         this.vaccinations[i].generic +
         this.vaccinations[i - 1].generic +
