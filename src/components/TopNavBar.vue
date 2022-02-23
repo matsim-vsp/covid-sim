@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2022.02.23
+
+          .navbar-dropdown
+            a.navbar-item(:href="'/cologne/2022-02-22/1?ba2Inf=1.5&ba1ba2Long=True'") Omicron variant BA.2. Report Feb. 23
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2022.01.20
 
           .navbar-dropdown
@@ -51,17 +57,12 @@
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2021-09-22/1?leisureUnv=no'") Cologne measures for fall
 
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.09.03
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") Fall measures (endog. activity reductions)
-            a.navbar-item(:href="'/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") Fall measures (no activity reductions)
-
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}" )
           a.navbar-link  Other Versions
           .navbar-dropdown(style="margin-left: -20rem;")
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") 2021.09.03 Fall measures (endog. activity reductions)
+              a.navbar-item(:href="'/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") 2021.09.03 Fall measures (no activity reductions)
               a.navbar-item(:href="'/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25'") 2021.07.16 Report runs for School measures after the holidays
               a.navbar-item(:href="'/2021-05-20/bmbf?b1351inf=1.8&b1351VaccinationEffectiveness=70%25&vaccinationCompliance=80%25&revaccinationDate=no'") 2021.05.21 Virus Mutations and Revaccination
               a.navbar-item(:href="'/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25'") 2021.04.30 Opening Strategies
