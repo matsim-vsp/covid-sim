@@ -199,6 +199,22 @@
               :logScale="logScale"
               :vaccinations="vaccinationPerType")
 
+        
+        //- ---------- ANTIBODIES -------
+        .linear-plot(v-if="showIncidenceComp && antibodies.length > 0")
+          h5 {{ cityCap }} Antibodies
+            button.button.is-small.hider(@click="toggleShowPlot(23)") ..
+
+          .hideIt(v-show="showPlot[23]")
+            //p 7 day average
+            //p New persons showing symptoms (model) vs. new cases (reality)
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              antibodies.plotsize(v-else :endDate="endDate"
+              :logScale="logScale"
+              :antibodies="antibodies")
+
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
         .linear-plot
           h5 {{ cityCap }} Hospitalization New Cases
@@ -436,6 +452,7 @@ import HospitalizationVaccinationComparison from '@/components/HospitalizationVa
 import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
+import Antibodies from '@/components/Antibodies.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
@@ -473,6 +490,7 @@ interface VegaChartDefinition {
     VaccineEffectivenessPlot,
     VaccineEffectivenessVsStrain,
     VaccinationPerType,
+    Antibodies,
   },
 })
 export default class VueComponent extends Vue {
@@ -520,6 +538,7 @@ export default class VueComponent extends Vue {
     20: true,
     21: true,
     22: true,
+    23: true,
   }
 
   private MAX_DAYS = 1500
@@ -958,6 +977,8 @@ export default class VueComponent extends Vue {
 
     this.loadVaccinationPerType(this.currentRun)
 
+    this.loadAntibodies(this.currentRun)
+
     this.loadRValues(this.currentRun)
 
     this.loadInfectionsByActivityType(this.currentRun)
@@ -1277,6 +1298,27 @@ export default class VueComponent extends Vue {
       console.log(this.vaccinationPerType)
     } catch (e) {
       console.log('Vaccination Per Type: no', filename)
+    }
+  }
+
+  private antibodies: any[] = []
+
+  private async loadAntibodies(currentRun: any) {
+    this.antibodies = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.antibodies.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.antibodies = z.data
+      console.log(this.antibodies)
+    } catch (e) {
+      console.log('Antibodies: no', filename)
     }
   }
 
