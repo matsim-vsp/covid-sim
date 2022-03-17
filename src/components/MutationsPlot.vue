@@ -300,9 +300,9 @@ export default class VueComponent extends Vue {
           '% Gamma Reported',
           '% MUTB Reported',
           '% SARS_CoV_2 Reported',
-          '% Omicron Reported',
-          '% BA.1 Reported',
-          '% BA.2 Reported',
+          '% Omicron Reported (NRW)',
+          '% BA.1 Reported (Germany)',
+          '% BA.2 Reported (Germany)',
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -579,8 +579,8 @@ export default class VueComponent extends Vue {
       //range: [0.01, 100],
       // range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
       // type: this.logScale ? 'log' : 'linear',
-      range:[Math.log10(0.01), Math.log10(100)] ,
-      type:  'log' ,
+      range: [Math.log10(0.01), Math.log10(100)],
+      type: 'log',
       //tickformat: '.01r',
       title: '% of Cases',
     },
