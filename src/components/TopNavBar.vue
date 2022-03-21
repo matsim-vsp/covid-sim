@@ -38,29 +38,14 @@
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25'") Measures and Omicron variant. Report Dec. 17
 
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.11.19
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected'") Measures without activity reductions
-            a.navbar-item(:href="'/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected'") Measures with activity reductions
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.10.22
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no'") Booster vaccinations
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.09.24
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2021-09-22/1?leisureUnv=no'") Cologne measures for fall
-
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}" )
           a.navbar-link  Other Versions
           .navbar-dropdown(style="margin-left: -20rem;")
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected'") 2021.11.19 Measures without activity reductions
+              a.navbar-item(:href="'/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected'") 2021.11.19 Measures with activity reductions
+              a.navbar-item(:href="'/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no'") 2021.10.22 Booster vaccinations
+              a.navbar-item(:href="'/cologne/2021-09-22/1?leisureUnv=no'") 2021.09.22 Cologne measures for fall
               a.navbar-item(:href="'/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") 2021.09.03 Fall measures (endog. activity reductions)
               a.navbar-item(:href="'/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current'") 2021.09.03 Fall measures (no activity reductions)
               a.navbar-item(:href="'/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25'") 2021.07.16 Report runs for School measures after the holidays
