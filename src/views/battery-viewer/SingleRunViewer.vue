@@ -101,7 +101,8 @@
               weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
               :observed="observedCases"
               :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale")
+              :logScale="logScale"
+              :unreportedIncidence="unreportedIncidence")
 
         //- ---------- VACCINE EFFECTIVENESS -------
         .linear-plot(v-if="showVaccineEffectivenessFields.length")
@@ -866,6 +867,27 @@ export default class VueComponent extends Vue {
   private async mounted() {
     this.loadCoronaDetectionRateData()
     this.switchYaml()
+  }
+
+  private unreportedIncidence: any = {}
+
+  @Watch('cityCap') async loadUnreportedIncidence() {
+    if (this.cityCap == 'Cologne') {
+      const url =
+        'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferCologne.csv'
+
+      try {
+        const response = await fetch(url)
+        const csvContents = await response.text()
+        this.unreportedIncidence = Papa.parse(csvContents, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+      } catch (e) {
+        console.warn(e)
+      }
+    }
   }
 
   private rkiDetectionRateData: { x?: any[]; y?: any[]; line?: any; name?: string } = {}

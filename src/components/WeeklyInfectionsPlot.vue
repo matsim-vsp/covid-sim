@@ -20,6 +20,7 @@ export default class VueComponent extends Vue {
     line?: any
     name?: string
   }
+  @Prop({ required: true }) private unreportedIncidence!: any[]
 
   private color = ['#094', '#0c4']
 
@@ -57,6 +58,29 @@ export default class VueComponent extends Vue {
           autorange: true,
           title: '7-Day Infections / 100k Pop.',
         }
+  }
+
+  @Watch('unreportedIncidence') gotUnreportedIncidence() {
+    this.calculateValues()
+  }
+  private async calculateUnreported() {
+    if (this.unreportedIncidence.length > 1) {
+      const unreportedDataLine: any = {
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 4 },
+      }
+
+      unreportedDataLine.name = 'Assumed Reported and Unreported Cases'
+      unreportedDataLine.x = []
+      unreportedDataLine.y = []
+
+      for (var i = 0; i < this.unreportedIncidence.length; i++) {
+        unreportedDataLine.x.push(this.unreportedIncidence[i]['Datum'])
+        unreportedDataLine.y.push(this.unreportedIncidence[i]['DunkelzifferInzidenz'])
+      }
+      this.dataLines.push(unreportedDataLine)
+    }
   }
 
   private calculateObserved(factor100k: number) {
@@ -118,6 +142,7 @@ export default class VueComponent extends Vue {
 
       this.dataLines.push(observedLine)
     }
+    this.calculateUnreported()
   }
 
   /**
