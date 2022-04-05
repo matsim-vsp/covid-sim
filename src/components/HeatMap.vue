@@ -16,6 +16,14 @@ export default class VueComponent extends Vue {
 
   private maximumValue = 2000
 
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
+  }
+
   private dataMatrix: any[] = []
 
   // log of 'Hot' Colorscale from

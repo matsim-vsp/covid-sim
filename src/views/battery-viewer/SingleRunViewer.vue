@@ -45,7 +45,11 @@
         input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
         p.infected {{ summaryRValue }}
 
-    .right-side
+    .right-side(:class="{'wide-mode': $store.state.isWideMode}")
+      p.width-selection
+        a(:class="{'active-view-mode': !$store.state.isWideMode}" @click="setWideMode(false)") Narrow
+        a(:class="{'active-view-mode': $store.state.isWideMode}" @click="setWideMode(true)") Wide
+
       //- ------- ACTIVITY LEVELS
       .linear-plot.activity(v-if="showActivityLevels")
         h5 Activity Levels by Type
@@ -200,7 +204,6 @@
               :logScale="logScale"
               :vaccinations="vaccinationPerType")
 
-        
         //- ---------- ANTIBODIES -------
         .linear-plot(v-if="showIncidenceComp && antibodies.length > 0")
           h5 {{ cityCap }} Antibodies
@@ -640,6 +643,12 @@ export default class VueComponent extends Vue {
     this.zipLoaderLookup = {}
   }
 
+  private async setWideMode(mode: boolean) {
+    this.$store.commit('setWideMode', mode)
+    await this.$nextTick()
+    this.$forceUpdate()
+  }
+
   @Watch('runYaml') private async switchYaml() {
     if (!this.runYaml.city) return
 
@@ -870,6 +879,14 @@ export default class VueComponent extends Vue {
   }
 
   private unreportedIncidence: any = {}
+
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
+  }
 
   @Watch('cityCap') async loadUnreportedIncidence() {
     if (this.cityCap == 'Cologne') {
@@ -1761,6 +1778,21 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+.width-selection {
+  margin-left: auto;
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
+
+.width-selection a {
+  margin-left: 0.5rem;
+}
+
+a.active-view-mode {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .hider {
   border-radius: 10rem;
   font-size: 0.6rem;
@@ -1989,6 +2021,10 @@ p.subhead {
   display: flex;
   flex: 1;
   flex-direction: column;
+}
+
+.right-side.wide-mode {
+  max-width: none;
 }
 
 .results {

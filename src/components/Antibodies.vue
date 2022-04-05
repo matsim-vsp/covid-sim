@@ -25,6 +25,14 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
+  }
+
   @Watch('antibodies') private updateModelData() {
     this.calculateValues()
   }
@@ -162,6 +170,9 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
+.my-view-component {
+  background-color: yellow;
+}
 @media only screen and (max-width: 640px) {
 }
 </style>

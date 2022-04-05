@@ -1,6 +1,6 @@
 <template lang="pug">
 .activity-levels-plot
-  vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly.activity-plot(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options")
 
   .row-labels(:class="{jakarta: city==='jakarta'}")
     .activity(v-for="row in dataLines" :key="row.name")
@@ -12,9 +12,8 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import moment from 'moment'
 import Papa from 'papaparse'
-import SVNFileSystem from '@/util/SVNFileSystem'
 import VuePlotly from '@statnett/vue-plotly'
-import ZipLoader from 'zip-loader'
+
 import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
@@ -32,6 +31,7 @@ export default class VueComponent extends Vue {
   private zipCache: any = {}
   private zipLoader: any
   private isZipLoaded = false
+  private isResizing = false
 
   private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
@@ -95,7 +95,7 @@ export default class VueComponent extends Vue {
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
-    console.log({ timeSerieses })
+    // console.log({ timeSerieses })
 
     // populate the data where we need it
     this.dataLines = timeSerieses
@@ -175,6 +175,13 @@ export default class VueComponent extends Vue {
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
       .format('YYYY-MM-DD')
     return date
+  }
+
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
   }
 
   private unpack(rows: any[], key: any) {

@@ -66,6 +66,16 @@ export default class VueComponent extends Vue {
     this.calculateValues()
   }
 
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.layout2 = Object.assign({}, this.layout2)
+    this.layout3 = Object.assign({}, this.layout3)
+    this.isResizing = false
+  }
+
   private async prepareData() {
     // this.dataLines2 = []
     var foundHeader = false

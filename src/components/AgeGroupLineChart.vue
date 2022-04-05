@@ -26,6 +26,10 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('$store.state.isWideMode') handleWideModeChanged() {
+    this.layout = Object.assign({}, this.layout)
+  }
+
   @Watch('data') private updateModelData() {
     this.buildHeatMap()
   }

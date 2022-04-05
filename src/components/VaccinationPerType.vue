@@ -25,6 +25,14 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
+  }
+
   @Watch('vaccinations') private updateModelData() {
     this.calculateValues()
   }

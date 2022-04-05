@@ -11,6 +11,7 @@ export default new Vuex.Store({
     isRunning: true,
     isFullScreen: false,
     isShowingHelp: false,
+    isWideMode: false,
 
     colorScheme: localStorage.getItem('colorscheme')
       ? localStorage.getItem('colorscheme')
@@ -21,6 +22,9 @@ export default new Vuex.Store({
       : false,
   },
   mutations: {
+    setWideMode(state, value: boolean) {
+      state.isWideMode = value
+    },
     setFullScreen(state, value: boolean) {
       state.isFullScreen = value
     },

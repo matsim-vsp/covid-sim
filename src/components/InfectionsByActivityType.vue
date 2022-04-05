@@ -24,6 +24,15 @@ export default class VueComponent extends Vue {
     this.calculateValues()
   }
 
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.layout2 = Object.assign({}, this.layout2)
+    this.isResizing = false
+  }
+
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateValues()

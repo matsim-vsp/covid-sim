@@ -64,6 +64,16 @@ class VegaLiteChart extends Vue {
     this.processInputs()
   }
 
+  private isResizing = false
+
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
+    this.chartYaml = Object.assign({}, this.chartYaml)
+    await this.embedIt()
+    this.isResizing = false
+  }
+
   private async getVizDetails() {
     await this.processInputs()
     this.loadingText = ''
@@ -130,8 +140,13 @@ class VegaLiteChart extends Vue {
     if (!this.chartYaml.width) this.chartYaml.width = 'container'
     if (!this.chartYaml.height) this.chartYaml.height = this.chartYaml.showAbove ? 250 : 350
 
+    await this.embedIt()
+  }
+
+  private async embedIt() {
     // save buttons
     const exportActions = { export: true, source: false, compiled: false, editor: false }
+
     const embedOptions = {
       actions: this.chartYaml.showAbove ? false : exportActions,
       hover: true,
@@ -221,7 +236,6 @@ p {
 
 .vega-chart {
   width: 100%;
-  max-width: 60rem;
   height: auto;
   margin: 0px auto;
 }
