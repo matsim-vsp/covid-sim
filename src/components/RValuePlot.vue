@@ -1,5 +1,5 @@
 <template lang="pug">
-vue-plotly(:data="dataLines" :layout="layout" :options="options"  @relayout="handleRelayout")
+vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options"  @relayout="handleRelayout")
 
 </template>
 

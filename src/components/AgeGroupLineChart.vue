@@ -1,5 +1,5 @@
 <template lang="pug">
-vue-plotly(:data="dataMatrix" :layout="layout" :options="options" @relayout="handleRelayout")
+vue-plotly(v-if="!isResizing" :data="dataMatrix" :layout="layout" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -26,8 +26,12 @@ export default class VueComponent extends Vue {
     }
   }
 
-  @Watch('$store.state.isWideMode') handleWideModeChanged() {
+  private isResizing = false
+  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
+    this.isResizing = true
+    await this.$nextTick()
     this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
   }
 
   @Watch('data') private updateModelData() {

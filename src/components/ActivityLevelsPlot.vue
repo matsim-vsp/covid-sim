@@ -1,6 +1,6 @@
 <template lang="pug">
-.activity-levels-plot
-  vue-plotly.activity-plot(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options")
+.activity-levels-plot(v-if="!isResizing")
+  vue-plotly.activity-plot(:data="dataLines" :layout="layout" :options="options")
 
   .row-labels(:class="{jakarta: city==='jakarta'}")
     .activity(v-for="row in dataLines" :key="row.name")
@@ -13,6 +13,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import moment from 'moment'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
+import { debounce } from 'debounce'
 
 import { PUBLIC_SVN } from '@/Globals'
 
@@ -45,6 +46,19 @@ export default class VueComponent extends Vue {
       this.isZipLoaded = true
       this.runChanged()
     }
+    window.addEventListener('resize', this.handleResize)
+  }
+
+  private beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize)
+  }
+
+  private handleResize = debounce(this.realHandleResize, 250)
+  private async realHandleResize(c: Event) {
+    this.isResizing = true
+    await this.$nextTick()
+    this.layout = Object.assign({}, this.layout)
+    this.isResizing = false
   }
 
   @Watch('battery') private updateModelData() {
@@ -256,7 +270,7 @@ export default class VueComponent extends Vue {
   private options = {
     // displayModeBar: true,
     displaylogo: false,
-    responsive: true,
+    // responsive: true,
     modeBarButtonsToRemove: [
       'pan2d',
       'zoom2d',

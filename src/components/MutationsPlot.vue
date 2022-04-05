@@ -1,5 +1,5 @@
 <template lang="pug">
-.mutations-plots
+.mutations-plots(v-if="!isResizing")
   vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
   vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
   vue-plotly.plot2(:data="dataLines2" :layout="layout3" :options="options" @relayout="handleRelayout")
