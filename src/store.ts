@@ -12,7 +12,7 @@ export default new Vuex.Store({
     isFullScreen: false,
     isShowingHelp: false,
     isWideMode: false,
-
+    graphStartDate: '',
     colorScheme: localStorage.getItem('colorscheme')
       ? localStorage.getItem('colorscheme')
       : ColorScheme.DarkMode,
@@ -22,6 +22,9 @@ export default new Vuex.Store({
       : false,
   },
   mutations: {
+    setGraphStartDate(state, value: string) {
+      state.graphStartDate = value
+    },
     setWideMode(state, value: boolean) {
       state.isWideMode = value
     },

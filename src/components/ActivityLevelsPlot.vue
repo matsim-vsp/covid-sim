@@ -103,7 +103,7 @@ export default class VueComponent extends Vue {
     this.layout.grid.rows = this.dataLines.length
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     for (let i = 2; i <= this.dataLines.length; i++) {
       const key = 'yaxis' + i
@@ -224,8 +224,9 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 45 },
+    margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
+      automargin: true,
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
       zeroline: true,
@@ -235,6 +236,7 @@ export default class VueComponent extends Vue {
       showline: false,
     },
     yaxis: {
+      automargin: true,
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
       type: 'linear',
@@ -284,7 +286,7 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .activity-levels-plot {
-  margin-left: 0.5rem;
+  margin-left: 0rem;
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto;

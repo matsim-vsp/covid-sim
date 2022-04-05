@@ -72,6 +72,8 @@ export interface RunYaml {
   defaultStartDate?: string
   startDates?: string[]
   //heat map max
+  // graphs can start on a different date than the simulation
+  graphStartDate: string
   heatMapMaxValue?: number
   // Starting date for left-panel R-Value statistic
   rValueDate?: string

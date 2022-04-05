@@ -14,6 +14,7 @@
 import vegaEmbed from 'vega-embed'
 import yaml from 'yaml'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import moment from 'moment'
 
 @Component({ components: {} })
 class VegaLiteChart extends Vue {
@@ -93,6 +94,19 @@ class VegaLiteChart extends Vue {
         this.chartYaml.encoding.y.scale = { type: this.logScale ? 'symlog' : 'linear' }
         if (!this.logScale) delete this.chartYaml.encoding.y.axis
       } catch (e) {}
+    }
+
+    // date range. If x-axis is "date"s, then filter them using startDate
+    if (this.chartYaml.encoding?.x?.field === 'date') {
+      const date = moment(this.$store.state.graphStartDate)
+      this.chartYaml.transform = [
+        {
+          filter: {
+            field: 'date',
+            gte: { year: date.year(), month: 1 + date.month(), day: date.day() },
+          },
+        },
+      ]
     }
 
     // fonts

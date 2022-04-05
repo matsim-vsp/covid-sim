@@ -105,7 +105,7 @@ export default class VueComponent extends Vue {
     }
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)] // otherwise starts with different values. kai, jan'21
 
@@ -135,7 +135,7 @@ export default class VueComponent extends Vue {
     if (this.data.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 
@@ -217,7 +217,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {

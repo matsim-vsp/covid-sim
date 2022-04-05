@@ -82,8 +82,8 @@ export default class VueComponent extends Vue {
     // console.log({ date, infections, shares })
 
     // set up the plots
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
-    this.layout2.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+    this.layout2.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     for (const actType of Object.keys(infections).sort()) {
       this.dataLines.push({
@@ -121,7 +121,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {

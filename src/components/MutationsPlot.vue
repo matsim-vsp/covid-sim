@@ -39,7 +39,10 @@ export default class VueComponent extends Vue {
   }
 
   private handleRelayout(event: any) {
-    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+    if (
+      event['xaxis.range[0]'] == this.$store.state.graphStartDate &&
+      event['xaxis.range[1]'] == '2020-12-31'
+    ) {
       this.calculateValues()
     }
   }
@@ -473,9 +476,9 @@ export default class VueComponent extends Vue {
     }
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
-    this.layout2.xaxis.range = ['2020-02-09', this.endDate]
-    this.layout3.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+    this.layout2.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+    this.layout3.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     this.dataLines.push({
       name: strain,
@@ -503,7 +506,6 @@ export default class VueComponent extends Vue {
 
   private layout = {
     height: 200, // this _should_ adjust automatically, but somehow it does not for me.  kai, feb'22
-    autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
@@ -513,11 +515,11 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
+    margin: { t: 5, r: 10, b: 0, l: 60, pad: 2 },
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {
@@ -532,7 +534,6 @@ export default class VueComponent extends Vue {
 
   private layout2 = {
     height: 200,
-    autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
@@ -542,22 +543,23 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 5, l: 60 },
+    margin: { t: 5, r: 10, b: 0, l: 60, pad: 2 },
     xaxis: {
+      automargin: true,
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
+      animate: true,
     },
     yaxis: {
-      //fixedrange: window.innerWidth < 700,
-      //fixedrange: true,
       type: 'linear',
+      automargin: true,
       range: [0.01, 100],
       // range: this.logScale ? [Math.log10(0.01), Math.log10(100)] : [Math.log10(0), Math.log10(100)],
       // type: this.logScale ? 'log' : 'linear',
       //tickformat: '.01r',
-      title: '% of Cases',
+      title: { text: '% of Cases', standoff: 0 },
     },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
@@ -575,14 +577,16 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 5, l: 60 },
+    margin: { t: 5, r: 10, b: 0, l: 60, pad: 2 },
     xaxis: {
+      automargin: true,
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {
+      automargin: true,
       //fixedrange: window.innerWidth < 700,
       //fixedrange: true,
       //type: 'linear',

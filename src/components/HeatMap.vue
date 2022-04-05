@@ -103,7 +103,7 @@ export default class VueComponent extends Vue {
     margin: { t: 10, r: 10, b: 30, l: 60 },
     xaxis: {
       type: 'date',
-      range: ['2020-02-09', this.endDate],
+      range: [this.$store.state.graphStartDate, this.endDate],
       fixedrange: true,
     },
     yaxis: {

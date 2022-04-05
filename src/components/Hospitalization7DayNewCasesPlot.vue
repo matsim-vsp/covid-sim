@@ -134,7 +134,7 @@ export default class VueComponent extends Vue {
       }
 
       // set end date
-      this.layout.xaxis.range = ['2020-02-09', this.endDate]
+      this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
       // log/linear
       this.updateScale()

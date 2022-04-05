@@ -145,7 +145,7 @@ export default class VueComponent extends Vue {
     if (!modelData.length) return
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     // For Berlin we need to *combine* the seriouslySick and critical into one line.
     for (let i = 0; i < modelData[0].y.length; i++) {
@@ -361,7 +361,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {

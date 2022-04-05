@@ -160,7 +160,7 @@ export default class VueComponent extends Vue {
     if (this.data.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
 

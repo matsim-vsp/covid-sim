@@ -45,7 +45,7 @@ export default class VueComponent extends Vue {
     if (this.vaccinations.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = [this.vaccinations[0].date, this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     const date = []
     const generic = []

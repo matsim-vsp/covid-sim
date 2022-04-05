@@ -92,7 +92,7 @@ export default class VueComponent extends Vue {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
       type: 'date',
-      range: ['2020-02-09', this.endDate],
+      range: [this.$store.state.graphStartDate, this.endDate],
     },
     yaxis: {
       // fixedrange: window.innerWidth < 700,

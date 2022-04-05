@@ -77,7 +77,7 @@ export default class VueComponent extends Vue {
     if (this.data.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     // Vaccinations
     let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
@@ -139,7 +139,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {

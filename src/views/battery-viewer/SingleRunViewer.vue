@@ -673,10 +673,13 @@ export default class VueComponent extends Vue {
       return
     }
 
+    // set start date for Graphs -- not the same as start date of simulation
+    this.$store.commit('setGraphStartDate', this.runYaml.graphStartDate || '2021-02-09') // this.startDate)
+
     // set end date
     this.endDate = this.runYaml.endDate ? this.runYaml.endDate : '2020-08-31'
     // console.log({ endDate: this.endDate })
-    this.layout.xaxis.range = ['2020-02-09', this.endDate]
+    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     // build offsets
     if (!this.runYaml.offset && !this.runYaml.startDates) {
