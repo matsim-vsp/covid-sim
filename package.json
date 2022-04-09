@@ -35,7 +35,7 @@
     "mathjs": "^8.0.1",
     "medium-zoom": "^1.0.5",
     "micromatch": "^4.0.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "papaparse": "^5.1.1",
     "plotly.js": "^1.52.3",
     "proj4": "^2.6.2",
