@@ -105,8 +105,7 @@ export default class VueComponent extends Vue {
     }
 
     // set end date
-    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
-
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)] // otherwise starts with different values. kai, jan'21
 
     this.dataLines.push({

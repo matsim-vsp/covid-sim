@@ -24,6 +24,8 @@ export default class VueComponent extends Vue {
   private mounted() {
     this.calculateRvalues()
     this.updateSummaryRValue()
+    // set end date
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
   }
 
   private handleRelayout(event: any) {
@@ -226,7 +228,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: [this.$store.state.graphStartDate, '2020-12-31'],
+      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {

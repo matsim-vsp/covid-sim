@@ -77,7 +77,7 @@ export default class VueComponent extends Vue {
     if (this.data.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
 
     // Vaccinations
     let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]

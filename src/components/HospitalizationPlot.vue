@@ -94,6 +94,8 @@ export default class VueComponent extends Vue {
   private mounted() {
     this.prepareAdditionalHospitalData()
     this.buildPlot()
+    // set end date
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
   }
 
   private buildPlot() {
@@ -143,9 +145,6 @@ export default class VueComponent extends Vue {
     this.factor100k = totalPopulation / 100000.0
 
     if (!modelData.length) return
-
-    // set end date
-    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
     // For Berlin we need to *combine* the seriouslySick and critical into one line.
     for (let i = 0; i < modelData[0].y.length; i++) {
@@ -361,7 +360,7 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: [this.$store.state.graphStartDate, '2020-12-31'],
+      range: ['2020-02-09', '2020-12-31'],
       type: 'date',
     },
     yaxis: {

@@ -476,9 +476,9 @@ export default class VueComponent extends Vue {
     }
 
     // set end date
-    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
-    this.layout2.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
-    this.layout3.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout2.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout3.xaxis.range[0] = this.$store.state.graphStartDate
 
     this.dataLines.push({
       name: strain,
