@@ -45,7 +45,7 @@ export default class VueComponent extends Vue {
     if (this.antibodies.length === 0) return
 
     // set end date
-    this.layout.xaxis.range = [this.antibodies[0].date, this.endDate]
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
 
     const date = []
     const ALPHA = []
