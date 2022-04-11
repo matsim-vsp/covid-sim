@@ -83,7 +83,9 @@ export default class VueComponent extends Vue {
 
     // set up the plots
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout.xaxis.range[1] = this.endDate
     this.layout2.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout2.xaxis.range[1] = this.endDate
 
     for (const actType of Object.keys(infections).sort()) {
       this.dataLines.push({

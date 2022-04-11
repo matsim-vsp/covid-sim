@@ -479,6 +479,9 @@ export default class VueComponent extends Vue {
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout2.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout3.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout.xaxis.range[1] = this.endDate
+    this.layout2.xaxis.range[1] = this.endDate
+    this.layout3.xaxis.range[1] = this.endDate
 
     this.dataLines.push({
       name: strain,

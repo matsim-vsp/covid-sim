@@ -116,8 +116,9 @@ export default class VueComponent extends Vue {
 
     this.layout.grid.rows = this.dataLines.length
 
-    // set end date
+    // set x-range
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout.xaxis.range[1] = this.endDate
 
     for (let i = 2; i <= this.dataLines.length; i++) {
       const key = 'yaxis' + i
