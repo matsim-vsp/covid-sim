@@ -75,7 +75,7 @@ export default class VueComponent extends Vue {
     if (this.unreportedIncidence.length > 1) {
       const unreportedDataLine: any = {
         type: 'scatter',
-        mode: 'lines+markers',
+        mode: 'markers',
         marker: { size: 4 },
       }
 
