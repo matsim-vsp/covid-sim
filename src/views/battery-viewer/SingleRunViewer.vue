@@ -762,6 +762,7 @@ export default class VueComponent extends Vue {
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: '-0.15',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
