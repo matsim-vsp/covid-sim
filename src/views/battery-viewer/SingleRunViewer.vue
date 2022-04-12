@@ -272,7 +272,7 @@
 
           .hideIt(v-show="showPlot[6]")
             p Simulated number of infections and percentage, by strain
-            .plotarea(:style="{height: '38rem'}")
+            .plotarea(:style="{height: '42rem'}")
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
               mutations-plot(v-else
@@ -1912,6 +1912,7 @@ h5 {
 }
 
 .plotarea {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 25rem;

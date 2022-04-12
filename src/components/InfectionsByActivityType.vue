@@ -1,7 +1,7 @@
 <template lang="pug">
 .mutations-plots(v-if="!isResizing")
-  vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
-  vue-plotly(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot1(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -107,8 +107,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    // barmode: 'stack',
-    height: 250,
     autosize: true,
     showlegend: true,
     legend: {
@@ -138,7 +136,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout2 = {
-    height: 200,
     autosize: true,
     showlegend: true,
     legend: {
@@ -200,8 +197,18 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .mutations-plots {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.plot1 {
+  flex: 1;
 }
 
 @media only screen and (max-width: 640px) {

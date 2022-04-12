@@ -2,7 +2,7 @@
 .mutations-plots(v-if="!isResizing")
   vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
   vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
-  vue-plotly.plot2(:data="dataLines2" :layout="layout3" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot3(:data="dataLines2" :layout="layout3" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -508,10 +508,11 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    height: 200, // this _should_ adjust automatically, but somehow it does not for me.  kai, feb'22
+    // height: 200, // this _should_ adjust automatically, but somehow it does not for me.  kai, feb'22
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: '-0.15',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -532,14 +533,15 @@ export default class VueComponent extends Vue {
       title: '7-Day Infections / 100k Pop.',
     },
     plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8', // f8f8f8',
   }
 
   private layout2 = {
-    height: 200,
+    // height: 200,
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: '-0.2',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -565,15 +567,16 @@ export default class VueComponent extends Vue {
       title: { text: '% of Cases', standoff: 0 },
     },
     plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
+    paper_bgcolor: '#f8f8f8', // f8f8f8',
   }
 
   private layout3 = {
-    height: 200,
     autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
+      // yanchor: 'top',
+      y: '-0.2',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -638,15 +641,27 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 .mutations-plots {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .plot1 {
   flex: 6;
+  margin-bottom: 1rem;
 }
 
 .plot2 {
+  flex: 5;
+  margin-bottom: 1rem;
+}
+
+.plot3 {
   flex: 5;
 }
 

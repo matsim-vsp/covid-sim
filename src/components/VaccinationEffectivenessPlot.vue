@@ -1,6 +1,11 @@
 <template lang="pug">
-#vue-component(v-if="!isResizing")
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+.vue-component(v-if="!isResizing")
+  vue-plotly.plot1(
+      :class="{'mrna': vaccineType=='mRNA'}"
+      :data="dataLines"
+      :layout="layout"
+      :options="options"
+  )
 
 </template>
 
@@ -160,7 +165,6 @@ export default class VueComponent extends Vue {
   }
 
   private layout = {
-    height: 260,
     autosize: true,
     showlegend: true,
     legend: {
@@ -222,6 +226,25 @@ export default class VueComponent extends Vue {
 
 <style scoped lang="scss">
 @import '@/styles.scss';
+
+.vue-component {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.plot1 {
+  flex: 1;
+}
+
+.mrna {
+  margin-bottom: 1rem;
+}
 
 @media only screen and (max-width: 640px) {
 }
