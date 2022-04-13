@@ -271,7 +271,7 @@
             button.button.is-small.hider(@click="toggleShowPlot(6)") ..
 
           .hideIt(v-show="showPlot[6]")
-            p Simulated number of infections and percentage, by strain
+            p Simulated number of infections (whole simulation region) and percentage, by strain
             .plotarea(:style="{height: '42rem'}")
               p.plotsize(v-if="!isZipLoaded") Loading data...
               p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
