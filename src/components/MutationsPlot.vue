@@ -93,6 +93,8 @@ export default class VueComponent extends Vue {
     var omicron: any[] = []
     var ba1: any[] = []
     var ba2: any[] = []
+    var ba1Cologne: any[] = []
+    var ba2Cologne: any[] = []
 
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
@@ -116,8 +118,12 @@ export default class VueComponent extends Vue {
       var omicronTempDouble = 0
       var ba1TempDouble = 0
       var ba2TempDouble = 0
+      var ba1CologneTempDouble = 0
+      var ba2CologneTempDouble = 0
       var wildTempDouble = 0
       var countDays = 0
+
+      console.log(VOCData)
 
       for (var i = 0; i < VOCData.length; i++) {
         if (
@@ -137,6 +143,8 @@ export default class VueComponent extends Vue {
               header.push(VOCData[i][3])
               header.push(VOCData[i][2])
               header.push(VOCData[i][1])
+              header.push(VOCData[i][9])
+              header.push(VOCData[i][10])
             } else {
               header.push(VOCData[i][0])
               header.push(VOCData[i][1])
@@ -157,6 +165,8 @@ export default class VueComponent extends Vue {
               wildTempDouble = 0
               ba1TempDouble = 0
               ba2TempDouble = 0
+              ba1CologneTempDouble = 0
+              ba2CologneTempDouble = 0
             } else {
               countDays += 1
             }
@@ -171,6 +181,8 @@ export default class VueComponent extends Vue {
               var omicronTemp = VOCData[i][6]
               var ba1Temp = VOCData[i][7]
               var ba2Temp = VOCData[i][8]
+              var ba1CologneTemp = VOCData[i][9]
+              var ba2CologneTemp = VOCData[i][10]
             } else {
               var dateTemp = VOCData[i][0]
               var alphaTemp = VOCData[i][1]
@@ -255,6 +267,22 @@ export default class VueComponent extends Vue {
                   ba2Temp = parseFloat(ba2Temp)
                 }
               }
+
+              if (ba1CologneTemp == null) {
+                ba1CologneTemp = 0
+              } else {
+                if (typeof ba1CologneTemp == 'string') {
+                  ba1CologneTemp = parseFloat(ba1CologneTemp)
+                }
+              }
+
+              if (ba2CologneTemp == null) {
+                ba2CologneTemp = 0
+              } else {
+                if (typeof ba2CologneTemp == 'string') {
+                  ba2CologneTemp = parseFloat(ba2CologneTemp)
+                }
+              }
             }
 
             alphaTempDouble += alphaTemp
@@ -266,6 +294,8 @@ export default class VueComponent extends Vue {
               omicronTempDouble += omicronTemp
               ba1TempDouble += ba1Temp
               ba2TempDouble += ba2Temp
+              ba1CologneTempDouble += ba1CologneTemp
+              ba2CologneTempDouble += ba2CologneTemp
             }
 
             if (countDays == 7 && this.city == 'cologne') {
@@ -278,6 +308,8 @@ export default class VueComponent extends Vue {
               omicron.push((omicronTempDouble * 100) / 7)
               ba1.push((ba1TempDouble * 100) / 7)
               ba2.push((ba2TempDouble * 100) / 7)
+              ba1Cologne.push((ba1CologneTempDouble * 100) / 7)
+              ba2Cologne.push((ba2CologneTempDouble * 100) / 7)
 
               countDays = 0
               alphaTempDouble = 0
@@ -288,6 +320,8 @@ export default class VueComponent extends Vue {
               omicronTempDouble = 0
               ba1TempDouble = 0
               ba2TempDouble = 0
+              ba1CologneTempDouble = 0
+              ba2CologneTempDouble = 0
             } else if (this.city == 'berlin') {
               date.push(dateTemp)
               alpha.push(alphaTempDouble)
@@ -316,6 +350,8 @@ export default class VueComponent extends Vue {
           '% Omicron Reported (NRW)',
           '% BA.1 Reported (Germany)',
           '% BA.2 Reported (Germany)',
+          '% BA.1 Reported (Cologne)',
+          '% BA.2 Reported (Cologne)',
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -400,6 +436,26 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba2,
         name: header[8],
+        color: color[8],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[9]] = {
+        x: date,
+        y: ba1Cologne,
+        name: header[9],
+        color: color[8],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+      this.lineDataLookup[header[10]] = {
+        x: date,
+        y: ba2Cologne,
+        name: header[10],
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
