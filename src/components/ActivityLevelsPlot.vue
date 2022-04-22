@@ -36,7 +36,7 @@ export default class VueComponent extends Vue {
 
   private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
-  private MAX_DAYS = 1000
+  private MAX_DAYS = 1500
 
   private mounted() {
     // if results were passed in, then we don't need to unzip.
