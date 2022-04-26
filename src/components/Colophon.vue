@@ -9,7 +9,7 @@
 
   p Sebastian Müller
   p Christian Rakow
-  p Ricardo Ewert
+  p Jakob Rehmann
   p Sydney Paltra
   p Billy Charlton
 
@@ -19,7 +19,7 @@
 
   .team Contact
 
-  p.nonbreak: a(href="mailto:ewert@vsp.tu-berlin.de") ewert@vsp.tu-berlin.de
+  p.nonbreak: a(href="mailto:covid19@vsp.tu-berlin.de") covid19@vsp.tu-berlin.de
 
   .team Partners
 
