@@ -95,7 +95,6 @@ export default class VueComponent extends Vue {
       })
     }
 
-    console.log(666, lines)
     this.dataLines = []
 
     columns.forEach(col => {

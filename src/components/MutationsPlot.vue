@@ -123,8 +123,6 @@ export default class VueComponent extends Vue {
       var wildTempDouble = 0
       var countDays = 0
 
-      console.log(VOCData)
-
       for (var i = 0; i < VOCData.length; i++) {
         if (
           !(

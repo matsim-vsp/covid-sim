@@ -172,8 +172,6 @@ export default class VueComponent extends Vue {
       item => item.name === 'ShowingSymptomsCumulativeVaccinated'
     )[0]
 
-    console.log(nShowingSymptomsCumulative)
-
     var newCases = []
     var newCasesVac = []
     var newCasesUnvac = []

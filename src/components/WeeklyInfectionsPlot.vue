@@ -21,6 +21,7 @@ export default class VueComponent extends Vue {
     name?: string
   }
   @Prop({ required: true }) private unreportedIncidence!: any[]
+  @Prop({ required: true }) private unreportedIncidenceNRW!: any[]
 
   private color = ['#094', '#0c4']
 
@@ -71,6 +72,44 @@ export default class VueComponent extends Vue {
   @Watch('unreportedIncidence') gotUnreportedIncidence() {
     this.calculateValues()
   }
+
+  @Watch('unreportedIncidenceNRW') gotUnreportedIncidenceNRW() {
+    this.calculateValues()
+  }
+
+  private async calculateUnreportedNRW() {
+    if (this.unreportedIncidenceNRW.length > 1) {
+      const unreportedIncidence: any = {
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 4 },
+      }
+
+      const unreportedIncidenceX2: any = {
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 4 },
+      }
+
+      unreportedIncidence.name = 'MAGS NRW Incidence'
+      unreportedIncidence.x = []
+      unreportedIncidence.y = []
+
+      unreportedIncidenceX2.name = 'Assumed Reported and Unreported Cases (NRW)'
+      unreportedIncidenceX2.x = []
+      unreportedIncidenceX2.y = []
+
+      for (var i = 0; i < this.unreportedIncidenceNRW.length; i++) {
+        unreportedIncidence.x.push(this.unreportedIncidenceNRW[i]['Date'])
+        unreportedIncidence.y.push(this.unreportedIncidenceNRW[i]['Incidence(NRW)'])
+        unreportedIncidenceX2.x.push(this.unreportedIncidenceNRW[i]['Date'])
+        unreportedIncidenceX2.y.push(this.unreportedIncidenceNRW[i]['ScaledTimes2'])
+      }
+      this.dataLines.push(unreportedIncidence)
+      this.dataLines.push(unreportedIncidenceX2)
+    }
+  }
+
   private async calculateUnreported() {
     if (this.unreportedIncidence.length > 1) {
       const unreportedDataLine: any = {
@@ -89,12 +128,11 @@ export default class VueComponent extends Vue {
       }
       this.dataLines.push(unreportedDataLine)
     }
+    this.calculateUnreportedNRW()
   }
 
   private calculateObserved(factor100k: number) {
     if (this.observed.length === 0) return
-
-    console.log(this.observed)
 
     // for each data source, let's draw some dots
     for (const source of this.observed) {

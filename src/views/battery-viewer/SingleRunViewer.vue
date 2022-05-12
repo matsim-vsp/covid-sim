@@ -106,7 +106,8 @@
               :observed="observedCases"
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale"
-              :unreportedIncidence="unreportedIncidence")
+              :unreportedIncidence="unreportedIncidence"
+              :unreportedIncidenceNRW="unreportedIncidenceNRW")
 
         //- ---------- VACCINE EFFECTIVENESS -------
         .linear-plot(v-if="showVaccineEffectivenessFields.length")
@@ -882,8 +883,6 @@ export default class VueComponent extends Vue {
     this.switchYaml()
   }
 
-  private unreportedIncidence: any = {}
-
   private isResizing = false
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
     this.isResizing = true
@@ -891,6 +890,8 @@ export default class VueComponent extends Vue {
     this.layout = Object.assign({}, this.layout)
     this.isResizing = false
   }
+
+  private unreportedIncidence: any = {}
 
   @Watch('cityCap') async loadUnreportedIncidence() {
     if (this.cityCap == 'Cologne') {
@@ -901,6 +902,27 @@ export default class VueComponent extends Vue {
         const response = await fetch(url)
         const csvContents = await response.text()
         this.unreportedIncidence = Papa.parse(csvContents, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+      } catch (e) {
+        console.warn(e)
+      }
+    }
+  }
+
+  private unreportedIncidenceNRW: any = {}
+
+  @Watch('cityCap') async loadUnreportedIncidenceNRW() {
+    if (this.cityCap == 'Cologne') {
+      const url =
+        'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferNRW.csv'
+
+      try {
+        const response = await fetch(url)
+        const csvContents = await response.text()
+        this.unreportedIncidenceNRW = Papa.parse(csvContents, {
           header: true,
           dynamicTyping: true,
           skipEmptyLines: true,
@@ -1338,7 +1360,6 @@ export default class VueComponent extends Vue {
       const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
       this.vaccinationPerType = z.data
-      console.log(this.vaccinationPerType)
     } catch (e) {
       console.log('Vaccination Per Type: no', filename)
     }
@@ -1359,7 +1380,6 @@ export default class VueComponent extends Vue {
       const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
       this.antibodies = z.data
-      console.log(this.antibodies)
     } catch (e) {
       console.log('Antibodies: no', filename)
     }
