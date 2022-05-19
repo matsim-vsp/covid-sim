@@ -24,14 +24,15 @@
 
         .option-group(:class="{'totally-disabled': isBase}"
                       v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-
-          .g1(v-if="hasMultipleOptions(group)")
-            h6.title {{ getGroupTitle(group) }}
+          .g1
+            h6.title {{ calendarForSimDay(group.day) }}:
+              br
+              | {{ group.heading }}
 
             p.subhead(v-if="group.subheading") {{ group.subheading }}
 
             .measure(v-for="m in group.measures" :key="m.measure")
-              .measure-buttons(v-if="measureOptions[m.measure].length > 1")
+              .measure-buttons
                 p {{ m.title }}
                 button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
@@ -602,21 +603,6 @@ export default class VueComponent extends Vue {
 
   private get showByAgePlot() {
     return this.city !== 'jakarta'
-  }
-
-  private getGroupTitle(group: any) {
-    return this.calendarForSimDay(group.day) || group.heading || 'General Options'
-  }
-
-  private hasMultipleOptions(group: any) {
-    // see if any measures have multiple values
-    for (const m of group.measures) {
-      const numOptions = this.measureOptions[m.measure].length
-      if (numOptions > 1) return true
-    }
-
-    // if we got here, then all measures have but one option.
-    return false
   }
 
   private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
@@ -1447,7 +1433,7 @@ export default class VueComponent extends Vue {
   }
 
   private calendarForSimDay(day: number) {
-    if (day === -1) return ''
+    if (day === -1) return 'General Options'
 
     const date = moment(this.startDate)
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
@@ -1861,7 +1847,7 @@ h6 {
 }
 
 .measure {
-  margin-top: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .measure-buttons p {
@@ -1976,7 +1962,6 @@ p.plotsize {
 }
 
 p.subhead {
-  font-size: 0.9rem;
   margin-top: -0.25rem;
 }
 
@@ -2023,7 +2008,7 @@ p.subhead {
 }
 
 .g1 {
-  padding: 0rem 0.5rem 0.1rem 0.5rem;
+  padding: 0rem 0.5rem 1rem 0.5rem;
   border: 1px solid #aaa;
   border-radius: 4px;
 }
