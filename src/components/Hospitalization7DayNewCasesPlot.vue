@@ -120,6 +120,8 @@ export default class VueComponent extends Vue {
 
     try {
       const susceptible = this.data.filter(v => v.name === 'Susceptible')[0]
+      if (!susceptible) return
+
       const totalPopulation = susceptible.y[0]
       const factor100k = totalPopulation / 100000.0
 

@@ -226,11 +226,17 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('data') private prepareHospitalData() {
-    const hospData = Papaparse.parse(this.csvData[this.city], {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
+    let hospData
+    try {
+      hospData = Papaparse.parse(this.csvData[this.city], {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+    } catch (e) {
+      // no data!
+      return
+    }
 
     const sevenDays = 7
     const susceptible = this.data.filter(item => item.name === 'Susceptible')
