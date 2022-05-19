@@ -24,15 +24,14 @@
 
         .option-group(:class="{'totally-disabled': isBase}"
                       v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-          .g1
-            h6.title {{ calendarForSimDay(group.day) }}:
-              br
-              | {{ group.heading }}
+
+          .g1(v-if="hasMultipleOptions(group)")
+            h6.title {{ getGroupTitle(group) }}
 
             p.subhead(v-if="group.subheading") {{ group.subheading }}
 
             .measure(v-for="m in group.measures" :key="m.measure")
-              .measure-buttons
+              .measure-buttons(v-if="measureOptions[m.measure].length > 1")
                 p {{ m.title }}
                 button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
@@ -418,7 +417,7 @@
               :data="vegaChartData[chartKey].data"
             )
 
-        i Run ID: {{ currentRun.RunId }}
+        i Run ID: {{ currentRun ? currentRun.RunId : '' }}
   .page-section.content(v-if="bottomNotes")
     .bottom
       h3 Further Notes
@@ -603,6 +602,39 @@ export default class VueComponent extends Vue {
 
   private get showByAgePlot() {
     return this.city !== 'jakarta'
+  }
+
+  private getGroupTitle(group: any) {
+    return this.calendarForSimDay(group.day) || group.heading || 'General Options'
+  }
+
+  private hasMultipleOptions(group: any) {
+    let hasMultiple = false
+    // see if any measures have multiple values
+    for (const m of group.measures) {
+      if (!this.measureOptions[m.measure]) continue
+
+      const numOptions = this.measureOptions[m.measure].length
+      if (numOptions > 1) {
+        hasMultiple = true
+      } else {
+        this.setValueForSingleOptionMeasure(m.measure)
+      }
+    }
+    return hasMultiple
+  }
+
+  // some measures only have one option! Set its value.
+  private setValueForSingleOptionMeasure(measure: string) {
+    let onlyValue = this.measureOptions[measure][0]
+    if (onlyValue.endsWith('%') && !onlyValue.startsWith('+')) {
+      const answer = onlyValue.substring(0, onlyValue.length - 1)
+      onlyValue = '' + parseFloat(answer) / 100.0
+      if (onlyValue === '0') onlyValue = '0.0'
+      if (onlyValue === '1') onlyValue = '1.0'
+    }
+    const wait = true
+    this.sliderChanged(measure, onlyValue, wait)
   }
 
   private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
@@ -1132,10 +1164,10 @@ export default class VueComponent extends Vue {
     this.summaryRValue = v
   }
 
-  private sliderChanged(measure: any, value: any) {
+  private sliderChanged(measure: any, value: any, wait?: boolean) {
     // console.log(measure, value)
     this.currentSituation[measure] = value
-    this.showPlotForCurrentSituation()
+    if (!wait) this.showPlotForCurrentSituation()
   }
 
   private showPlotForCurrentSituation() {
@@ -1433,7 +1465,7 @@ export default class VueComponent extends Vue {
   }
 
   private calendarForSimDay(day: number) {
-    if (day === -1) return 'General Options'
+    if (day === -1) return ''
 
     const date = moment(this.startDate)
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
@@ -1847,7 +1879,7 @@ h6 {
 }
 
 .measure {
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .measure-buttons p {
@@ -1962,6 +1994,7 @@ p.plotsize {
 }
 
 p.subhead {
+  font-size: 0.9rem;
   margin-top: -0.25rem;
 }
 
@@ -2008,7 +2041,7 @@ p.subhead {
 }
 
 .g1 {
-  padding: 0rem 0.5rem 1rem 0.5rem;
+  padding: 0rem 0.5rem 0.1rem 0.5rem;
   border: 1px solid #aaa;
   border-radius: 4px;
 }
