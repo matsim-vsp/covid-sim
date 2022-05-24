@@ -1,414 +1,137 @@
 <template lang="pug">
 #single-run-viewer
-  .page-section.content
-    .readme(v-html="topNotes")
-
-  .page-section.preamble(:style="{backgroundColor: 'white'}")
-    h3.select-scenario Select Scenario:
-
-  .page-section.base-choice(v-if="city && hasBaseRun")
-    .button-choices.buttons.has-addons
-      button.button.is-small(
-        :style="{marginRight: '0.5rem'}"
-        :class="{'is-link': !isBase, 'is-selected': !isBase}"
-        :key="'do-something'" @click='setBase(false)') Alternatives
-      button.button.is-small(
-        :class="{'is-link': isBase, 'is-selected': isBase}"
-        :key="'base'" @click='setBase(true)') What would have happened without restrictions
-
-  .page-section.selections-and-charts
-    .left-side
-      .option-groups(
-        v-if="this.city"
-        :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
-
-        .option-group(:class="{'totally-disabled': isBase}"
-                      v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-          .g1
-            h6.title {{ calendarForSimDay(group.day) }}:
-              br
-              | {{ group.heading }}
-
-            p.subhead(v-if="group.subheading") {{ group.subheading }}
-
+  .left-content
+    .side-menu
+      .menu-categorie(v-for="(categorie, index) in sideMenuCategories")
+        .categorie-header
+          i.fa.fa-arrow-down.menu-arrow(v-if="index == activeSideMenu" @click="updateSideMenu(categorie)")
+          i.fa.fa-arrow-right.menu-arrow(v-else @click="updateSideMenu(categorie)")
+          h6.menu-header.title {{categorie}}
+        .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
+          .scrollable
+            .allPlots(v-for="(plot, index) in allPlots")
+              .plot-menu
+                input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(index)")
+                p.plot-name {{ cityCap }} {{plot.name}}
+                // v-model="checked"
+          .select-all-plots
+            button.button.is-small.menu-button(@click="showPlotMenu(5656)") Select All
+            button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
+        .categorie-content.scrollable(v-show="categorie == 'Configuration' && activeSideMenu == 0")
+          .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
+            h6.title {{ group.heading }}
+            h6.title {{ calendarForSimDay(group.day) }}
+            p.subhead {{ group.subheading }}
             .measure(v-for="m in group.measures" :key="m.measure")
               .measure-buttons
                 p {{ m.title }}
-                button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+                  button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+          h5.cumulative Cumulative Infected by
+            br
+            | {{ endDate }}:
+          p.infected {{ prettyInfected }}
 
-        h5.cumulative Cumulative Infected by
-          br
-          | {{ this.endDate }}:
-        p.infected {{ prettyInfected }}
+          h5.cumulative R-Value on:
+          input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
+          p.infected {{ summaryRValue }}
+  .right-content
+    .page-section.content
+      .readme(v-html="topNotes")
 
-        h5.cumulative R-Value on:
-        input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
-        p.infected {{ summaryRValue }}
+    .page-section.preamble(:style="{backgroundColor: 'white'}")
+      h3.select-scenario Select Scenario:
 
-    .right-side(:class="{'wide-mode': $store.state.isWideMode}")
-      p.width-selection
-        a(:class="{'active-view-mode': !$store.state.isWideMode}" @click="setWideMode(false)") Narrow
-        a(:class="{'active-view-mode': $store.state.isWideMode}" @click="setWideMode(true)") Wide
+    .page-section.base-choice(v-if="city && hasBaseRun")
+      .button-choices.buttons.has-addons
+        button.button.is-small(
+          :style="{marginRight: '0.5rem'}"
+          :class="{'is-link': !isBase, 'is-selected': !isBase}"
+          :key="'do-something'" @click='setBase(false)') Alternatives
+        button.button.is-small(
+          :class="{'is-link': isBase, 'is-selected': isBase}"
+          :key="'base'" @click='setBase(true)') What would have happened without restrictions
 
-      //- ------- ACTIVITY LEVELS
-      .linear-plot.activity(v-if="showActivityLevels")
-        h5 Activity Levels by Type
-        p 0-100% of normal
-        .plotarea.activities
-          activity-levels-plot.plotsize(:city="city" :battery="runId"
-            :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-            :zipContent="zipLoader")
-            //- @missing="showActivityLevels = false")
+    .page-section.selections-and-charts
+      //- .side-menu
+      //-   .menu-categorie(v-for="(categorie, index) in sideMenuCategories")
+      //-     .categorie-header
+      //-       i.fa.fa-arrow-down.menu-arrow(v-if="index == activeSideMenu" @click="updateSideMenu(categorie)")
+      //-       i.fa.fa-arrow-right.menu-arrow(v-else @click="updateSideMenu(categorie)")
+      //-       h6.menu-header.title {{categorie}}
+      //-     .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
+      //-       .allPlots(v-for="(plot, index) in allPlots")
+      //-         .plot-menu
+      //-           input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(index)")
+      //-           p.plot-name {{ cityCap }} {{plot.name}}
+      //-           // v-model="checked"
+      //-       .select-all-plots
+      //-         button.button.is-small.menu-button(@click="showPlotMenu(5656)") Select All
+      //-         button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
+      //-     .categorie-content(v-show="categorie == 'Configuration' && activeSideMenu == 0")
+      //-       .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
+      //-         h6.title {{ group.heading }}
+      //-         h6.title {{ calendarForSimDay(group.day) }}
+      //-         p.subhead {{ group.subheading }}
+      //-         .measure(v-for="m in group.measures" :key="m.measure")
+      //-           .measure-buttons
+      //-             p {{ m.title }}
+      //-               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+      //-       h5.cumulative Cumulative Infected by
+      //-         br
+      //-         | {{ endDate }}:
+      //-       p.infected {{ prettyInfected }}
 
-      //- ------ Vega charts with top=true -----------
-      .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-        .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
-          vega-lite-chart.plotsize(
-            :baseUrl="BATTERY_URL"
-            :runId="runId"
-            :configFile="chartKey"
-            :logScale="logScale"
-            :yamlDef="vegaChartData[chartKey].yaml"
-            :data="vegaChartData[chartKey].data"
-          )
+      //-       h5.cumulative R-Value on:
+      //-       input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
+      //-       p.infected {{ summaryRValue }}
+              
 
-      //- ----- SCALE AND SHIFT BUTTONS -----
-      .plot-options
-        .scale-options
-          b Scale
-          .variation-choices.buttons.has-addons
-            button.button.is-small(
-              :class="{'is-link': !logScale, 'is-selected': !logScale}"
-              @click="logScale = false") Linear
-            button.button.is-small(
-              :class="{'is-link': logScale, 'is-selected': logScale}"
-              @click="logScale = true") Log
+        //- .left-side
+        //-   .option-groups(
+        //-       v-if="this.city"
+        //-       :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
 
-        .variation(v-if="offset.length > 1")
-          b Shift Start Date
-          .variation-choices.buttons.has-addons( style="margin-left: auto;")
-            button.button.is-small(v-for="offset in offset" :key="offset"
-              :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
-              @click="setPlusMinus(offset)") {{ strOffset(offset)}}
+        //-       .option-group(:class="{'totally-disabled': isBase}"
+        //-                     v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
+        //-         .g1
+        //-           h6.title {{ calendarForSimDay(group.day) }}:
+        //-             br
+        //-             | {{ group.heading }}
 
-      .all-plots
-        //- ---------- CASES COMPARISION -------
-        .linear-plot
-          h5 {{ cityCap }} Cases Comparison
-            button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+        //-           p.subhead(v-if="group.subheading") {{ group.subheading }}
 
-          .hideIt(v-show="showPlot[0]")
-            p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
-              :observed="observedCases"
-              :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale"
-              :unreportedIncidence="unreportedIncidence"
-              :unreportedIncidenceNRW="unreportedIncidenceNRW")
+        //-           .measure(v-for="m in group.measures" :key="m.measure")
+        //-             .measure-buttons
+        //-               p {{ m.title }}
+        //-               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
-        //- ---------- VACCINE EFFECTIVENESS -------
-        .linear-plot(v-if="showVaccineEffectivenessFields.length")
-          h5 {{ cityCap }} Vaccine Effectiveness (against infection)
-            button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+        //-       h5.cumulative Cumulative Infected by
+        //-         br
+        //-         | {{ this.endDate }}:
+        //-       p.infected {{ prettyInfected }}
 
-          .hideIt(v-show="showPlot[18]")
-            p mRNA Vaccines
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vaccine-effectiveness-plot(v-else
-                :startDate="startDate"
-                :endDate="endDate"
-                :logScale="false"
-                :vaccineEffectivenessData="vaccineEffectivenessData"
-                :vaccineEffectivenessFields="showVaccineEffectivenessFields"
-                vaccineType="mRNA"
-              )
+        //-       h5.cumulative R-Value on:
+        //-       input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
+        //-       p.infected {{ summaryRValue }}
 
-          .hideIt(v-show="showPlot[18]")
-            p Vector Vaccines
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vaccine-effectiveness-plot.plotsize(v-else
-                :startDate="startDate"
-                :endDate="endDate"
-                :logScale="false"
-                :vaccineEffectivenessData="vaccineEffectivenessData"
-                :vaccineEffectivenessFields="showVaccineEffectivenessFields"
-                vaccineType="vector"
-              )
+      .right-side(:class="{'wide-mode': $store.state.isWideMode}")
+        p.width-selection
+          a(:class="{'active-view-mode': !$store.state.isWideMode}" @click="setWideMode(false)") Narrow
+          a(:class="{'active-view-mode': $store.state.isWideMode}" @click="setWideMode(true)") Wide
 
-        //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
-        .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length")
-          h5 {{ cityCap }} Vaccine Effectiveness Vs. Strain
-            button.button.is-small.hider(@click="toggleShowPlot(19)") ..
+        //- ------- ACTIVITY LEVELS
+        .linear-plot.activity(v-if="showActivityLevels")
+          h5 Activity Levels by Type
+          p 0-100% of normal
+          .plotarea.activities
+            activity-levels-plot.plotsize(:city="city" :battery="runId"
+              :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
+              :zipContent="zipLoader")
+              //- @missing="showActivityLevels = false")
 
-          .hideIt(v-show="showPlot[19]")
-            //- p mRNA Vaccines
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vaccine-effectiveness-vs-strain(v-else
-                :startDate="startDate"
-                :endDate="endDate"
-                :logScale="false"
-                :vaccineEffectivenessData="vaccineEffectivenessVsStrainData"
-                :vaccineEffectivenessFields="showVaccineEffectivenessVsStrainFields"
-              )
-
-        //- ---------- VACCINATED / UNVACCINATED -------
-        .linear-plot(v-if="showIncidenceComp")
-          h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(14)") ..
-
-          .hideIt(v-show="showPlot[14]")
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
-              :observed="observedCases"
-              :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale")
-
-        //- ---------- VACCINATION / BOOSTER RATES -------
-        .linear-plot(v-if="showIncidenceComp")
-          h5 {{ cityCap }} Vaccination Rates and Booster Rates
-            button.button.is-small.hider(@click="toggleShowPlot(17)") ..
-
-          .hideIt(v-show="showPlot[17]")
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
-              :observed="observedCases"
-              :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale")
-
-        //- ---------- VACCINATION PER TYPE -------
-        .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0")
-          h5 {{ cityCap }} Vaccination per Type
-            button.button.is-small.hider(@click="toggleShowPlot(22)") ..
-
-          .hideIt(v-show="showPlot[22]")
-            p 7 day average
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vaccination-per-type.plotsize(v-else :endDate="endDate"
-              :logScale="logScale"
-              :vaccinations="vaccinationPerType")
-
-        //- ---------- ANTIBODIES -------
-        .linear-plot(v-if="showIncidenceComp && antibodies.length > 0")
-          h5 {{ cityCap }} Antibodies
-            button.button.is-small.hider(@click="toggleShowPlot(23)") ..
-
-          .hideIt(v-show="showPlot[23]")
-            //p 7 day average
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              antibodies.plotsize(v-else :endDate="endDate"
-              :logScale="logScale"
-              :antibodies="antibodies")
-
-        //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
-        .linear-plot
-          h5 {{ cityCap }} Hospitalization New Cases
-            button.button.is-small.hider(@click="toggleShowPlot(15)") ..
-
-          .hideIt(v-show="showPlot[15]")
-            p 7-day moving average
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              hospitalization-7-day-new-cases-plot.plotsize(v-else
-               :data="data"
-               :endDate="endDate"
-               :city="city"
-               :logScale="logScale"
-              )
-
-        //- ---------- HOSPITALIZATION RATES
-        .linear-plot(v-if="city !== 'heinsberg'")
-          h5 {{ cityCap }} Hospitalization Rate Comparison
-            button.button.is-small.hider(@click="toggleShowPlot(1)") ..
-
-          .hideIt(v-show="showPlot[1]")
-            p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              hospitalization-plot.plotsize(v-else
-                :data="hospitalData" :logScale="logScale" :city="city"
-                :diviData="diviData" :endDate="endDate" )
-
-        //- ---------- CASES COMPARISION BY VACCINATION -------
-        .linear-plot(v-if="showIncidenceComp")
-          h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
-            button.button.is-small.hider(@click="toggleShowPlot(16)") ..
-
-          .hideIt(v-show="showPlot[16]")
-            //p New persons showing symptoms (model) vs. new cases (reality)
-            .plotarea.tall
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              hospitalization-vaccination-comparison.plotsize(v-else :data="data"  :endDate="endDate"
-              :observed="observedCases"
-              :rkiDetectionData="rkiDetectionRateData"
-              :logScale="logScale")
-
-        //- ---------- VIRUS STRAINS -------
-        .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0")
-          h5 {{ cityCap }} Virus Strains
-            button.button.is-small.hider(@click="toggleShowPlot(6)") ..
-
-          .hideIt(v-show="showPlot[6]")
-            p Simulated number of infections (whole simulation region) and percentage, by strain
-            .plotarea(:style="{height: '42rem'}")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              mutations-plot(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="logScale"
-                :strainValues="mutationValues"
-                :city="city"
-              )
-
-        //- ---------- R-VALUES -------
-        .linear-plot
-          h5 {{ cityCap }} Simulated R-Values
-            button.button.is-small.hider(@click="toggleShowPlot(2)") ..
-
-          .hideIt(v-show="showPlot[2]")
-            p {{ rValueMethodDescription }}
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              r-value-plot.plotsize(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="false"
-                :rValues="rValues"
-                :rValueDate="summaryRValueDate"
-                @avgR="gotNewSummaryRValue"
-                @method="switchRMethod")
-
-        //- ---------- R VALUES 2 -------
-        .linear-plot(v-if="hasRValuePurposes")
-          h5 {{ cityCap }} Simulated R-Values by Purpose
-            button.button.is-small.hider(@click="toggleShowPlot(5)") ..
-
-          .hideIt(v-show="showPlot[5]")
-            p {{ rValueMethodDescription }}
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              r-value-two.plotsize(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="false"
-                :rValues="rValues"
-                @method="switchRMethod")
-
-        //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
-        .linear-plot(v-if="infectionsByActivityType.length > 0")
-          h5 {{ cityCap }} Infections by Activity Type
-            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
-          .hideIt(v-show="showPlot[7]")
-            p 7 day average
-            .plotarea(:style="{height: '28rem'}")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              infections-by-activity-type(v-else
-                :endDate="endDate"
-                :logScale="logScale"
-                :values="infectionsByActivityType"
-              )
-
-        //- ---------- HEALTH OUTCOMES ------
-        .linear-plot
-          h5 {{ cityCap }} Simulated Health Outcomes Over Time
-            button.button.is-small.hider(@click="toggleShowPlot(3)") ..
-
-          .hideIt(v-show="showPlot[3]")
-            p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-            .plotarea
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              vue-plotly.plotsize(v-else
-                :data="dataHealth" :layout="layout" :options="options")
-
-        //- ---------- AGE GROUP BLOCK CHART ------
-        .linear-plot(v-if="showByAgePlot && incidenceHeatMapData")
-          h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
-            button.button.is-small.hider(@click="toggleShowPlot(4)") ..
-
-          .hideIt(v-show="showPlot[4]")
-            .plotarea(style="grid-template-rows: 18rem")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              heat-map.plotsize(v-else
-                :endDate="endDate"
-                :data="incidenceHeatMapData"
-                :heatMapMaxValue="runYaml.heatMapMaxValue"
-              )
-
-        //- ---------- AGE GROUP LINE CHART ------
-        .linear-plot(v-if="showByAgePlot && incidenceHeatMapData")
-          h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
-            button.button.is-small.hider(@click="toggleShowPlot(13)") ..
-
-          .hideIt(v-show="showPlot[13]")
-            .plotarea(style="grid-template-rows: 18rem")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              age-group-line-chart.plotsize(v-else
-                :endDate="endDate"
-                :data="incidenceHeatMapData"
-                :logScale="logScale")
-
-        //- ---------- LEISURE OUTDOOR FRACTION ------
-        .linear-plot(v-if="leisurOutdoorFractionData.length")
-          h5 Leisure Outdoor Fraction
-            button.button.is-small.hider(@click="toggleShowPlot(11)") ..
-
-          .hideIt(v-show="showPlot[11]")
-            .plotarea(style="grid-template-rows: 18rem")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              leisure-outdoor-fraction.plotsize(v-else
-                :data="leisurOutdoorFractionData"
-                :logScale="false"
-                :endDate="endDate"
-                )
-
-          //- ---------- WEEKLY TESTS ------
-        .linear-plot(v-if="weeklyTestsData.length")
-          h5 Weekly Tests
-            button.button.is-small.hider(@click="toggleShowPlot(12)") ..
-
-          .hideIt(v-show="showPlot[12]")
-            .plotarea(style="grid-template-rows: 18rem")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              weekly-tests.plotsize(v-else
-                :data="weeklyTestsData"
-                :endDate="endDate"
-                )
-
-        //- ---------- VEGA PLOTS ------
-        .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-          .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
+        //- ------ Vega charts with top=true -----------
+        .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+          .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
               :runId="runId"
@@ -418,11 +141,370 @@
               :data="vegaChartData[chartKey].data"
             )
 
-        i Run ID: {{ currentRun.RunId }}
-  .page-section.content(v-if="bottomNotes")
-    .bottom
-      h3 Further Notes
-      .readme(v-html="bottomNotes")
+        //- ----- SCALE AND SHIFT BUTTONS -----
+        .plot-options
+          .scale-options
+            b Scale
+            .variation-choices.buttons.has-addons
+              button.button.is-small(
+                :class="{'is-link': !logScale, 'is-selected': !logScale}"
+                @click="logScale = false") Linear
+              button.button.is-small(
+                :class="{'is-link': logScale, 'is-selected': logScale}"
+                @click="logScale = true") Log
+
+          .variation(v-if="offset.length > 1")
+            b Shift Start Date
+            .variation-choices.buttons.has-addons( style="margin-left: auto;")
+              button.button.is-small(v-for="offset in offset" :key="offset"
+                :class="{'is-link': plusminus === offset, 'is-selected': plusminus === offset}"
+                @click="setPlusMinus(offset)") {{ strOffset(offset)}}
+
+        .all-plots
+          //- ---------- CASES COMPARISION -------
+          .linear-plot(v-if="allPlots[0].active")
+            h5 {{ cityCap }} Cases Comparison
+              button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+
+            .hideIt(v-show="showPlot[0]")
+              p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.tall
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
+                :observed="observedCases"
+                :rkiDetectionData="rkiDetectionRateData"
+                :logScale="logScale"
+                :unreportedIncidence="unreportedIncidence"
+                :unreportedIncidenceNRW="unreportedIncidenceNRW")
+
+          //- ---------- VACCINE EFFECTIVENESS -------
+          .linear-plot(v-if="showVaccineEffectivenessFields.length && allPlots[1].active")
+            h5 {{ cityCap }} Vaccine Effectiveness (against infection)
+              button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+
+            .hideIt(v-show="showPlot[18]")
+              p mRNA Vaccines
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vaccine-effectiveness-plot(v-else
+                  :startDate="startDate"
+                  :endDate="endDate"
+                  :logScale="false"
+                  :vaccineEffectivenessData="vaccineEffectivenessData"
+                  :vaccineEffectivenessFields="showVaccineEffectivenessFields"
+                  vaccineType="mRNA"
+                )
+
+            .hideIt(v-show="showPlot[18]")
+              p Vector Vaccines
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vaccine-effectiveness-plot.plotsize(v-else
+                  :startDate="startDate"
+                  :endDate="endDate"
+                  :logScale="false"
+                  :vaccineEffectivenessData="vaccineEffectivenessData"
+                  :vaccineEffectivenessFields="showVaccineEffectivenessFields"
+                  vaccineType="vector"
+                )
+
+          //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
+          .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length && allPlots[2].active")
+            h5 {{ cityCap }} Vaccine Effectiveness Vs. Strain
+              button.button.is-small.hider(@click="toggleShowPlot(19)") ..
+
+            .hideIt(v-show="showPlot[19]")
+              //- p mRNA Vaccines
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vaccine-effectiveness-vs-strain(v-else
+                  :startDate="startDate"
+                  :endDate="endDate"
+                  :logScale="false"
+                  :vaccineEffectivenessData="vaccineEffectivenessVsStrainData"
+                  :vaccineEffectivenessFields="showVaccineEffectivenessVsStrainFields"
+                )
+
+          //- ---------- VACCINATED / UNVACCINATED -------
+          .linear-plot(v-if="showIncidenceComp && allPlots[3].active")
+            h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
+              button.button.is-small.hider(@click="toggleShowPlot(14)") ..
+
+            .hideIt(v-show="showPlot[14]")
+              //p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.tall
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
+                :observed="observedCases"
+                :rkiDetectionData="rkiDetectionRateData"
+                :logScale="logScale")
+
+          //- ---------- VACCINATION / BOOSTER RATES -------
+          .linear-plot(v-if="showIncidenceComp  && allPlots[4].active")
+            h5 {{ cityCap }} Vaccination Rates and Booster Rates
+              button.button.is-small.hider(@click="toggleShowPlot(17)") ..
+
+            .hideIt(v-show="showPlot[17]")
+              //p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
+                :observed="observedCases"
+                :rkiDetectionData="rkiDetectionRateData"
+                :logScale="logScale")
+
+          //- ---------- VACCINATION PER TYPE -------
+          .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0  && allPlots[5].active")
+            h5 {{ cityCap }} Vaccination per Type
+              button.button.is-small.hider(@click="toggleShowPlot(22)") ..
+
+            .hideIt(v-show="showPlot[22]")
+              p 7 day average
+              //p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vaccination-per-type.plotsize(v-else :endDate="endDate"
+                :logScale="logScale"
+                :vaccinations="vaccinationPerType")
+
+          //- ---------- ANTIBODIES -------
+          .linear-plot(v-if="showIncidenceComp && antibodies.length > 0  && allPlots[6].active")
+            h5 {{ cityCap }} Antibodies
+              button.button.is-small.hider(@click="toggleShowPlot(23)") ..
+
+            .hideIt(v-show="showPlot[23]")
+              //p 7 day average
+              //p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                antibodies.plotsize(v-else :endDate="endDate"
+                :logScale="logScale"
+                :antibodies="antibodies")
+
+          //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
+          .linear-plot(v-if="allPlots[7].active")
+            h5 {{ cityCap }} Hospitalization New Cases
+              button.button.is-small.hider(@click="toggleShowPlot(15)") ..
+
+            .hideIt(v-show="showPlot[15]")
+              p 7-day moving average
+              .plotarea.tall
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                hospitalization-7-day-new-cases-plot.plotsize(v-else
+                :data="data"
+                :endDate="endDate"
+                :city="city"
+                :logScale="logScale"
+                )
+
+          //- ---------- HOSPITALIZATION RATES
+          .linear-plot(v-if="city !== 'heinsberg'  && allPlots[8].active")
+            h5 {{ cityCap }} Hospitalization Rate Comparison
+              button.button.is-small.hider(@click="toggleShowPlot(1)") ..
+
+            .hideIt(v-show="showPlot[1]")
+              p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+              .plotarea.tall
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                hospitalization-plot.plotsize(v-else
+                  :data="hospitalData" :logScale="logScale" :city="city"
+                  :diviData="diviData" :endDate="endDate" )
+
+          //- ---------- CASES COMPARISION BY VACCINATION -------
+          .linear-plot(v-if="showIncidenceComp  && allPlots[9].active")
+            h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
+              button.button.is-small.hider(@click="toggleShowPlot(16)") ..
+
+            .hideIt(v-show="showPlot[16]")
+              //p New persons showing symptoms (model) vs. new cases (reality)
+              .plotarea.tall
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                hospitalization-vaccination-comparison.plotsize(v-else :data="data"  :endDate="endDate"
+                :observed="observedCases"
+                :rkiDetectionData="rkiDetectionRateData"
+                :logScale="logScale")
+
+          //- ---------- VIRUS STRAINS -------
+          .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[10].active")
+            h5 {{ cityCap }} Virus Strains
+              button.button.is-small.hider(@click="toggleShowPlot(6)") ..
+
+            .hideIt(v-show="showPlot[6]")
+              p Simulated number of infections (whole simulation region) and percentage, by strain
+              .plotarea(:style="{height: '42rem'}")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                mutations-plot(v-else
+                  :data="data"
+                  :endDate="endDate"
+                  :logScale="logScale"
+                  :strainValues="mutationValues"
+                  :city="city"
+                )
+
+          //- ---------- R-VALUES -------
+          .linear-plot(v-if="allPlots[11].active")
+            h5 {{ cityCap }} Simulated R-Values
+              button.button.is-small.hider(@click="toggleShowPlot(2)") ..
+
+            .hideIt(v-show="showPlot[2]")
+              p {{ rValueMethodDescription }}
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                r-value-plot.plotsize(v-else
+                  :data="data"
+                  :endDate="endDate"
+                  :logScale="false"
+                  :rValues="rValues"
+                  :rValueDate="summaryRValueDate"
+                  @avgR="gotNewSummaryRValue"
+                  @method="switchRMethod")
+
+          //- ---------- R VALUES 2 -------
+          .linear-plot(v-if="hasRValuePurposes  && allPlots[12].active")
+            h5 {{ cityCap }} Simulated R-Values by Purpose
+              button.button.is-small.hider(@click="toggleShowPlot(5)") ..
+
+            .hideIt(v-show="showPlot[5]")
+              p {{ rValueMethodDescription }}
+              .plotarea.compact
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                r-value-two.plotsize(v-else
+                  :data="data"
+                  :endDate="endDate"
+                  :logScale="false"
+                  :rValues="rValues"
+                  @method="switchRMethod")
+
+          //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
+          .linear-plot(v-if="infectionsByActivityType.length > 0  && allPlots[13].active")
+            h5 {{ cityCap }} Infections by Activity Type
+              button.button.is-small.hider(@click="toggleShowPlot(7)") ..
+            .hideIt(v-show="showPlot[7]")
+              p 7 day average
+              .plotarea(:style="{height: '28rem'}")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                infections-by-activity-type(v-else
+                  :endDate="endDate"
+                  :logScale="logScale"
+                  :values="infectionsByActivityType"
+                )
+
+          //- ---------- HEALTH OUTCOMES ------
+          .linear-plot(v-if="allPlots[14].active")
+            h5 {{ cityCap }} Simulated Health Outcomes Over Time
+              button.button.is-small.hider(@click="toggleShowPlot(3)") ..
+
+            .hideIt(v-show="showPlot[3]")
+              p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+              .plotarea
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                vue-plotly.plotsize(v-else
+                  :data="dataHealth" :layout="layout" :options="options")
+
+          //- ---------- AGE GROUP BLOCK CHART ------
+          .linear-plot(v-if="showByAgePlot && incidenceHeatMapData && allPlots[15].active")
+            h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
+              button.button.is-small.hider(@click="toggleShowPlot(4)") ..
+
+            .hideIt(v-show="showPlot[4]")
+              .plotarea(style="grid-template-rows: 18rem")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                heat-map.plotsize(v-else
+                  :endDate="endDate"
+                  :data="incidenceHeatMapData"
+                  :heatMapMaxValue="runYaml.heatMapMaxValue"
+                )
+
+          //- ---------- AGE GROUP LINE CHART ------
+          .linear-plot(v-if="showByAgePlot && incidenceHeatMapData  && allPlots[16].active")
+            h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
+              button.button.is-small.hider(@click="toggleShowPlot(13)") ..
+
+            .hideIt(v-show="showPlot[13]")
+              .plotarea(style="grid-template-rows: 18rem")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                age-group-line-chart.plotsize(v-else
+                  :endDate="endDate"
+                  :data="incidenceHeatMapData"
+                  :logScale="logScale")
+
+          //- ---------- LEISURE OUTDOOR FRACTION ------
+          .linear-plot(v-if="leisurOutdoorFractionData.length && allPlots[17].active")
+            h5 {{ cityCap }} Leisure Outdoor Fraction
+              button.button.is-small.hider(@click="toggleShowPlot(11)") ..
+
+            .hideIt(v-show="showPlot[11]")
+              .plotarea(style="grid-template-rows: 18rem")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                leisure-outdoor-fraction.plotsize(v-else
+                  :data="leisurOutdoorFractionData"
+                  :logScale="false"
+                  :endDate="endDate"
+                  )
+
+            //- ---------- WEEKLY TESTS ------
+          .linear-plot(v-if="weeklyTestsData.length  && allPlots[18].active")
+            h5 {{ cityCap }} Weekly Tests
+              button.button.is-small.hider(@click="toggleShowPlot(12)") ..
+
+            .hideIt(v-show="showPlot[12]")
+              .plotarea(style="grid-template-rows: 18rem")
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                weekly-tests.plotsize(v-else
+                  :data="weeklyTestsData"
+                  :endDate="endDate"
+                  )
+
+          //- ---------- VEGA PLOTS ------
+          .vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
+            .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
+              vega-lite-chart.plotsize(
+                :baseUrl="BATTERY_URL"
+                :runId="runId"
+                :configFile="chartKey"
+                :logScale="logScale"
+                :yamlDef="vegaChartData[chartKey].yaml"
+                :data="vegaChartData[chartKey].data"
+              )
+
+          i Run ID: {{ currentRun.RunId }}
+    .page-section.content(v-if="bottomNotes")
+      .bottom
+        h3 Further Notes
+        .readme(v-html="bottomNotes")
+
+    .page-section.footer(v-if="!state.isFullScreen")
+        //- a(href="https://vsp.tu-berlin.de")
+        //-   img(alt="TU-Berlin logo" src="@/assets/images/vsp-logo.png" width=225)
+        a(href="https://matsim.org")
+          img(alt="MATSim logo" src="@/assets/images/matsim-logo-white.png" width=250)
+
+        p COVID-19 Scenario Viewer <br/>&copy; 2020 VSP TU-Berlin
+        p GDPR: This site does not collect, store, or analyze any personal information.
+        p For more info about VSP at TU Berlin, see
+          a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
+        
+        p: router-link(to="/imprint") Imprint
 
 </template>
 
@@ -435,6 +517,7 @@ import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 import yaml from 'yaml'
 import moment from 'moment'
+import store from '@/store'
 
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
@@ -502,6 +585,109 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private runYaml!: RunYaml
   @Prop({ required: true }) private runId!: string
   @Prop({ required: true }) private chartYamlFiles!: string[]
+
+  // var for side-menu
+  private state = store.state
+
+  private sideMenuCategories = ['Configuration', 'Plots']
+  private activeSideMenu = 0
+  private allPlots = [
+    {
+      // 0
+      name: 'Cases Comparison',
+      active: true,
+    },
+    {
+      // 1
+      name: 'Vaccine Effectiveness (against infection)',
+      active: true,
+    },
+    {
+      // 2
+      name: 'Vaccine Effectiveness Vs. Strain',
+      active: true,
+    },
+    {
+      // 3
+      name: 'Incidence comparison between vaccinated and unvaccinated persons',
+      active: true,
+    },
+    {
+      // 4
+      name: 'Vaccination Rates and Booster Rates',
+      active: true,
+    },
+    {
+      // 5
+      name: 'Vaccination per Type',
+      active: true,
+    },
+    {
+      // 6
+      name: 'Antibodies',
+      active: true,
+    },
+    {
+      // 7
+      name: 'Hospitalization New Cases',
+      active: true,
+    },
+    {
+      // 8
+      name: 'Hospitalization Rate Comparison',
+      active: true,
+    },
+    {
+      // 9
+      name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
+      active: true,
+    },
+    {
+      // 10
+      name: 'Virus Strains',
+      active: true,
+    },
+    {
+      // 11
+      name: 'Simulated R-Values',
+      active: true,
+    },
+    {
+      // 12
+      name: 'Simulated R-Values by Purpose',
+      active: true,
+    },
+    {
+      // 13
+      name: 'Infections by Activity Type',
+      active: true,
+    },
+    {
+      // 14
+      name: 'Simulated Health Outcomes Over Time',
+      active: true,
+    },
+    {
+      // 15
+      name: '7-Day Incidence by Age Group Over Time',
+      active: true,
+    },
+    {
+      // 16
+      name: '7-Day Incidence by Age Group Over Time',
+      active: true,
+    },
+    {
+      // 17
+      name: 'Leisure Outdoor Fraction',
+      active: true,
+    },
+    {
+      // 18
+      name: 'Weekly Tests',
+      active: true,
+    },
+  ]
 
   private berlin_population = 3574568
 
@@ -1794,6 +1980,23 @@ export default class VueComponent extends Vue {
     if (i < 0) return ''
     return this.cityMarkdownNotes.substring(i + this.plotTag.length)
   }
+
+  private updateSideMenu(categorie: string) {
+    const index = this.sideMenuCategories.indexOf(categorie)
+    this.activeSideMenu = index == this.activeSideMenu ? -1 : index
+  }
+
+  private showPlotMenu(index: number) {
+    // Select All -> 5656
+    // Unselect All -> 5657
+    if (index == 5656) {
+      this.allPlots.forEach(element => (element.active = true))
+    } else if (index == 5657) {
+      this.allPlots.forEach(element => (element.active = false))
+    } else {
+      this.allPlots[index].active = !this.allPlots[index].active
+    }
+  }
 }
 
 // ###########################################################################
@@ -2034,6 +2237,132 @@ p.subhead {
   padding-bottom: 0;
 }
 
+// could be deleted later
+#single-run-viewer {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.left-content {
+  position: relative;
+  width: 300px;
+  height: 800px;
+  //background-color: rgba(255, 0, 0, 0.082);
+  //overflow: auto;
+  background-color: white;
+  //border-style: solid;
+  //border-width: thin;
+}
+
+.right-content {
+  width: 600px;
+  flex-grow: 1;
+  height: 800px;
+  //background-color: rgba(0, 128, 0, 0.122);
+  overflow: auto;
+}
+
+.side-menu {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-categorie {
+  border-bottom-style: solid;
+  border-right-style: solid;
+  border-width: thin;
+  border-color: #b5b5b5;
+  max-height: calc(100% - 2rem);
+}
+
+.categorie-header {
+  display: flex;
+  height: 2rem;
+  //border-bottom-style: solid;
+  //border-width: thin;
+}
+
+.menu-arrow,
+.menu-header {
+  margin: 4px;
+}
+
+.menu-arrow {
+  margin-left: 8px;
+  height: min-content;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.plot-menu {
+  display: flex;
+  margin: 5px;
+}
+
+.allPlots:nth-child(even) {
+  background-color: rgba(234, 234, 234, 0.5);
+}
+
+.plot-checkbox {
+  margin-right: 15px;
+  margin-left: 8px;
+  height: min-content;
+  margin-top: 5px;
+}
+
+.select-all-plots {
+  display: flex;
+}
+
+.menu-button {
+  //border-style: solid;
+  //border-color: black;
+  width: 50%;
+  //background-color: transparent;
+  margin: 10px;
+}
+
+.categorie-group {
+  //border-bottom-style: solid;
+  border-width: thin;
+  padding: 8px;
+}
+
+.categorie-content {
+  //overflow: auto;
+  flex: 1;
+  max-height: calc(100% - 2rem);
+  display: flex;
+  flex-direction: column;
+  border-top-style: solid;
+  border-width: thin;
+  border-color: #b5b5b5;
+}
+
+.scrollable {
+  overflow: auto;
+}
+
+.footer p {
+  line-height: 1.2rem;
+  margin-top: 0.5rem;
+  color: white;
+}
+
+.footer a {
+  color: #043b26;
+}
+
+.footer img {
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
 .left-side {
   display: flex;
   flex-direction: column;
@@ -2117,6 +2446,8 @@ p.subhead {
 
 .r-input {
   font-size: 1.1rem;
+  margin: 8px;
+  width: calc(100% - 16px);
 }
 
 @media only screen and (max-width: 1024px) {

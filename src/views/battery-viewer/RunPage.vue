@@ -241,7 +241,8 @@ export default class VueComponent extends Vue {
 
 .view-section {
   grid-column: 1 / 2;
-  grid-row: 5 / 6;
+  //grid-row: 5 / 6;
+  grid-row: 3 / 6;
   background: #eee;
   width: 100%;
 }
