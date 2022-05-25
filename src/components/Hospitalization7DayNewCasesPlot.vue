@@ -24,6 +24,8 @@ export default class VueComponent extends Vue {
   private dataLines: any[] = []
 
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
+  private diviIncidenceNRWUrl =
+    PUBLIC_SVN + 'original-data/hospital-cases/cologne/DiviIncidenceNRW.csv'
 
   private observedData: any[] = []
 
@@ -42,6 +44,7 @@ export default class VueComponent extends Vue {
     this.fetchRealHospitalizationRates()
     this.calculate()
     this.fetchBundeslandIncidenceRates()
+    this.fetchDiviIncidenceNRW()
   }
 
   private handleRelayout(event: any) {
@@ -54,6 +57,7 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     this.calculate()
     this.fetchBundeslandIncidenceRates()
+    this.fetchDiviIncidenceNRW()
   }
 
   @Watch('city') private async fetchRealHospitalizationRates() {
@@ -109,6 +113,34 @@ export default class VueComponent extends Vue {
     await this.$nextTick()
     this.layout = Object.assign({}, this.layout)
     this.isResizing = false
+  }
+
+  private async fetchDiviIncidenceNRW() {
+    try {
+      const response = await fetch(this.diviIncidenceNRWUrl)
+      const text = await response.text()
+      const incidenceNRW = Papaparse.parse(text, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        comments: '#',
+      }).data
+      console.log(incidenceNRW)
+
+      if (incidenceNRW.length) {
+        if (this.dataLines.length)
+          this.dataLines.push({
+            name: 'Observed : Nordrhein-Westfalen (DIVI)',
+            x: incidenceNRW.map(row => row.Date),
+            y: incidenceNRW.map(row => row.DIVIIncidence),
+            type: 'scatter',
+            marker: { size: 4, color: 'brown' },
+            line: { width: 2, dash: 'dot' },
+          })
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   private calculate() {
