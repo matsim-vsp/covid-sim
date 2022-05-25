@@ -270,7 +270,8 @@ export default class VueComponent extends Vue {
         scaledData[i] = scaledData[i] * currentFactor
       }
       this.dataLines.push({
-        name: 'Observed: ' + region.name + ' (DIVI)',
+        //
+        name: 'Scaled: ' + region.name + ' (DIVI)',
         x: scaledDate,
         y: scaledData,
         type: 'scatter',
