@@ -271,7 +271,7 @@ export default class VueComponent extends Vue {
       }
       this.dataLines.push({
         //
-        name: 'Scaled: ' + region.name + ' (DIVI)',
+        name: 'Scaled: ' + region.name + ' (SARI)',
         x: scaledDate,
         y: scaledData,
         type: 'scatter',
