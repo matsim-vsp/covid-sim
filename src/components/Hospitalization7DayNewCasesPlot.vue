@@ -247,7 +247,7 @@ export default class VueComponent extends Vue {
       marker: { color: '#4c6' },
       line: { width: 1.5 },
     })
-    // Scaling the Adjusted NRW (RKI) Data
+    // Scaling the Adjusted NRW (SARI) Data
     let facObj: any = {
       '2020-12-10': 23 / 16,
       '2021-01-11': 8 / 6,
