@@ -125,7 +125,6 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
         comments: '#',
       }).data
-      console.log(incidenceNRW)
 
       if (incidenceNRW.length) {
         if (this.dataLines.length)
@@ -248,6 +247,37 @@ export default class VueComponent extends Vue {
       marker: { color: '#4c6' },
       line: { width: 1.5 },
     })
+    // Scaling the Adjusted NRW (RKI) Data
+    let facObj: any = {
+      '2020-12-10': 23 / 16,
+      '2021-01-11': 8 / 6,
+      '2021-03-22': 15 / 11,
+      '2021-05-03': 1,
+      '2021-08-11': 16 / 13,
+      '2021-12-06': 1,
+      '2022-01-24': 11 / 14,
+    }
+    if (region.name == 'Nordrhein-Westfalen') {
+      const scaledData = regionData
+        .map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz'])
+        .reverse()
+      const scaledDate = regionData.map(row => row['Datum']).reverse()
+      let currentFactor = 1
+      for (let i = 0; i < scaledDate.length; i++) {
+        if (Object.keys(facObj).includes(scaledDate[i])) {
+          currentFactor = facObj[scaledDate[i]]
+        }
+        scaledData[i] = scaledData[i] * currentFactor
+      }
+      this.dataLines.push({
+        name: 'Observed: ' + region.name + ' (DIVI)',
+        x: scaledDate,
+        y: scaledData,
+        type: 'scatter',
+        marker: { color: 'red' },
+        line: { width: 1.5 },
+      })
+    }
   }
 
   private layout: any = {
