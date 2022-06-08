@@ -44,7 +44,7 @@ export default class VueComponent extends Vue {
     this.fetchRealHospitalizationRates()
     this.calculate()
     this.fetchBundeslandIncidenceRates()
-    this.fetchDiviIncidenceNRW()
+    //this.fetchDiviIncidenceNRW()
   }
 
   private handleRelayout(event: any) {
@@ -57,7 +57,7 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     this.calculate()
     this.fetchBundeslandIncidenceRates()
-    this.fetchDiviIncidenceNRW()
+    //this.fetchDiviIncidenceNRW()
   }
 
   @Watch('city') private async fetchRealHospitalizationRates() {
@@ -125,10 +125,19 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
         comments: '#',
       }).data
-      console.log(incidenceNRW)
+
+      // Workaround for doubled data; Not a good bugfix but it works
+      // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
+      // times on the Cologne Hospitalization New Cases Plot
+      let diviExsists = false
+      this.dataLines.forEach(e => {
+        if (e.name == 'Observed : Nordrhein-Westfalen (DIVI)') {
+          diviExsists = true
+        }
+      })
 
       if (incidenceNRW.length) {
-        if (this.dataLines.length)
+        if (this.dataLines.length && !diviExsists)
           this.dataLines.push({
             name: 'Observed : Nordrhein-Westfalen (DIVI)',
             x: incidenceNRW.map(row => row.Date),
@@ -218,6 +227,7 @@ export default class VueComponent extends Vue {
     // only add Bundesland data if we are looking at data for a city with a Bundesland
     if (!this.bundeslandIncidenceRateLookup[this.city]) return
     const region = this.bundeslandIncidenceRateLookup[this.city]
+    console.log(region)
 
     const csvData = Papaparse.parse(this.bundeslandCSV, {
       header: true,
@@ -248,6 +258,8 @@ export default class VueComponent extends Vue {
       marker: { color: '#4c6' },
       line: { width: 1.5 },
     })
+
+    this.fetchDiviIncidenceNRW()
   }
 
   private layout: any = {
