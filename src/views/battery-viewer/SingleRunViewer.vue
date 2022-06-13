@@ -108,6 +108,24 @@
               :unreportedIncidence="unreportedIncidence"
               :unreportedIncidenceNRW="unreportedIncidenceNRW")
 
+        //- ---------- VIRUS STRAINS -------
+        .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0")
+          h5 {{ cityCap }} Virus Strains
+            button.button.is-small.hider(@click="toggleShowPlot(6)") ..
+
+          .hideIt(v-show="showPlot[6]")
+            p Simulated number of infections (whole simulation region) and percentage, by strain
+            .plotarea(:style="{height: '42rem'}")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              mutations-plot(v-else
+                :data="data"
+                :endDate="endDate"
+                :logScale="logScale"
+                :strainValues="mutationValues"
+                :city="city"
+              )
+
         //- ---------- VACCINE EFFECTIVENESS -------
         .linear-plot(v-if="showVaccineEffectivenessFields.length")
           h5 {{ cityCap }} Vaccine Effectiveness (against infection)
@@ -264,24 +282,6 @@
               :observed="observedCases"
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
-
-        //- ---------- VIRUS STRAINS -------
-        .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0")
-          h5 {{ cityCap }} Virus Strains
-            button.button.is-small.hider(@click="toggleShowPlot(6)") ..
-
-          .hideIt(v-show="showPlot[6]")
-            p Simulated number of infections (whole simulation region) and percentage, by strain
-            .plotarea(:style="{height: '42rem'}")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              mutations-plot(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="logScale"
-                :strainValues="mutationValues"
-                :city="city"
-              )
 
         //- ---------- R-VALUES -------
         .linear-plot
