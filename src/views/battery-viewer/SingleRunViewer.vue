@@ -126,6 +126,57 @@
                 :city="city"
               )
 
+        //- ---------- R-VALUES -------
+        .linear-plot
+          h5 {{ cityCap }} Simulated R-Values
+            button.button.is-small.hider(@click="toggleShowPlot(2)") ..
+
+          .hideIt(v-show="showPlot[2]")
+            p {{ rValueMethodDescription }}
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              r-value-plot.plotsize(v-else
+                :data="data"
+                :endDate="endDate"
+                :logScale="false"
+                :rValues="rValues"
+                :rValueDate="summaryRValueDate"
+                @avgR="gotNewSummaryRValue"
+                @method="switchRMethod")
+
+        //- ---------- R VALUES 2 -------
+        .linear-plot(v-if="hasRValuePurposes")
+          h5 {{ cityCap }} Simulated R-Values by Purpose
+            button.button.is-small.hider(@click="toggleShowPlot(5)") ..
+
+          .hideIt(v-show="showPlot[5]")
+            p {{ rValueMethodDescription }}
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              r-value-two.plotsize(v-else
+                :data="data"
+                :endDate="endDate"
+                :logScale="false"
+                :rValues="rValues"
+                @method="switchRMethod")
+
+        //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
+        .linear-plot(v-if="infectionsByActivityType.length > 0")
+          h5 {{ cityCap }} Infections by Activity Type
+            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
+          .hideIt(v-show="showPlot[7]")
+            p 7 day average
+            .plotarea(:style="{height: '28rem'}")
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              infections-by-activity-type(v-else
+                :endDate="endDate"
+                :logScale="logScale"
+                :values="infectionsByActivityType"
+              )
+
         //- ---------- VACCINE EFFECTIVENESS -------
         .linear-plot(v-if="showVaccineEffectivenessFields.length")
           h5 {{ cityCap }} Vaccine Effectiveness (against infection)
@@ -282,57 +333,6 @@
               :observed="observedCases"
               :rkiDetectionData="rkiDetectionRateData"
               :logScale="logScale")
-
-        //- ---------- R-VALUES -------
-        .linear-plot
-          h5 {{ cityCap }} Simulated R-Values
-            button.button.is-small.hider(@click="toggleShowPlot(2)") ..
-
-          .hideIt(v-show="showPlot[2]")
-            p {{ rValueMethodDescription }}
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              r-value-plot.plotsize(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="false"
-                :rValues="rValues"
-                :rValueDate="summaryRValueDate"
-                @avgR="gotNewSummaryRValue"
-                @method="switchRMethod")
-
-        //- ---------- R VALUES 2 -------
-        .linear-plot(v-if="hasRValuePurposes")
-          h5 {{ cityCap }} Simulated R-Values by Purpose
-            button.button.is-small.hider(@click="toggleShowPlot(5)") ..
-
-          .hideIt(v-show="showPlot[5]")
-            p {{ rValueMethodDescription }}
-            .plotarea.compact
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              r-value-two.plotsize(v-else
-                :data="data"
-                :endDate="endDate"
-                :logScale="false"
-                :rValues="rValues"
-                @method="switchRMethod")
-
-        //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
-        .linear-plot(v-if="infectionsByActivityType.length > 0")
-          h5 {{ cityCap }} Infections by Activity Type
-            button.button.is-small.hider(@click="toggleShowPlot(7)") ..
-          .hideIt(v-show="showPlot[7]")
-            p 7 day average
-            .plotarea(:style="{height: '28rem'}")
-              p.plotsize(v-if="!isZipLoaded") Loading data...
-              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-              infections-by-activity-type(v-else
-                :endDate="endDate"
-                :logScale="logScale"
-                :values="infectionsByActivityType"
-              )
 
         //- ---------- HEALTH OUTCOMES ------
         .linear-plot
