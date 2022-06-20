@@ -289,7 +289,8 @@
               :antibodies="antibodies")
 
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
-        .linear-plot(v-if="!this.runYaml.ignoredPlots.includes('hospNewCases')")
+        //- .linear-plot(v-if="!this.runYaml.ignoredPlots.includes('hospNewCases')")
+        .linear-plot
           h5 {{ cityCap }} Hospitalization New Cases
             button.button.is-small.hider(@click="toggleShowPlot(15)") ..
 
@@ -306,7 +307,8 @@
               )
 
         //- ---------- HOSPITALIZATION RATES
-        .linear-plot(v-if="city !== 'heinsberg' && !this.runYaml.ignoredPlots.includes('hospRateComp')")
+        //- .linear-plot(v-if="city !== 'heinsberg' && !this.runYaml.ignoredPlots.includes('hospRateComp')")
+        .linear-plot(v-if="city !== 'heinsberg'")
           h5 {{ cityCap }} Hospitalization Rate Comparison
             button.button.is-small.hider(@click="toggleShowPlot(1)") ..
 
