@@ -2034,6 +2034,7 @@ a.active-view-mode {
 #single-run-viewer {
   display: flex;
   flex-direction: column;
+  background-color: cyan;
 }
 
 h5 {
@@ -2252,7 +2253,7 @@ p.subhead {
 .left-content {
   position: relative;
   width: 300px;
-  height: 800px;
+  //height: 800px;
   //background-color: rgba(255, 0, 0, 0.082);
   //overflow: auto;
   background-color: white;
@@ -2263,9 +2264,10 @@ p.subhead {
 .right-content {
   width: 600px;
   flex-grow: 1;
-  height: 800px;
+  //height: 800px;
   //background-color: rgba(0, 128, 0, 0.122);
   overflow: auto;
+  background: #eee;
 }
 
 .side-menu {

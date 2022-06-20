@@ -91,9 +91,9 @@ h3 {
 }
 
 #app {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto;
+  // display: grid;
+  // grid-template-columns: 1fr;
+  // grid-template-rows: auto 1fr auto;
   background-color: $paleBackground;
   color: #222;
   margin: 0rem 0rem;
@@ -102,6 +102,8 @@ h3 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .modebar-group {
@@ -116,6 +118,7 @@ h3 {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
   box-shadow: 0px 2px 10px #00000060;
+  height: min-content;
 }
 
 .center-area {
@@ -124,6 +127,8 @@ h3 {
   z-index: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  max-height: 100%;
 }
 
 .main-view {
