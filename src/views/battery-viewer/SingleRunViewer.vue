@@ -289,8 +289,7 @@
               :antibodies="antibodies")
 
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
-        //- .linear-plot(v-if="!this.runYaml.ignoredPlots.includes('hospNewCases')")
-        .linear-plot
+        .linear-plot(v-if="!disablePlot[0]")
           h5 {{ cityCap }} Hospitalization New Cases
             button.button.is-small.hider(@click="toggleShowPlot(15)") ..
 
@@ -307,8 +306,7 @@
               )
 
         //- ---------- HOSPITALIZATION RATES
-        //- .linear-plot(v-if="city !== 'heinsberg' && !this.runYaml.ignoredPlots.includes('hospRateComp')")
-        .linear-plot(v-if="city !== 'heinsberg'")
+        .linear-plot(v-if="city !== 'heinsberg' && !disablePlot[1]")
           h5 {{ cityCap }} Hospitalization Rate Comparison
             button.button.is-small.hider(@click="toggleShowPlot(1)") ..
 
@@ -547,6 +545,11 @@ export default class VueComponent extends Vue {
     23: true,
   }
 
+  private disablePlot: any = {
+    0: false, // hospNewCases
+    1: false, // hospRateComp
+  }
+
   private MAX_DAYS = 1500
   private cumulativeInfected = 0
 
@@ -753,6 +756,20 @@ export default class VueComponent extends Vue {
     this.showActivityLevelPlot()
 
     this.hasBaseRun = this.isThereABaseRun()
+
+    //chang disabled plots
+    for (let i = 0; i < this.disablePlot.length; i++) {
+      this.disablePlot[i] = false
+    }
+    if (Object.keys(this.runYaml).includes('ignoredPlots')) {
+      if (this.runYaml.ignoredPlots?.includes('hospNewCases')) {
+        this.disablePlot[0] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospRateComp')) {
+        this.disablePlot[1] = true
+      }
+      // hospRateComp
+    }
 
     this.showPlotForCurrentSituation()
   }
