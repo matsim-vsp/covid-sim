@@ -91,6 +91,23 @@
               @click="setPlusMinus(offset)") {{ strOffset(offset)}}
 
       .all-plots
+        //- ---------- Disease Import -------
+        .linear-plot(v-if="diseaseData.length > 0")
+          h5 {{ cityCap }} Disease Import
+            button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+
+          .hideIt(v-show="showPlot[24]")
+            //- p mRNA Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              disease-import(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="logScale"
+                :data="diseaseData"
+              )
+
         //- ---------- CASES COMPARISION -------
         .linear-plot
           h5 {{ cityCap }} Cases Comparison
@@ -457,6 +474,7 @@ import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
 import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
+import DiseaseImport from '@/components/DiseaseImport.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
@@ -495,6 +513,7 @@ interface VegaChartDefinition {
     VaccineEffectivenessVsStrain,
     VaccinationPerType,
     Antibodies,
+    DiseaseImport,
   },
 })
 export default class VueComponent extends Vue {
@@ -543,6 +562,7 @@ export default class VueComponent extends Vue {
     21: true,
     22: true,
     23: true,
+    24: true,
   }
 
   private disablePlot: any = {
@@ -1059,6 +1079,7 @@ export default class VueComponent extends Vue {
   private incidenceHeatMapData: string = ''
   private leisurOutdoorFractionData: any[] = []
   private weeklyTestsData: any[] = [] // includes nReVaccinated values
+  private diseaseData: any[] = []
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
@@ -1100,6 +1121,8 @@ export default class VueComponent extends Vue {
     this.loadInfectionsByActivityType(this.currentRun)
 
     this.loadWeeklyTests(this.currentRun)
+
+    this.loaddiseaseImport(this.currentRun)
 
     this.loadLeisurOutdoorFraction(this.currentRun)
 
@@ -1393,6 +1416,24 @@ export default class VueComponent extends Vue {
       if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
     } catch (e) {
       console.log('WeeklyTests: no', filename)
+    }
+  }
+
+  private async loaddiseaseImport(currentRun: any) {
+    this.diseaseData = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.diseaseImport.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.diseaseData = z.data
+    } catch (e) {
+      console.log('DiseaseData: no', filename)
     }
   }
 
