@@ -289,7 +289,6 @@
               :antibodies="antibodies")
 
         //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
-        //- (v-if="this.runYaml.ignoredPlots.includes('hospNewCases')")
         .linear-plot(v-if="!this.runYaml.ignoredPlots.includes('hospNewCases')")
           h5 {{ cityCap }} Hospitalization New Cases
             button.button.is-small.hider(@click="toggleShowPlot(15)") ..
