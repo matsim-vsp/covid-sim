@@ -31,7 +31,7 @@
             p.subhead(v-if="group.subheading") {{ group.subheading }}
 
             .measure(v-for="m in group.measures" :key="m.measure")
-              .measure-buttons(v-if="measureOptions[m.measure].length >= 1")
+              .measure-buttons(v-if="measureOptions[m.measure].length > 1")
                 p {{ m.title }}
                 button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
