@@ -494,6 +494,7 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
+      /*
       this.lineDataLookup[header[11]] = {
         x: date,
         y: ba29Cologne,
@@ -504,6 +505,7 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
+      */
       this.lineDataLookup[header[12]] = {
         x: date,
         y: ba5Cologne,
