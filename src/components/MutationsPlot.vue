@@ -95,11 +95,13 @@ export default class VueComponent extends Vue {
     var ba2: any[] = []
     var ba1Cologne: any[] = []
     var ba2Cologne: any[] = []
-    var ba29Cologne: any[] = []
+    //var ba29Cologne: any[] = []
+    var ba4Cologne: any[] = []
     var ba5Cologne: any[] = []
 
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
+      console.log(this.svnUrl)
     } else if (this.city == 'berlin') {
       this.svnUrl = this.originalDataUrl + 'Berlin/VOC_Berlin.csv'
     }
@@ -123,9 +125,12 @@ export default class VueComponent extends Vue {
       var ba1CologneTempDouble = 0
       var ba2CologneTempDouble = 0
       var wildTempDouble = 0
-      var ba29CologneTempDouble = 0
+      //var ba29CologneTempDouble = 0
+      var ba4CologneTempDouble = 0
       var ba5CologneTempDouble = 0
       var countDays = 0
+
+      console.log(VOCData)
 
       for (var i = 0; i < VOCData.length; i++) {
         if (
@@ -149,6 +154,7 @@ export default class VueComponent extends Vue {
               header.push(VOCData[i][10])
               header.push(VOCData[i][11].trim())
               header.push(VOCData[i][12].trim())
+              header.push(VOCData[i][13].trim())
             } else {
               header.push(VOCData[i][0])
               header.push(VOCData[i][1])
@@ -171,7 +177,8 @@ export default class VueComponent extends Vue {
               ba2TempDouble = 0
               ba1CologneTempDouble = 0
               ba2CologneTempDouble = 0
-              ba29CologneTempDouble = 0
+              //ba29CologneTempDouble = 0
+              ba4CologneTempDouble = 0
               ba5CologneTempDouble = 0
             } else {
               countDays += 1
@@ -189,8 +196,9 @@ export default class VueComponent extends Vue {
               var ba2Temp = VOCData[i][8]
               var ba1CologneTemp = VOCData[i][9]
               var ba2CologneTemp = VOCData[i][10]
-              var ba29CologneTemp = VOCData[i][11]
+              //var ba29CologneTemp = VOCData[i][11]
               var ba5CologneTemp = VOCData[i][12]
+              var ba4CologneTemp = VOCData[i][13]
             } else {
               var dateTemp = VOCData[i][0]
               var alphaTemp = VOCData[i][1]
@@ -292,11 +300,19 @@ export default class VueComponent extends Vue {
                 }
               }
 
-              if (ba29CologneTemp == null) {
-                ba29CologneTemp = 0
+              if (ba4CologneTemp == null) {
+                ba4CologneTemp = 0
               } else {
-                if (typeof ba29CologneTemp == 'string') {
-                  ba29CologneTemp = parseFloat(ba29CologneTemp)
+                if (typeof ba4CologneTemp == 'string') {
+                  ba4CologneTemp = parseFloat(ba4CologneTemp)
+                }
+              }
+
+              if (ba4CologneTemp == null) {
+                ba4CologneTemp = 0
+              } else {
+                if (typeof ba4CologneTemp == 'string') {
+                  ba4CologneTemp = parseFloat(ba4CologneTemp)
                 }
               }
 
@@ -320,7 +336,7 @@ export default class VueComponent extends Vue {
               ba2TempDouble += ba2Temp
               ba1CologneTempDouble += ba1CologneTemp
               ba2CologneTempDouble += ba2CologneTemp
-              ba29CologneTempDouble += ba29CologneTemp
+              ba4CologneTempDouble += ba4CologneTemp
               ba5CologneTempDouble += ba5CologneTemp
             }
 
@@ -336,7 +352,7 @@ export default class VueComponent extends Vue {
               ba2.push((ba2TempDouble * 100) / 7)
               ba1Cologne.push((ba1CologneTempDouble * 100) / 7)
               ba2Cologne.push((ba2CologneTempDouble * 100) / 7)
-              ba29Cologne.push((ba29CologneTempDouble * 100) / 7)
+              ba4Cologne.push((ba4CologneTempDouble * 100) / 7)
               ba5Cologne.push((ba5CologneTempDouble * 100) / 7)
 
               countDays = 0
@@ -350,7 +366,7 @@ export default class VueComponent extends Vue {
               ba2TempDouble = 0
               ba1CologneTempDouble = 0
               ba2CologneTempDouble = 0
-              ba29CologneTempDouble = 0
+              ba4CologneTempDouble = 0
               ba5CologneTempDouble = 0
             } else if (this.city == 'berlin') {
               date.push(dateTemp)
@@ -384,6 +400,7 @@ export default class VueComponent extends Vue {
           '% BA.2 Reported (Cologne)',
           '% BA.2.9 Reported (Germany)',
           '% BA.5 Reported (Germany)',
+          '% BA.4 Reported (Germany)',
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -494,18 +511,18 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
-      /*
+
       this.lineDataLookup[header[11]] = {
         x: date,
-        y: ba29Cologne,
-        name: header[11],
+        y: ba4Cologne,
+        name: header[13],
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
         marker: { size: 5 },
         opacity: 0.5,
       }
-      */
+
       this.lineDataLookup[header[12]] = {
         x: date,
         y: ba5Cologne,
