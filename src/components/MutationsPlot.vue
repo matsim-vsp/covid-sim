@@ -130,7 +130,7 @@ export default class VueComponent extends Vue {
       var ba5CologneTempDouble = 0
       var countDays = 0
 
-      console.log(VOCData)
+      // console.log(VOCData)
 
       for (var i = 0; i < VOCData.length; i++) {
         if (
