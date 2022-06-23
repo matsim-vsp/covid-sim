@@ -44,6 +44,13 @@
         input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
         p.infected {{ summaryRValue }}
 
+        .single-value-options(v-if="singleValueOptionKeys.length")
+          h5 Simulation Parameters:
+          table
+            tr(v-for="measure in singleValueOptionKeys" :key="measure")
+              td(style="text-align: right; padding-right: 0.4rem") {{measure}}
+              td: b(style="color: #596") {{ singleValueOptions[measure]}}
+
     .right-side(:class="{'wide-mode': $store.state.isWideMode}")
       p.width-selection
         a(:class="{'active-view-mode': !$store.state.isWideMode}" @click="setWideMode(false)") Narrow
@@ -451,6 +458,7 @@ import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 import yaml from 'yaml'
 import moment from 'moment'
+import { debounce } from 'vega'
 
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
@@ -646,8 +654,17 @@ export default class VueComponent extends Vue {
         this.setValueForSingleOptionMeasure(m.measure)
       }
     }
+
+    // update the single-value parameters, after everything else has settled down
+    debounce(1, () => {
+      this.singleValueOptionKeys = Object.keys(this.singleValueOptions)
+    })()
+
     return hasMultiple
   }
+
+  private singleValueOptions: any = {}
+  private singleValueOptionKeys: any[] = []
 
   // some measures only have one option! Set its value.
   private setValueForSingleOptionMeasure(measure: string) {
@@ -659,6 +676,8 @@ export default class VueComponent extends Vue {
       if (onlyValue === '1') onlyValue = '1.0'
     }
     const wait = true
+
+    this.singleValueOptions[measure] = onlyValue
     this.sliderChanged(measure, onlyValue, wait)
   }
 
@@ -2210,6 +2229,14 @@ p.subhead {
 
 .r-input {
   font-size: 1.1rem;
+}
+
+.single-value-options {
+  margin: 1rem 0.5rem;
+}
+
+.single-value-options table {
+  font-size: 0.9rem;
 }
 
 @media only screen and (max-width: 1024px) {
