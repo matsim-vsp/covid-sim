@@ -114,6 +114,42 @@
                 :logScale="logScale"
                 :data="diseaseData"
               )
+        
+        //- ---------- Post Hospital -------
+        .linear-plot(v-if="postHospital.length > 0")
+          h5 {{ cityCap }} Hospitalization New Cases (post-process)
+            button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+
+          .hideIt(v-show="showPlot[24]")
+            //- p mRNA Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              post-hospital(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="logScale"
+                :data="postHospital"
+                :intakesHosp="true"
+              )
+
+        //- ---------- Post Hospital -------
+        .linear-plot(v-if="postHospital.length > 0")
+          h5 {{ cityCap }} Cologne Hospitalization Rate (post-process)
+            button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+
+          .hideIt(v-show="showPlot[24]")
+            //- p mRNA Vaccines
+            .plotarea.compact
+              p.plotsize(v-if="!isZipLoaded") Loading data...
+              p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+              post-hospital(v-else
+                :startDate="startDate"
+                :endDate="endDate"
+                :logScale="logScale"
+                :data="postHospital"
+                :intakesHosp="false"
+              )
 
         //- ---------- CASES COMPARISION -------
         .linear-plot
@@ -483,6 +519,7 @@ import WeeklyTests from '@/components/WeeklyTests.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
 import DiseaseImport from '@/components/DiseaseImport.vue'
+import PostHospital from '@/components/PostHospital.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
@@ -522,6 +559,7 @@ interface VegaChartDefinition {
     VaccinationPerType,
     Antibodies,
     DiseaseImport,
+    PostHospital,
   },
 })
 export default class VueComponent extends Vue {
@@ -1099,6 +1137,7 @@ export default class VueComponent extends Vue {
   private leisurOutdoorFractionData: any[] = []
   private weeklyTestsData: any[] = [] // includes nReVaccinated values
   private diseaseData: any[] = []
+  private postHospital: any[] = []
 
   private async runChanged() {
     const ignoreRow = 'Cumulative Hospitalized'
@@ -1142,6 +1181,8 @@ export default class VueComponent extends Vue {
     this.loadWeeklyTests(this.currentRun)
 
     this.loaddiseaseImport(this.currentRun)
+
+    this.loadPostHospital(this.currentRun)
 
     this.loadLeisurOutdoorFraction(this.currentRun)
 
@@ -1453,6 +1494,24 @@ export default class VueComponent extends Vue {
       this.diseaseData = z.data
     } catch (e) {
       console.log('DiseaseData: no', filename)
+    }
+  }
+
+  private async loadPostHospital(currentRun: any) {
+    this.postHospital = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.post.hospital.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.postHospital = z.data
+    } catch (e) {
+      console.log('postHospital: no', filename)
     }
   }
 
