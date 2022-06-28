@@ -21,6 +21,15 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+            a.navbar-link  2022.06.28
+
+          .navbar-dropdown
+            a.navbar-item(:href="https://covid-sim.info/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25") Measures in autumn and winter. Report June 28
+
+          .navbar-dropdown
+            a.navbar-item(:href="https://covid-sim.info/cologne/2022-06-23/1b?vacCamp=off&workTest=none&eduTest=none&leisTest=none") Testing regimes in autumn and winter. Report June 28
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2022.04.26
 
           .navbar-dropdown

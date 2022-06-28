@@ -119,6 +119,12 @@ export default class VueComponent extends Vue {
 
   private modelruns: any[] = [
     {
+      url: '/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25',
+      date: 'Released: 28 June 2022',
+      title: 'Report runs 28 June',
+      subtitle: 'Measures in autumn and winter',
+    },
+    {
       url: '/cologne/2022-04-13/?mutEscOm=6.0&timePeriodIgA=730.0&mutDate=2022-10-01',
       date: 'Released: 26 April 2022',
       title: 'Report runs 26 April',
