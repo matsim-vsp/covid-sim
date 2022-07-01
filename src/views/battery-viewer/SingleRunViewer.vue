@@ -238,7 +238,7 @@
               )
 
         //- ---------- VACCINE EFFECTIVENESS -------
-        .linear-plot(v-if="showVaccineEffectivenessFields.length")
+        .linear-plot(v-if="showVaccineEffectivenessFields.length && !disablePlot[2]")
           h5 {{ cityCap }} Vaccine Effectiveness (against infection)
             button.button.is-small.hider(@click="toggleShowPlot(18)") ..
 
@@ -271,7 +271,7 @@
               )
 
         //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
-        .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length")
+        .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length && !disablePlot[3]")
           h5 {{ cityCap }} Vaccine Effectiveness Vs. Strain
             button.button.is-small.hider(@click="toggleShowPlot(19)") ..
 
@@ -289,7 +289,7 @@
               )
 
         //- ---------- VACCINATED / UNVACCINATED -------
-        .linear-plot(v-if="showIncidenceComp")
+        .linear-plot(v-if="showIncidenceComp && !disablePlot[4]")
           h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
             button.button.is-small.hider(@click="toggleShowPlot(14)") ..
 
@@ -304,7 +304,7 @@
               :logScale="logScale")
 
         //- ---------- VACCINATION / BOOSTER RATES -------
-        .linear-plot(v-if="showIncidenceComp")
+        .linear-plot(v-if="showIncidenceComp && !disablePlot[5]")
           h5 {{ cityCap }} Vaccination Rates and Booster Rates
             button.button.is-small.hider(@click="toggleShowPlot(17)") ..
 
@@ -319,7 +319,7 @@
               :logScale="logScale")
 
         //- ---------- VACCINATION PER TYPE -------
-        .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0")
+        .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0 && !disablePlot[6]")
           h5 {{ cityCap }} Vaccination per Type
             button.button.is-small.hider(@click="toggleShowPlot(22)") ..
 
@@ -380,7 +380,7 @@
                 :diviData="diviData" :endDate="endDate" )
 
         //- ---------- CASES COMPARISION BY VACCINATION -------
-        .linear-plot(v-if="showIncidenceComp")
+        .linear-plot(v-if="showIncidenceComp && !disablePlot[7]")
           h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
             button.button.is-small.hider(@click="toggleShowPlot(16)") ..
 
@@ -395,7 +395,7 @@
               :logScale="logScale")
 
         //- ---------- HEALTH OUTCOMES ------
-        .linear-plot
+        .linear-plot(v-if="!disablePlot[8]")
           h5 {{ cityCap }} Simulated Health Outcomes Over Time
             button.button.is-small.hider(@click="toggleShowPlot(3)") ..
 
@@ -614,6 +614,13 @@ export default class VueComponent extends Vue {
   private disablePlot: any = {
     0: false, // hospNewCases
     1: false, // hospRateComp
+    2: false, // vacEffInf
+    3: false, // vacEffStrain
+    4: false, // incVacUnvac
+    5: false, // vacBoostRate
+    6: false, // vacType
+    7: false, // hospVacUnvac
+    8: false, // healthOutcome
   }
 
   private MAX_DAYS = 1500
@@ -844,6 +851,27 @@ export default class VueComponent extends Vue {
       }
       if (this.runYaml.ignoredPlots?.includes('hospRateComp')) {
         this.disablePlot[1] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacEffInf')) {
+        this.disablePlot[2] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacEffStrain')) {
+        this.disablePlot[3] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('incVacUnvac')) {
+        this.disablePlot[4] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacBoostRate')) {
+        this.disablePlot[5] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacType')) {
+        this.disablePlot[6] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospVacUnvac')) {
+        this.disablePlot[7] = true
+      }
+      if (this.runYaml.ignoredPlots?.includes('healthOutcome')) {
+        this.disablePlot[8] = true
       }
       // hospRateComp
     }
