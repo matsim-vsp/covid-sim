@@ -172,7 +172,7 @@ export default class VueComponent extends Vue {
           const newInfections = source.y[i] - source.y[i - 7]
           const observedRate = 0.1 * Math.floor((10.0 * newInfections) / factor100k)
 
-          observedLine.x.push(source.x[i - 3]) // midweek
+              observedLine.x.push(source.x[i - 3]) // midweek
           observedLine.y.push(observedRate)
         }
       } else {
