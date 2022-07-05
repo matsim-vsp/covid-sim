@@ -8,7 +8,6 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import { map } from 'mathjs'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
