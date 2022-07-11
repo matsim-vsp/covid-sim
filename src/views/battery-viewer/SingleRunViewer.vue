@@ -19,12 +19,21 @@
             button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
         .categorie-content.scrollable(v-show="categorie == 'Configuration' && activeSideMenu == 0")
           .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-            h6.title {{ group.heading }}
-            h6.title {{ calendarForSimDay(group.day) }}
-            p.subhead {{ group.subheading }}
-            .measure(v-for="m in group.measures" :key="m.measure")
-              .measure-buttons
-                p {{ m.title }}
+            //- h6.title {{ group.heading }}
+            //- h6.title {{ calendarForSimDay(group.day) }}
+            //- p.subhead {{ group.subheading }}
+            //- .measure(v-for="m in group.measures" :key="m.measure")
+            //-   .measure-buttons
+            //-     p {{ m.title }}
+            //-       button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+            .g1(v-if="hasMultipleOptions(group)")
+              h6.title {{ getGroupTitle(group) }}
+
+              p.subhead(v-if="group.subheading") {{ group.subheading }}
+
+              .measure(v-for="m in group.measures" :key="m.measure")
+                .measure-buttons(v-if="measureOptions[m.measure].length > 1")
+                  p {{ m.title }}
                   button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
           h5.cumulative Cumulative Infected by
             br
@@ -34,6 +43,13 @@
           h5.cumulative R-Value on:
           input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
           p.infected {{ summaryRValue }}
+
+          .single-value-options(v-if="singleValueOptionKeys.length")
+            h5 Simulation Parameters:
+            table
+              tr(v-for="measure in singleValueOptionKeys" :key="measure")
+                td(style="text-align: right; padding-right: 0.4rem") {{measure}}
+                td: b(style="color: #596") {{ singleValueOptions[measure]}}
   .right-content
     .page-section.content
       .readme(v-html="topNotes")
@@ -456,6 +472,7 @@ import ZipLoader from 'zip-loader'
 import yaml from 'yaml'
 import moment from 'moment'
 import store from '@/store'
+import { debounce } from 'vega'
 
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
@@ -887,6 +904,44 @@ export default class VueComponent extends Vue {
     return this.showPlot[which]
   }
 
+  private hasMultipleOptions(group: any) {
+    let hasMultiple = false
+    // see if any measures have multiple values
+    for (const m of group.measures) {
+      if (!this.measureOptions[m.measure]) continue
+      const numOptions = this.measureOptions[m.measure].length
+      if (numOptions > 1) {
+        hasMultiple = true
+      } else {
+        this.setValueForSingleOptionMeasure(m.measure)
+      }
+    }
+    // update the single-value parameters, after everything else has settled down
+    debounce(1, () => {
+      this.singleValueOptionKeys = Object.keys(this.singleValueOptions)
+    })()
+    return hasMultiple
+  }
+  private singleValueOptions: any = {}
+  private singleValueOptionKeys: any[] = []
+  // some measures only have one option! Set its value.
+  private setValueForSingleOptionMeasure(measure: string) {
+    let onlyValue = this.measureOptions[measure][0]
+    if (onlyValue.endsWith('%') && !onlyValue.startsWith('+')) {
+      const answer = onlyValue.substring(0, onlyValue.length - 1)
+      onlyValue = '' + parseFloat(answer) / 100.0
+      if (onlyValue === '0') onlyValue = '0.0'
+      if (onlyValue === '1') onlyValue = '1.0'
+    }
+    const wait = true
+    this.singleValueOptions[measure] = onlyValue
+    this.sliderChanged(measure, onlyValue, wait)
+  }
+
+  private getGroupTitle(group: any) {
+    return this.calendarForSimDay(group.day) || group.heading || 'General Options'
+  }
+
   private layout = {
     autosize: true,
     showlegend: true,
@@ -1261,10 +1316,10 @@ export default class VueComponent extends Vue {
     this.summaryRValue = v
   }
 
-  private sliderChanged(measure: any, value: any) {
+  private sliderChanged(measure: any, value: any, wait?: boolean) {
     // console.log(measure, value)
     this.currentSituation[measure] = value
-    this.showPlotForCurrentSituation()
+    if (!wait) this.showPlotForCurrentSituation()
   }
 
   private showPlotForCurrentSituation() {
@@ -2156,8 +2211,8 @@ p.subhead {
 
 .g1 {
   padding: 0rem 0.5rem 1rem 0.5rem;
-  border: 1px solid #aaa;
-  border-radius: 4px;
+  border-bottom: 1px solid #aaa;
+  //border-radius: 4px;
 }
 
 .cumulative {
@@ -2276,9 +2331,10 @@ p.subhead {
 
 .categorie-group {
   border-width: thin;
-  padding: 8px;
+  //padding: 8px;
   border-bottom-style: solid;
   border-color: #b5b5b5;
+  border: none;
 }
 
 .categorie-content {
@@ -2395,6 +2451,13 @@ p.subhead {
   font-size: 1.1rem;
   margin: 8px;
   width: calc(100% - 16px);
+}
+
+.single-value-options {
+  margin: 1rem 0.5rem;
+}
+.single-value-options table {
+  font-size: 0.9rem;
 }
 
 @media only screen and (max-width: 1024px) {
