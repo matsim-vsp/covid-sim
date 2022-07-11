@@ -3,9 +3,9 @@
   .left-content
     .side-menu
       .menu-categorie(v-for="(categorie, index) in sideMenuCategories")
-        .categorie-header
-          i.fa.fa-arrow-down.menu-arrow(v-if="index == activeSideMenu" @click="updateSideMenu(categorie)")
-          i.fa.fa-arrow-right.menu-arrow(v-else @click="updateSideMenu(categorie)")
+        .categorie-header(@click="updateSideMenu(categorie)")
+          i.fa.fa-arrow-down.menu-arrow(v-if="index == activeSideMenu" )
+          i.fa.fa-arrow-right.menu-arrow(v-else )
           h6.menu-header.title {{categorie}}
         .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
           .scrollable
@@ -52,68 +52,6 @@
           :key="'base'" @click='setBase(true)') What would have happened without restrictions
 
     .page-section.selections-and-charts
-      //- .side-menu
-      //-   .menu-categorie(v-for="(categorie, index) in sideMenuCategories")
-      //-     .categorie-header
-      //-       i.fa.fa-arrow-down.menu-arrow(v-if="index == activeSideMenu" @click="updateSideMenu(categorie)")
-      //-       i.fa.fa-arrow-right.menu-arrow(v-else @click="updateSideMenu(categorie)")
-      //-       h6.menu-header.title {{categorie}}
-      //-     .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
-      //-       .allPlots(v-for="(plot, index) in allPlots")
-      //-         .plot-menu
-      //-           input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(index)")
-      //-           p.plot-name {{ cityCap }} {{plot.name}}
-      //-           // v-model="checked"
-      //-       .select-all-plots
-      //-         button.button.is-small.menu-button(@click="showPlotMenu(5656)") Select All
-      //-         button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
-      //-     .categorie-content(v-show="categorie == 'Configuration' && activeSideMenu == 0")
-      //-       .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-      //-         h6.title {{ group.heading }}
-      //-         h6.title {{ calendarForSimDay(group.day) }}
-      //-         p.subhead {{ group.subheading }}
-      //-         .measure(v-for="m in group.measures" :key="m.measure")
-      //-           .measure-buttons
-      //-             p {{ m.title }}
-      //-               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
-      //-       h5.cumulative Cumulative Infected by
-      //-         br
-      //-         | {{ endDate }}:
-      //-       p.infected {{ prettyInfected }}
-
-      //-       h5.cumulative R-Value on:
-      //-       input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
-      //-       p.infected {{ summaryRValue }}
-              
-
-        //- .left-side
-        //-   .option-groups(
-        //-       v-if="this.city"
-        //-       :style="{gridTemplateColumns: runYaml.optionGroups.length > 1 ?  'repeat(3, 1fr)' : ''}")
-
-        //-       .option-group(:class="{'totally-disabled': isBase}"
-        //-                     v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-        //-         .g1
-        //-           h6.title {{ calendarForSimDay(group.day) }}:
-        //-             br
-        //-             | {{ group.heading }}
-
-        //-           p.subhead(v-if="group.subheading") {{ group.subheading }}
-
-        //-           .measure(v-for="m in group.measures" :key="m.measure")
-        //-             .measure-buttons
-        //-               p {{ m.title }}
-        //-               button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
-
-        //-       h5.cumulative Cumulative Infected by
-        //-         br
-        //-         | {{ this.endDate }}:
-        //-       p.infected {{ prettyInfected }}
-
-        //-       h5.cumulative R-Value on:
-        //-       input#reditor.input.r-input(size=10 v-model="summaryRValueDate")
-        //-       p.infected {{ summaryRValue }}
-
       .right-side(:class="{'wide-mode': $store.state.isWideMode}")
         p.width-selection
           a(:class="{'active-view-mode': !$store.state.isWideMode}" @click="setWideMode(false)") Narrow
@@ -2253,21 +2191,26 @@ p.subhead {
 .left-content {
   position: relative;
   width: 300px;
-  //height: 800px;
-  //background-color: rgba(255, 0, 0, 0.082);
-  //overflow: auto;
+  height: calc(100vh - $navAndBannerHeight);
   background-color: white;
-  //border-style: solid;
-  //border-width: thin;
+  position: fixed;
 }
 
 .right-content {
   width: 600px;
   flex-grow: 1;
-  //height: 800px;
-  //background-color: rgba(0, 128, 0, 0.122);
   overflow: auto;
   background: #eee;
+  margin-left: 300px;
+}
+
+.right-content {
+  position: relative;
+  width: calc(100vw - 300px);
+  flex-grow: 1;
+  height: calc(100vh - $navAndBannerHeight);
+  background: #eee;
+  position: fixed;
 }
 
 .side-menu {
@@ -2290,8 +2233,7 @@ p.subhead {
 .categorie-header {
   display: flex;
   height: 2rem;
-  //border-bottom-style: solid;
-  //border-width: thin;
+  background-color: #eee;
 }
 
 .menu-arrow,
@@ -2327,15 +2269,12 @@ p.subhead {
 }
 
 .menu-button {
-  //border-style: solid;
-  //border-color: black;
   width: 50%;
-  //background-color: transparent;
+
   margin: 10px;
 }
 
 .categorie-group {
-  //border-bottom-style: solid;
   border-width: thin;
   padding: 8px;
   border-bottom-style: solid;
@@ -2343,7 +2282,6 @@ p.subhead {
 }
 
 .categorie-content {
-  //overflow: auto;
   flex: 1;
   max-height: calc(100% - 2rem);
   display: flex;
@@ -2474,7 +2412,47 @@ p.subhead {
   }
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 750px) {
+  #single-run-viewer {
+    flex-direction: column;
+    background-color: white;
+    //width: calc(100% + 15px);
+    width: 100%;
+    overflow: visible;
+  }
+
+  .side-menu {
+    position: relative;
+    top: 0;
+    height: max-content;
+    width: 100%;
+    background-color: white;
+  }
+
+  .content {
+    margin-top: 0rem;
+  }
+
+  .readme {
+    padding-top: 1rem;
+  }
+
+  .left-content {
+    margin: 0;
+    width: 100%;
+    position: static;
+    height: min-content;
+    background-color: white;
+  }
+
+  .right-content {
+    margin: 0;
+    width: 100%;
+    position: static;
+    height: max-content;
+    background-color: white;
+  }
+
   .linear-plot.activity {
     padding-right: 0.25rem;
   }
