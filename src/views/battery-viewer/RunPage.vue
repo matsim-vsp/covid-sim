@@ -1,6 +1,6 @@
 <template lang="pug">
 #run-page
-  .banner#banner
+  .banner
     .banner-text
       h2 VSP / Technische Universität Berlin
       h3 COVID-19 Analysis Portal
@@ -46,7 +46,6 @@ import * as moment from 'moment'
 
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import SingleRunViewer from './SingleRunViewer.vue'
-import Banner from '../../components/Banner.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 import SVNFileSystem from '@/util/SVNFileSystem'
 import { Route } from 'vue-router'
@@ -60,7 +59,6 @@ interface Breadcrumb {
 @Component({
   components: {
     SingleRunViewer,
-    Banner,
   },
 })
 export default class VueComponent extends Vue {
