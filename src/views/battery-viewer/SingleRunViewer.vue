@@ -19,13 +19,6 @@
             button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
         .categorie-content.scrollable(v-show="categorie == 'Configuration' && activeSideMenu == 0")
           .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
-            //- h6.title {{ group.heading }}
-            //- h6.title {{ calendarForSimDay(group.day) }}
-            //- p.subhead {{ group.subheading }}
-            //- .measure(v-for="m in group.measures" :key="m.measure")
-            //-   .measure-buttons
-            //-     p {{ m.title }}
-            //-       button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
             .g1(v-if="hasMultipleOptions(group)")
               h6.title {{ getGroupTitle(group) }}
 
@@ -1617,7 +1610,7 @@ export default class VueComponent extends Vue {
   }
 
   private calendarForSimDay(day: number) {
-    if (day === -1) return 'General Options'
+    if (day === -1) return ''
 
     const date = moment(this.startDate)
       .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
