@@ -9,14 +9,13 @@
           h6.menu-header.title {{categorie}}
         .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
           .scrollable
-            .allPlots(v-for="(plot, index) in allPlots")
+            .allPlots(v-for="(plot, index) in allPlotsCheckIsUsedInThisRun()")
               .plot-menu(v-if="plot.usedInThisRun")
-                input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(index)")
+                input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(plot.index)")
                 p.plot-name {{plot.name}}
-                // v-model="checked"
           .select-all-plots
-            button.button.is-small.menu-button(@click="showPlotMenu(5656)") Select All
-            button.button.is-small.menu-button(@click="showPlotMenu(5657)") Unselect All
+            button.button.is-small.menu-button(@click="showPlotMenu('allActive')") Select All
+            button.button.is-small.menu-button(@click="showPlotMenu('allInactive')") Unselect All
         .categorie-content.scrollable(v-show="categorie == 'Configuration' && activeSideMenu == 0")
           .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
             .g1(v-if="hasMultipleOptions(group)")
@@ -68,7 +67,7 @@
 
         //- ------- ACTIVITY LEVELS
         .linear-plot.activity(v-if="showActivityLevels && allPlots[0].active")
-          h5 Activity Levels by Type
+          h5 {{allPlots[0].name}}
           p 0-100% of normal
           .plotarea.activities
             activity-levels-plot.plotsize(:city="city" :battery="runId"
@@ -110,10 +109,10 @@
         .all-plots
           //- ---------- Disease Import -------
           .linear-plot(v-if="diseaseData.length > 0 && allPlots[1].active")
-            h5 {{ cityCap }} Disease Import
-              button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+            h5 {{ cityCap }} {{allPlots[1].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(1)") ..
 
-            .hideIt(v-show="showPlot[24]")
+            .hideIt(v-show="allPlots[1].showPlot")
               //- p mRNA Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -127,10 +126,10 @@
 
           //- //- ---------- Post Hospital -------
           .linear-plot(v-if="postHospital.length > 0 && allPlots[2].active")
-            h5 {{ cityCap }} Hospitalization New Cases (post-process)
-              button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+            h5 {{ cityCap }} {{allPlots[2].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(2)") ..
 
-            .hideIt(v-show="showPlot[24]")
+            .hideIt(v-show="allPlots[2].showPlot")
               //- p mRNA Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -145,10 +144,10 @@
 
           //- //- ---------- Post Hospital -------
           .linear-plot(v-if="postHospital.length > 0 && allPlots[3].active")
-            h5 {{ cityCap }} Cologne Hospitalization Rate (post-process)
-              button.button.is-small.hider(@click="toggleShowPlot(24)") ..
+            h5 {{ cityCap }} {{allPlots[3].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(3)") ..
 
-            .hideIt(v-show="showPlot[24]")
+            .hideIt(v-show="allPlots[3].showPlot")
               //- p mRNA Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -163,10 +162,10 @@
 
           //- ---------- CASES COMPARISION -------
           .linear-plot(v-if="allPlots[4].active")
-            h5 {{ cityCap }} Cases Comparison
-              button.button.is-small.hider(@click="toggleShowPlot(0)") ..
+            h5 {{ cityCap }} {{allPlots[4].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(4)") ..
 
-            .hideIt(v-show="showPlot[0]")
+            .hideIt(v-show="allPlots[4].showPlot")
               p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -180,10 +179,10 @@
 
           //- ---------- VIRUS STRAINS -------
           .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[5].active")
-            h5 {{ cityCap }} Virus Strains
-              button.button.is-small.hider(@click="toggleShowPlot(6)") ..
+            h5 {{ cityCap }} {{allPlots[5].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(5)") ..
 
-            .hideIt(v-show="showPlot[6]")
+            .hideIt(v-show="allPlots[5].showPlot")
               p Simulated number of infections (whole simulation region) and percentage, by strain
               .plotarea(:style="{height: '42rem'}")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -198,10 +197,10 @@
 
           //- ---------- R-VALUES -------
           .linear-plot(v-if="allPlots[6].active")
-            h5 {{ cityCap }} Simulated R-Values
-              button.button.is-small.hider(@click="toggleShowPlot(2)") ..
+            h5 {{ cityCap }} {{allPlots[6].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(6)") ..
 
-            .hideIt(v-show="showPlot[2]")
+            .hideIt(v-show="allPlots[6].showPlot")
               p {{ rValueMethodDescription }}
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -217,10 +216,10 @@
 
           //- ---------- R VALUES 2 -------
           .linear-plot(v-if="hasRValuePurposes  && allPlots[7].active")
-            h5 {{ cityCap }} Simulated R-Values by Purpose
-              button.button.is-small.hider(@click="toggleShowPlot(5)") ..
+            h5 {{ cityCap }} {{allPlots[7].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(7)") ..
 
-            .hideIt(v-show="showPlot[5]")
+            .hideIt(v-show="allPlots[7].showPlot")
               p {{ rValueMethodDescription }}
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -234,9 +233,9 @@
 
           //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
           .linear-plot(v-if="infectionsByActivityType.length > 0  && allPlots[8].active")
-            h5 {{ cityCap }} Infections by Activity Type
-              button.button.is-small.hider(@click="toggleShowPlot(7)") ..
-            .hideIt(v-show="showPlot[7]")
+            h5 {{ cityCap }} {{allPlots[8].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(8)") ..
+            .hideIt(v-show="allPlots[8].showPlot")
               p 7 day average
               .plotarea(:style="{height: '28rem'}")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -249,10 +248,10 @@
 
           //- ---------- VACCINE EFFECTIVENESS -------
           .linear-plot(v-if="showVaccineEffectivenessFields.length && allPlots[9].active")
-            h5 {{ cityCap }} Vaccine Effectiveness (against infection)
-              button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+            h5 {{ cityCap }} {{allPlots[9].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(9)") ..
 
-            .hideIt(v-show="showPlot[18]")
+            .hideIt(v-show="allPlots[9].showPlot")
               p mRNA Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -266,7 +265,7 @@
                   vaccineType="mRNA"
                 )
 
-            .hideIt(v-show="showPlot[18]")
+            .hideIt(v-show="allPlots[9].showPlot")
               p Vector Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -282,10 +281,10 @@
 
           //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
           .linear-plot(v-if="showVaccineEffectivenessVsStrainFields.length && allPlots[10].active")
-            h5 {{ cityCap }} Vaccine Effectiveness Vs. Strain
-              button.button.is-small.hider(@click="toggleShowPlot(19)") ..
+            h5 {{ cityCap }} {{allPlots[10].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(10)") ..
 
-            .hideIt(v-show="showPlot[19]")
+            .hideIt(v-show="allPlots[10].showPlot")
               //- p mRNA Vaccines
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -300,10 +299,10 @@
 
           //- ---------- VACCINATED / UNVACCINATED -------
           .linear-plot(v-if="showIncidenceComp && allPlots[11].active")
-            h5 {{ cityCap }} Incidence comparison between vaccinated and unvaccinated persons
-              button.button.is-small.hider(@click="toggleShowPlot(14)") ..
+            h5 {{ cityCap }} {{allPlots[11].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(11)") ..
 
-            .hideIt(v-show="showPlot[14]")
+            .hideIt(v-show="allPlots[11].showPlot")
               //p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -315,10 +314,10 @@
 
           //- ---------- VACCINATION / BOOSTER RATES -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[12].active")
-            h5 {{ cityCap }} Vaccination Rates and Booster Rates
-              button.button.is-small.hider(@click="toggleShowPlot(17)") ..
+            h5 {{ cityCap }} {{allPlots[12].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(12)") ..
 
-            .hideIt(v-show="showPlot[17]")
+            .hideIt(v-show="allPlots[12].showPlot")
               //p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -330,10 +329,10 @@
 
           //- ---------- VACCINATION PER TYPE -------
           .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0  && allPlots[13].active")
-            h5 {{ cityCap }} Vaccination per Type
-              button.button.is-small.hider(@click="toggleShowPlot(22)") ..
+            h5 {{ cityCap }} {{allPlots[13].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(13)") ..
 
-            .hideIt(v-show="showPlot[22]")
+            .hideIt(v-show="allPlots[13].showPlot")
               p 7 day average
               //p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.compact
@@ -345,10 +344,10 @@
 
           //- ---------- ANTIBODIES -------
           .linear-plot(v-if="showIncidenceComp && antibodies.length > 0  && allPlots[14].active")
-            h5 {{ cityCap }} Antibodies
-              button.button.is-small.hider(@click="toggleShowPlot(23)") ..
+            h5 {{ cityCap }} {{allPlots[14].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(14)") ..
 
-            .hideIt(v-show="showPlot[23]")
+            .hideIt(v-show="allPlots[14].showPlot")
               //p 7 day average
               //p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.compact
@@ -360,10 +359,10 @@
 
           //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
           .linear-plot(v-if="allPlots[15].active")
-            h5 {{ cityCap }} Hospitalization New Cases
+            h5 {{ cityCap }} {{allPlots[15].name}}
               button.button.is-small.hider(@click="toggleShowPlot(15)") ..
 
-            .hideIt(v-show="showPlot[15]")
+            .hideIt(v-show="allPlots[15].showPlot")
               p 7-day moving average
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -377,10 +376,10 @@
 
           //- ---------- HOSPITALIZATION RATES
           .linear-plot(v-if="city !== 'heinsberg'  && allPlots[16].active")
-            h5 {{ cityCap }} Hospitalization Rate Comparison
-              button.button.is-small.hider(@click="toggleShowPlot(1)") ..
+            h5 {{ cityCap }} {{allPlots[16].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(16)") ..
 
-            .hideIt(v-show="showPlot[1]")
+            .hideIt(v-show="allPlots[16].showPlot")
               p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -391,10 +390,10 @@
 
           //- ---------- CASES COMPARISION BY VACCINATION -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[17].active")
-            h5 {{ cityCap }} Hospitalization Rate Comparison for vaccinated and unvaccinated persons
-              button.button.is-small.hider(@click="toggleShowPlot(16)") ..
+            h5 {{ cityCap }} {{allPlots[17].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(17)") ..
 
-            .hideIt(v-show="showPlot[16]")
+            .hideIt(v-show="allPlots[17].showPlot")
               //p New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -406,10 +405,10 @@
 
           //- ---------- HEALTH OUTCOMES ------
           .linear-plot(v-if="allPlots[18].active")
-            h5 {{ cityCap }} Simulated Health Outcomes Over Time
-              button.button.is-small.hider(@click="toggleShowPlot(3)") ..
+            h5 {{ cityCap }} {{allPlots[18].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(18)") ..
 
-            .hideIt(v-show="showPlot[3]")
+            .hideIt(v-show="allPlots[18].showPlot")
               p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
               .plotarea
                 p.plotsize(v-if="!isZipLoaded") Loading data...
@@ -419,10 +418,10 @@
 
           //- ---------- AGE GROUP BLOCK CHART ------
           .linear-plot(v-if="showByAgePlot && incidenceHeatMapData && allPlots[19].active")
-            h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
-              button.button.is-small.hider(@click="toggleShowPlot(4)") ..
+            h5 {{ cityCap }} {{allPlots[19].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(19)") ..
 
-            .hideIt(v-show="showPlot[4]")
+            .hideIt(v-show="allPlots[19].showPlot")
               .plotarea(style="grid-template-rows: 18rem")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -434,10 +433,10 @@
 
           //- ---------- AGE GROUP LINE CHART ------
           .linear-plot(v-if="showByAgePlot && incidenceHeatMapData  && allPlots[20].active")
-            h5 {{ cityCap }} 7-Day Incidence by Age Group Over Time
-              button.button.is-small.hider(@click="toggleShowPlot(13)") ..
+            h5 {{ cityCap }} {{allPlots[20].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(20)") ..
 
-            .hideIt(v-show="showPlot[13]")
+            .hideIt(v-show="allPlots[20].showPlot")
               .plotarea(style="grid-template-rows: 18rem")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -448,10 +447,10 @@
 
           //- ---------- LEISURE OUTDOOR FRACTION ------
           .linear-plot(v-if="leisurOutdoorFractionData.length && allPlots[21].active")
-            h5 {{ cityCap }} Leisure Outdoor Fraction
-              button.button.is-small.hider(@click="toggleShowPlot(11)") ..
+            h5 {{ cityCap }} {{allPlots[21].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(21)") ..
 
-            .hideIt(v-show="showPlot[11]")
+            .hideIt(v-show="allPlots[21].showPlot")
               .plotarea(style="grid-template-rows: 18rem")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -463,10 +462,10 @@
 
             //- ---------- WEEKLY TESTS ------
           .linear-plot(v-if="weeklyTestsData.length  && allPlots[22].active")
-            h5 {{ cityCap }} Weekly Tests
-              button.button.is-small.hider(@click="toggleShowPlot(12)") ..
+            h5 {{ cityCap }} {{allPlots[22].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(22)") ..
 
-            .hideIt(v-show="showPlot[12]")
+            .hideIt(v-show="allPlots[22].showPlot")
               .plotarea(style="grid-template-rows: 18rem")
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -598,143 +597,166 @@ export default class VueComponent extends Vue {
   private activeSideMenu = 0
   private allPlots = [
     {
-      // 0
+      index: 0,
       name: 'Activity Levels by Type',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 1
+      index: 1,
       name: 'Disease Import', // NEW
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 2
+      index: 2,
       name: 'Hospitalization New Cases (post-process)', // NEW
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 3
+      index: 3,
       name: 'Hospitalization Rate (post-process)', // NEW
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 4
+      index: 4,
       name: 'Cases Comparison',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 5
+      index: 5,
       name: 'Virus Strains',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 6
+      index: 6,
       name: 'Simulated R-Values',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 7
+      index: 7,
       name: 'Simulated R-Values by Purpose',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 8
+      index: 8,
       name: 'Infections by Activity Type',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 9
+      index: 9,
       name: 'Vaccine Effectiveness (against infection)',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 10
+      index: 10,
       name: 'Vaccine Effectiveness Vs. Strain',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 11
+      index: 11,
       name: 'Incidence comparison between vaccinated and unvaccinated persons',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 12
+      index: 12,
       name: 'Vaccination Rates and Booster Rates',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 13
+      index: 13,
       name: 'Vaccination per Type',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 14
+      index: 14,
       name: 'Antibodies',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 15
+      index: 15,
       name: 'Hospitalization New Cases',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 16
+      index: 16,
       name: 'Hospitalization Rate Comparison',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 17
+      index: 17,
       name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
 
     {
-      // 18
+      index: 18,
       name: 'Simulated Health Outcomes Over Time',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 19
+      index: 19,
       name: '7-Day Incidence by Age Group Over Time (Heatmap)',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 20
+      index: 20,
       name: '7-Day Incidence by Age Group Over Time (Linechart)',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 21
+      index: 21,
       name: 'Leisure Outdoor Fraction',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
     {
-      // 22
+      index: 22,
       name: 'Weekly Tests',
       active: true,
       usedInThisRun: true,
+      showPlot: true,
     },
   ]
 
@@ -753,34 +775,6 @@ export default class VueComponent extends Vue {
   private DEFAULT_R_VALUE_DATE = '2020-10-15'
   private summaryRValueDate = ''
   private summaryRValue = ''
-
-  private showPlot: any = {
-    0: true,
-    1: true,
-    2: true,
-    3: true,
-    4: true,
-    5: true,
-    6: true,
-    7: true,
-    8: true,
-    9: true,
-    10: true,
-    11: true,
-    12: true,
-    13: true,
-    14: true,
-    15: true,
-    16: true,
-    17: true,
-    18: true,
-    19: true,
-    20: true,
-    21: true,
-    22: true,
-    23: true,
-    24: true,
-  }
 
   private MAX_DAYS = 1500
   private cumulativeInfected = 0
@@ -956,6 +950,40 @@ export default class VueComponent extends Vue {
 
     this.hasBaseRun = this.isThereABaseRun()
 
+    //chang disabled plots
+    for (let i = 0; i < this.allPlots.length; i++) {
+      this.allPlots[i].active = true
+    }
+    if (Object.keys(this.runYaml).includes('ignoredPlots')) {
+      if (this.runYaml.ignoredPlots?.includes('hospNewCases')) {
+        this.allPlots[15].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospRateComp')) {
+        this.allPlots[16].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacEffInf')) {
+        this.allPlots[9].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacEffStrain')) {
+        this.allPlots[10].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('incVacUnvac')) {
+        this.allPlots[11].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacBoostRate')) {
+        this.allPlots[12].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacType')) {
+        this.allPlots[13].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospVacUnvac')) {
+        this.allPlots[17].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('healthOutcome')) {
+        this.allPlots[18].active = false
+      }
+    }
+
     this.showPlotForCurrentSituation()
   }
 
@@ -986,12 +1014,7 @@ export default class VueComponent extends Vue {
   private showIncidenceComp = false
 
   private toggleShowPlot(which: number) {
-    this.showPlot[which] = !this.showPlot[which]
-    console.log(this.showPlot)
-  }
-
-  private showThisPlot(which: number) {
-    return this.showPlot[which]
+    this.allPlots[which].showPlot = !this.allPlots[which].showPlot
   }
 
   private hasMultipleOptions(group: any) {
@@ -1394,7 +1417,7 @@ export default class VueComponent extends Vue {
       this.allPlots[13].usedInThisRun = false
     }
 
-    if (!this.showIncidenceComp && !(this.antibodies.length > 0)) {
+    if (!this.showIncidenceComp || !(this.antibodies.length > 0)) {
       this.allPlots[14].usedInThisRun = false
     }
 
@@ -2177,12 +2200,18 @@ export default class VueComponent extends Vue {
     this.activeSideMenu = index == this.activeSideMenu ? -1 : index
   }
 
-  private showPlotMenu(index: number) {
+  private allPlotsCheckIsUsedInThisRun() {
+    return this.allPlots.filter(function(u) {
+      return u.usedInThisRun
+    })
+  }
+
+  private showPlotMenu(index: any) {
     // Select All -> 5656
     // Unselect All -> 5657
-    if (index == 5656) {
+    if (index === 'allActive') {
       this.allPlots.forEach(element => (element.active = true))
-    } else if (index == 5657) {
+    } else if (index === 'allInactive') {
       this.allPlots.forEach(element => (element.active = false))
     } else {
       this.allPlots[index].active = !this.allPlots[index].active
@@ -2219,7 +2248,7 @@ a.active-view-mode {
 
 #single-run-viewer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background-color: cyan;
 }
 
@@ -2437,7 +2466,6 @@ p.subhead {
 }
 
 .left-content {
-  position: relative;
   width: 300px;
   height: calc(100vh - $navAndBannerHeight);
   background-color: white;
@@ -2445,15 +2473,11 @@ p.subhead {
 }
 
 .right-content {
-  width: 600px;
+  width: 100%;
   flex-grow: 1;
   overflow: auto;
   background: #eee;
   margin-left: 300px;
-}
-
-.right-content {
-  position: relative;
   width: calc(100vw - 300px);
   flex-grow: 1;
   height: calc(100vh - $navAndBannerHeight);

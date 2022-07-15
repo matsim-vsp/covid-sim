@@ -71,6 +71,7 @@ export interface RunYaml {
   // these are for new version
   defaultStartDate?: string
   startDates?: string[]
+  ignoredPlots?: string[]
   //heat map max
   // graphs can start on a different date than the simulation
   graphStartDate: string
