@@ -66,15 +66,14 @@ export default class VueComponent extends Vue {
     // get a map (date -> homeInfections). This will be used to make Infections by activity type plot be in relation to home activities.
     // e.g. on xx/xx/2020 date, 1.8x as many infections occured in leisure context as in home.
     // share plot is not affected - jr July2022
-    const mapHomeInfections = new Map();
+    const mapHomeInfections = new Map()
 
     for (const row of this.values) {
       const act = row.activity
-      if(act=="home"){
-        mapHomeInfections.set(row.date,row.infections)
+      if (act == 'home') {
+        mapHomeInfections.set(row.date, row.infections)
       }
     }
-
 
     // process the data
     for (const row of this.values) {
