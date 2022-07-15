@@ -1443,8 +1443,6 @@ export default class VueComponent extends Vue {
     if (!this.weeklyTestsData.length) {
       this.allPlots[22].usedInThisRun = false
     }
-
-    console.log(this.allPlots)
   }
 
   private addDataFromInfectionsCSVToData(valueName: string) {
@@ -2213,8 +2211,6 @@ export default class VueComponent extends Vue {
   }
 
   private showPlotMenu(index: any) {
-    // Select All -> 5656
-    // Unselect All -> 5657
     if (index === 'allActive') {
       this.allPlots.forEach(element => (element.active = true))
     } else if (index === 'allInactive') {
