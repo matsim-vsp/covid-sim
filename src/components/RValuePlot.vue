@@ -125,14 +125,14 @@ export default class VueComponent extends Vue {
           shape: 'linear',
         },
       },
-      {
-        name: 'Daily R-Value',
-        x: x,
-        y: r,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { color: '#c44', size: 3 },
-      },
+      // {
+      //   name: 'Daily R-Value',
+      //   x: x,
+      //   y: r,
+      //   mode: 'markers',
+      //   type: 'scatter',
+      //   marker: { color: '#c44', size: 3 },
+      // },
     ]
 
     // save the 7-day average so we can query it later for the summary stats

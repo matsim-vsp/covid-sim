@@ -543,6 +543,8 @@ import PostHospital from '@/components/PostHospital.vue'
 import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
+import DiseaseImport from '@/components/DiseaseImport.vue'
+import PostHospital from '@/components/PostHospital.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
@@ -583,6 +585,8 @@ interface VegaChartDefinition {
     VaccineEffectivenessVsStrain,
     VaccinationPerType,
     Antibodies,
+    DiseaseImport,
+    PostHospital,
   },
 })
 export default class VueComponent extends Vue {
@@ -833,6 +837,50 @@ export default class VueComponent extends Vue {
 
   private get showByAgePlot() {
     return this.city !== 'jakarta'
+  }
+
+  private getGroupTitle(group: any) {
+    return this.calendarForSimDay(group.day) || group.heading || 'General Options'
+  }
+
+  private hasMultipleOptions(group: any) {
+    let hasMultiple = false
+    // see if any measures have multiple values
+    for (const m of group.measures) {
+      if (!this.measureOptions[m.measure]) continue
+
+      const numOptions = this.measureOptions[m.measure].length
+      if (numOptions > 1) {
+        hasMultiple = true
+      } else {
+        this.setValueForSingleOptionMeasure(m.measure)
+      }
+    }
+
+    // update the single-value parameters, after everything else has settled down
+    debounce(1, () => {
+      this.singleValueOptionKeys = Object.keys(this.singleValueOptions)
+    })()
+
+    return hasMultiple
+  }
+
+  private singleValueOptions: any = {}
+  private singleValueOptionKeys: any[] = []
+
+  // some measures only have one option! Set its value.
+  private setValueForSingleOptionMeasure(measure: string) {
+    let onlyValue = this.measureOptions[measure][0]
+    if (onlyValue.endsWith('%') && !onlyValue.startsWith('+')) {
+      const answer = onlyValue.substring(0, onlyValue.length - 1)
+      onlyValue = '' + parseFloat(answer) / 100.0
+      if (onlyValue === '0') onlyValue = '0.0'
+      if (onlyValue === '1') onlyValue = '1.0'
+    }
+    const wait = true
+
+    this.singleValueOptions[measure] = onlyValue
+    this.sliderChanged(measure, onlyValue, wait)
   }
 
   private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
@@ -1745,6 +1793,42 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private async loaddiseaseImport(currentRun: any) {
+    this.diseaseData = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.diseaseImport.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.diseaseData = z.data
+    } catch (e) {
+      console.log('DiseaseData: no', filename)
+    }
+  }
+
+  private async loadPostHospital(currentRun: any) {
+    this.postHospital = []
+
+    if (!currentRun.RunId) return
+    if (this.zipLoader === {}) return
+
+    const filename = currentRun.RunId + '.post.hospital.tsv'
+
+    try {
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      this.postHospital = z.data
+    } catch (e) {
+      console.log('postHospital: no', filename)
+    }
+  }
+
   private vaccinationPerType: any[] = []
 
   private async loadVaccinationPerType(currentRun: any) {
@@ -2271,7 +2355,7 @@ h6 {
 }
 
 .measure {
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .measure-buttons p {
@@ -2386,6 +2470,7 @@ p.plotsize {
 }
 
 p.subhead {
+  font-size: 0.9rem;
   margin-top: -0.25rem;
 }
 
@@ -2673,6 +2758,14 @@ p.subhead {
 .single-value-options {
   margin: 1rem 0.5rem;
 }
+.single-value-options table {
+  font-size: 0.9rem;
+}
+
+.single-value-options {
+  margin: 1rem 0.5rem;
+}
+
 .single-value-options table {
   font-size: 0.9rem;
 }

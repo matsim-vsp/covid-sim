@@ -24,6 +24,8 @@ export default class VueComponent extends Vue {
   private dataLines: any[] = []
 
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
+  private diviIncidenceNRWUrl =
+    PUBLIC_SVN + 'original-data/hospital-cases/cologne/DiviIncidenceNRW.csv'
 
   private observedData: any[] = []
 
@@ -42,6 +44,7 @@ export default class VueComponent extends Vue {
     this.fetchRealHospitalizationRates()
     this.calculate()
     this.fetchBundeslandIncidenceRates()
+    //this.fetchDiviIncidenceNRW()
   }
 
   private handleRelayout(event: any) {
@@ -54,6 +57,7 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     this.calculate()
     this.fetchBundeslandIncidenceRates()
+    //this.fetchDiviIncidenceNRW()
   }
 
   @Watch('city') private async fetchRealHospitalizationRates() {
@@ -111,6 +115,43 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
+  private async fetchDiviIncidenceNRW() {
+    try {
+      const response = await fetch(this.diviIncidenceNRWUrl)
+      const text = await response.text()
+      const incidenceNRW = Papaparse.parse(text, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        comments: '#',
+      }).data
+
+      // Workaround for doubled data; Not a good bugfix but it works
+      // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
+      // times on the Cologne Hospitalization New Cases Plot
+      let diviExsists = false
+      this.dataLines.forEach(e => {
+        if (e.name == 'Observed : Nordrhein-Westfalen (DIVI)') {
+          diviExsists = true
+        }
+      })
+
+      if (incidenceNRW.length) {
+        if (this.dataLines.length && !diviExsists)
+          this.dataLines.push({
+            name: 'Observed : Nordrhein-Westfalen (DIVI)',
+            x: incidenceNRW.map(row => row.Date),
+            y: incidenceNRW.map(row => row.DIVIIncidence),
+            type: 'scatter',
+            marker: { size: 4, color: 'brown' },
+            line: { width: 2, dash: 'dot' },
+          })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   private calculate() {
     this.$emit('method', this.lagDays + '-day Hospitalizations / 100k Pop.')
 
@@ -120,6 +161,8 @@ export default class VueComponent extends Vue {
 
     try {
       const susceptible = this.data.filter(v => v.name === 'Susceptible')[0]
+      if (!susceptible) return
+
       const totalPopulation = susceptible.y[0]
       const factor100k = totalPopulation / 100000.0
 
@@ -184,6 +227,7 @@ export default class VueComponent extends Vue {
     // only add Bundesland data if we are looking at data for a city with a Bundesland
     if (!this.bundeslandIncidenceRateLookup[this.city]) return
     const region = this.bundeslandIncidenceRateLookup[this.city]
+    console.log(region)
 
     const csvData = Papaparse.parse(this.bundeslandCSV, {
       header: true,
@@ -214,6 +258,8 @@ export default class VueComponent extends Vue {
       marker: { color: '#4c6' },
       line: { width: 1.5 },
     })
+
+    this.fetchDiviIncidenceNRW()
   }
 
   private layout: any = {

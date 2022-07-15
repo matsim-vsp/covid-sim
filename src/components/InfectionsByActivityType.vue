@@ -63,6 +63,19 @@ export default class VueComponent extends Vue {
     const shares: { [activity: string]: number[] } = {}
     const date: number[] = []
 
+    // get a map (date -> homeInfections). This will be used to make Infections by activity type plot be in relation to home activities.
+    // e.g. on xx/xx/2020 date, 1.8x as many infections occured in leisure context as in home.
+    // share plot is not affected - jr July2022
+    const mapHomeInfections = new Map();
+
+    for (const row of this.values) {
+      const act = row.activity
+      if(act=="home"){
+        mapHomeInfections.set(row.date,row.infections)
+      }
+    }
+
+
     // process the data
     for (const row of this.values) {
       const act = row.activity
@@ -75,7 +88,7 @@ export default class VueComponent extends Vue {
       if (date.length === 0 || row.date !== date[date.length - 1]) date.push(row.date)
 
       // update infections and shares
-      infections[act].push(row.infections)
+      infections[act].push(row.infections / mapHomeInfections.get(row.date))
       shares[act].push(100.0 * row.infectionsShare)
     }
 
@@ -127,8 +140,8 @@ export default class VueComponent extends Vue {
     yaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      type: this.logScale ? 'log' : 'linear',
-      title: 'Number of Infections',
+      type: 'linear',
+      title: 'Num of Infections (vs. Home)',
       hoverformat: '.1f',
     },
     plot_bgcolor: '#f8f8f8',
