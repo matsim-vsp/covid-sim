@@ -553,7 +553,6 @@ import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
-import { boolean } from 'mathjs'
 
 interface Measure {
   measure: string
