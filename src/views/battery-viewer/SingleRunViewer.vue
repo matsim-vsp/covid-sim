@@ -9,10 +9,19 @@
           h6.menu-header.title {{categorie}}
         .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
           .scrollable
-            .allPlots(v-for="(plot, index) in allPlotsCheckIsUsedInThisRun()")
+            .allPlots(v-for="chartKey in Object.keys(vegaChartData)" :key="'top' + chartKey" v-if="vegaChartData[chartKey].yaml.showAbove === true")
+              .plot-menu()
+                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox" @click="showVegaPlots(chartKey)")
+                p {{vegaChartData[chartKey].yaml.title}}
+            .allPlots(v-for="(plot, index) in allPlotsCheckIsUsedInThisRun()" :key="index")
               .plot-menu(v-if="plot.usedInThisRun")
                 input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(plot.index)")
                 p.plot-name {{plot.name}}
+            .allPlots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey" v-if="vegaChartData[chartKey].yaml.showAbove === false")
+              .plot-menu()
+                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox" @click="showVegaPlots(chartKey)")
+                p {{vegaChartData[chartKey].yaml.title}}
+              
           .select-all-plots
             button.button.is-small.menu-button(@click="showPlotMenu('allActive')") Select All
             button.button.is-small.menu-button(@click="showPlotMenu('allInactive')") Unselect All
@@ -77,7 +86,7 @@
 
         //- ------ Vega charts with top=true -----------
         .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-          .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true")
+          .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
               :runId="runId"
@@ -544,6 +553,7 @@ import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
+import { boolean } from 'mathjs'
 
 interface Measure {
   measure: string
@@ -555,6 +565,7 @@ interface VegaChartDefinition {
   zip?: string
   url?: string
   data?: any[]
+  isVisible?: boolean
 }
 
 @Component({
@@ -890,8 +901,9 @@ export default class VueComponent extends Vue {
         const response = await fetch(url).then()
         const text = await response.text()
         const definition = yaml.parse(text)
+        const isVisible = true
 
-        const chart: VegaChartDefinition = { yaml: definition, data: [] }
+        const chart: VegaChartDefinition = { yaml: definition, data: [], isVisible: isVisible }
 
         // is there a zip file?
         if (definition.data && definition.data.zip) {
@@ -1181,10 +1193,23 @@ export default class VueComponent extends Vue {
     nReVaccinated: 'Boosted',
   }
 
+  // private async created() {
+  //   window.addEventListener('resize', this.myEventHandler)
+  // }
+
   private async mounted() {
     this.loadCoronaDetectionRateData()
     this.switchYaml()
   }
+
+  // private async destroyed() {
+  //   window.removeEventListener('resize', this.myEventHandler)
+  // }
+
+  // private myEventHandler() {
+  //   this.showPlotForCurrentSituation()
+  //   console.log('Resize')
+  // }
 
   private isResizing = false
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
@@ -2208,6 +2233,14 @@ export default class VueComponent extends Vue {
     return this.allPlots.filter(function(u) {
       return u.usedInThisRun
     })
+  }
+
+  private showVegaPlots(id: string) {
+    if (this.vegaChartData[id].isVisible) {
+      this.vegaChartData[id].isVisible = false
+    } else {
+      this.vegaChartData[id].isVisible = true
+    }
   }
 
   private showPlotMenu(index: any) {
