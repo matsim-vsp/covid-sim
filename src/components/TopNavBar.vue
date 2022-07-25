@@ -38,8 +38,6 @@
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2022-02-22/1?ba2Inf=1.5&ba1ba2Long=True'") Omicron variant BA.2. Report Feb. 23
 
- 
-
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}" )
           a.navbar-link  Other Versions
           .navbar-dropdown(style="margin-left: -20rem;")
