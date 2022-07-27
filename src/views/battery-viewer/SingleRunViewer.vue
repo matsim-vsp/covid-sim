@@ -21,7 +21,7 @@
               .plot-menu()
                 input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox" @click="showVegaPlots(chartKey)")
                 p {{vegaChartData[chartKey].yaml.title}}
-              
+
           .select-all-plots
             button.button.is-small.menu-button(@click="showPlotMenu('allActive')") Select All
             button.button.is-small.menu-button(@click="showPlotMenu('allInactive')") Unselect All
@@ -36,6 +36,7 @@
                 .measure-buttons(v-if="measureOptions[m.measure].length > 1")
                   p {{ m.title }}
                   button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
+
           h5.cumulative Cumulative Infected by
             br
             | {{ endDate }}:
@@ -45,12 +46,14 @@
           input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
           p.infected {{ summaryRValue }}
 
+
           .single-value-options(v-if="singleValueOptionKeys.length")
             h5 Simulation Parameters:
             table
               tr(v-for="measure in singleValueOptionKeys" :key="measure")
                 td(style="text-align: right; padding-right: 0.4rem") {{measure}}
                 td: b(style="color: #596") {{ singleValueOptions[measure]}}
+
   .right-content
     .page-section.content
       .readme(v-html="topNotes")
@@ -511,7 +514,6 @@
         p GDPR: This site does not collect, store, or analyze any personal information.
         p For more info about VSP at TU Berlin, see
           a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
-        
         p: router-link(to="/imprint") Imprint
 
 </template>
@@ -849,6 +851,8 @@ export default class VueComponent extends Vue {
     return this.calendarForSimDay(group.day) || group.heading || 'General Options'
   }
 
+  private cachedOptionKeys = ''
+
   private hasMultipleOptions(group: any) {
     let hasMultiple = false
     // see if any measures have multiple values
@@ -864,9 +868,12 @@ export default class VueComponent extends Vue {
     }
 
     // update the single-value parameters, after everything else has settled down
-    debounce(1, () => {
-      this.singleValueOptionKeys = Object.keys(this.singleValueOptions)
-    })()
+    const keys = Object.keys(this.singleValueOptions)
+    const keysStringify = JSON.stringify(keys)
+    if (this.cachedOptionKeys !== keysStringify) {
+      this.singleValueOptionKeys = keys
+      this.cachedOptionKeys = keysStringify
+    }
 
     return hasMultiple
   }
@@ -927,6 +934,9 @@ export default class VueComponent extends Vue {
       zipfile.clear()
     }
     this.zipLoaderLookup = {}
+    this.csvCache = {}
+    this.promisedZipFile = null
+    this.cachedOptionKeys = ''
   }
 
   private async setWideMode(mode: boolean) {
@@ -1192,23 +1202,10 @@ export default class VueComponent extends Vue {
     nReVaccinated: 'Boosted',
   }
 
-  // private async created() {
-  //   window.addEventListener('resize', this.myEventHandler)
-  // }
-
   private async mounted() {
     this.loadCoronaDetectionRateData()
     this.switchYaml()
   }
-
-  // private async destroyed() {
-  //   window.removeEventListener('resize', this.myEventHandler)
-  // }
-
-  // private myEventHandler() {
-  //   this.showPlotForCurrentSituation()
-  //   console.log('Resize')
-  // }
 
   private isResizing = false
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
