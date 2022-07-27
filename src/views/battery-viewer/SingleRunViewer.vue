@@ -10,17 +10,17 @@
         .categorie-content(v-show="categorie == 'Plots' && activeSideMenu == 1")
           .scrollable
             .allPlots(v-for="chartKey in Object.keys(vegaChartData)" :key="'top' + chartKey" v-if="vegaChartData[chartKey].yaml.showAbove === true")
-              .plot-menu()
-                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox" @click="showVegaPlots(chartKey)")
+              .plot-menu(@click="showVegaPlots(chartKey)")
+                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox")
                 p {{vegaChartData[chartKey].yaml.title}}
             .allPlots(v-for="(plot, index) in allPlotsCheckIsUsedInThisRun()" :key="index")
-              .plot-menu(v-if="plot.usedInThisRun")
-                input.plot-checkbox(:checked="plot.active" type="checkbox" @click="showPlotMenu(plot.index)")
+              .plot-menu(v-if="plot.usedInThisRun" @click="showPlotMenu(plot.index)")
+                input.plot-checkbox(:checked="plot.active" type="checkbox")
                 p.plot-name {{plot.name}}
             .allPlots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey" v-if="vegaChartData[chartKey].yaml.showAbove === false")
-              .plot-menu()
-                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox" @click="showVegaPlots(chartKey)")
-                p {{vegaChartData[chartKey].yaml.title}}
+              .plot-menu(@click="showVegaPlots(chartKey)")
+                input.plot-checkbox(:checked="vegaChartData[chartKey].isVisible" type="checkbox")
+                p(@click="showVegaPlots(chartKey)") {{vegaChartData[chartKey].yaml.title}}
 
           .select-all-plots
             button.button.is-small.menu-button(@click="showPlotMenu('allActive')") Select All
@@ -37,22 +37,22 @@
                   p {{ m.title }}
                   button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
-          h5.cumulative Cumulative Infected by
-            br
-            | {{ endDate }}:
-          p.infected {{ prettyInfected }}
+          .left-padding
+            h5.cumulative Cumulative Infected by
+              br
+              | {{ endDate }}:
+            p.infected {{ prettyInfected }}
 
-          h5.cumulative R-Value on:
-          input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
-          p.infected {{ summaryRValue }}
+            h5.cumulative R-Value on:
+            input#reditor.input.r-input(size=9 v-model="summaryRValueDate")
+            p.infected {{ summaryRValue }}
 
-
-          .single-value-options(v-if="singleValueOptionKeys.length")
-            h5 Simulation Parameters:
-            table
-              tr(v-for="measure in singleValueOptionKeys" :key="measure")
-                td(style="text-align: right; padding-right: 0.4rem") {{measure}}
-                td: b(style="color: #596") {{ singleValueOptions[measure]}}
+            .single-value-options(v-if="singleValueOptionKeys.length")
+              h5 Simulation Parameters:
+              table
+                tr(v-for="measure in singleValueOptionKeys" :key="measure")
+                  td(style="text-align: right; padding-right: 0.4rem") {{measure}}
+                  td: b(style="color: #596") {{ singleValueOptions[measure]}}
 
   .right-content
     .page-section.content
@@ -2550,6 +2550,7 @@ p.subhead {
 }
 
 .categorie-header {
+  cursor: pointer;
   display: flex;
   height: 2rem;
   background-color: #eee;
@@ -2568,6 +2569,7 @@ p.subhead {
 }
 
 .plot-menu {
+  cursor: pointer;
   display: flex;
   margin: 5px;
 }
@@ -2595,7 +2597,7 @@ p.subhead {
 
 .categorie-group {
   border-width: thin;
-  //padding: 8px;
+  padding-left: 8px;
   border-bottom-style: solid;
   border-color: #b5b5b5;
   border: none;
@@ -2612,6 +2614,7 @@ p.subhead {
 }
 
 .scrollable {
+  padding-top: 0.5rem;
   overflow: auto;
 }
 
@@ -2730,6 +2733,10 @@ p.subhead {
 
 .single-value-options table {
   font-size: 0.9rem;
+}
+
+.left-padding {
+  padding-left: 0.5rem;
 }
 
 @media only screen and (max-width: 1024px) {
