@@ -1,15 +1,17 @@
 <template lang="pug">
 #run-page
   .banner
-    h2 VSP / Technische Universität Berlin
-    h3 COVID-19 Analysis Portal
+    .banner-text
+      h2 VSP / Technische Universität Berlin
+      h3 COVID-19 Analysis Portal
+    .city-picker(v-if="!badPage")
+      .which-city(v-for="(run,index) in allRuns"
+        :key="run.runId"
+        :class="{'selected': run.name === city}"
+        @click="switchCity(index)" :to="'/runs/' + run.runId")
+        h1 {{ run.name }}
 
-  .city-picker(v-if="!badPage")
-    .which-city(v-for="(run,index) in allRuns"
-      :key="run.runId"
-      :class="{'selected': run.name === city}"
-      @click="switchCity(index)" :to="'/runs/' + run.runId")
-      h1 {{ run.name }}
+  //- banner(:badPage="badPage" :allRuns="allRuns" )
 
   nav.breadcrumb(aria-label="breadcrumbs" v-if="currentCity == -2")
     ul
@@ -23,11 +25,16 @@
     p Go back to the&nbsp;
       router-link(to="/") main page.
 
-  .view-section
-    single-run-viewer.viewer(v-if="currentCity > -1"
-                             :runYaml="allRuns[currentCity].yaml"
-                             :runId="allRuns[currentCity].runId"
-                             :chartYamlFiles="chartYamlFiles")
+  .view-container
+    .view-section
+      single-run-viewer.viewer(v-if="currentCity > -1"
+                              :runYaml="allRuns[currentCity].yaml"
+                              :runId="allRuns[currentCity].runId"
+                              :chartYamlFiles="chartYamlFiles")
+
+  //- .view-section-test
+  //-   p1 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
+    
 
 </template>
 
@@ -214,14 +221,19 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 #run-page {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto auto auto auto;
+  // display: grid;
+  // grid-template-columns: 1fr;
+  // grid-template-rows: auto auto auto auto auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .banner {
   grid-column: 1 / 2;
   grid-row: 1 / 3;
+  width: 100vw;
+  position: sticky;
 }
 
 .city-picker {
@@ -241,16 +253,18 @@ export default class VueComponent extends Vue {
 
 .view-section {
   grid-column: 1 / 2;
-  grid-row: 5 / 6;
-  background: #eee;
+  grid-row: 3 / 4;
+  background: white;
   width: 100%;
+  height: 100%;
+  overflow: scroll;
 }
 
 .viewer {
   padding: 0rem 0rem;
   margin: 0rem 0rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .city-picker {
@@ -295,12 +309,13 @@ a.selected {
 .banner {
   display: flex;
   flex-direction: column;
-  padding: 4rem 3rem 1rem 3rem;
-  background-color: #1e1f2c;
+  padding: 2rem 3rem 0rem 3rem;
+  background-color: black;
   color: white;
   background: url(../../assets/images/banner.jpg);
   background-repeat: no-repeat;
   background-size: cover;
+  height: max-content;
 }
 
 .banner h2 {
@@ -308,17 +323,32 @@ a.selected {
   font-size: 1.6rem;
   background-color: #1e1f2c;
   line-height: 1.6rem;
-  margin-right: auto;
+  margin-right: 1rem;
 }
 
 .banner h3 {
   font-size: 1.3rem;
   font-weight: normal;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   line-height: 1.4rem;
-  padding-bottom: 0.25rem;
+  padding-top: 0.2rem;
   background-color: #1e1f2c;
   width: max-content;
+}
+
+.banner-text {
+  display: flex;
+}
+
+.view-container {
+  background-color: green;
+  height: min-content;
+}
+
+@media only screen and (max-width: 750px) {
+  .view-section {
+    overflow: visible;
+  }
 }
 
 @media only screen and (max-width: 640px) {
