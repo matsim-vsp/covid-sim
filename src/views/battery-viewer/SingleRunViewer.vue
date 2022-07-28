@@ -25,7 +25,7 @@
           .select-all-plots
             button.button.is-small.menu-button(@click="showPlotMenu('allActive')") Select All
             button.button.is-small.menu-button(@click="showPlotMenu('allInactive')") Unselect All
-        .categorie-content.scrollable(v-show="categorie == 'Configuration' && activeSideMenu == 0")
+        .categorie-content.scrollable(v-show="categorie == 'Select Scenario' && activeSideMenu == 0")
           .categorie-group(v-for="group in runYaml.optionGroups" :key="group.heading + group.day")
             .g1(v-if="hasMultipleOptions(group)")
               h6.title {{ getGroupTitle(group) }}
@@ -59,7 +59,7 @@
       .readme(v-html="topNotes")
 
     .page-section.preamble(:style="{backgroundColor: 'white'}")
-      h3.select-scenario Select Scenario:
+      h3.select-scenario &nbsp;
 
     .page-section.base-choice(v-if="city && hasBaseRun")
       .button-choices.buttons.has-addons
@@ -605,7 +605,7 @@ export default class VueComponent extends Vue {
   // var for side-menu
   private state = store.state
 
-  private sideMenuCategories = ['Configuration', 'Plots']
+  private sideMenuCategories = ['Select Scenario', 'Plots']
   private activeSideMenu = 0
   private allPlots = [
     {
@@ -934,8 +934,8 @@ export default class VueComponent extends Vue {
       zipfile.clear()
     }
     this.zipLoaderLookup = {}
-    this.csvCache = {}
-    this.promisedZipFile = null
+    // this.csvCache = {}
+    // this.promisedZipFile = null
     this.cachedOptionKeys = ''
   }
 
