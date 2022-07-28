@@ -1311,21 +1311,16 @@ export default class VueComponent extends Vue {
 
   private hasBaseRun = false
 
-  private promisedZipFile: any = null
-
   private async loadZipFile(whichZip: string) {
-    if (this.promisedZipFile) return await this.promisedZipFile
+    // this.isZipLoaded = false
 
-    this.promisedZipFile = new Promise(async (resolve, reject) => {
-      const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
-      const zloader = new ZipLoader(filepath)
-      await zloader.load()
+    const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
+    const zloader = new ZipLoader(filepath)
+    await zloader.load()
 
-      this.isZipLoaded = true
-      resolve(zloader)
-    })
+    this.isZipLoaded = true
 
-    return await this.promisedZipFile
+    return zloader
   }
 
   private async showActivityLevelPlot() {
@@ -1836,7 +1831,6 @@ export default class VueComponent extends Vue {
   }
 
   private zipLoaderLookup: { [run: string]: any } = {} // holds the ZipLoaders
-  private csvCache: { [filename: string]: Promise<any[]> } = {} // holds CSV tables
 
   private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
@@ -1844,11 +1838,9 @@ export default class VueComponent extends Vue {
     // get the ZipLoader for this run
     if (this.zipLoaderLookup[currentRun.RunId]) {
       // already loaded! Use cached copy
-      console.log('** zip is cached')
       this.zipLoader = this.zipLoaderLookup[currentRun.RunId]
     } else {
       // need to load it from disk
-      console.log('nope, loading from disk')
       this.zipLoader = await this.loadZipFile(currentRun.RunId)
       this.zipLoaderLookup[currentRun.RunId] = this.zipLoader
     }
@@ -1857,19 +1849,12 @@ export default class VueComponent extends Vue {
     if (!this.zipLoader.extractAsText) return []
 
     const filename = currentRun.RunId + '.infections.txt.csv'
+    console.log('Extracting', filename)
 
-    if (filename in this.csvCache) {
-      return await this.csvCache[filename]
-    }
+    let text = this.zipLoader.extractAsText(filename)
+    const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
 
-    this.csvCache[filename] = new Promise((resolve, reject) => {
-      console.log('7 Extracting', filename)
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-      resolve(z.data)
-    })
-
-    return await this.csvCache[filename]
+    return z.data
   }
 
   private calendarForSimDay(day: number) {
