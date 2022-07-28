@@ -929,13 +929,12 @@ export default class VueComponent extends Vue {
     this.loadVegaYamlFiles()
   }
 
-  private clearZipLoaderLookups() {
+  private async clearZipLoaderLookups() {
     for (const zipfile of Object.values(this.zipLoaderLookup)) {
-      zipfile.clear()
+      ;(await zipfile).clear()
     }
     this.zipLoaderLookup = {}
-    // this.csvCache = {}
-    // this.promisedZipFile = null
+    this.csvCache = {}
     this.cachedOptionKeys = ''
   }
 
@@ -950,7 +949,7 @@ export default class VueComponent extends Vue {
 
     this.summaryRValueDate = this.runYaml.rValueDate || this.DEFAULT_R_VALUE_DATE
 
-    this.clearZipLoaderLookups()
+    await this.clearZipLoaderLookups()
     this.isUsingRealDates = false
 
     this.$nextTick()
@@ -1311,12 +1310,10 @@ export default class VueComponent extends Vue {
 
   private hasBaseRun = false
 
-  private promisedZipFile: any = null
+  private loadZipFile(whichZip: string): Promise<any> {
+    if (whichZip in this.zipLoaderLookup) return this.zipLoaderLookup[whichZip]
 
-  private async loadZipFile(whichZip: string) {
-    if (this.promisedZipFile) return await this.promisedZipFile
-
-    this.promisedZipFile = new Promise(async (resolve, reject) => {
+    const loader = new Promise(async (resolve, reject) => {
       const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
       const zloader = new ZipLoader(filepath)
       await zloader.load()
@@ -1325,7 +1322,7 @@ export default class VueComponent extends Vue {
       resolve(zloader)
     })
 
-    return await this.promisedZipFile
+    return loader
   }
 
   private async showActivityLevelPlot() {
@@ -1835,22 +1832,24 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private zipLoaderLookup: { [run: string]: any } = {} // holds the ZipLoaders
+  private zipLoaderLookup: { [run: string]: Promise<any> } = {} // holds the ZipLoaders
   private csvCache: { [filename: string]: Promise<any[]> } = {} // holds CSV tables
 
   private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
 
     // get the ZipLoader for this run
-    if (this.zipLoaderLookup[currentRun.RunId]) {
+    if (currentRun.RunId in this.zipLoaderLookup) {
       // already loaded! Use cached copy
       console.log('** zip is cached')
-      this.zipLoader = this.zipLoaderLookup[currentRun.RunId]
+      this.zipLoader = await this.zipLoaderLookup[currentRun.RunId]
     } else {
       // need to load it from disk
-      console.log('nope, loading from disk')
-      this.zipLoader = await this.loadZipFile(currentRun.RunId)
-      this.zipLoaderLookup[currentRun.RunId] = this.zipLoader
+      console.log('nope, loading from disk', currentRun.RunId)
+      const loader = this.loadZipFile(currentRun.RunId)
+      this.zipLoaderLookup[currentRun.RunId] = loader
+      // make sure it's done loading
+      this.zipLoader = await loader
     }
 
     if (this.zipLoader === {}) return []
@@ -1859,11 +1858,12 @@ export default class VueComponent extends Vue {
     const filename = currentRun.RunId + '.infections.txt.csv'
 
     if (filename in this.csvCache) {
+      console.log(filename + 'is in cache: retrieving now')
       return await this.csvCache[filename]
     }
 
     this.csvCache[filename] = new Promise((resolve, reject) => {
-      console.log('7 Extracting', filename)
+      console.log('Extracting', filename)
       let text = this.zipLoader.extractAsText(filename)
       const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
       resolve(z.data)
