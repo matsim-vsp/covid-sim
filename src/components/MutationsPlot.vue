@@ -52,17 +52,17 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('logScale') updateScale() {
-    // if (this.logScale) {
-    //   this.layout.yaxis.type = 'log'
-    //   this.layout2.yaxis.type = 'log'
-    //   //this.layout2.yaxis.range = [0.01, 2]
-    //   this.layout2.yaxis.range = [Math.log10(0.01), Math.log10(100)]
-    // } else {
-    //   this.layout.yaxis.type = 'linear'
-    //   this.layout2.yaxis.type = 'linear'
-    //   //this.layout2.yaxis.range = [0.01, 100]
-    //   this.layout2.yaxis.range = [0, 100]
-    // }
+    if (this.logScale) {
+      this.layout.yaxis.type = 'log'
+      //this.layout2.yaxis.type = 'log'
+      //this.layout2.yaxis.range = [0.01, 2]
+      //this.layout2.yaxis.range = [Math.log10(0.01), Math.log10(100)]
+    } else {
+      this.layout.yaxis.type = 'linear'
+      //this.layout2.yaxis.type = 'linear'
+      //this.layout2.yaxis.range = [0.01, 100]
+      //this.layout2.yaxis.range = [0, 100]
+    }
   }
 
   @Watch('city') updateCity() {
