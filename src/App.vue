@@ -4,7 +4,7 @@
 
   .center-area
     router-view.main-view
-
+    
   .footer(v-if="!state.isFullScreen")
     //- a(href="https://vsp.tu-berlin.de")
     //-   img(alt="TU-Berlin logo" src="@/assets/images/vsp-logo.png" width=225)
@@ -91,9 +91,9 @@ h3 {
 }
 
 #app {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto;
+  // display: grid;
+  // grid-template-columns: 1fr;
+  // grid-template-rows: auto 1fr auto;
   background-color: $paleBackground;
   color: #222;
   margin: 0rem 0rem;
@@ -101,6 +101,9 @@ h3 {
   font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .modebar-group {
@@ -115,6 +118,7 @@ h3 {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
   box-shadow: 0px 2px 10px #00000060;
+  height: min-content;
 }
 
 .center-area {
@@ -123,6 +127,9 @@ h3 {
   z-index: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  //max-height: 100%;
+  height: min-content;
 }
 
 .main-view {
@@ -139,7 +146,7 @@ h3 {
 
 #app .footer {
   grid-column: 1 / 2;
-  grid-row: 3 / 4;
+  grid-row: 5 / 6;
   text-align: center;
   padding: 2rem 0.5rem 3rem 0.5rem;
   background-color: #648cb4;

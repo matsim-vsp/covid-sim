@@ -38,22 +38,12 @@
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2022-02-22/1?ba2Inf=1.5&ba1ba2Long=True'") Omicron variant BA.2. Report Feb. 23
 
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2022.01.20
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current'") Immune status and leisure measures. Report Jan. 20
-
-        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
-          a.navbar-link  2021.12.17
-
-          .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25'") Measures and Omicron variant. Report Dec. 17
-
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}" )
           a.navbar-link  Other Versions
           .navbar-dropdown(style="margin-left: -20rem;")
             .panel(style="columns: 3")
+              a.navbar-item(:href="'/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current'") 2022.01.20 Immune status and leisure measures. Report Jan. 20
+              a.navbar-item(:href="'/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25'") 2021.12.17 Measures and Omicron variant. Report Dec. 17
               a.navbar-item(:href="'/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected'") 2021.11.19 Measures without activity reductions
               a.navbar-item(:href="'/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected'") 2021.11.19 Measures with activity reductions
               a.navbar-item(:href="'/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no'") 2021.10.22 Booster vaccinations
