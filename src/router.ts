@@ -207,6 +207,10 @@ const routes = [
       import(/* webpackChunkName: "mobility" */ '@/views/MobilityPageLandkreise.vue'),
   },
   {
+    path: '/reports',
+    component: () => import(/* webpackChunkName: "mobility" */ '@/views/Reports.vue'),
+  },
+  {
     path: '/*',
     component: () =>
       import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),

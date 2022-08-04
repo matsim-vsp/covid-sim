@@ -103,6 +103,8 @@
             a.navbar-item(:href="'/mobility'") Mobility State
             a.navbar-item(:href="'/mobility-counties/'") Mobility County
 
+        router-link.navbar-item(:href="'/reports'" :style="{color: 'white'}") Reports
+
         //- .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
         //-   a.navbar-link(:href="'/calculators'")  Calculators
         //-   .navbar-dropdown
