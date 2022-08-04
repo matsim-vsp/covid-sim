@@ -63,34 +63,35 @@ export default class VueComponent extends Vue {
   @Watch('city') private async fetchRealHospitalizationRates() {
     this.observedData = []
 
-    try {
-      if (this.cityObservedHospitalizationFiles[this.city]) {
-        const response = await fetch(this.cityObservedHospitalizationFiles[this.city])
-        const text = await response.text()
-        const hospitalData = Papaparse.parse(text, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          comments: '#',
-        }).data
+    // Moved to new hosp plot
+    // try {
+    //   if (this.cityObservedHospitalizationFiles[this.city]) {
+    //     const response = await fetch(this.cityObservedHospitalizationFiles[this.city])
+    //     const text = await response.text()
+    //     const hospitalData = Papaparse.parse(text, {
+    //       header: true,
+    //       dynamicTyping: true,
+    //       skipEmptyLines: true,
+    //       comments: '#',
+    //     }).data
 
-        if (hospitalData.length) {
-          this.observedData = hospitalData
+    //     if (hospitalData.length) {
+    //       this.observedData = hospitalData
 
-          if (this.dataLines.length)
-            this.dataLines.push({
-              name: 'Observed Hospitalization Case Rate',
-              x: this.observedData.map(row => row.date),
-              y: this.observedData.map(row => row.realHospitalizationRate),
-              type: 'scatter',
-              mode: 'markers',
-              marker: { size: 4, color: '#f08' },
-            })
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    }
+    //       if (this.dataLines.length)
+    //         this.dataLines.push({
+    //           name: 'Observed Hospitalization Case Rate',
+    //           x: this.observedData.map(row => row.date),
+    //           y: this.observedData.map(row => row.realHospitalizationRate),
+    //           type: 'scatter',
+    //           mode: 'markers',
+    //           marker: { size: 4, color: '#f08' },
+    //         })
+    //     }
+    //   }
+    // } catch (e) {
+    //   console.error(e)
+    // }
 
     return
   }
@@ -116,40 +117,39 @@ export default class VueComponent extends Vue {
   }
 
   private async fetchDiviIncidenceNRW() {
-    try {
-      const response = await fetch(this.diviIncidenceNRWUrl)
-      const text = await response.text()
-      const incidenceNRW = Papaparse.parse(text, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        comments: '#',
-      }).data
-
-      // Workaround for doubled data; Not a good bugfix but it works
-      // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
-      // times on the Cologne Hospitalization New Cases Plot
-      let diviExsists = false
-      this.dataLines.forEach(e => {
-        if (e.name == 'Observed : Nordrhein-Westfalen (DIVI)') {
-          diviExsists = true
-        }
-      })
-
-      if (incidenceNRW.length) {
-        if (this.dataLines.length && !diviExsists)
-          this.dataLines.push({
-            name: 'Observed : Nordrhein-Westfalen (DIVI)',
-            x: incidenceNRW.map(row => row.Date),
-            y: incidenceNRW.map(row => row.DIVIIncidence),
-            type: 'scatter',
-            marker: { size: 4, color: 'brown' },
-            line: { width: 2, dash: 'dot' },
-          })
-      }
-    } catch (e) {
-      console.error(e)
-    }
+    // Moved to new hosp plot
+    // try {
+    //   const response = await fetch(this.diviIncidenceNRWUrl)
+    //   const text = await response.text()
+    //   const incidenceNRW = Papaparse.parse(text, {
+    //     header: true,
+    //     dynamicTyping: true,
+    //     skipEmptyLines: true,
+    //     comments: '#',
+    //   }).data
+    //   // Workaround for doubled data; Not a good bugfix but it works
+    //   // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
+    //   // times on the Cologne Hospitalization New Cases Plot
+    //   let diviExsists = false
+    //   this.dataLines.forEach(e => {
+    //     if (e.name == 'Observed : Nordrhein-Westfalen (DIVI)') {
+    //       diviExsists = true
+    //     }
+    //   })
+    //   if (incidenceNRW.length) {
+    //     if (this.dataLines.length && !diviExsists)
+    //       this.dataLines.push({
+    //         name: 'Observed : Nordrhein-Westfalen (DIVI)',
+    //         x: incidenceNRW.map(row => row.Date),
+    //         y: incidenceNRW.map(row => row.DIVIIncidence),
+    //         type: 'scatter',
+    //         marker: { size: 4, color: 'brown' },
+    //         line: { width: 2, dash: 'dot' },
+    //       })
+    //   }
+    // } catch (e) {
+    //   console.error(e)
+    // }
   }
 
   private calculate() {
@@ -207,16 +207,17 @@ export default class VueComponent extends Vue {
         },
       })
 
-      if (this.observedData) {
-        this.dataLines.push({
-          name: 'Observed Hospitalization Case Rate',
-          x: this.observedData.map(row => row.date),
-          y: this.observedData.map(row => row.realHospitalizationRate),
-          type: 'scatter',
-          mode: 'markers',
-          marker: { size: 4, color: '#f08' },
-        })
-      }
+      // Moved to new hosp plot
+      // if (this.observedData) {
+      //   this.dataLines.push({
+      //     name: 'Observed Hospitalization Case Rate',
+      //     x: this.observedData.map(row => row.date),
+      //     y: this.observedData.map(row => row.realHospitalizationRate),
+      //     type: 'scatter',
+      //     mode: 'markers',
+      //     marker: { size: 4, color: '#f08' },
+      //   })
+      // }
     } catch (e) {
       console.error(e)
       return
@@ -226,38 +227,40 @@ export default class VueComponent extends Vue {
   private async fetchBundeslandIncidenceRates() {
     // only add Bundesland data if we are looking at data for a city with a Bundesland
     if (!this.bundeslandIncidenceRateLookup[this.city]) return
-    const region = this.bundeslandIncidenceRateLookup[this.city]
-    console.log(region)
 
-    const csvData = Papaparse.parse(this.bundeslandCSV, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      comments: '#',
-    }).data
+    // Moved to new hosp plot
+    // const region = this.bundeslandIncidenceRateLookup[this.city]
+    // console.log(region)
 
-    const allAges = csvData.filter(row => row['Altersgruppe'] === '00+')
-    const regionData = allAges.filter(row => row['Bundesland'] === region.name)
+    // const csvData = Papaparse.parse(this.bundeslandCSV, {
+    //   header: true,
+    //   dynamicTyping: true,
+    //   skipEmptyLines: true,
+    //   comments: '#',
+    // }).data
 
-    this.dataLines.push({
-      name: 'Observed: ' + region.name + ' (RKI)',
-      x: regionData.map(row => row['Datum']),
-      y: regionData.map(
-        row =>
-          row['aktualisierte_7T_Hospitalisierung_Inzidenz'] || row['7T_Hospitalisierung_Inzidenz']
-      ),
-      type: 'scatter',
-      marker: { size: 4, color: '#4c6' },
-      line: { width: 2, dash: 'dot' },
-    })
-    this.dataLines.push({
-      name: 'Adjusted: ' + region.name + ' (RKI)',
-      x: regionData.map(row => row['Datum']),
-      y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
-      type: 'scatter',
-      marker: { color: '#4c6' },
-      line: { width: 1.5 },
-    })
+    // const allAges = csvData.filter(row => row['Altersgruppe'] === '00+')
+    // const regionData = allAges.filter(row => row['Bundesland'] === region.name)
+
+    // this.dataLines.push({
+    //   name: 'Observed: ' + region.name + ' (RKI)',
+    //   x: regionData.map(row => row['Datum']),
+    //   y: regionData.map(
+    //     row =>
+    //       row['aktualisierte_7T_Hospitalisierung_Inzidenz'] || row['7T_Hospitalisierung_Inzidenz']
+    //   ),
+    //   type: 'scatter',
+    //   marker: { size: 4, color: '#4c6' },
+    //   line: { width: 2, dash: 'dot' },
+    // })
+    // this.dataLines.push({
+    //   name: 'Adjusted: ' + region.name + ' (RKI)',
+    //   x: regionData.map(row => row['Datum']),
+    //   y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
+    //   type: 'scatter',
+    //   marker: { color: '#4c6' },
+    //   line: { width: 1.5 },
+    // })
 
     this.fetchDiviIncidenceNRW()
   }

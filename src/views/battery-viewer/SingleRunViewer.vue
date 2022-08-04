@@ -151,7 +151,9 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="postHospital"
+                  :data2="data"
                   :intakesHosp="true"
+                  :city="city"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -169,7 +171,9 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="postHospital"
+                  :data2="data"
                   :intakesHosp="false"
+                  :city="city"
                 )
 
           //- ---------- CASES COMPARISION -------
