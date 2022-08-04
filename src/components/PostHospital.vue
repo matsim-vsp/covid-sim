@@ -109,6 +109,8 @@ export default class VueComponent extends Vue {
   private async calculateValues() {
     if (!this.data.length) return
 
+    this.dataLines = []
+
     // intakesHosp
     // intakesICU
     // occupancyHosp
@@ -222,13 +224,11 @@ export default class VueComponent extends Vue {
     }
 
     // Rate
-    // TODO: Add
     if (!this.intakesHosp) {
-      console.log(this.dataLines)
-      this.addReportedDataRate()
+      await this.addReportedDataRate()
     } else {
       // New Cases
-      this.addReportedDataNewCases()
+      await this.addReportedDataNewCases()
     }
   }
 
@@ -282,12 +282,19 @@ export default class VueComponent extends Vue {
         if (hospitalData.length) {
           this.observedData = hospitalData
 
+          for (let i = 0; i < this.dataLines.length; i++) {
+            if (this.dataLines[i].name == 'Observed Hospitalization Case Rate') {
+              this.dataLines.splice(i, 1)
+            }
+          }
+
           if (this.dataLines.length)
             this.dataLines.push({
               name: 'Observed Hospitalization Case Rate',
               x: this.observedData.map(row => row.date),
               y: this.observedData.map(row => row.realHospitalizationRate),
-              //marker: { size: 4, color: '#f08' },
+              //type: 'scatter',
+              //mode: 'markers',
               line: { width: 1 },
             })
         }
@@ -310,6 +317,15 @@ export default class VueComponent extends Vue {
 
     const allAges = csvData.filter(row => row['Altersgruppe'] === '00+')
     const regionData = allAges.filter(row => row['Bundesland'] === region.name)
+
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (this.dataLines[i].name == 'Observed: ' + region.name + ' (RKI)') {
+        this.dataLines.splice(i, 1)
+      }
+      if (this.dataLines[i].name == 'Adjusted: ' + region.name + ' (RKI)') {
+        this.dataLines.splice(i, 1)
+      }
+    }
 
     this.dataLines.push({
       name: 'Observed: ' + region.name + ' (RKI)',
