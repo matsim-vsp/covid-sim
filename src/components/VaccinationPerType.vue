@@ -54,6 +54,8 @@ export default class VueComponent extends Vue {
     const natural = []
     const omicronUpdate = []
     const vector = []
+    const ba1Update = []
+    const ba5Update = []
 
     // 7-day average
     const dateAvg = []
@@ -62,6 +64,8 @@ export default class VueComponent extends Vue {
     const naturalAvg = []
     const omicronUpdateAvg = []
     const vectorAvg = []
+    const ba1UpdateAvg = []
+    const ba5UpdateAvg = []
 
     for (let i = 7; i < this.vaccinations.length; i += 7) {
       var genericTemp =
@@ -104,6 +108,22 @@ export default class VueComponent extends Vue {
         this.vaccinations[i - 4].vector +
         this.vaccinations[i - 5].vector +
         this.vaccinations[i - 6].vector
+      var ba1UpdateTemp =
+        this.vaccinations[i].ba1Update +
+        this.vaccinations[i - 1].ba1Update +
+        this.vaccinations[i - 2].ba1Update +
+        this.vaccinations[i - 3].ba1Update +
+        this.vaccinations[i - 4].ba1Update +
+        this.vaccinations[i - 5].ba1Update +
+        this.vaccinations[i - 6].ba1Update
+      var ba5UpdateTemp =
+        this.vaccinations[i].ba5Update +
+        this.vaccinations[i - 1].ba5Update +
+        this.vaccinations[i - 2].ba5Update +
+        this.vaccinations[i - 3].ba5Update +
+        this.vaccinations[i - 4].ba5Update +
+        this.vaccinations[i - 5].ba5Update +
+        this.vaccinations[i - 6].ba5Update
 
       dateAvg.push(this.vaccinations[i].date)
       genericAvg.push(genericTemp / 7)
@@ -111,6 +131,8 @@ export default class VueComponent extends Vue {
       naturalAvg.push(naturalTemp / 7)
       omicronUpdateAvg.push(omicronUpdateTemp / 7)
       vectorAvg.push(vectorTemp / 7)
+      ba1UpdateAvg.push(ba1UpdateTemp / 7)
+      ba5UpdateAvg.push(ba5UpdateTemp / 7)
     }
 
     // for (let i = 0; i < this.vaccinations.length; i++) {
@@ -176,7 +198,18 @@ export default class VueComponent extends Vue {
         x: dateAvg,
         y: vectorAvg,
       },
+      {
+        name: 'ba1update',
+        x: dateAvg,
+        y: ba1UpdateAvg,
+      },
+      {
+        name: 'ba5update',
+        x: dateAvg,
+        y: ba5UpdateAvg,
+      },
     ]
+    console.log(this.dataLines)
   }
 
   private layout = {
