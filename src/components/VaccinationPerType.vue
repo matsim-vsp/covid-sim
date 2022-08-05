@@ -209,7 +209,6 @@ export default class VueComponent extends Vue {
         y: ba5UpdateAvg,
       },
     ]
-    console.log(this.dataLines)
   }
 
   private layout = {
