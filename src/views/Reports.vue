@@ -13,11 +13,8 @@ de:
   .report-container
     .report-header 
       h2 Reports
-    .report-content
+    
     report-viewer
-      .single-report 
-        h1 Title 
-        p Link 
 
 
 </template>
@@ -40,7 +37,7 @@ export default class VueComponent extends Vue {}
 }
 
 .report-container {
-  margin: 50px 200px 0 200px;
+  margin: 50px 100px 0 100px;
 }
 
 .report-header {
