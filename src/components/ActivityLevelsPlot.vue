@@ -139,6 +139,8 @@ export default class VueComponent extends Vue {
   private activityTypes: any[] = [
     { col: 'work', title: 'Work' },
     { col: 'leisure', title: 'Leisure' },
+    { col: 'leisPublic', title: 'Public Leisure' },
+    { col: 'leisPrivate', title: 'Private Leisure' },
     { col: 'educ_kiga', title: 'Daycare' },
     { col: 'educ_primary', title: 'Primary Ed.' },
     { col: 'educ_secondary', title: 'Secondary Ed.' },
