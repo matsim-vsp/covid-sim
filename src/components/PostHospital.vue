@@ -9,6 +9,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import { PUBLIC_SVN } from '@/Globals'
 import Papaparse from 'papaparse'
+import { constant } from 'vega'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -135,6 +136,18 @@ export default class VueComponent extends Vue {
         let severity = this.data[i].severity.trim()
         let dateTemp = this.data[i].date.trim()
         let n = this.data[i].n
+
+
+        const dateTemp2 = new Date(dateTemp)
+        // We only want values for entire week, thus we filter to only sundays (which has  value of 0)
+        if(dateTemp2.getDay() == 0){ 
+          // the sunday value is an average of the previous week (previous saturday to this sunday)
+          // thus, if we want to represent the week by the day in the middle (Thursday), we must subtract 3 days
+          dateTemp2.setDate(dateTemp2.getDate() - 3)
+          dateTemp = dateTemp2.toISOString().substring(0, 10)
+        } else {
+          continue
+        }
 
         if (severity == 'Omicron') {
           if (measurement == 'intakesHosp') {
