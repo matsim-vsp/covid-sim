@@ -118,6 +118,13 @@ export default class VueComponent extends Vue {
   private rCalculators = allCalculators
 
   private modelruns: any[] = [
+        {
+      url:
+        '/cologne/2022-08-04/9b-leis-dec',
+      date: 'Released: 09 August 2022',
+      title: 'Report runs 09 August',
+      subtitle: 'Measures in autumn and winter',
+    },
     {
       url:
         '/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25',
