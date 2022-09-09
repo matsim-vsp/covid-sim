@@ -112,24 +112,13 @@ export default class VueComponent extends Vue {
 
     this.dataLines = []
 
-    // intakesHosp
-    // intakesICU
-    // occupancyHosp
-    // occupancyICU
-    //
-    // Omicron
-    // Delta
+    // key is the scenario name, value is the associated data (list)
+    const dataMap = new Map()
 
-    let date = [] as any[]
-    let intakesHospOmicron = []
-    let intakesICUOmicron = []
-    let occupancyHospOmicron = []
-    let occupancyICUOmicron = []
-    let intakesHospDelta = []
-    let intakesICUDelta = []
-    let occupancyHospDelta = []
-    let occupancyICUDelta = []
+    // set that contains all dates used in our data.
+    let dateSet = new Set()
 
+    // loop through data add data points to map
     for (let i = 0; i < this.data.length; i++) {
       if (this.data[i].measurement != null) {
         let measurement = this.data[i].measurement.trim()
@@ -137,6 +126,7 @@ export default class VueComponent extends Vue {
         let dateTemp = this.data[i].date.trim()
         let n = this.data[i].n
 
+        let scenario = measurement + severity
 
         const dateTemp2 = new Date(dateTemp)
         // We only want values for entire week, thus we filter to only sundays (which has  value of 0)
@@ -149,91 +139,45 @@ export default class VueComponent extends Vue {
           continue
         }
 
-        if (severity == 'Omicron') {
-          if (measurement == 'intakesHosp') {
-            date.push(dateTemp)
-            intakesHospOmicron.push(n)
-          }
-          if (measurement == 'intakesICU') {
-            intakesICUOmicron.push(n)
-          }
-          if (measurement == 'occupancyHosp') {
-            occupancyHospOmicron.push(n)
-          }
-          if (measurement == 'occupancyICU') {
-            occupancyICUOmicron.push(n)
-          }
-        } else {
-          if (measurement == 'intakesHosp') {
-            intakesHospDelta.push(n)
-          }
-          if (measurement == 'intakesICU') {
-            intakesICUDelta.push(n)
-          }
-          if (measurement == 'occupancyHosp') {
-            occupancyHospDelta.push(n)
-          }
-          if (measurement == 'occupancyICU') {
-            occupancyICUDelta.push(n)
-          }
+        dateSet.add(dateTemp)
+
+        let toUpdate = []
+        if(dataMap.has(scenario)){
+          toUpdate = dataMap.get(scenario)
         }
-      }
+        toUpdate.push(n)
+        dataMap.set(scenario,toUpdate)
     }
 
+    }
+    let date = Array.from(dateSet)
+
+    // now push data to correct plot
     if (!this.intakesHosp) {
-      this.dataLines.push(
-        {
-          name: 'occupancyHosp-Delta',
-          x: date,
-          y: occupancyHospDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyHosp-Omicron',
-          x: date,
-          y: occupancyHospOmicron,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyICU-Delta',
-          x: date,
-          y: occupancyICUDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyICU-Omicron',
-          x: date,
-          y: occupancyICUOmicron,
-          line: { width: 1 },
+
+      dataMap.forEach((data, seriesName) => {
+        if(seriesName.startsWith("occupancy")){
+          this.dataLines.push(
+          {
+            name: seriesName,
+            x: date,
+            y: data,
+            line: { width: 1 },
+          })
         }
-      )
+      })
     } else {
-      this.dataLines.push(
-        {
-          name: 'intakesHosp-Delta',
-          x: date,
-          y: intakesHospDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesHosp-Omicron',
-          x: date,
-          y: intakesHospOmicron,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesICU-Delta',
-          x: date,
-          y: intakesICUDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesICU-Omicron',
-          x: date,
-          y: intakesICUOmicron,
-          line: { width: 1 },
+       dataMap.forEach((data, seriesName) => {
+        if(seriesName.startsWith("intakes")){
+          this.dataLines.push(
+          {
+            name: seriesName,
+            x: date,
+            y: data,
+            line: { width: 1 },
+          })
         }
-      )
+      })
     }
 
     // Rate
