@@ -36,7 +36,7 @@ export default class VueComponent extends Vue {
 
   private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
-  private MAX_DAYS = 1500
+  private MAX_DAYS = 4000
 
   private mounted() {
     // if results were passed in, then we don't need to unzip.
@@ -207,7 +207,9 @@ export default class VueComponent extends Vue {
       return v
     })
 
-    v = v.slice(0, this.MAX_DAYS)
+    if (v.length > this.MAX_DAYS) {
+      v = v.slice(0, this.MAX_DAYS)
+    }
 
     // maybe the sim ended early - go out to 150 anyway
     if (v.length < this.MAX_DAYS) {

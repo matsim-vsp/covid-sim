@@ -48,167 +48,44 @@ export default class VueComponent extends Vue {
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate
 
-    const date = []
-    const generic = []
-    const mRNA = []
-    const natural = []
-    const omicronUpdate = []
-    const vector = []
-    const ba1Update = []
-    const ba5Update = []
-
-    // 7-day average
-    const dateAvg = []
-    const genericAvg = []
-    const mRNAAvg = []
-    const naturalAvg = []
-    const omicronUpdateAvg = []
-    const vectorAvg = []
-    const ba1UpdateAvg = []
-    const ba5UpdateAvg = []
-
-    for (let i = 7; i < this.vaccinations.length; i += 7) {
-      var genericTemp =
-        this.vaccinations[i].generic +
-        this.vaccinations[i - 1].generic +
-        this.vaccinations[i - 2].generic +
-        this.vaccinations[i - 3].generic +
-        this.vaccinations[i - 4].generic +
-        this.vaccinations[i - 5].generic +
-        this.vaccinations[i - 6].generic
-      var mRNATemp =
-        this.vaccinations[i].mRNA +
-        this.vaccinations[i - 1].mRNA +
-        this.vaccinations[i - 2].mRNA +
-        this.vaccinations[i - 3].mRNA +
-        this.vaccinations[i - 4].mRNA +
-        this.vaccinations[i - 5].mRNA +
-        this.vaccinations[i - 6].mRNA
-      var naturalTemp =
-        this.vaccinations[i].natural +
-        this.vaccinations[i - 1].natural +
-        this.vaccinations[i - 2].natural +
-        this.vaccinations[i - 3].natural +
-        this.vaccinations[i - 4].natural +
-        this.vaccinations[i - 5].natural +
-        this.vaccinations[i - 6].natural
-      var omicronUpdateTemp =
-        this.vaccinations[i].omicronUpdate +
-        this.vaccinations[i - 1].omicronUpdate +
-        this.vaccinations[i - 2].omicronUpdate +
-        this.vaccinations[i - 3].omicronUpdate +
-        this.vaccinations[i - 4].omicronUpdate +
-        this.vaccinations[i - 5].omicronUpdate +
-        this.vaccinations[i - 6].omicronUpdate
-      var vectorTemp =
-        this.vaccinations[i].vector +
-        this.vaccinations[i - 1].vector +
-        this.vaccinations[i - 2].vector +
-        this.vaccinations[i - 3].vector +
-        this.vaccinations[i - 4].vector +
-        this.vaccinations[i - 5].vector +
-        this.vaccinations[i - 6].vector
-      var ba1UpdateTemp =
-        this.vaccinations[i].ba1Update +
-        this.vaccinations[i - 1].ba1Update +
-        this.vaccinations[i - 2].ba1Update +
-        this.vaccinations[i - 3].ba1Update +
-        this.vaccinations[i - 4].ba1Update +
-        this.vaccinations[i - 5].ba1Update +
-        this.vaccinations[i - 6].ba1Update
-      var ba5UpdateTemp =
-        this.vaccinations[i].ba5Update +
-        this.vaccinations[i - 1].ba5Update +
-        this.vaccinations[i - 2].ba5Update +
-        this.vaccinations[i - 3].ba5Update +
-        this.vaccinations[i - 4].ba5Update +
-        this.vaccinations[i - 5].ba5Update +
-        this.vaccinations[i - 6].ba5Update
-
-      dateAvg.push(this.vaccinations[i].date)
-      genericAvg.push(genericTemp / 7)
-      mRNAAvg.push(mRNATemp / 7)
-      naturalAvg.push(naturalTemp / 7)
-      omicronUpdateAvg.push(omicronUpdateTemp / 7)
-      vectorAvg.push(vectorTemp / 7)
-      ba1UpdateAvg.push(ba1UpdateTemp / 7)
-      ba5UpdateAvg.push(ba5UpdateTemp / 7)
+    let formattedData = {
+      names: [],
+      date: [],
+      values: [],
+    } as {
+      [id: string]: any[]
     }
 
-    // for (let i = 0; i < this.vaccinations.length; i++) {
-    //   date.push(this.vaccinations[i].date)
-    //   generic.push(this.vaccinations[i].generic)
-    //   mRNA.push(this.vaccinations[i].mRNA)
-    //   natural.push(this.vaccinations[i].natural)
-    //   omicronUpdate.push(this.vaccinations[i].omicronUpdate)
-    //   vector.push(this.vaccinations[i].vector)
-    // }
+    const header = Object.keys(this.vaccinations[0])
 
-    // this.dataLines = [
-    //   {
-    //     name: 'generic',
-    //     x: date,
-    //     y: generic,
-    //   },
-    //   {
-    //     name: 'mRNA',
-    //     x: date,
-    //     y: mRNA,
-    //   },
-    //   {
-    //     name: 'natural',
-    //     x: date,
-    //     y: natural,
-    //   },
-    //   {
-    //     name: 'omicronUpdate',
-    //     x: date,
-    //     y: omicronUpdate,
-    //   },
-    //   {
-    //     name: 'vector',
-    //     x: date,
-    //     y: vector,
-    //   },
-    // ]
+    // Skip date and day column
+    for (let i = 2; i < header.length; i++) {
+      formattedData.names.push(header[i])
+      formattedData.values.push([])
+    }
 
-    this.dataLines = [
-      {
-        name: 'generic',
-        x: dateAvg,
-        y: genericAvg,
-      },
-      {
-        name: 'mRNA',
-        x: dateAvg,
-        y: mRNAAvg,
-      },
-      {
-        name: 'natural',
-        x: dateAvg,
-        y: naturalAvg,
-      },
-      {
-        name: 'omicronUpdate',
-        x: dateAvg,
-        y: omicronUpdateAvg,
-      },
-      {
-        name: 'vector',
-        x: dateAvg,
-        y: vectorAvg,
-      },
-      {
-        name: 'ba1update',
-        x: dateAvg,
-        y: ba1UpdateAvg,
-      },
-      {
-        name: 'ba5update',
-        x: dateAvg,
-        y: ba5UpdateAvg,
-      },
-    ]
+    for (let i = 7; i < this.vaccinations.length; i = i += 7) {
+      for (let j = 2; j < header.length; j++) {
+        const value =
+          this.vaccinations[i][header[j]] +
+          this.vaccinations[i - 1][header[j]] +
+          this.vaccinations[i - 2][header[j]] +
+          this.vaccinations[i - 3][header[j]] +
+          this.vaccinations[i - 4][header[j]] +
+          this.vaccinations[i - 5][header[j]] +
+          this.vaccinations[i - 6][header[j]]
+        formattedData.values[j - 2].push(value / 7)
+      }
+      formattedData.date.push(this.vaccinations[i].date)
+    }
+
+    for (let i = 0; i < formattedData.names.length; i++) {
+      this.dataLines.push({
+        name: formattedData.names[i],
+        x: formattedData.date,
+        y: formattedData.values[i],
+      })
+    }
   }
 
   private layout = {

@@ -76,6 +76,8 @@ export default class VueComponent extends Vue {
   private calculateValues() {
     if (this.data.length === 0) return
 
+    console.log(this.data)
+
     // set end date
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate

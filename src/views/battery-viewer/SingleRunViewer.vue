@@ -792,7 +792,7 @@ export default class VueComponent extends Vue {
   private summaryRValueDate = ''
   private summaryRValue = ''
 
-  private MAX_DAYS = 1500
+  private MAX_DAYS = 4000
   private cumulativeInfected = 0
 
   private isZipLoaded = false
@@ -1387,6 +1387,8 @@ export default class VueComponent extends Vue {
     this.loadPostHospital(this.currentRun)
 
     this.loadLeisurOutdoorFraction(this.currentRun)
+
+    console.log(csv)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
