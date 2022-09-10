@@ -22,15 +22,18 @@ export default class VueComponent extends Vue {
   }
   @Prop({ required: true }) private unreportedIncidence!: any[]
   @Prop({ required: true }) private unreportedIncidenceNRW!: any[]
+  @Prop({ required: true }) private metadata!: any
 
   private color = ['#094', '#0c4']
 
   private lagDays = 1
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   private handleRelayout(event: any) {
@@ -77,6 +80,45 @@ export default class VueComponent extends Vue {
     this.calculateValues()
   }
 
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+
+    console.log(this.dataLines)
+  }
+
+  private unselectLines() {
+    const query = this.$route.query
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      for (let i = 0; i < query[name].length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == query[name][i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
+  }
+
   private async calculateUnreportedNRW() {
     if (this.unreportedIncidenceNRW.length > 1) {
       const unreportedIncidence: any = {
@@ -94,10 +136,11 @@ export default class VueComponent extends Vue {
       unreportedIncidence.name = 'MAGS NRW Incidence'
       unreportedIncidence.x = []
       unreportedIncidence.y = []
-
-      unreportedIncidenceX2.name = 'Assumed Reported and Unreported Cases (NRW)'
+      ;(unreportedIncidence.visible = 'true'),
+        (unreportedIncidenceX2.name = 'Assumed Reported and Unreported Cases (NRW)')
       unreportedIncidenceX2.x = []
       unreportedIncidenceX2.y = []
+      unreportedIncidenceX2.visible = 'true'
 
       for (var i = 0; i < this.unreportedIncidenceNRW.length; i++) {
         unreportedIncidence.x.push(this.unreportedIncidenceNRW[i]['Date'])
@@ -121,6 +164,7 @@ export default class VueComponent extends Vue {
       unreportedDataLine.name = 'Assumed Reported and Unreported Cases'
       unreportedDataLine.x = []
       unreportedDataLine.y = []
+      unreportedDataLine.visible = 'true'
 
       for (var i = 0; i < this.unreportedIncidence.length; i++) {
         unreportedDataLine.x.push(this.unreportedIncidence[i]['Datum'])
@@ -152,6 +196,7 @@ export default class VueComponent extends Vue {
       observedLine.line = source.line
       observedLine.x = []
       observedLine.y = []
+      observedLine.visible = 'true'
       if (source.marker) observedLine.marker = source.marker
 
       // RKI meldedatum and infection data start on different days of the week.
@@ -237,6 +282,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Target: 50 per 100K',
+        visible: 'true',
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50, 50],
         fill: 'tozeroy',
@@ -259,6 +305,7 @@ export default class VueComponent extends Vue {
       // },
       {
         name: 'Model',
+        visible: 'true',
         x: midWeekDates, // susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         type: 'scatter',

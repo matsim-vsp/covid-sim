@@ -92,6 +92,7 @@ export default class VueComponent extends Vue {
   }
 
   private async buildPageForURL() {
+    console.log(this.$route.query)
     this.badPage = false
     console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch

@@ -49,7 +49,7 @@ export default class VueComponent extends Vue {
     cologne: { name: 'Nordrhein-Westfalen' },
   }
 
-  private mounted() {
+  private async mounted() {
     this.updateScale()
     this.calculateValues()
   }
@@ -171,24 +171,28 @@ export default class VueComponent extends Vue {
       this.dataLines.push(
         {
           name: 'occupancyHosp-Delta',
+          visible: true,
           x: date,
           y: occupancyHospDelta,
           line: { width: 1 },
         },
         {
           name: 'occupancyHosp-Omicron',
+          visible: true,
           x: date,
           y: occupancyHospOmicron,
           line: { width: 1 },
         },
         {
           name: 'occupancyICU-Delta',
+          visible: true,
           x: date,
           y: occupancyICUDelta,
           line: { width: 1 },
         },
         {
           name: 'occupancyICU-Omicron',
+          visible: true,
           x: date,
           y: occupancyICUOmicron,
           line: { width: 1 },
@@ -198,24 +202,28 @@ export default class VueComponent extends Vue {
       this.dataLines.push(
         {
           name: 'intakesHosp-Delta',
+          visible: true,
           x: date,
           y: intakesHospDelta,
           line: { width: 1 },
         },
         {
           name: 'intakesHosp-Omicron',
+          visible: true,
           x: date,
           y: intakesHospOmicron,
           line: { width: 1 },
         },
         {
           name: 'intakesICU-Delta',
+          visible: true,
           x: date,
           y: intakesICUDelta,
           line: { width: 1 },
         },
         {
           name: 'intakesICU-Omicron',
+          visible: true,
           x: date,
           y: intakesICUOmicron,
           line: { width: 1 },
@@ -291,6 +299,7 @@ export default class VueComponent extends Vue {
           if (this.dataLines.length)
             this.dataLines.push({
               name: 'Observed Hospitalization Case Rate',
+              visible: true,
               x: this.observedData.map(row => row.date),
               y: this.observedData.map(row => row.realHospitalizationRate),
               //type: 'scatter',
@@ -329,6 +338,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines.push({
       name: 'Observed: ' + region.name + ' (RKI)',
+      visible: true,
       x: regionData.map(row => row['Datum']),
       y: regionData.map(
         row =>
@@ -341,6 +351,7 @@ export default class VueComponent extends Vue {
     })
     this.dataLines.push({
       name: 'Adjusted: ' + region.name + ' (RKI)',
+      visible: true,
       x: regionData.map(row => row['Datum']),
       y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
       //type: 'scatter',
@@ -373,6 +384,7 @@ export default class VueComponent extends Vue {
         if (this.dataLines.length && !diviExsists)
           this.dataLines.push({
             name: 'Observed : Nordrhein-Westfalen (DIVI)',
+            visible: true,
             x: incidenceNRW.map(row => row.Date),
             y: incidenceNRW.map(row => row.DIVIIncidence),
             //type: 'scatter',

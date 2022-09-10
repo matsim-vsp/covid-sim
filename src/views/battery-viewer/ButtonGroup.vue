@@ -34,6 +34,7 @@ export default class VueComponent extends Vue {
 
     // add param to URL if it's not the first option
     const params = Object.assign({}, this.$route.query)
+
     if (choice !== this.stops[0]) {
       params[this.measure.measure] = choice
     } else {

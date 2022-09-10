@@ -134,6 +134,7 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="diseaseData"
+                  :metadata="allPlots[1]"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -191,7 +192,8 @@
                 :rkiDetectionData="rkiDetectionRateData"
                 :logScale="logScale"
                 :unreportedIncidence="unreportedIncidence"
-                :unreportedIncidenceNRW="unreportedIncidenceNRW")
+                :unreportedIncidenceNRW="unreportedIncidenceNRW"
+                :metadata="allPlots[4]")
 
           //- ---------- VIRUS STRAINS -------
           .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[5].active")
@@ -615,6 +617,7 @@ export default class VueComponent extends Vue {
     {
       index: 0,
       name: 'Activity Levels by Type',
+      abbreviation: 'actLevPerTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -622,6 +625,7 @@ export default class VueComponent extends Vue {
     {
       index: 1,
       name: 'Disease Import', // NEW
+      abbreviation: 'disImp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -629,6 +633,7 @@ export default class VueComponent extends Vue {
     {
       index: 2,
       name: 'Hospitalization New Cases (post-process)', // NEW
+      abbreviation: 'hosNewCasPos',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -636,6 +641,7 @@ export default class VueComponent extends Vue {
     {
       index: 3,
       name: 'Hospitalization Rate (post-process)', // NEW
+      abbreviation: 'hosRatPos',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -643,6 +649,7 @@ export default class VueComponent extends Vue {
     {
       index: 4,
       name: 'Cases Comparison',
+      abbreviation: 'casCom',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -650,6 +657,7 @@ export default class VueComponent extends Vue {
     {
       index: 5,
       name: 'Virus Strains',
+      abbreviation: 'virStr',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -657,6 +665,7 @@ export default class VueComponent extends Vue {
     {
       index: 6,
       name: 'Simulated R-Values',
+      abbreviation: 'simRVal',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -664,6 +673,7 @@ export default class VueComponent extends Vue {
     {
       index: 7,
       name: 'Simulated R-Values by Purpose',
+      abbreviation: 'simRValByPur',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -671,6 +681,7 @@ export default class VueComponent extends Vue {
     {
       index: 8,
       name: 'Infections by Activity Type',
+      abbreviation: 'infByActTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -678,6 +689,7 @@ export default class VueComponent extends Vue {
     {
       index: 9,
       name: 'Vaccine Effectiveness (against infection)',
+      abbreviation: 'vacEffAgaInf',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -685,6 +697,7 @@ export default class VueComponent extends Vue {
     {
       index: 10,
       name: 'Vaccine Effectiveness Vs. Strain',
+      abbreviation: 'vacEffVsStr',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -692,6 +705,7 @@ export default class VueComponent extends Vue {
     {
       index: 11,
       name: 'Incidence comparison between vaccinated and unvaccinated persons',
+      abbreviation: 'incComVacAndUnvac',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -699,6 +713,7 @@ export default class VueComponent extends Vue {
     {
       index: 12,
       name: 'Vaccination Rates and Booster Rates',
+      abbreviation: 'VacRatBooRat',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -706,6 +721,7 @@ export default class VueComponent extends Vue {
     {
       index: 13,
       name: 'Vaccination per Type',
+      abbreviation: 'VacPerTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -713,6 +729,7 @@ export default class VueComponent extends Vue {
     {
       index: 14,
       name: 'Antibodies',
+      abbreviation: 'Antibodies',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -720,6 +737,7 @@ export default class VueComponent extends Vue {
     {
       index: 15,
       name: 'Hospitalization New Cases',
+      abbreviation: 'hospNewCas',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -727,6 +745,7 @@ export default class VueComponent extends Vue {
     {
       index: 16,
       name: 'Hospitalization Rate Comparison',
+      abbreviation: 'hospRatComp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -734,6 +753,7 @@ export default class VueComponent extends Vue {
     {
       index: 17,
       name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
+      abbreviation: 'hospRatCompVacAndUnvac',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -742,6 +762,7 @@ export default class VueComponent extends Vue {
     {
       index: 18,
       name: 'Simulated Health Outcomes Over Time',
+      abbreviation: 'simHealOutOveTim',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -749,6 +770,7 @@ export default class VueComponent extends Vue {
     {
       index: 19,
       name: '7-Day Incidence by Age Group Over Time (Heatmap)',
+      abbreviation: 'inciHeatmap',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -756,6 +778,7 @@ export default class VueComponent extends Vue {
     {
       index: 20,
       name: '7-Day Incidence by Age Group Over Time (Linechart)',
+      abbreviation: 'inciLinechart',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -763,6 +786,7 @@ export default class VueComponent extends Vue {
     {
       index: 21,
       name: 'Leisure Outdoor Fraction',
+      abbreviation: 'leiOutFra',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -770,6 +794,7 @@ export default class VueComponent extends Vue {
     {
       index: 22,
       name: 'Weekly Tests',
+      abbreviation: 'weekTest',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -1342,6 +1367,7 @@ export default class VueComponent extends Vue {
   private postHospital: any[] = []
 
   private async runChanged() {
+    console.log('RUN CHANGED')
     const ignoreRow = 'Cumulative Hospitalized'
     const ignoreRowHealth = [
       'SusceptibleVaccinated',
