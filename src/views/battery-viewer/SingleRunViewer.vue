@@ -211,6 +211,7 @@
                   :logScale="logScale"
                   :strainValues="mutationValues"
                   :city="city"
+                  :metadata="allPlots[5]"
                 )
 
           //- ---------- R-VALUES -------
