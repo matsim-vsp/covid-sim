@@ -1388,8 +1388,6 @@ export default class VueComponent extends Vue {
 
     this.loadLeisurOutdoorFraction(this.currentRun)
 
-    console.log(csv)
-
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
     // cache the result
