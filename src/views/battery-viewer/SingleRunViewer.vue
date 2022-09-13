@@ -155,6 +155,7 @@
                   :data2="data"
                   :intakesHosp="true"
                   :city="city"
+                  :metadata="allPlots[2]"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -175,6 +176,7 @@
                   :data2="data"
                   :intakesHosp="false"
                   :city="city"
+                  :metadata="allPlots[3]"
                 )
 
           //- ---------- CASES COMPARISION -------
