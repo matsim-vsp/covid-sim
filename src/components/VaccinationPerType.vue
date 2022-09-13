@@ -44,6 +44,8 @@ export default class VueComponent extends Vue {
   private calculateValues() {
     if (this.vaccinations.length === 0) return
 
+    this.dataLines = []
+
     // set end date
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate
