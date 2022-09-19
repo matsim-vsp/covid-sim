@@ -1,3 +1,5 @@
+const ThreadsPlugin = require('threads-plugin')
+
 module.exports = {
   publicPath: '/',
   productionSourceMap: false,
@@ -21,6 +23,7 @@ module.exports = {
       .end()
   },
   configureWebpack: {
+    plugins: [new ThreadsPlugin()],
     module: {
       rules: [
         {
