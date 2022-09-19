@@ -25,27 +25,22 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private startDate!: string
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private plusminus!: number
-  @Prop({ required: true }) private zipContent!: any
+  @Prop({ required: true }) private zipWorker!: any
 
   private dataLines: any[] = []
 
-  private zipCache: any = {}
-  private zipLoader: any
-  private isZipLoaded = false
+  // private zipCache: any = {}
+  // private zipLoader: any
+  // private isZipLoaded = false
   private isResizing = false
 
-  private BATTERY_URL = PUBLIC_SVN + 'battery/'
+  // private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
   private MAX_DAYS = 4000
 
   private mounted() {
-    // if results were passed in, then we don't need to unzip.
-    if (this.zipContent.extractAsText) {
-      this.zipLoader = this.zipContent
-      this.zipCache[this.city] = this.zipLoader
-      this.isZipLoaded = true
-      this.runChanged()
-    }
+    // this.isZipLoaded = true
+    this.runChanged()
     window.addEventListener('resize', this.handleResize)
   }
 
@@ -61,38 +56,21 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('battery') private updateModelData() {
-    // this.buildActivityLevels()
-  }
-
-  @Watch('currentRun') private runWasSwitched() {
+  @Watch('city')
+  @Watch('currentRun')
+  @Watch('zipWorker')
+  private runWasSwitched() {
     this.runChanged()
-  }
-
-  @Watch('city') private changedCity() {
-    this.zipLoader = this.zipContent
-    this.zipCache[this.city] = this.zipLoader
-    this.isZipLoaded = true
-    this.runChanged()
-  }
-
-  @Watch('zipContent') private zipContentChanged() {
-    console.log('ZIP CONTENT CHANGED', this.zipContent)
-    this.changedCity()
   }
 
   private async loadCSV(currentRun: any) {
     if (!currentRun.RunId) return []
-    if (!this.zipLoader) return []
-    if (this.zipLoader === {}) return []
+    if (!this.zipWorker) return []
 
     const filename = currentRun.RunId + '.restrictions.txt.csv'
-    // console.log('Extracting', filename)
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-      // console.log('Got it!', filename)
+      const z = await this.zipWorker.extractFile(filename)
       return z.data
     } catch (e) {
       this.$emit('missing', true)
