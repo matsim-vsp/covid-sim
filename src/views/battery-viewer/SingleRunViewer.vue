@@ -232,6 +232,7 @@
                   :logScale="false"
                   :rValues="rValues"
                   :rValueDate="summaryRValueDate"
+                  :metadata="allPlots[6]"
                   @avgR="gotNewSummaryRValue"
                   @method="switchRMethod")
 
@@ -250,6 +251,7 @@
                   :endDate="endDate"
                   :logScale="false"
                   :rValues="rValues"
+                  :metadata="allPlots[7]"
                   @method="switchRMethod")
 
           //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
@@ -316,6 +318,7 @@
                   :logScale="false"
                   :vaccineEffectivenessData="vaccineEffectivenessVsStrainData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessVsStrainFields"
+                  :metadata="allPlots[10]"
                 )
 
           //- ---------- VACCINATED / UNVACCINATED -------
@@ -331,7 +334,8 @@
                 weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[11]")
 
           //- ---------- VACCINATION / BOOSTER RATES -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[12].active")
@@ -346,7 +350,8 @@
                 vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[12]")
 
           //- ---------- VACCINATION PER TYPE -------
           .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0  && allPlots[13].active")
@@ -361,7 +366,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 vaccination-per-type.plotsize(v-else :endDate="endDate"
                 :logScale="logScale"
-                :vaccinations="vaccinationPerType")
+                :vaccinations="vaccinationPerType"
+                :metadata="allPlots[13]")
 
           //- ---------- ANTIBODIES -------
           .linear-plot(v-if="showIncidenceComp && antibodies.length > 0  && allPlots[14].active")
@@ -376,7 +382,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 antibodies.plotsize(v-else :endDate="endDate"
                 :logScale="logScale"
-                :antibodies="antibodies")
+                :antibodies="antibodies"
+                :metadata="allPlots[14]")
 
           //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
           .linear-plot(v-if="allPlots[15].active")
@@ -393,6 +400,7 @@
                 :endDate="endDate"
                 :city="city"
                 :logScale="logScale"
+                :metadata="allPlots[15]"
                 )
 
           //- ---------- HOSPITALIZATION RATES
@@ -407,7 +415,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 hospitalization-plot.plotsize(v-else
                   :data="hospitalData" :logScale="logScale" :city="city"
-                  :diviData="diviData" :endDate="endDate" )
+                  :diviData="diviData" :endDate="endDate" 
+                  :metadata="allPlots[16]")
 
           //- ---------- CASES COMPARISION BY VACCINATION -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[17].active")
@@ -422,7 +431,8 @@
                 hospitalization-vaccination-comparison.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[17]")
 
           //- ---------- HEALTH OUTCOMES ------
           .linear-plot(v-if="allPlots[18].active")
@@ -450,6 +460,7 @@
                   :endDate="endDate"
                   :data="incidenceHeatMapData"
                   :heatMapMaxValue="runYaml.heatMapMaxValue"
+                  :metadata="allPlots[19]"
                 )
 
           //- ---------- AGE GROUP LINE CHART ------
@@ -464,7 +475,8 @@
                 age-group-line-chart.plotsize(v-else
                   :endDate="endDate"
                   :data="incidenceHeatMapData"
-                  :logScale="logScale")
+                  :logScale="logScale"
+                  :metadata="allPlots[20]")
 
           //- ---------- LEISURE OUTDOOR FRACTION ------
           .linear-plot(v-if="leisurOutdoorFractionData.length && allPlots[21].active")
@@ -479,6 +491,7 @@
                   :data="leisurOutdoorFractionData"
                   :logScale="false"
                   :endDate="endDate"
+                  :metadata="allPlots[21]"
                   )
 
             //- ---------- WEEKLY TESTS ------
@@ -493,6 +506,7 @@
                 weekly-tests.plotsize(v-else
                   :data="weeklyTestsData"
                   :endDate="endDate"
+                  :metadata="allPlots[22]"
                   )
 
           //- ---------- VEGA PLOTS ------
@@ -1100,6 +1114,7 @@ export default class VueComponent extends Vue {
 
   private data: any[] = []
   private dataHealth: any[] = []
+  private unselectedHealthLines: string[] = []
 
   private measureOptions: any = {}
   private runLookup: any = {}
@@ -1426,11 +1441,17 @@ export default class VueComponent extends Vue {
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
 
+    for (let i = 0; i < this.data.length; i++) {
+      this.data[i].visible = true
+    }
+
     this.addDataFromInfectionsCSVToData('nReVaccinated')
 
     this.updateTotalInfected()
     this.updateVegaCharts()
     this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
+
+    this.unselectHealthLines()
 
     this.updatePlotMenu()
   }
@@ -1498,6 +1519,50 @@ export default class VueComponent extends Vue {
 
     if (!this.weeklyTestsData.length) {
       this.allPlots[22].usedInThisRun = false
+    }
+  }
+
+  @Watch('dataHealth', { deep: true }) updateUrl() {
+    console.log(this.dataHealth)
+    for (let i = 0; i < this.dataHealth.length; i++) {
+      if (
+        this.dataHealth[i].visible == 'legendonly' &&
+        !this.unselectedHealthLines.includes(this.dataHealth[i].name)
+      ) {
+        this.unselectedHealthLines.push(this.dataHealth[i].name)
+      } else if (
+        this.dataHealth[i].visible != 'legendonly' &&
+        this.unselectedHealthLines.includes(this.dataHealth[i].name)
+      ) {
+        this.unselectedHealthLines.splice(
+          this.unselectedHealthLines.indexOf(this.dataHealth[i].name)
+        )
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.allPlots[18].abbreviation] = this.unselectedHealthLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectHealthLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.allPlots[18].abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataHealth.length; j++) {
+          if (this.dataHealth[j].name == nameArray[i]) {
+            this.dataHealth[j].visible = 'legendonly'
+          }
+        }
+      }
     }
   }
 

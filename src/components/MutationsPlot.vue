@@ -2,7 +2,7 @@
 .mutations-plots(v-if="!isResizing")
   vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
   vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
-  vue-plotly.plot3(:data="dataLines2" :layout="layout3" :options="options" @relayout="handleRelayout")
+  vue-plotly.plot3(:data="dataLines3" :layout="layout3" :options="options" @relayout="handleRelayout")
 
 </template>
 
@@ -19,11 +19,17 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private strainValues!: any[]
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private metadata!: any
 
   private color = '#04f'
 
   private dataLines: any[] = []
   private dataLines2: any[] = []
+  private dataLines3: any[] = []
+  private unselectedLines: string[] = []
+  private unselectedLines2: string[] = []
+  private unselectedLines3: string[] = []
+  private plotPrefix = ['plot-1-', 'plot-2-', 'plot-3-']
 
   private factor100k = 1
 
@@ -36,6 +42,7 @@ export default class VueComponent extends Vue {
     this.factor100k = totalPopulation / 100000.0
 
     this.calculateValues()
+    this.unselectLinesForAllPlots()
   }
 
   private handleRelayout(event: any) {
@@ -48,7 +55,10 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('strainValues') private updateRValues() {
+    console.log('updateRValues')
     this.calculateValues()
+    this.unselectLinesForAllPlots()
+    this.unselectLinesForAllPlots()
   }
 
   @Watch('logScale') updateScale() {
@@ -77,6 +87,98 @@ export default class VueComponent extends Vue {
     this.layout2 = Object.assign({}, this.layout2)
     this.layout3 = Object.assign({}, this.layout3)
     this.isResizing = false
+  }
+
+  private unselectLinesForAllPlots() {
+    this.unselectLines(this.dataLines, this.plotPrefix[0])
+    this.unselectLines(this.dataLines2, this.plotPrefix[1])
+    this.unselectLines(this.dataLines3, this.plotPrefix[2])
+  }
+
+  private unselectLines(data: any, plotName: string) {
+    const query = this.$route.query as any
+    const name = plotName + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      console.log(plotName, '  ', nameArray)
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < data.length; j++) {
+          if (data[j].name == nameArray[i]) {
+            data[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params[this.plotPrefix[0] + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  @Watch('dataLines2', { deep: true }) updateUrl2() {
+    for (let i = 0; i < this.dataLines2.length; i++) {
+      if (
+        this.dataLines2[i].visible == 'legendonly' &&
+        !this.unselectedLines2.includes(this.dataLines2[i].name)
+      ) {
+        this.unselectedLines2.push(this.dataLines2[i].name)
+      } else if (
+        this.dataLines2[i].visible != 'legendonly' &&
+        this.unselectedLines2.includes(this.dataLines2[i].name)
+      ) {
+        this.unselectedLines2.splice(this.unselectedLines2.indexOf(this.dataLines2[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params[this.plotPrefix[1] + this.metadata.abbreviation] = this.unselectedLines2
+
+    this.$router.replace({ query: params })
+  }
+
+  @Watch('dataLines3', { deep: true }) updateUrl3() {
+    for (let i = 0; i < this.dataLines3.length; i++) {
+      if (
+        this.dataLines3[i].visible == 'legendonly' &&
+        !this.unselectedLines3.includes(this.dataLines3[i].name)
+      ) {
+        this.unselectedLines3.push(this.dataLines3[i].name)
+      } else if (
+        this.dataLines3[i].visible != 'legendonly' &&
+        this.unselectedLines3.includes(this.dataLines3[i].name)
+      ) {
+        this.unselectedLines3.splice(this.unselectedLines3.indexOf(this.dataLines3[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params[this.plotPrefix[2] + this.metadata.abbreviation] = this.unselectedLines3
+
+    this.$router.replace({ query: params })
   }
 
   private async prepareData() {
@@ -413,6 +515,7 @@ export default class VueComponent extends Vue {
           x: date,
           y: wild,
           name: header[5],
+          visible: true,
           color: color[5],
           type: 'scatter',
           mode: 'lines+markers',
@@ -425,6 +528,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: alpha,
         name: header[1],
+        visible: true,
         color: color[1],
         type: 'scatter',
         mode: 'lines+markers',
@@ -435,6 +539,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: beta,
         name: header[2],
+        visible: true,
         color: color[2],
         type: 'scatter',
         mode: 'lines+markers',
@@ -445,6 +550,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: gamma,
         name: header[3],
+        visible: true,
         color: color[3],
         type: 'scatter',
         mode: 'lines+markers',
@@ -455,6 +561,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: delta,
         name: header[4],
+        visible: true,
         color: color[4],
         type: 'scatter',
         mode: 'lines+markers',
@@ -465,6 +572,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: omicron,
         name: header[6],
+        visible: true,
         color: color[6],
         type: 'scatter',
         mode: 'lines+markers',
@@ -475,6 +583,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba1,
         name: header[7],
+        visible: true,
         color: color[7],
         type: 'scatter',
         mode: 'lines+markers',
@@ -485,6 +594,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba2,
         name: header[8],
+        visible: true,
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
@@ -495,6 +605,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba1Cologne,
         name: header[9],
+        visible: true,
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
@@ -505,6 +616,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba2Cologne,
         name: header[10],
+        visible: true,
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
@@ -516,6 +628,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba4Cologne,
         name: header[13],
+        visible: true,
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
@@ -527,6 +640,7 @@ export default class VueComponent extends Vue {
         x: date,
         y: ba5Cologne,
         name: header[12],
+        visible: true,
         color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
@@ -534,7 +648,12 @@ export default class VueComponent extends Vue {
         opacity: 0.5,
       }
 
+      for (let i = 0; i < this.lineDataLookup; i++) {
+        this.lineDataLookup[i].visible = true
+      }
+
       this.dataLines2 = Object.values(this.lineDataLookup)
+      this.dataLines3 = JSON.parse(JSON.stringify(this.dataLines2))
 
       // *** CAUSES INFINITE LAYOUT LOOP
       // this.layout.xaxis.range = [date[0], date[date.length - 1]]
@@ -557,6 +676,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines = []
     this.dataLines2 = []
+    this.dataLines3 = []
     this.lineDataLookup = {}
 
     // // build totals
@@ -612,6 +732,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines.push({
       name: strain,
+      visible: true,
       x: x,
       y: r,
       mode: 'markers',
@@ -620,6 +741,7 @@ export default class VueComponent extends Vue {
 
     this.lineDataLookup['% ' + strain] = {
       name: '% ' + strain,
+      visible: true,
       x: x,
       y: t,
       // mode: 'markers',

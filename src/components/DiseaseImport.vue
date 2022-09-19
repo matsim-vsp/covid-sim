@@ -35,6 +35,7 @@ export default class VueComponent extends Vue {
 
   @Watch('data') updateData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('dataLines', { deep: true }) updateUrl() {
@@ -78,13 +79,17 @@ export default class VueComponent extends Vue {
   }
 
   private unselectLines() {
-    const query = this.$route.query
+    const query = this.$route.query as any
     const name = 'plot-' + this.metadata.abbreviation
 
     if (Object.keys(query).includes(name)) {
-      for (let i = 0; i < query[name].length; i++) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
         for (let j = 0; j < this.dataLines.length; j++) {
-          if (this.dataLines[j].name == query[name][i]) {
+          if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
           }
         }

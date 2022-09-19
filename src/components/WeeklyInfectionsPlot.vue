@@ -39,6 +39,7 @@ export default class VueComponent extends Vue {
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateValues()
+      this.unselectLines()
     }
   }
 
@@ -52,6 +53,7 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -74,10 +76,12 @@ export default class VueComponent extends Vue {
 
   @Watch('unreportedIncidence') gotUnreportedIncidence() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('unreportedIncidenceNRW') gotUnreportedIncidenceNRW() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('dataLines', { deep: true }) updateUrl() {
@@ -100,18 +104,20 @@ export default class VueComponent extends Vue {
     params['plot-' + this.metadata.abbreviation] = this.unselectedLines
 
     this.$router.replace({ query: params })
-
-    console.log(this.dataLines)
   }
 
   private unselectLines() {
-    const query = this.$route.query
+    const query = this.$route.query as any
     const name = 'plot-' + this.metadata.abbreviation
 
     if (Object.keys(query).includes(name)) {
-      for (let i = 0; i < query[name].length; i++) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
         for (let j = 0; j < this.dataLines.length; j++) {
-          if (this.dataLines[j].name == query[name][i]) {
+          if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
           }
         }

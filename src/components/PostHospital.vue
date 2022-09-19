@@ -1,8 +1,8 @@
 <template lang="pug">
-.vue-component(v-if="!isResizing" )
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
-  
-</template>
+  .vue-component(v-if="!isResizing" )
+    vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
+    
+  </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -22,8 +22,8 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
-  private unselectedLines: string[] = []
   private observedData: any[] = []
+  private unselectedLines: string[] = []
   private factor100k = 1
 
   private observedHospitalizationConfig: {
@@ -51,10 +51,9 @@ export default class VueComponent extends Vue {
     cologne: { name: 'Nordrhein-Westfalen' },
   }
 
-  private async mounted() {
+  private mounted() {
     this.updateScale()
     this.calculateValues()
-    this.unselectLines()
   }
 
   private isResizing = false
@@ -131,14 +130,18 @@ export default class VueComponent extends Vue {
     this.$router.replace({ query: params })
   }
 
-  private unselectLines() {
-    const query = this.$route.query
+  private async unselectLines() {
+    const query = this.$route.query as any
     const name = 'plot-' + this.metadata.abbreviation
 
     if (Object.keys(query).includes(name)) {
-      for (let i = 0; i < query[name].length; i++) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
         for (let j = 0; j < this.dataLines.length; j++) {
-          if (this.dataLines[j].name == query[name][i]) {
+          if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
           }
         }
@@ -278,6 +281,7 @@ export default class VueComponent extends Vue {
       // New Cases
       await this.addReportedDataNewCases()
     }
+    await this.unselectLines()
   }
 
   private async addReportedDataRate() {
@@ -305,6 +309,7 @@ export default class VueComponent extends Vue {
 
       this.dataLines.push({
         name: config.legendText,
+        visible: true,
         x: csvData.map(row => row.date.split('T')[0]),
         y: csvData.map(row => parseFloat(row[config.csvCasesColumn]) / this.factor100k),
         line: { width: 1 },

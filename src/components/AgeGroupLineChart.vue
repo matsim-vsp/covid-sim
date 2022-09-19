@@ -13,11 +13,14 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: string
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private logScale!: boolean
+  @Prop({ required: true }) private metadata!: any
 
   private dataMatrix: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.buildHeatMap()
+    this.unselectLines()
   }
 
   private handleRelayout(event: any) {
@@ -36,6 +39,7 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.buildHeatMap()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -54,6 +58,47 @@ export default class VueComponent extends Vue {
           //autorange: true,
           title: 'Incidence',
         }
+  }
+
+  @Watch('dataMatrix', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataMatrix.length; i++) {
+      if (
+        this.dataMatrix[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataMatrix[i].name)
+      ) {
+        this.unselectedLines.push(this.dataMatrix[i].name)
+      } else if (
+        this.dataMatrix[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataMatrix[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataMatrix[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataMatrix.length; j++) {
+          if (this.dataMatrix[j].name == nameArray[i]) {
+            this.dataMatrix[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private buildHeatMap() {
@@ -86,6 +131,7 @@ export default class VueComponent extends Vue {
       this.dataMatrix.push({
         x,
         y: matrix[i],
+        visible: true,
         name: y[i],
       })
     }

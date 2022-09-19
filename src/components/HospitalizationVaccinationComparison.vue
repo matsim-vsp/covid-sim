@@ -20,25 +20,30 @@ export default class VueComponent extends Vue {
     line?: any
     name?: string
   }
+  @Prop({ required: true }) private metadata!: any
 
   private color = ['#094', '#0c4']
 
   private lagDays = 1
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateValues()
+      this.unselectLines()
     }
   }
 
   @Watch('data') private updateModelData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   private isResizing = false
@@ -65,6 +70,47 @@ export default class VueComponent extends Vue {
           autorange: true,
           title: 'Hospitalizations / 100k Pop.',
         }
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private calculateObserved(factor100k: number) {
@@ -207,6 +253,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'KH / 100k vaccinated_v_1',
+        visible: true,
         x: date,
         y: geimpft_v_1,
         line: {
@@ -215,6 +262,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'KH / 100k vaccinated_v_2',
+        visible: true,
         x: date,
         y: geimpft_v_2,
         line: {
@@ -223,6 +271,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'KH / 100k unvaccinated_v_1',
+        visible: true,
         x: date,
         y: ungeimpft_v_1,
         line: {
@@ -231,6 +280,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'KH / 100k unvaccinated_v_2',
+        visible: true,
         x: date,
         y: ungeimpft_v_2,
         line: {
@@ -239,6 +289,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'KH / 100k',
+        visible: true,
         x: date,
         y: total,
         line: {
