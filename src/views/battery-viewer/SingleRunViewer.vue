@@ -78,13 +78,13 @@
           a(:class="{'active-view-mode': $store.state.isWideMode}" @click="setWideMode(true)") Wide
 
         //- ------- ACTIVITY LEVELS
-        .linear-plot.activity(v-if="showActivityLevels && allPlots[0].active")
+        .linear-plot.activity(v-if="showActivityLevels && allPlots[0].active && isZipLoaded")
           h5 {{allPlots[0].name}}
           p 0-100% of normal
           .plotarea.activities
             activity-levels-plot.plotsize(:city="city" :battery="runId"
               :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-              :zipContent="zipLoader")
+              :zipWorker="zipWorker")
               //- @missing="showActivityLevels = false")
 
         //- ------ Vega charts with top=true -----------
@@ -525,15 +525,15 @@
 <script lang="ts">
 // ###########################################################################
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { spawn, Thread, Worker } from 'threads'
 import MarkdownIt from 'markdown-it'
 import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
-import ZipLoader from 'zip-loader'
-import yaml from 'yaml'
 import moment from 'moment'
-import store from '@/store'
-import { debounce } from 'vega'
+import yaml from 'yaml'
 
+import store from '@/store'
+import { RunYaml, PUBLIC_SVN } from '@/Globals'
 import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
 import ButtonGroup from './ButtonGroup.vue'
 import HeatMap from '@/components/HeatMap.vue'
@@ -543,7 +543,6 @@ import InfectionsByActivityType from '@/components/InfectionsByActivityType.vue'
 import MutationsPlot from '@/components/MutationsPlot.vue'
 import RValuePlot from '@/components/RValuePlot.vue'
 import RValueTwo from '@/components/RValueTwo.vue'
-import SVNFileSystem from '@/util/SVNFileSystem'
 import VegaLiteChart from '@/components/VegaLiteChart.vue'
 import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
 import VaccinationRates from '@/components/VaccinationRates.vue'
@@ -558,7 +557,6 @@ import PostHospital from '@/components/PostHospital.vue'
 import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
-import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
   measure: string
@@ -934,10 +932,7 @@ export default class VueComponent extends Vue {
   }
 
   private async clearZipLoaderLookups() {
-    for (const zipfile of Object.values(this.zipLoaderLookup)) {
-      ;(await zipfile).clear()
-    }
-    this.zipLoaderLookup = {}
+    await this.zipWorker.clear()
     this.csvCache = {}
     this.cachedOptionKeys = ''
   }
@@ -1016,7 +1011,7 @@ export default class VueComponent extends Vue {
     this.runChanged()
     this.showActivityLevelPlot()
 
-    this.hasBaseRun = this.isThereABaseRun()
+    this.hasBaseRun = await this.isThereABaseRun()
 
     //chang disabled plots
     for (let i = 0; i < this.allPlots.length; i++) {
@@ -1159,21 +1154,19 @@ export default class VueComponent extends Vue {
     return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
   }
 
-  private isThereABaseRun() {
-    const files = this.zipLoader.files
-    if (!files) return
+  private async isThereABaseRun() {
+    if (!this.isZipLoaded) return false
 
-    console.log({ ZIPLODER: this.zipLoader })
     const baseFilename = 'sz0' + '.infections.txt.csv'
+    const hasBase = await this.zipWorker.hasFile(baseFilename)
 
-    console.log('DOES SZ0 EXIST: ', files.hasOwnProperty(baseFilename))
-
-    return files.hasOwnProperty(baseFilename)
+    console.log('DOES SZ0 EXIST: ', hasBase)
+    return hasBase
   }
 
   private currentSituation: any = {}
   private loadedSeriesData: any = {}
-  private zipLoader: any = {}
+  // private zipLoader: any = {}
 
   private labels: any = {
     nSusceptible: 'Susceptible',
@@ -1205,9 +1198,17 @@ export default class VueComponent extends Vue {
     nReVaccinated: 'Boosted',
   }
 
+  private zipWorker: any = null
+
   private async mounted() {
+    this.zipWorker = await spawn(new Worker('../../zipExtractor.worker'))
+
     this.loadCoronaDetectionRateData()
     this.switchYaml()
+  }
+
+  private beforeDestroy() {
+    if (this.zipWorker) Thread.terminate(this.zipWorker)
   }
 
   private isResizing = false
@@ -1314,19 +1315,21 @@ export default class VueComponent extends Vue {
 
   private hasBaseRun = false
 
-  private loadZipFile(whichZip: string): Promise<any> {
-    if (whichZip in this.zipLoaderLookup) return this.zipLoaderLookup[whichZip]
+  private async loadZipFile(whichZip: string) {
+    // if (whichZip in this.zipLoaderLookup) return this.zipLoaderLookup[whichZip]
+    // const loader = new Promise(async (resolve, reject) => {
 
-    const loader = new Promise(async (resolve, reject) => {
-      const filepath = `${this.BATTERY_URL}${this.runId}/${this.runYaml.zipFolder}/${whichZip}.zip`
-      const zloader = new ZipLoader(filepath)
-      await zloader.load()
-
-      this.isZipLoaded = true
-      resolve(zloader)
+    await this.zipWorker.setZipFile({
+      BATTERY_URL: this.BATTERY_URL,
+      runId: this.runId,
+      zipFolder: this.runYaml.zipFolder,
+      whichZip,
     })
 
-    return loader
+    this.isZipLoaded = true
+    // resolve(instance)
+    // const zloader = new ZipLoader(filepath)
+    // await zloader.load()
   }
 
   private async showActivityLevelPlot() {
@@ -1341,7 +1344,15 @@ export default class VueComponent extends Vue {
   private diseaseData: any[] = []
   private postHospital: any[] = []
 
+  private previousRun = ''
+
   private async runChanged() {
+    if (this.currentRun?.RunId === this.previousRun) {
+      return
+    } else {
+      this.previousRun = this.currentRun.RunId
+    }
+
     const ignoreRow = 'Cumulative Hospitalized'
     const ignoreRowHealth = [
       'SusceptibleVaccinated',
@@ -1382,11 +1393,14 @@ export default class VueComponent extends Vue {
 
     this.loadWeeklyTests(this.currentRun)
 
-    this.loaddiseaseImport(this.currentRun)
+    this.loadDiseaseImport(this.currentRun)
 
     this.loadPostHospital(this.currentRun)
 
     this.loadLeisurOutdoorFraction(this.currentRun)
+
+    // const duration = performance.now() - start
+    // console.log('DURATION:', duration / 1000)
 
     const timeSerieses = this.generateSeriesFromCSVData(csv)
 
@@ -1497,19 +1511,18 @@ export default class VueComponent extends Vue {
 
       try {
         const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
-        let text = this.zipLoader.extractAsText(filename)
-        const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+        this.zipWorker.extractFile(filename).then((z: any) => {
+          const dateBracket = z.data.filter((point: any) => point.date <= this.endDate)
 
-        const dateBracket = z.data.filter(point => point.date <= this.endDate)
+          // if data doesn't go out to end-date, straightline it
+          const lastEntry = dateBracket[dateBracket.length - 1]
+          if (lastEntry.date < this.endDate) {
+            dateBracket.push(lastEntry)
+            dateBracket[dateBracket.length - 1].date = this.endDate
+          }
 
-        // if data doesn't go out to end-date, straightline it
-        const lastEntry = dateBracket[dateBracket.length - 1]
-        if (lastEntry.date < this.endDate) {
-          dateBracket.push(lastEntry)
-          dateBracket[dateBracket.length - 1].date = this.endDate
-        }
-
-        chart.data = dateBracket
+          chart.data = dateBracket
+        })
       } catch (e) {
         console.log('YEEEARGH')
         console.log(e)
@@ -1597,12 +1610,11 @@ export default class VueComponent extends Vue {
     this.incidenceHeatMapData = ''
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.post.incidenceByAge.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
+      let text = await this.zipWorker.extractRawText(filename)
       this.incidenceHeatMapData = text
     } catch (e) {
       // console.log('INCIDENCE HEAT MAP DATA: fail', filename)
@@ -1614,19 +1626,11 @@ export default class VueComponent extends Vue {
     this.infectionsByActivityType = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.infectionsPerActivity.txt.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        delimiter: '\t',
-      })
-
+      const z = await this.zipWorker.extractFile(filename)
       this.infectionsByActivityType = z.data
     } catch (e) {
       console.log('INFECTIONSPERACTIVITY: no', filename)
@@ -1640,14 +1644,11 @@ export default class VueComponent extends Vue {
     this.hasRValuePurposes = false
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.rValues.txt.csv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
+      const z = await this.zipWorker.extractFile(filename)
       this.rValues = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
     } catch (e) {
@@ -1655,14 +1656,13 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private async loaddiseaseImport(currentRun: any) {
+  private async loadDiseaseImport(currentRun: any) {
     this.diseaseData = []
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
+
     const filename = currentRun.RunId + '.diseaseImport.tsv'
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
       this.diseaseData = z.data
     } catch (e) {
       console.log('DiseaseData: no', filename)
@@ -1671,11 +1671,10 @@ export default class VueComponent extends Vue {
   private async loadPostHospital(currentRun: any) {
     this.postHospital = []
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
+
     const filename = currentRun.RunId + '.post.hospital.tsv'
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
       this.postHospital = z.data
     } catch (e) {
       console.log('postHospital: no', filename)
@@ -1689,14 +1688,11 @@ export default class VueComponent extends Vue {
     this.hasLeisurOutdoorFraction = false
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.outdoorFraction.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
+      const z = await this.zipWorker.extractFile(filename)
       this.leisurOutdoorFractionData = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
     } catch (e) {
@@ -1712,13 +1708,11 @@ export default class VueComponent extends Vue {
     this.showVaccineEffectivenessFields = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.post.vaccineEff.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
 
       if (z.meta.fields.indexOf('day') > -1) {
         this.vaccineEffectivenessData = z.data
@@ -1737,13 +1731,11 @@ export default class VueComponent extends Vue {
     this.showVaccineEffectivenessVsStrainFields = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.post.ve.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
 
       if (z.meta.fields.indexOf('day') > -1) {
         this.vaccineEffectivenessVsStrainData = z.data
@@ -1761,13 +1753,11 @@ export default class VueComponent extends Vue {
     this.hasWeeklyTests = false
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.infections.txt.csv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
 
       this.weeklyTestsData = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
@@ -1782,13 +1772,11 @@ export default class VueComponent extends Vue {
     this.vaccinationPerType = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.vaccinations.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+      const z = await this.zipWorker.extractFile(filename)
 
       this.vaccinationPerType = z.data
     } catch (e) {
@@ -1802,14 +1790,11 @@ export default class VueComponent extends Vue {
     this.antibodies = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.antibodies.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
+      const z = await this.zipWorker.extractFile(filename)
       this.antibodies = z.data
     } catch (e) {
       console.log('Antibodies: no', filename)
@@ -1822,42 +1807,32 @@ export default class VueComponent extends Vue {
     this.mutationValues = []
 
     if (!currentRun.RunId) return
-    if (this.zipLoader === {}) return
 
     const filename = currentRun.RunId + '.strains.tsv'
 
     try {
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
+      const z = await this.zipWorker.extractFile(filename)
       this.mutationValues = z.data
     } catch (e) {
       console.log('MUTATIONS: no', filename)
     }
   }
 
-  private zipLoaderLookup: { [run: string]: Promise<any> } = {} // holds the ZipLoaders
   private csvCache: { [filename: string]: Promise<any[]> } = {} // holds CSV tables
 
   private async loadCSVs(currentRun: any) {
     if (!currentRun.RunId) return []
 
     // get the ZipLoader for this run
-    if (currentRun.RunId in this.zipLoaderLookup) {
-      // already loaded! Use cached copy
-      console.log('** zip is cached')
-      this.zipLoader = await this.zipLoaderLookup[currentRun.RunId]
-    } else {
-      // need to load it from disk
-      console.log('nope, loading from disk', currentRun.RunId)
-      const loader = this.loadZipFile(currentRun.RunId)
-      this.zipLoaderLookup[currentRun.RunId] = loader
-      // make sure it's done loading
-      this.zipLoader = await loader
-    }
 
-    if (this.zipLoader === {}) return []
-    if (!this.zipLoader.extractAsText) return []
+    await this.zipWorker.setZipFile({
+      BATTERY_URL: this.BATTERY_URL,
+      runId: this.runId,
+      zipFolder: this.runYaml.zipFolder,
+      whichZip: currentRun.RunId,
+    })
+
+    this.isZipLoaded = true
 
     const filename = currentRun.RunId + '.infections.txt.csv'
 
@@ -1866,10 +1841,8 @@ export default class VueComponent extends Vue {
       return await this.csvCache[filename]
     }
 
-    this.csvCache[filename] = new Promise((resolve, reject) => {
-      console.log('Extracting', filename)
-      let text = this.zipLoader.extractAsText(filename)
-      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+    this.csvCache[filename] = new Promise(async (resolve, reject) => {
+      const z = await this.zipWorker.extractFile(filename)
       resolve(z.data)
     })
 
