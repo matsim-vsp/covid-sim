@@ -1607,9 +1607,10 @@ export default class VueComponent extends Vue {
   }
 
   private async loadIncidenceHeatMapData(currentRun: any) {
-    this.incidenceHeatMapData = ''
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.incidenceHeatMapData = ''
+      return
+    }
 
     const filename = currentRun.RunId + '.post.incidenceByAge.tsv'
 
@@ -1617,15 +1618,17 @@ export default class VueComponent extends Vue {
       let text = await this.zipWorker.extractRawText(filename)
       this.incidenceHeatMapData = text
     } catch (e) {
-      // console.log('INCIDENCE HEAT MAP DATA: fail', filename)
+      this.incidenceHeatMapData = ''
+      console.log('NO INCIDENCE HEAT MAP DATA:', filename)
     }
   }
 
   private infectionsByActivityType: any[] = []
   private async loadInfectionsByActivityType(currentRun: any) {
-    this.infectionsByActivityType = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.infectionsByActivityType = []
+      return
+    }
 
     const filename = currentRun.RunId + '.infectionsPerActivity.txt.tsv'
 
@@ -1633,6 +1636,7 @@ export default class VueComponent extends Vue {
       const z = await this.zipWorker.extractFile(filename)
       this.infectionsByActivityType = z.data
     } catch (e) {
+      this.infectionsByActivityType = []
       console.log('INFECTIONSPERACTIVITY: no', filename)
     }
   }
@@ -1640,10 +1644,11 @@ export default class VueComponent extends Vue {
   private hasRValuePurposes = false
 
   private async loadRValues(currentRun: any) {
-    this.rValues = []
-    this.hasRValuePurposes = false
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.rValues = []
+      this.hasRValuePurposes = false
+      return
+    }
 
     const filename = currentRun.RunId + '.rValues.txt.csv'
 
@@ -1652,13 +1657,17 @@ export default class VueComponent extends Vue {
       this.rValues = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
     } catch (e) {
+      this.rValues = []
+      this.hasRValuePurposes = false
       console.log('RVALUES: no', filename)
     }
   }
 
   private async loadDiseaseImport(currentRun: any) {
-    this.diseaseData = []
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.diseaseData = []
+      return
+    }
 
     const filename = currentRun.RunId + '.diseaseImport.tsv'
     try {
@@ -1666,28 +1675,32 @@ export default class VueComponent extends Vue {
       this.diseaseData = z.data
     } catch (e) {
       console.log('DiseaseData: no', filename)
+      this.diseaseData = []
     }
   }
   private async loadPostHospital(currentRun: any) {
-    this.postHospital = []
-    if (!currentRun.RunId) return
-
+    if (!currentRun.RunId) {
+      this.postHospital = []
+      return
+    }
     const filename = currentRun.RunId + '.post.hospital.tsv'
     try {
       const z = await this.zipWorker.extractFile(filename)
       this.postHospital = z.data
     } catch (e) {
       console.log('postHospital: no', filename)
+      this.postHospital = []
     }
   }
 
   private hasLeisurOutdoorFraction = false
 
   private async loadLeisurOutdoorFraction(currentRun: any) {
-    this.leisurOutdoorFractionData = []
-    this.hasLeisurOutdoorFraction = false
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.leisurOutdoorFractionData = []
+      this.hasLeisurOutdoorFraction = false
+      return
+    }
 
     const filename = currentRun.RunId + '.outdoorFraction.tsv'
 
@@ -1696,6 +1709,8 @@ export default class VueComponent extends Vue {
       this.leisurOutdoorFractionData = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
     } catch (e) {
+      this.leisurOutdoorFractionData = []
+      this.hasLeisurOutdoorFraction = false
       console.log('LeisurOutdoorFraction: no', filename)
     }
   }
@@ -1704,10 +1719,11 @@ export default class VueComponent extends Vue {
   private showVaccineEffectivenessFields: string[] = []
 
   private async loadVaccineEffectivenessData(currentRun: any) {
-    this.vaccineEffectivenessData = []
-    this.showVaccineEffectivenessFields = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.vaccineEffectivenessData = []
+      this.showVaccineEffectivenessFields = []
+      return
+    }
 
     const filename = currentRun.RunId + '.post.vaccineEff.tsv'
 
@@ -1719,6 +1735,8 @@ export default class VueComponent extends Vue {
         this.showVaccineEffectivenessFields = z.meta.fields
       }
     } catch (e) {
+      this.vaccineEffectivenessData = []
+      this.showVaccineEffectivenessFields = []
       console.log('NO VaccineEffectiveness:', filename)
     }
   }
@@ -1727,10 +1745,11 @@ export default class VueComponent extends Vue {
   private showVaccineEffectivenessVsStrainFields: string[] = []
 
   private async loadVaccineEffectivenessVsStrainData(currentRun: any) {
-    this.vaccineEffectivenessVsStrainData = []
-    this.showVaccineEffectivenessVsStrainFields = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.vaccineEffectivenessVsStrainData = []
+      this.showVaccineEffectivenessVsStrainFields = []
+      return
+    }
 
     const filename = currentRun.RunId + '.post.ve.tsv'
 
@@ -1742,6 +1761,8 @@ export default class VueComponent extends Vue {
         this.showVaccineEffectivenessVsStrainFields = z.meta.fields
       }
     } catch (e) {
+      this.vaccineEffectivenessVsStrainData = []
+      this.showVaccineEffectivenessVsStrainFields = []
       console.log('NO VaccineEffectivenessVsStrain:', filename)
     }
   }
@@ -1749,10 +1770,11 @@ export default class VueComponent extends Vue {
   private hasWeeklyTests = false
 
   private async loadWeeklyTests(currentRun: any) {
-    this.weeklyTestsData = []
-    this.hasWeeklyTests = false
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.weeklyTestsData = []
+      this.hasWeeklyTests = false
+      return
+    }
 
     const filename = currentRun.RunId + '.infections.txt.csv'
 
@@ -1762,6 +1784,8 @@ export default class VueComponent extends Vue {
       this.weeklyTestsData = z.data
       if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
     } catch (e) {
+      this.weeklyTestsData = []
+      this.hasWeeklyTests = false
       console.log('WeeklyTests: no', filename)
     }
   }
@@ -1769,9 +1793,10 @@ export default class VueComponent extends Vue {
   private vaccinationPerType: any[] = []
 
   private async loadVaccinationPerType(currentRun: any) {
-    this.vaccinationPerType = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.vaccinationPerType = []
+      return
+    }
 
     const filename = currentRun.RunId + '.vaccinations.tsv'
 
@@ -1780,6 +1805,7 @@ export default class VueComponent extends Vue {
 
       this.vaccinationPerType = z.data
     } catch (e) {
+      this.vaccinationPerType = []
       console.log('Vaccination Per Type: no', filename)
     }
   }
@@ -1787,9 +1813,10 @@ export default class VueComponent extends Vue {
   private antibodies: any[] = []
 
   private async loadAntibodies(currentRun: any) {
-    this.antibodies = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.antibodies = []
+      return
+    }
 
     const filename = currentRun.RunId + '.antibodies.tsv'
 
@@ -1797,6 +1824,7 @@ export default class VueComponent extends Vue {
       const z = await this.zipWorker.extractFile(filename)
       this.antibodies = z.data
     } catch (e) {
+      this.antibodies = []
       console.log('Antibodies: no', filename)
     }
   }
@@ -1804,9 +1832,10 @@ export default class VueComponent extends Vue {
   private mutationValues: any[] = []
 
   private async loadMutationValues(currentRun: any) {
-    this.mutationValues = []
-
-    if (!currentRun.RunId) return
+    if (!currentRun.RunId) {
+      this.mutationValues = []
+      return
+    }
 
     const filename = currentRun.RunId + '.strains.tsv'
 
@@ -1814,6 +1843,7 @@ export default class VueComponent extends Vue {
       const z = await this.zipWorker.extractFile(filename)
       this.mutationValues = z.data
     } catch (e) {
+      this.mutationValues = []
       console.log('MUTATIONS: no', filename)
     }
   }
