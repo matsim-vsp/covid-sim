@@ -8,8 +8,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import { PUBLIC_SVN } from '@/Globals'
-import Papaparse from 'papaparse'
-import { constant } from 'vega'
+import { spawn, Thread, Worker } from 'threads'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -53,25 +52,17 @@ export default class VueComponent extends Vue {
   private bundeslandCsvData: any[] = []
   private diviIncidenceNRWData: any[] = []
 
-  private async mounted() {
-    this.bundeslandCsvData = Papaparse.parse(this.bundeslandCSV, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      comments: '#',
-    }).data
+  private postProcessWorker: any = null
 
-    const response = await fetch(this.diviIncidenceNRWUrl)
-    const text = await response.text()
-    this.diviIncidenceNRWData = Papaparse.parse(text, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      comments: '#',
-    }).data
+  private async mounted() {
+    this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
 
     this.updateScale()
     this.calculateValues()
+  }
+
+  private beforeDestroy() {
+    if (this.postProcessWorker) Thread.terminate(this.postProcessWorker)
   }
 
   private isResizing = false
@@ -129,235 +120,16 @@ export default class VueComponent extends Vue {
   private async calculateValues() {
     if (!this.data.length) return
 
-    this.dataLines = []
-
-    // key is the scenario name, value is the associated data (list)
-    const dataMap = new Map()
-
-    // set that contains all dates used in our data.
-    let dateSet = new Set()
-
-    // loop through data add data points to map
-    for (let i = 0; i < this.data.length; i++) {
-      if (this.data[i].measurement != null) {
-        let measurement = this.data[i].measurement.trim()
-        let severity = this.data[i].severity.trim()
-        let dateTemp = this.data[i].date.trim()
-        let n = this.data[i].n
-
-        let scenario = measurement + severity
-
-        const dateTemp2 = new Date(dateTemp)
-        // We only want values for entire week, thus we filter to only sundays (which has  value of 0)
-        if(dateTemp2.getDay() == 0){ 
-          // the sunday value is an average of the previous week (previous saturday to this sunday)
-          // thus, if we want to represent the week by the day in the middle (Thursday), we must subtract 3 days
-          dateTemp2.setDate(dateTemp2.getDate() - 3)
-          dateTemp = dateTemp2.toISOString().substring(0, 10)
-        } else {
-          continue
-        }
-
-        dateSet.add(dateTemp)
-
-        let toUpdate = []
-        if(dataMap.has(scenario)){
-          toUpdate = dataMap.get(scenario)
-        }
-        toUpdate.push(n)
-        dataMap.set(scenario,toUpdate)
-    }
-
-    }
-    let date = Array.from(dateSet)
-
-    // now push data to correct plot
-    if (!this.intakesHosp) {
-
-      dataMap.forEach((data, seriesName) => {
-        if(seriesName.startsWith("occupancy")){
-          this.dataLines.push(
-          {
-            name: seriesName,
-            x: date,
-            y: data,
-            line: { width: 1 },
-          })
-        }
-      })
-    } else {
-       dataMap.forEach((data, seriesName) => {
-        if(seriesName.startsWith("intakes")){
-          this.dataLines.push(
-          {
-            name: seriesName,
-            x: date,
-            y: data,
-            line: { width: 1 },
-          })
-        }
-      })
-    }
-
-    // Rate
-    if (!this.intakesHosp) {
-      await this.addReportedDataRate()
-    } else {
-      // New Cases
-      await this.addReportedDataNewCases()
-    }
-  }
-
-  private cacheReportedDataRate: { [city: string]: any[] } = {}
-  private cacheReportedDataNewCases: { [city: string]: any[] } = {}
-
-  private async addReportedDataRate() {
-    if (this.data2.length == 0) return
-
-    const susceptible = this.data2.filter(item => item.name === 'Susceptible')
-
-    // maybe data is not loaded yet
-    if (!susceptible.length) return
-
-    const totalPopulation = susceptible[0].y[0]
-    this.factor100k = totalPopulation / 100000.0
-
-    if (this.observedHospitalizationConfig[this.city]) {
-      const config = this.observedHospitalizationConfig[this.city]
-
-      if (!(this.city in this.cacheReportedDataRate)) {
-        const url = PUBLIC_SVN + config.svnPath
-        console.log(url)
-        const rawData = await fetch(url).then(async data2 => await data2.text())
-        const csvData = Papaparse.parse(rawData, {
-          header: true,
-          dynamicTyping: false,
-          skipEmptyLines: true,
-        }).data
-        this.cacheReportedDataRate[this.city] = csvData
-      }
-
-      const csvData = this.cacheReportedDataRate[this.city]
-      this.dataLines.push({
-        name: config.legendText,
-        x: csvData.map(row => row.date.split('T')[0]),
-        y: csvData.map(row => parseFloat(row[config.csvCasesColumn]) / this.factor100k),
-        line: { width: 1 },
-      })
-    }
-  }
-
-  private async addReportedDataNewCases() {
-    // Observed Hospitalization Case Rate
-    this.observedData = []
-
-    try {
-      if (this.cityObservedHospitalizationFiles[this.city]) {
-        if (!(this.city in this.cacheReportedDataNewCases)) {
-          const response = await fetch(this.cityObservedHospitalizationFiles[this.city])
-          const text = await response.text()
-          const hospitalData = Papaparse.parse(text, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true,
-            comments: '#',
-          }).data
-          this.cacheReportedDataNewCases[this.city] = hospitalData
-        }
-
-        const hospitalData = this.cacheReportedDataNewCases[this.city]
-        if (hospitalData.length) {
-          this.observedData = hospitalData
-
-          for (let i = 0; i < this.dataLines.length; i++) {
-            if (this.dataLines[i].name == 'Observed Hospitalization Case Rate') {
-              this.dataLines.splice(i, 1)
-            }
-          }
-
-          if (this.dataLines.length)
-            this.dataLines.push({
-              name: 'Observed Hospitalization Case Rate',
-              x: this.observedData.map(row => row.date),
-              y: this.observedData.map(row => row.realHospitalizationRate),
-              //type: 'scatter',
-              //mode: 'markers',
-              line: { width: 1 },
-            })
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    }
-
-    // only add Bundesland data if we are looking at data for a city with a Bundesland
-    if (!this.bundeslandIncidenceRateLookup[this.city]) return
-
-    const region = this.bundeslandIncidenceRateLookup[this.city]
-    console.log(region)
-
-    const allAges = this.bundeslandCsvData.filter(row => row['Altersgruppe'] === '00+')
-    const regionData = allAges.filter(row => row['Bundesland'] === region.name)
-
-    for (let i = 0; i < this.dataLines.length; i++) {
-      if (this.dataLines[i].name == 'Observed: ' + region.name + ' (RKI)') {
-        this.dataLines.splice(i, 1)
-      }
-      if (this.dataLines[i].name == 'Adjusted: ' + region.name + ' (RKI)') {
-        this.dataLines.splice(i, 1)
-      }
-    }
-
-    this.dataLines.push({
-      name: 'Observed: ' + region.name + ' (RKI)',
-      x: regionData.map(row => row['Datum']),
-      y: regionData.map(
-        row =>
-          row['aktualisierte_7T_Hospitalisierung_Inzidenz'] || row['7T_Hospitalisierung_Inzidenz']
-      ),
-      //type: 'scatter',
-      //marker: { size: 4, color: '#4c6' },
-      //line: { width: 2, dash: 'dot' },
-      line: { width: 1 },
-    })
-    this.dataLines.push({
-      name: 'Adjusted: ' + region.name + ' (RKI)',
-      x: regionData.map(row => row['Datum']),
-      y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
-      //type: 'scatter',
-      //marker: { color: '#4c6' },
-      line: { width: 1 },
+    console.log('&&&&&&& clculationg')
+    const lines = await this.postProcessWorker.buildDataLines({
+      data: this.data,
+      data2: this.data2,
+      city: this.city,
+      intakesHosp: this.intakesHosp,
     })
 
-    // DIVI
-    try {
-      // Workaround for doubled data; Not a good bugfix but it works
-      // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
-      // times on the Cologne Hospitalization New Cases Plot
-      let diviExsists = false
-      this.dataLines.forEach(e => {
-        if (e.name == 'Observed : Nordrhein-Westfalen (DIVI)') {
-          diviExsists = true
-        }
-      })
-
-      const incidenceNRW = this.diviIncidenceNRWData
-
-      if (incidenceNRW.length) {
-        if (this.dataLines.length && !diviExsists)
-          this.dataLines.push({
-            name: 'Observed : Nordrhein-Westfalen (DIVI)',
-            x: incidenceNRW.map(row => row.Date),
-            y: incidenceNRW.map(row => row.DIVIIncidence),
-            //type: 'scatter',
-            //marker: { size: 4, color: 'brown' },
-            //line: { width: 2, dash: 'dot' },
-            line: { width: 1 },
-          })
-      }
-    } catch (e) {
-      console.error(e)
-    }
+    console.log('&&&&&&& done')
+    this.dataLines = lines
   }
 
   private layout = {
