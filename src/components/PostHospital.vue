@@ -1,13 +1,17 @@
 <template lang="pug">
 .vue-component(v-if="!isResizing" )
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly.plot1(
+    :data="dataLines"
+    :layout="layout"
+    :options="options"
+    :class="{'processing': postHospUpdater !== updaterCount}"
+  )
 
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import { PUBLIC_SVN } from '@/Globals'
 import { spawn, Thread, Worker } from 'threads'
 
 @Component({ components: { VuePlotly }, props: {} })
@@ -15,48 +19,19 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private startDate!: any
   @Prop({ required: true }) private endDate!: any
   @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private data2!: any[]
+  @Prop({ required: true }) private totalPopulation!: number
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private intakesHosp!: boolean
   @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private postHospUpdater!: number
 
   private dataLines: any[] = []
-  private observedData: any[] = []
-  private factor100k = 1
-
-  private observedHospitalizationConfig: {
-    [id: string]: { svnPath: string; legendText: string; csvCasesColumn: string }
-  } = {
-    cologne: {
-      svnPath: 'original-data/hospital-cases/cologne/KoelnAllgemeinpatienten.csv',
-      csvCasesColumn: 'allgemeinpatienten',
-      legendText: 'Reported: Hospitalizations (City)',
-    },
-  }
-
-  private diviIncidenceNRWUrl =
-    PUBLIC_SVN + 'original-data/hospital-cases/cologne/DiviIncidenceNRW.csv'
-
-  private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
-
-  private cityObservedHospitalizationFiles: any = {
-    cologne: this.originalDataUrl + 'Cologne/cologne-hospital.csv',
-  }
-
-  private bundeslandCSV = require('@/assets/rki-deutschland-hospitalization.csv').default
-  private bundeslandIncidenceRateLookup: { [id: string]: any } = {
-    berlin: { name: 'Berlin' },
-    cologne: { name: 'Nordrhein-Westfalen' },
-  }
-
-  private bundeslandCsvData: any[] = []
-  private diviIncidenceNRWData: any[] = []
 
   private postProcessWorker: any = null
 
-  private async mounted() {
-    this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
+  private updaterCount = 0
 
+  private mounted() {
     this.updateScale()
     this.calculateValues()
   }
@@ -66,6 +41,7 @@ export default class VueComponent extends Vue {
   }
 
   private isResizing = false
+
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
     this.isResizing = true
     await this.$nextTick()
@@ -73,11 +49,9 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('data') updateData() {
-    this.calculateValues()
-  }
-
-  @Watch('data2') updateData2() {
+  @Watch('data')
+  @Watch('totalPopulation')
+  updateData() {
     this.calculateValues()
   }
 
@@ -118,18 +92,23 @@ export default class VueComponent extends Vue {
   }
 
   private async calculateValues() {
-    if (!this.data.length) return
+    if (!this.postProcessWorker) {
+      this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
+    }
 
-    console.log('&&&&&&& clculationg')
+    if (!this.data.length) {
+      return
+    }
+
     const lines = await this.postProcessWorker.buildDataLines({
       data: this.data,
-      data2: this.data2,
+      totalPopulation: this.totalPopulation,
       city: this.city,
       intakesHosp: this.intakesHosp,
     })
 
-    console.log('&&&&&&& done')
     this.dataLines = lines
+    this.updaterCount = this.postHospUpdater
   }
 
   private layout = {
@@ -207,6 +186,10 @@ export default class VueComponent extends Vue {
 
 .plot1 {
   flex: 1;
+}
+
+.processing {
+  opacity: 0.6;
 }
 
 @media only screen and (max-width: 640px) {
