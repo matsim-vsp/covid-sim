@@ -25,7 +25,8 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "src/zipExtractor.worker.js"
+    "src/zipExtractor.worker.js",
+    "src/components/postHospital.worker.js"
   ],
   "exclude": ["node_modules"]
 }
