@@ -30,7 +30,7 @@ export default class VueComponent extends Vue {
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
   private svnUrl = ''
 
-  private mounted() {
+  private async mounted() {
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
     const totalPopulation = susceptible.y[0]
     this.factor100k = totalPopulation / 100000.0
@@ -79,6 +79,8 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
+  private cacheRawVOCData: { [city: string]: any[] } = {}
+
   private async prepareData() {
     // this.dataLines2 = []
     var foundHeader = false
@@ -101,19 +103,23 @@ export default class VueComponent extends Vue {
 
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
-      console.log(this.svnUrl)
     } else if (this.city == 'berlin') {
       this.svnUrl = this.originalDataUrl + 'Berlin/VOC_Berlin.csv'
     }
 
-    if (this.city != '') {
-      const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
-      const VOCData = Papa.parse(rawVOCData, {
-        //header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        delimiter: ',',
-      }).data
+    if (this.city !== '') {
+      if (!(this.city in this.cacheRawVOCData)) {
+        console.log(this.svnUrl)
+        const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
+        const VOCData = Papa.parse(rawVOCData, {
+          //header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          delimiter: ',',
+        }).data
+        this.cacheRawVOCData[this.city] = VOCData
+      }
+      const VOCData = this.cacheRawVOCData[this.city]
 
       var alphaTempDouble = 0
       var betaTempDouble = 0

@@ -30,7 +30,6 @@ const extractor = {
       _zipFile = instance
       // cache the zipfile:
       _zipLoaderLookup[runId] = _zipFile
-      console.log('PING! =====', _zipFile)
     })
   },
   extractFile(filename) {

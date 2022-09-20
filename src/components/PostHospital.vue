@@ -1,7 +1,7 @@
 <template lang="pug">
 .vue-component(v-if="!isResizing" )
   vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
-  
+
 </template>
 
 <script lang="ts">
@@ -50,7 +50,26 @@ export default class VueComponent extends Vue {
     cologne: { name: 'Nordrhein-Westfalen' },
   }
 
-  private mounted() {
+  private bundeslandCsvData: any[] = []
+  private diviIncidenceNRWData: any[] = []
+
+  private async mounted() {
+    this.bundeslandCsvData = Papaparse.parse(this.bundeslandCSV, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      comments: '#',
+    }).data
+
+    const response = await fetch(this.diviIncidenceNRWUrl)
+    const text = await response.text()
+    this.diviIncidenceNRWData = Papaparse.parse(text, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      comments: '#',
+    }).data
+
     this.updateScale()
     this.calculateValues()
   }
@@ -189,6 +208,9 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private cacheReportedDataRate: { [city: string]: any[] } = {}
+  private cacheReportedDataNewCases: { [city: string]: any[] } = {}
+
   private async addReportedDataRate() {
     if (this.data2.length == 0) return
 
@@ -202,16 +224,20 @@ export default class VueComponent extends Vue {
 
     if (this.observedHospitalizationConfig[this.city]) {
       const config = this.observedHospitalizationConfig[this.city]
-      const url = PUBLIC_SVN + config.svnPath
-      console.log(url)
 
-      const rawData = await fetch(url).then(async data2 => await data2.text())
-      const csvData = Papaparse.parse(rawData, {
-        header: true,
-        dynamicTyping: false,
-        skipEmptyLines: true,
-      }).data
+      if (!(this.city in this.cacheReportedDataRate)) {
+        const url = PUBLIC_SVN + config.svnPath
+        console.log(url)
+        const rawData = await fetch(url).then(async data2 => await data2.text())
+        const csvData = Papaparse.parse(rawData, {
+          header: true,
+          dynamicTyping: false,
+          skipEmptyLines: true,
+        }).data
+        this.cacheReportedDataRate[this.city] = csvData
+      }
 
+      const csvData = this.cacheReportedDataRate[this.city]
       this.dataLines.push({
         name: config.legendText,
         x: csvData.map(row => row.date.split('T')[0]),
@@ -227,15 +253,19 @@ export default class VueComponent extends Vue {
 
     try {
       if (this.cityObservedHospitalizationFiles[this.city]) {
-        const response = await fetch(this.cityObservedHospitalizationFiles[this.city])
-        const text = await response.text()
-        const hospitalData = Papaparse.parse(text, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          comments: '#',
-        }).data
+        if (!(this.city in this.cacheReportedDataNewCases)) {
+          const response = await fetch(this.cityObservedHospitalizationFiles[this.city])
+          const text = await response.text()
+          const hospitalData = Papaparse.parse(text, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            comments: '#',
+          }).data
+          this.cacheReportedDataNewCases[this.city] = hospitalData
+        }
 
+        const hospitalData = this.cacheReportedDataNewCases[this.city]
         if (hospitalData.length) {
           this.observedData = hospitalData
 
@@ -262,17 +292,11 @@ export default class VueComponent extends Vue {
 
     // only add Bundesland data if we are looking at data for a city with a Bundesland
     if (!this.bundeslandIncidenceRateLookup[this.city]) return
+
     const region = this.bundeslandIncidenceRateLookup[this.city]
     console.log(region)
 
-    const csvData = Papaparse.parse(this.bundeslandCSV, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      comments: '#',
-    }).data
-
-    const allAges = csvData.filter(row => row['Altersgruppe'] === '00+')
+    const allAges = this.bundeslandCsvData.filter(row => row['Altersgruppe'] === '00+')
     const regionData = allAges.filter(row => row['Bundesland'] === region.name)
 
     for (let i = 0; i < this.dataLines.length; i++) {
@@ -307,15 +331,6 @@ export default class VueComponent extends Vue {
 
     // DIVI
     try {
-      const response = await fetch(this.diviIncidenceNRWUrl)
-      const text = await response.text()
-      const incidenceNRW = Papaparse.parse(text, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        comments: '#',
-      }).data
-
       // Workaround for doubled data; Not a good bugfix but it works
       // The 'Observed : Nordrhein-Westfalen (DIVI)' was present three
       // times on the Cologne Hospitalization New Cases Plot
@@ -325,6 +340,8 @@ export default class VueComponent extends Vue {
           diviExsists = true
         }
       })
+
+      const incidenceNRW = this.diviIncidenceNRWData
 
       if (incidenceNRW.length) {
         if (this.dataLines.length && !diviExsists)
