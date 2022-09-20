@@ -151,9 +151,10 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="postHospital"
-                  :data2="data"
+                  :totalPopulation="totalPopulation"
                   :intakesHosp="true"
                   :city="city"
+                  :postHospUpdater="postHospUpdater1"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -171,9 +172,10 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="postHospital"
-                  :data2="data"
+                  :totalPopulation="totalPopulation"
                   :intakesHosp="false"
                   :city="city"
+                  :postHospUpdater="postHospUpdater2"
                 )
 
           //- ---------- CASES COMPARISION -------
@@ -606,6 +608,10 @@ export default class VueComponent extends Vue {
 
   // var for side-menu
   private state = store.state
+
+  private postHospUpdater1 = 0
+  private postHospUpdater2 = 0
+  private totalPopulation = 1
 
   private sideMenuCategories = ['Select Scenario', 'Plots']
   private activeSideMenu = 0
@@ -1371,9 +1377,13 @@ export default class VueComponent extends Vue {
     ]
 
     // load run dataset
+
     const csv: any[] = await this.loadCSVs(this.currentRun)
     // zip might not yet be loaded
     if (csv.length === 0) return
+
+    this.postHospUpdater1++
+    this.postHospUpdater2++
 
     this.loadVaccineEffectivenessData(this.currentRun)
 
@@ -1410,6 +1420,14 @@ export default class VueComponent extends Vue {
     // populate the data where we need it
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
+
+    // figure out total population
+    for (let i = 0; i < this.data.length; i++) {
+      if (this.data[i].name === 'Susceptible') {
+        this.totalPopulation = this.data[i].y[0]
+        break
+      }
+    }
 
     this.addDataFromInfectionsCSVToData('nReVaccinated')
 

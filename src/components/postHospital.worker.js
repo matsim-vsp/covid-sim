@@ -65,7 +65,7 @@ async function buildDataLines(props) {
 
 async function calculateValues(props) {
   // these vars must be passed in:
-  const { data, data2, city, intakesHosp } = props
+  const { data, totalPopulation, city, intakesHosp } = props
 
   const dataLines = []
 
@@ -179,7 +179,7 @@ async function calculateValues(props) {
 
   if (!intakesHosp) {
     // Rate
-    await addReportedDataRate(dataLines, data2, city)
+    await addReportedDataRate(dataLines, totalPopulation, city)
   } else {
     // New Cases
     await addReportedDataNewCases(dataLines, city)
@@ -191,15 +191,7 @@ async function calculateValues(props) {
 const cacheReportedDataRate = {}
 const cacheReportedDataNewCases = {}
 
-async function addReportedDataRate(dataLines, data2, city) {
-  if (data2.length == 0) return
-
-  const susceptible = data2.filter(item => item.name === 'Susceptible')
-
-  // maybe data is not loaded yet
-  if (!susceptible.length) return
-
-  const totalPopulation = susceptible[0].y[0]
+async function addReportedDataRate(dataLines, totalPopulation, city) {
   factor100k = totalPopulation / 100000.0
 
   if (observedHospitalizationConfig[city]) {
@@ -208,7 +200,7 @@ async function addReportedDataRate(dataLines, data2, city) {
     if (!(city in cacheReportedDataRate)) {
       const url = PUBLIC_SVN + config.svnPath
       console.log(url)
-      const rawData = await fetch(url).then(async data2 => await data2.text())
+      const rawData = await fetch(url).then(async raw => await raw.text())
       const csvData = Papaparse.parse(rawData, {
         header: true,
         dynamicTyping: false,
