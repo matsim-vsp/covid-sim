@@ -76,12 +76,12 @@ async function calculateValues(props) {
   let dateSet = new Set()
 
   // loop through data add data points to map
-  for (let i = 0; i < this.data.length; i++) {
-    if (this.data[i].measurement != null) {
-      let measurement = this.data[i].measurement.trim()
-      let severity = this.data[i].severity.trim()
-      let dateTemp = this.data[i].date.trim()
-      let n = this.data[i].n
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].measurement != null) {
+      let measurement = data[i].measurement.trim()
+      let severity = data[i].severity.trim()
+      let dateTemp = data[i].date.trim()
+      let n = data[i].n
 
       let scenario = measurement + severity
 
@@ -109,10 +109,10 @@ async function calculateValues(props) {
   let date = Array.from(dateSet)
 
   // now push data to correct plot
-  if (!this.intakesHosp) {
+  if (!intakesHosp) {
     dataMap.forEach((data, seriesName) => {
       if (seriesName.startsWith('occupancy')) {
-        this.dataLines.push({
+        dataLines.push({
           name: seriesName,
           x: date,
           y: data,
@@ -123,7 +123,7 @@ async function calculateValues(props) {
   } else {
     dataMap.forEach((data, seriesName) => {
       if (seriesName.startsWith('intakes')) {
-        this.dataLines.push({
+        dataLines.push({
           name: seriesName,
           x: date,
           y: data,
