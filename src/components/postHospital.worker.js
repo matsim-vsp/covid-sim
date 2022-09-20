@@ -57,9 +57,7 @@ async function fetchInitialData() {
 }
 
 async function buildDataLines(props) {
-  console.log(1, 'HERE')
   const lines = await calculateValues(props)
-  console.log(99, lines)
   return lines
 }
 
@@ -70,8 +68,6 @@ async function calculateValues(props) {
   const dataLines = []
 
   await fetchInitialData()
-
-  console.log(2)
 
   const date = []
   const intakesHospOmicron = []
