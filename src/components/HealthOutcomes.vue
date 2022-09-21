@@ -34,6 +34,12 @@ export default class VueComponent extends Vue {
   ]
 
   private mounted() {
+    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    this.calculateValues()
+    this.unselectLines()
+  }
+
+  @Watch('data') private updateModelData() {
     this.calculateValues()
     this.unselectLines()
   }
@@ -58,7 +64,9 @@ export default class VueComponent extends Vue {
     }
   }
 
+  // , { deep: true }
   @Watch('dataLines', { deep: true }) updateUrl() {
+    console.log(this.dataLines)
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -81,11 +89,14 @@ export default class VueComponent extends Vue {
   }
 
   private calculateValues() {
-    console.log(this.endDate)
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate
     this.dataLines = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
-    console.log(this.dataLines)
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (!Object.keys(this.dataLines[i]).includes('visible')) {
+        this.dataLines[i].visible = true
+      }
+    }
   }
 
   private unselectLines() {
@@ -101,16 +112,11 @@ export default class VueComponent extends Vue {
         for (let j = 0; j < this.dataLines.length; j++) {
           if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
+            console.log('Unselect: ', this.dataLines[j].name)
           }
         }
       }
     }
-  }
-
-  private reformatDate(day: string) {
-    const pieces = day.split('.')
-    const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
-    return date
   }
 
   private layout = {
@@ -132,7 +138,8 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
-      type: this.logScale ? 'log' : 'linear',
+      //type: this.logScale ? 'log' : 'linear',
+      type: 'linear',
       fixedrange: true,
       autorange: true,
       title: 'Population',

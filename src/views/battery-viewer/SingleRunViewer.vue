@@ -438,17 +438,17 @@
                 :metadata="allPlots[17]")
 
           //- ---------- HEALTH OUTCOMES ------
-          .linear-plot(v-if="allPlots[18].active")
-            h5 {{ cityCap }} {{allPlots[18].name}}
-              button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+          //- .linear-plot(v-if="allPlots[18].active")
+          //-   h5 {{ cityCap }} {{allPlots[18].name}}
+          //-     button.button.is-small.hider(@click="toggleShowPlot(18)") ..
 
-            .hideIt(v-show="allPlots[18].showPlot")
-              p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
-              .plotarea
-                p.plotsize(v-if="!isZipLoaded") Loading data...
-                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                vue-plotly.plotsize(v-else
-                  :data="dataHealth" :layout="layout" :options="options")
+          //-   .hideIt(v-show="allPlots[18].showPlot")
+          //-     p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+          //-     .plotarea
+          //-       p.plotsize(v-if="!isZipLoaded") Loading data...
+          //-       p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+          //-       vue-plotly.plotsize(v-else
+          //-         :data="dataHealth" :layout="layout" :options="options")
 
           //- ---------- HEALTH OUTCOMES ------
           .linear-plot(v-if="allPlots[18].active")
@@ -461,7 +461,7 @@
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 health-outcomes.plotsize(v-else
-                  :data="dataHealth" :layout="layout" :options="options" :logScale="logScale" :endDate="endDate" :metadata="allPlots[18]")
+                  :data="data" :logScale="logScale" :endDate="endDate" :metadata="allPlots[18]")
 
           //- ---------- AGE GROUP BLOCK CHART ------
           .linear-plot(v-if="showByAgePlot && incidenceHeatMapData && allPlots[19].active")
