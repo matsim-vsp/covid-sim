@@ -267,6 +267,7 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :values="infectionsByActivityType"
+                  :metadata="allPlots[8]"
                 )
 
           //- ---------- VACCINE EFFECTIVENESS -------
@@ -286,6 +287,7 @@
                   :vaccineEffectivenessData="vaccineEffectivenessData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessFields"
                   vaccineType="mRNA"
+                  :metadata="allPlots[9]"
                 )
 
             .hideIt(v-show="allPlots[9].showPlot")
@@ -300,6 +302,7 @@
                   :vaccineEffectivenessData="vaccineEffectivenessData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessFields"
                   vaccineType="vector"
+                  :metadata="allPlots[9]"
                 )
 
           //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
@@ -447,6 +450,19 @@
                 vue-plotly.plotsize(v-else
                   :data="dataHealth" :layout="layout" :options="options")
 
+          //- ---------- HEALTH OUTCOMES ------
+          .linear-plot(v-if="allPlots[18].active")
+            h5 {{ cityCap }} {{allPlots[18].name}}
+              button.button.is-small.hider(@click="toggleShowPlot(18)") ..
+
+            .hideIt(v-show="allPlots[18].showPlot")
+              p {{ this.logScale ? 'Log scale' : 'Linear scale' }}
+              .plotarea
+                p.plotsize(v-if="!isZipLoaded") Loading data...
+                p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+                health-outcomes.plotsize(v-else
+                  :data="dataHealth" :layout="layout" :options="options" :logScale="logScale" :endDate="endDate" :metadata="allPlots[18]")
+
           //- ---------- AGE GROUP BLOCK CHART ------
           .linear-plot(v-if="showByAgePlot && incidenceHeatMapData && allPlots[19].active")
             h5 {{ cityCap }} {{allPlots[19].name}}
@@ -577,6 +593,7 @@ import PostHospital from '@/components/PostHospital.vue'
 import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
+import HealthOutcomes from '@/components/HealthOutcomes.vue'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 
 interface Measure {
@@ -618,6 +635,7 @@ interface VegaChartDefinition {
     VaccineEffectivenessVsStrain,
     VaccinationPerType,
     Antibodies,
+    HealthOutcomes,
   },
 })
 export default class VueComponent extends Vue {
@@ -1441,17 +1459,11 @@ export default class VueComponent extends Vue {
     this.hospitalData = timeSerieses
     this.data = timeSerieses.filter(row => row.name !== ignoreRow)
 
-    for (let i = 0; i < this.data.length; i++) {
-      this.data[i].visible = true
-    }
-
     this.addDataFromInfectionsCSVToData('nReVaccinated')
 
     this.updateTotalInfected()
     this.updateVegaCharts()
     this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
-
-    this.unselectHealthLines()
 
     this.updatePlotMenu()
   }
@@ -1519,50 +1531,6 @@ export default class VueComponent extends Vue {
 
     if (!this.weeklyTestsData.length) {
       this.allPlots[22].usedInThisRun = false
-    }
-  }
-
-  @Watch('dataHealth', { deep: true }) updateUrl() {
-    console.log(this.dataHealth)
-    for (let i = 0; i < this.dataHealth.length; i++) {
-      if (
-        this.dataHealth[i].visible == 'legendonly' &&
-        !this.unselectedHealthLines.includes(this.dataHealth[i].name)
-      ) {
-        this.unselectedHealthLines.push(this.dataHealth[i].name)
-      } else if (
-        this.dataHealth[i].visible != 'legendonly' &&
-        this.unselectedHealthLines.includes(this.dataHealth[i].name)
-      ) {
-        this.unselectedHealthLines.splice(
-          this.unselectedHealthLines.indexOf(this.dataHealth[i].name)
-        )
-      }
-    }
-
-    const params = Object.assign({}, this.$route.query)
-
-    params['plot-' + this.allPlots[18].abbreviation] = this.unselectedHealthLines
-
-    this.$router.replace({ query: params })
-  }
-
-  private unselectHealthLines() {
-    const query = this.$route.query as any
-    const name = 'plot-' + this.allPlots[18].abbreviation
-
-    if (Object.keys(query).includes(name)) {
-      let nameArray = query[name]
-      if (!Array.isArray(nameArray)) {
-        nameArray = [nameArray]
-      }
-      for (let i = 0; i < nameArray.length; i++) {
-        for (let j = 0; j < this.dataHealth.length; j++) {
-          if (this.dataHealth[j].name == nameArray[i]) {
-            this.dataHealth[j].visible = 'legendonly'
-          }
-        }
-      }
     }
   }
 

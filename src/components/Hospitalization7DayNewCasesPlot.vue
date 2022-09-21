@@ -42,10 +42,11 @@ export default class VueComponent extends Vue {
   }
 
   private mounted() {
+    console.log(this.$route.query)
     this.updateScale()
-    this.fetchRealHospitalizationRates()
+    //this.fetchRealHospitalizationRates()
     this.calculate()
-    this.fetchBundeslandIncidenceRates()
+    //this.fetchBundeslandIncidenceRates()
     this.unselectLines()
     //this.fetchDiviIncidenceNRW()
   }
@@ -53,14 +54,13 @@ export default class VueComponent extends Vue {
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculate()
-      this.fetchBundeslandIncidenceRates()
-      this.unselectLines()
+      //this.fetchBundeslandIncidenceRates()
     }
   }
 
   @Watch('data') private updateModelData() {
     this.calculate()
-    this.fetchBundeslandIncidenceRates()
+    //this.fetchBundeslandIncidenceRates()
     this.unselectLines()
     //this.fetchDiviIncidenceNRW()
   }
@@ -122,6 +122,9 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('dataLines', { deep: true }) updateUrl() {
+    console.log(this.dataLines)
+    console.log(this.unselectedLines)
+    console.log(this.$route.query)
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&

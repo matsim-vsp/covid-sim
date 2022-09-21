@@ -23,6 +23,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private vaccineEffectivenessData!: any[]
   @Prop({ required: true }) private vaccineEffectivenessFields!: string[]
   @Prop({ required: true }) private vaccineType!: string
+  @Prop({ required: true }) private metadata!: any
 
   private logScale = false
 
@@ -36,9 +37,11 @@ export default class VueComponent extends Vue {
   } as any
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   private isResizing = false
@@ -51,6 +54,7 @@ export default class VueComponent extends Vue {
 
   @Watch('vaccineEffectivenessData') private updateModelData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -69,6 +73,47 @@ export default class VueComponent extends Vue {
           autorange: true,
           title: 'Hospitalizations / 100k Pop.',
         }
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private calculateValues() {
@@ -107,6 +152,7 @@ export default class VueComponent extends Vue {
     columns.forEach(col => {
       this.dataLines.push({
         name: col,
+        visible: true,
         x: lines.day,
         y: lines[col],
         line: { width: 1 },
@@ -140,6 +186,7 @@ export default class VueComponent extends Vue {
 
       this.observedLine = {
         name: 'Nordström: ' + columnName,
+        visible: true,
         x: rows.map(row => row.day),
         y: rows.map(row => 100 * row[columnName]),
         line: {
