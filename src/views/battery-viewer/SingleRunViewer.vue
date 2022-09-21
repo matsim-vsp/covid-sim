@@ -401,7 +401,6 @@
                 hospitalization-7-day-new-cases-plot.plotsize(v-else
                 :data="data"
                 :endDate="endDate"
-                :city="city"
                 :logScale="logScale"
                 :metadata="allPlots[15]"
                 )
