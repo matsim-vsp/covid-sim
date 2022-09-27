@@ -11,11 +11,8 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import moment from 'moment'
-import Papa from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import { debounce } from 'debounce'
-
-import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -29,17 +26,11 @@ export default class VueComponent extends Vue {
 
   private dataLines: any[] = []
 
-  // private zipCache: any = {}
-  // private zipLoader: any
-  // private isZipLoaded = false
   private isResizing = false
-
-  // private BATTERY_URL = PUBLIC_SVN + 'battery/'
 
   private MAX_DAYS = 4000
 
   private mounted() {
-    // this.isZipLoaded = true
     this.runChanged()
     window.addEventListener('resize', this.handleResize)
   }
@@ -63,12 +54,11 @@ export default class VueComponent extends Vue {
     this.runChanged()
   }
 
-  private async loadCSV(currentRun: any) {
-    if (!currentRun.RunId) return []
+  private async loadCSV() {
+    if (!this.currentRun.RunId) return []
     if (!this.zipWorker) return []
 
-    const filename = currentRun.RunId + '.restrictions.txt.csv'
-
+    const filename = this.currentRun.RunId + '.restrictions.txt.csv'
     try {
       const z = await this.zipWorker.extractFile(filename)
       return z.data
@@ -80,7 +70,7 @@ export default class VueComponent extends Vue {
 
   private async runChanged() {
     // load run dataset
-    const csv: any[] = await this.loadCSV(this.currentRun)
+    const csv: any[] = await this.loadCSV()
 
     // zip might not yet be loaded
     if (csv.length === 0) return

@@ -1014,7 +1014,7 @@ export default class VueComponent extends Vue {
     }
 
     await this.loadInfoTxt()
-    this.runChanged()
+    this.runChanged({ RunId: '' })
     this.showActivityLevelPlot()
 
     this.hasBaseRun = await this.isThereABaseRun()
@@ -1352,7 +1352,7 @@ export default class VueComponent extends Vue {
 
   private previousRun = ''
 
-  private async runChanged() {
+  private async runChanged(newRun: { RunId: string }) {
     if (this.currentRun?.RunId === this.previousRun) {
       return
     } else {
@@ -1378,9 +1378,12 @@ export default class VueComponent extends Vue {
 
     // load run dataset
 
-    const csv: any[] = await this.loadCSVs(this.currentRun)
+    const csv: any[] = await this.loadCSVs(newRun)
+
     // zip might not yet be loaded
     if (csv.length === 0) return
+
+    this.currentRun = newRun
 
     this.postHospUpdater1++
     this.postHospUpdater2++
@@ -1575,8 +1578,7 @@ export default class VueComponent extends Vue {
 
   private showPlotForCurrentSituation() {
     if (this.isBase) {
-      this.currentRun = { RunId: 'sz0' }
-      this.runChanged()
+      this.runChanged({ RunId: 'sz0' })
       return
     }
 
@@ -1597,16 +1599,16 @@ export default class VueComponent extends Vue {
 
     // console.log(lookupKey)
 
-    this.currentRun = this.runLookup[lookupKey]
+    const newRun = this.runLookup[lookupKey]
 
-    if (!this.currentRun) {
+    if (!newRun) {
       this.isDataMissing = true
       console.log('Could not find this run in the zip:' + lookupKey)
       return
     }
 
     this.isDataMissing = false
-    this.runChanged()
+    this.runChanged(newRun)
   }
 
   private unpack(rows: any[], key: any) {
