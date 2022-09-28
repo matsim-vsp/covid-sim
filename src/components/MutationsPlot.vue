@@ -58,7 +58,6 @@ export default class VueComponent extends Vue {
     console.log('updateRValues')
     this.calculateValues()
     this.unselectLinesForAllPlots()
-    this.unselectLinesForAllPlots()
   }
 
   @Watch('logScale') updateScale() {
@@ -90,6 +89,8 @@ export default class VueComponent extends Vue {
   }
 
   private unselectLinesForAllPlots() {
+    console.log(this.dataLines2)
+    console.log(this.dataLines3)
     this.unselectLines(this.dataLines, this.plotPrefix[0])
     this.unselectLines(this.dataLines2, this.plotPrefix[1])
     this.unselectLines(this.dataLines3, this.plotPrefix[2])
@@ -116,6 +117,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('dataLines', { deep: true }) updateUrl() {
+    console.log('Update this.dataLines')
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -138,6 +140,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('dataLines2', { deep: true }) updateUrl2() {
+    console.log('Update this.dataLines2')
     for (let i = 0; i < this.dataLines2.length; i++) {
       if (
         this.dataLines2[i].visible == 'legendonly' &&
@@ -160,6 +163,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('dataLines3', { deep: true }) updateUrl3() {
+    console.log('Update this.dataLines3')
     for (let i = 0; i < this.dataLines3.length; i++) {
       if (
         this.dataLines3[i].visible == 'legendonly' &&

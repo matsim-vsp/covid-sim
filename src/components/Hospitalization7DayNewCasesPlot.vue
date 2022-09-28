@@ -257,7 +257,6 @@ export default class VueComponent extends Vue {
       console.error(e)
       return
     }
-    console.log(this.dataLines)
   }
 
   // private async fetchBundeslandIncidenceRates() {

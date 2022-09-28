@@ -66,7 +66,6 @@ export default class VueComponent extends Vue {
 
   // , { deep: true }
   @Watch('dataLines', { deep: true }) updateUrl() {
-    console.log(this.dataLines)
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
