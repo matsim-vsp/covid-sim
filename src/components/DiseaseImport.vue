@@ -14,12 +14,15 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: any
   @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
+  @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.updateScale()
     this.calculateValues()
+    this.unselectLines()
   }
 
   private isResizing = false
@@ -32,6 +35,7 @@ export default class VueComponent extends Vue {
 
   @Watch('data') updateData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -52,6 +56,47 @@ export default class VueComponent extends Vue {
         }
   }
 
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
+  }
+
   private calculateValues() {
     this.dataLines = []
     if (this.data.length == 0) return
@@ -66,6 +111,7 @@ export default class VueComponent extends Vue {
       }
       this.dataLines.push({
         name: 'nInfected',
+        visible: true,
         x: x,
         y: y,
         line: { width: 1 },
@@ -81,6 +127,7 @@ export default class VueComponent extends Vue {
           strainTypes.push(this.data[i].strain)
           strainObjects.push({
             name: this.data[i].strain,
+            visible: true,
             x: [] as any,
             y: [] as any,
             line: { width: 1 },
