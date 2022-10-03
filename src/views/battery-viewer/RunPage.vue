@@ -75,7 +75,7 @@ export default class VueComponent extends Vue {
   private allRuns: { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[] = []
 
   @Watch('$route') routeChanged(to: Route, from: Route) {
-    console.log('ROUTE CHANGED', to)
+    //console.log('ROUTE CHANGED', to)
 
     // skip a reload if only the search query changed.
     if (to.path === from.path) return
@@ -93,7 +93,7 @@ export default class VueComponent extends Vue {
 
   private async buildPageForURL() {
     this.badPage = false
-    console.log({ route: this.$route })
+    //console.log({ route: this.$route })
     this.runId = this.$route.params.pathMatch
 
     let trim = this.runId.endsWith('/') ? 1 : 0

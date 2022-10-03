@@ -1,8 +1,7 @@
 <template lang="pug">
-.my-vue-component(v-if="!isResizing")
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
-
-</template>
+  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options")
+  
+  </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -10,22 +9,40 @@ import VuePlotly from '@statnett/vue-plotly'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
+  @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private antibodies!: any[]
-  @Prop({ required: true }) private endDate!: any
+  @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
   private unselectedLines: string[] = []
 
+  private ignoreRowHealth = [
+    'SusceptibleVaccinated',
+    'ContagiousVaccinated',
+    'ShowingSymptomsVaccinated',
+    'SeriouslySickVaccinated',
+    'CriticalVaccinated',
+    'TotalInfectedVaccinated',
+    'InfectedCumulativeVaccinated',
+    'ShowingSymptomsCumulativeVaccinated',
+    'ContagiousCumulativeVaccinated',
+    'SeriouslySickCumulativeVaccinated',
+    'CriticalCumulativeVaccinated',
+    'RecoveredVaccinated',
+    'Cumulative Hospitalized',
+  ]
+
   private mounted() {
-    try {
-      this.calculateValues()
-      this.unselectLines()
-    } catch (e) {
-      console.warn('ANTIBODIES data not found')
-      // maybe this run doesn't have vaccinations or boosters
-    }
+    //this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    this.setLayout()
+    this.calculateValues()
+    this.unselectLines()
+  }
+
+  @Watch('data') private updateModelData() {
+    this.calculateValues()
+    this.unselectLines()
   }
 
   private isResizing = false
@@ -36,15 +53,19 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('antibodies') private updateModelData() {
-    this.calculateValues()
-    this.unselectLines()
-  }
-
   @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    if (this.logScale) {
+      this.layout.yaxis.type = 'log'
+      this.layout.yaxis.autorange = true
+      //this.layout.yaxis.range = [Math.log10(0.01), Math.log10(2)]
+    } else {
+      this.layout.yaxis.type = 'linear'
+      delete this.layout.yaxis.range // [0, 1.5]
+      this.layout.yaxis.autorange = true
+    }
   }
 
+  // , { deep: true }
   @Watch('dataLines', { deep: true }) updateUrl() {
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
@@ -67,6 +88,20 @@ export default class VueComponent extends Vue {
     this.$router.replace({ query: params })
   }
 
+  private setLayout() {
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout.xaxis.range[1] = this.endDate
+  }
+
+  private calculateValues() {
+    this.dataLines = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (!Object.keys(this.dataLines[i]).includes('visible')) {
+        this.dataLines[i].visible = true
+      }
+    }
+  }
+
   private unselectLines() {
     const query = this.$route.query as any
     const name = 'plot-' + this.metadata.abbreviation
@@ -80,91 +115,19 @@ export default class VueComponent extends Vue {
         for (let j = 0; j < this.dataLines.length; j++) {
           if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
+            console.log('Unselect: ', this.dataLines[j].name)
           }
         }
       }
     }
   }
 
-  private calculateValues() {
-    if (this.antibodies.length === 0) return
-
-    // set end date
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
-
-    const date = []
-    const ALPHA = []
-    const B1351 = []
-    const DELTA = []
-    const OMICRON_BA1 = []
-    const SARS_CoV_2 = []
-    const STRAIN_A = []
-    const STRAIN_B = []
-
-    for (let i = 0; i < this.antibodies.length; i++) {
-      date.push(this.antibodies[i].date)
-      ALPHA.push(this.antibodies[i].ALPHA)
-      B1351.push(this.antibodies[i].B1351)
-      DELTA.push(this.antibodies[i].DELTA)
-      OMICRON_BA1.push(this.antibodies[i].OMICRON_BA1)
-      SARS_CoV_2.push(this.antibodies[i].SARS_CoV_2)
-      STRAIN_A.push(this.antibodies[i].STRAIN_A)
-      STRAIN_B.push(this.antibodies[i].STRAIN_B)
-    }
-
-    this.dataLines = [
-      {
-        name: 'ALPHA',
-        visible: true,
-        x: date,
-        y: ALPHA,
-      },
-      {
-        name: 'B1351',
-        visible: true,
-        x: date,
-        y: B1351,
-      },
-      {
-        name: 'DELTA',
-        visible: true,
-        x: date,
-        y: DELTA,
-      },
-      {
-        name: 'OMICRON_BA1',
-        visible: true,
-        x: date,
-        y: OMICRON_BA1,
-      },
-      {
-        name: 'SARS_CoV_2',
-        visible: true,
-        x: date,
-        y: SARS_CoV_2,
-      },
-      {
-        name: 'STRAIN_A',
-        visible: true,
-        x: date,
-        y: STRAIN_A,
-      },
-      {
-        name: 'STRAIN_B',
-        visible: true,
-        x: date,
-        y: STRAIN_B,
-      },
-    ]
-  }
-
-  private layout = {
-    height: 240,
+  private layout: any = {
     autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: '-0.15',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -173,20 +136,16 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      //fixedrange: window.innerWidth < 700,
+      range: ['2020-02-09', '2020-12-31'],
       fixedrange: true,
-      range: [this.$store.state.graphStartDate, '2020-12-31'],
       type: 'date',
     },
     yaxis: {
-      // note this gets overwritten when the scale changes - see updateScale()
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
       type: this.logScale ? 'log' : 'linear',
+      fixedrange: true,
       autorange: true,
-      //range: [0, 100],
-      title: 'relative antibodies',
-    } as any,
+      title: 'Population',
+    },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
   }
@@ -211,7 +170,7 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'daily-cases',
+      filename: 'r-values',
       width: 1200,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
@@ -223,9 +182,6 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-.my-view-component {
-  background-color: yellow;
-}
 @media only screen and (max-width: 640px) {
 }
 </style>

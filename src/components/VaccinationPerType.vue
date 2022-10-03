@@ -13,12 +13,15 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private vaccinations!: any[]
   @Prop({ required: true }) private endDate!: any
+  @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     try {
       this.calculateValues()
+      this.unselectLines()
     } catch (e) {
       console.warn('VACCINATIONS PER TYPE data not found')
       // maybe this run doesn't have vaccinations or boosters
@@ -35,10 +38,52 @@ export default class VueComponent extends Vue {
 
   @Watch('vaccinations') private updateModelData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
     this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private calculateValues() {
@@ -84,6 +129,7 @@ export default class VueComponent extends Vue {
     for (let i = 0; i < formattedData.names.length; i++) {
       this.dataLines.push({
         name: formattedData.names[i],
+        visible: true,
         x: formattedData.date,
         y: formattedData.values[i],
       })

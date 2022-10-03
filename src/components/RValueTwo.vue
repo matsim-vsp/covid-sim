@@ -13,20 +13,24 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private rValues!: any[]
+  @Prop({ required: true }) private metadata!: any
 
   private color = '#04f'
 
   private lagDays = 7
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.calculateRvalues()
+    this.unselectLines()
   }
 
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateRvalues()
+      this.unselectLines()
     }
   }
 
@@ -40,10 +44,12 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.calculateRvalues()
+    this.unselectLines()
   }
 
   @Watch('rValues') private updateRValues() {
     this.calculateRvalues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -55,6 +61,47 @@ export default class VueComponent extends Vue {
       this.layout.yaxis.type = 'linear'
       delete this.layout.yaxis.range // [0, 1.5]
       this.layout.yaxis.autorange = true
+    }
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
     }
   }
 
@@ -111,6 +158,7 @@ export default class VueComponent extends Vue {
 
     this.dataLines.push({
       name: purpose,
+      visible: true,
       x: x.slice(center),
       y: avgR,
       // type: 'bar',
@@ -173,6 +221,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Target: 50 per 100,000 per 7 days',
+        visible: true,
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [1, 1],
         fill: 'tozeroy',
@@ -184,6 +233,7 @@ export default class VueComponent extends Vue {
       },
       {
         name: 'Estimated Multiplier',
+        visible: true,
         x: susceptible.x.slice(this.lagDays * 2),
         y: rValues,
         line: {

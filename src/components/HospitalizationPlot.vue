@@ -24,6 +24,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private diviData!: any[]
+  @Prop({ required: true }) private metadata!: any
 
   private csvData: any = {
     berlin: require('@/assets/berlin-hospital.csv').default,
@@ -88,12 +89,14 @@ export default class VueComponent extends Vue {
   }
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
   private hospitalSeries: any[] = []
   private cityDetails: City = this.dataDetails.berlin
 
   private mounted() {
     this.prepareAdditionalHospitalData()
     this.buildPlot()
+    this.unselectLines()
     // set end date
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate
@@ -113,10 +116,12 @@ export default class VueComponent extends Vue {
 
   @Watch('city') private switchCity() {
     this.buildPlot()
+    this.unselectLines()
   }
 
   @Watch('diviData') private switchDivi() {
     this.prepareHospitalData()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -175,6 +180,7 @@ export default class VueComponent extends Vue {
 
       const trace = {
         name: 'Model: ' + item.name,
+        visible: true,
         x: midWeekDates[0],
         y: infectionRate[0],
         line: item.line,
@@ -188,6 +194,7 @@ export default class VueComponent extends Vue {
       modelData.push(
         {
           name: 'Hospital Capacity',
+          visible: true,
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
             this.hospitalCapacity[this.city][0] / this.factor100k,
@@ -202,6 +209,7 @@ export default class VueComponent extends Vue {
         },
         {
           name: 'Hospital Max Reserve Capacity',
+          visible: true,
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
             this.hospitalCapacity[this.city][1] / this.factor100k,
@@ -223,6 +231,7 @@ export default class VueComponent extends Vue {
     this.dataLines.push(...this.hospitalSeries)
 
     // console.log({ dataLines: this.dataLines })
+    this.unselectLines()
   }
 
   @Watch('data') private prepareHospitalData() {
@@ -294,6 +303,47 @@ export default class VueComponent extends Vue {
     }
 
     if (this.extraHospitalData) this.hospitalSeries.push(this.extraHospitalData)
+  }
+
+  @Watch('dataLines', { deep: true }) updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    this.$router.replace({ query: params })
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private async prepareAdditionalHospitalData() {
