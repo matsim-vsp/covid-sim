@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+            a.navbar-link  2022.08.09
+            .navbar-dropdown
+              a.navbar-item(:href="'/cologne/2022-08-06/1-vax'") Strain A and B. Report August 09
+              a.navbar-item(:href="'/cologne/2022-08-04/9b-leis-dec'") Measures in autumn and winter. Report August 09
+
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2022.06.28
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25'") Measures in autumn and winter. Report June 28

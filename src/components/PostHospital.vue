@@ -1,29 +1,47 @@
 <template lang="pug">
 .vue-component(v-if="!isResizing" )
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
-  
+  vue-plotly.plot1(
+    :data="dataLines"
+    :layout="layout"
+    :options="options"
+    :class="{'processing': postHospUpdater !== updaterCount}"
+  )
+
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
+import { spawn, Thread, Worker } from 'threads'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private startDate!: any
   @Prop({ required: true }) private endDate!: any
   @Prop({ required: true }) private data!: any[]
+  @Prop({ required: true }) private totalPopulation!: number
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private intakesHosp!: boolean
+  @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private postHospUpdater!: number
 
   private dataLines: any[] = []
+
+  private postProcessWorker: any = null
+
+  private updaterCount = 0
 
   private mounted() {
     this.updateScale()
     this.calculateValues()
   }
 
+  private beforeDestroy() {
+    if (this.postProcessWorker) Thread.terminate(this.postProcessWorker)
+  }
+
   private isResizing = false
+
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
     this.isResizing = true
     await this.$nextTick()
@@ -31,7 +49,9 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('data') updateData() {
+  @Watch('data')
+  @Watch('totalPopulation')
+  updateData() {
     this.calculateValues()
   }
 
@@ -71,120 +91,24 @@ export default class VueComponent extends Vue {
     }
   }
 
-  private calculateValues() {
-    this.dataLines = []
-
-    if (this.data.length == 0) return
-
-    // intakesHosp
-    // intakesICU
-    // occupancyHosp
-    // occupancyICU
-    //
-    // Omicron
-    // Delta
-
-    let date = [] as any[]
-    let intakesHospOmicron = []
-    let intakesICUOmicron = []
-    let occupancyHospOmicron = []
-    let occupancyICUOmicron = []
-    let intakesHospDelta = []
-    let intakesICUDelta = []
-    let occupancyHospDelta = []
-    let occupancyICUDelta = []
-
-    for (let i = 0; i < this.data.length; i++) {
-      let measurement = this.data[i].measurement.trim()
-      let severity = this.data[i].severity.trim()
-      let dateTemp = this.data[i].date.trim()
-      let n = this.data[i].n
-
-      if (severity == 'Omicron') {
-        if (measurement == 'intakesHosp') {
-          date.push(dateTemp)
-          intakesHospOmicron.push(n)
-        }
-        if (measurement == 'intakesICU') {
-          intakesICUOmicron.push(n)
-        }
-        if (measurement == 'occupancyHosp') {
-          occupancyHospOmicron.push(n)
-        }
-        if (measurement == 'occupancyICU') {
-          occupancyICUOmicron.push(n)
-        }
-      } else {
-        if (measurement == 'intakesHosp') {
-          intakesHospDelta.push(n)
-        }
-        if (measurement == 'intakesICU') {
-          intakesICUDelta.push(n)
-        }
-        if (measurement == 'occupancyHosp') {
-          occupancyHospDelta.push(n)
-        }
-        if (measurement == 'occupancyICU') {
-          occupancyICUDelta.push(n)
-        }
-      }
+  private async calculateValues() {
+    if (!this.postProcessWorker) {
+      this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
     }
 
-    if (!this.intakesHosp) {
-      this.dataLines.push(
-        {
-          name: 'occupancyHosp-Delta',
-          x: date,
-          y: occupancyHospDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyHosp-Omicron',
-          x: date,
-          y: occupancyHospOmicron,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyICU-Delta',
-          x: date,
-          y: occupancyICUDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'occupancyICU-Omicron',
-          x: date,
-          y: occupancyICUOmicron,
-          line: { width: 1 },
-        }
-      )
-    } else {
-      this.dataLines.push(
-        {
-          name: 'intakesHosp-Delta',
-          x: date,
-          y: intakesHospDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesHosp-Omicron',
-          x: date,
-          y: intakesHospOmicron,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesICU-Delta',
-          x: date,
-          y: intakesICUDelta,
-          line: { width: 1 },
-        },
-        {
-          name: 'intakesICU-Omicron',
-          x: date,
-          y: intakesICUOmicron,
-          line: { width: 1 },
-        }
-      )
+    if (!this.data.length) {
+      return
     }
+
+    const lines = await this.postProcessWorker.buildDataLines({
+      data: this.data,
+      totalPopulation: this.totalPopulation,
+      city: this.city,
+      intakesHosp: this.intakesHosp,
+    })
+
+    this.dataLines = lines
+    this.updaterCount = this.postHospUpdater
   }
 
   private layout = {
@@ -262,6 +186,10 @@ export default class VueComponent extends Vue {
 
 .plot1 {
   flex: 1;
+}
+
+.processing {
+  opacity: 0.6;
 }
 
 @media only screen and (max-width: 640px) {
