@@ -62,7 +62,7 @@ export default class VueComponent extends Vue {
     }
   }
 
-  @Watch('dataLines', { deep: true }) updateUrl() {
+  @Watch('dataLines', { deep: true }) async updateUrl() {
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -81,10 +81,14 @@ export default class VueComponent extends Vue {
 
     params['plot-1-' + this.metadata.abbreviation] = this.unselectedLines
 
-    this.$router.replace({ query: params })
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
   }
 
-  @Watch('dataLines2', { deep: true }) updateUrl2() {
+  @Watch('dataLines2', { deep: true }) async updateUrl2() {
     for (let i = 0; i < this.dataLines2.length; i++) {
       if (
         this.dataLines2[i].visible == 'legendonly' &&
@@ -103,7 +107,11 @@ export default class VueComponent extends Vue {
 
     params['plot-2-' + this.metadata.abbreviation] = this.unselectedLines2
 
-    this.$router.replace({ query: params })
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
   }
 
   private unselectLines() {

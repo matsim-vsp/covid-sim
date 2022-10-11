@@ -122,7 +122,7 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('dataLines', { deep: true }) updateUrl() {
+  @Watch('dataLines', { deep: true }) async updateUrl() {
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -141,7 +141,11 @@ export default class VueComponent extends Vue {
 
     params['plot-' + this.metadata.abbreviation] = this.unselectedLines
 
-    this.$router.replace({ query: params })
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
   }
 
   private unselectLines() {

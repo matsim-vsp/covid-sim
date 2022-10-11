@@ -139,6 +139,8 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('data') private updateModelData() {
+    if (!this.cityDetails) return
+
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
     const sevenDays = 7
@@ -235,77 +237,14 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('data') private prepareHospitalData() {
-    // const hospData = Papaparse.parse(this.csvData[this.city], {
-    //   header: true,
-    //   dynamicTyping: true,
-    //   skipEmptyLines: true,
-    // }).data
-
-    // const sevenDays = 7
-    // const susceptible = this.data.filter(item => item.name === 'Susceptible')
-
-    // // maybe data is not loaded yet
-    // if (!susceptible.length) return
-
-    // const totalPopulation = susceptible[0].y[0]
-    // this.factor100k = totalPopulation / 100000.0
+    if (!this.cityDetails) return
 
     this.hospitalSeries = []
-
-    for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
-      // const column = this.cityDetails.fromCSV[i]
-      // if (this.cityDetails.csvLineNames.length <= i) continue
-      // const midWeekDates = []
-      // const infectionRate = []
-      // for (let i = 0; i < hospData.length; i++) {
-      //   infectionRate.push(hospData[i][column])
-      //   midWeekDates.push(hospData[i]['Datum'])
-      // }
-      // for (let j = 0; j < midWeekDates.length; j += 1) {
-      //   midWeekDates[j] = this.reformatDateBerlin(midWeekDates[j])
-      //   infectionRate[j] = infectionRate[j] / this.factor100k
-      // }
-      // Moved to new hosp plot
-      // this.hospitalSeries.push({
-      //   name: this.cityDetails.csvLineNames[i],
-      //   x: midWeekDates,
-      //   y: infectionRate,
-      //   line: {
-      //     dash: 'dot',
-      //     width: 2,
-      //     color: this.colors[this.cityDetails.fromModel[i]],
-      //   },
-      // })
-    }
-
-    const midWeekDates = []
-    const infectionRate = []
-
-    // add dividata, if we have some
-    if (this.diviData.length) {
-      // for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
-      //   let avgSum = 0
-      //   for (let k = j - sevenDays; k <= j; k += 1) {
-      //     avgSum += this.diviData[0].y[k]
-      //   }
-      //   let avgerage = avgSum / 7 / this.factor100k
-      //   const rate = 0.1 * Math.round(10.0 * avgerage)
-      //   infectionRate.push(rate)
-      //   midWeekDates.push(this.diviData[0].x[j - 3])
-      // }
-      // Moved to new hosp plot
-      // this.hospitalSeries.push({
-      //   name: this.diviData[0].name,
-      //   x: midWeekDates,
-      //   y: infectionRate,
-      //   line: this.diviData[0].line,
-      // })
-    }
 
     if (this.extraHospitalData) this.hospitalSeries.push(this.extraHospitalData)
   }
 
-  @Watch('dataLines', { deep: true }) updateUrl() {
+  @Watch('dataLines', { deep: true }) async updateUrl() {
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -324,7 +263,11 @@ export default class VueComponent extends Vue {
 
     params['plot-' + this.metadata.abbreviation] = this.unselectedLines
 
-    this.$router.replace({ query: params })
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
   }
 
   private unselectLines() {

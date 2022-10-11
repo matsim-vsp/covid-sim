@@ -61,7 +61,7 @@ export default class VueComponent extends Vue {
         }
   }
 
-  @Watch('dataMatrix', { deep: true }) updateUrl() {
+  @Watch('dataMatrix', { deep: true }) async updateUrl() {
     for (let i = 0; i < this.dataMatrix.length; i++) {
       if (
         this.dataMatrix[i].visible == 'legendonly' &&
@@ -80,7 +80,11 @@ export default class VueComponent extends Vue {
 
     params['plot-' + this.metadata.abbreviation] = this.unselectedLines
 
-    this.$router.replace({ query: params })
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
   }
 
   private unselectLines() {
