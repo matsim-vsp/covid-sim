@@ -1,6 +1,6 @@
 <template lang="pug">
   vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options")
-  
+
   </template>
 
 <script lang="ts">
@@ -89,8 +89,10 @@ export default class VueComponent extends Vue {
   }
 
   private setLayout() {
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
+    if (this.$store.state.graphStartDate && this.endDate) {
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
+    }
   }
 
   private calculateValues() {
@@ -123,7 +125,7 @@ export default class VueComponent extends Vue {
   }
 
   private layout: any = {
-    autosize: true,
+    // autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
@@ -141,7 +143,7 @@ export default class VueComponent extends Vue {
       type: 'date',
     },
     yaxis: {
-      type: this.logScale ? 'log' : 'linear',
+      type: 'log', // this.logScale ? 'log' : 'linear',
       fixedrange: true,
       autorange: true,
       title: 'Population',
