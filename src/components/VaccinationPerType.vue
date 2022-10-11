@@ -37,9 +37,9 @@ export default class VueComponent extends Vue {
     this.calculateValues()
   }
 
-  @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
-  }
+  // @Watch('logScale') updateScale() {
+  //   this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+  // }
 
   private calculateValues() {
     if (this.vaccinations.length === 0) return
@@ -113,7 +113,8 @@ export default class VueComponent extends Vue {
       // note this gets overwritten when the scale changes - see updateScale()
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      type: this.logScale ? 'log' : 'linear',
+      //type: this.logScale ? 'log' : 'linear',
+      type: 'linear',
       autorange: true,
       //range: [0, 100],
       title: '7-Day Vaccinations per Day',
