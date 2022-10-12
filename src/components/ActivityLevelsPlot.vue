@@ -131,15 +131,20 @@ export default class VueComponent extends Vue {
     // { col: 'shopping', title: 'Other Activities' },
   ]
 
+  private skipLeisure = false
+
   private generateSeriesFromCSVData(data: any[]) {
     const serieses = []
 
     const days: number[] = this.unpack(data, 'day')
     const x = days.map(d => this.calculateDatefromSimulationDay(d))
 
+    if (Object.keys(data[0]).includes('leisPrivate')) this.skipLeisure = true
+
     let yaxis = 0
     for (const field of this.activityTypes) {
       const name = field.title
+      if (this.skipLeisure && field.col == 'leisure') continue
       try {
         const y: number[] = this.unpack(data, field.col)
         yaxis++
