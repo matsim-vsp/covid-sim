@@ -66,6 +66,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('dataLines', { deep: true }) async updateUrl() {
+    console.log(this.dataLines)
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -99,12 +100,20 @@ export default class VueComponent extends Vue {
   }
 
   private calculateValues() {
-    this.dataLines = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
-    for (let i = 0; i < this.dataLines.length; i++) {
-      if (!Object.keys(this.dataLines[i]).includes('visible')) {
-        this.dataLines[i].visible = true
+    //
+    let data = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
+    for (let i = 0; i < data.length; i++) {
+      if (!Object.keys(data[i]).includes('visible')) {
+        data[i].visible = 'true'
       }
     }
+    // for (let i = 0; i < this.dataLines.length; i++) {
+    //   if (!Object.keys(this.dataLines[i]).includes('visible')) {
+    //     this.dataLines[i].visible = true
+    //   }
+    // }
+    this.dataLines = data
+    console.log(this.dataLines)
   }
 
   private unselectLines() {
