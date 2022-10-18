@@ -24,8 +24,10 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private intakesHosp!: boolean
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private postHospUpdater!: number
+  @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private postProcessWorker: any = null
 
@@ -34,6 +36,7 @@ export default class VueComponent extends Vue {
   private mounted() {
     this.updateScale()
     this.calculateValues()
+    //this.unselectLines()
   }
 
   private beforeDestroy() {
@@ -53,6 +56,7 @@ export default class VueComponent extends Vue {
   @Watch('totalPopulation')
   updateData() {
     this.calculateValues()
+    //this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -91,6 +95,51 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('dataLines', { deep: true }) async updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
+  }
+
+  private async unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
+  }
+
   private async calculateValues() {
     if (!this.postProcessWorker) {
       this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
@@ -109,6 +158,8 @@ export default class VueComponent extends Vue {
 
     this.dataLines = lines
     this.updaterCount = this.postHospUpdater
+
+    await this.unselectLines()
   }
 
   private layout = {

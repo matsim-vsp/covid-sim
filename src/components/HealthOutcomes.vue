@@ -1,8 +1,7 @@
 <template lang="pug">
-.my-vue-component(v-if="!isResizing")
-  vue-plotly(:data="dataLines" :layout="layout" :options="options")
+  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
 
-</template>
+  </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -10,22 +9,40 @@ import VuePlotly from '@statnett/vue-plotly'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
+  @Prop({ required: true }) private data!: any[]
   @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private vaccinations!: any[]
-  @Prop({ required: true }) private endDate!: any
+  @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private metadata!: any
 
   private dataLines: any[] = []
   private unselectedLines: string[] = []
 
+  private ignoreRowHealth = [
+    'SusceptibleVaccinated',
+    'ContagiousVaccinated',
+    'ShowingSymptomsVaccinated',
+    'SeriouslySickVaccinated',
+    'CriticalVaccinated',
+    'TotalInfectedVaccinated',
+    'InfectedCumulativeVaccinated',
+    'ShowingSymptomsCumulativeVaccinated',
+    'ContagiousCumulativeVaccinated',
+    'SeriouslySickCumulativeVaccinated',
+    'CriticalCumulativeVaccinated',
+    'RecoveredVaccinated',
+    'Cumulative Hospitalized',
+  ]
+
   private mounted() {
-    try {
-      this.calculateValues()
-      this.unselectLines()
-    } catch (e) {
-      console.warn('VACCINATIONS PER TYPE data not found')
-      // maybe this run doesn't have vaccinations or boosters
-    }
+    //this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    this.setLayout()
+    this.calculateValues()
+    this.unselectLines()
+  }
+
+  @Watch('data') private updateModelData() {
+    this.calculateValues()
+    this.unselectLines()
   }
 
   private isResizing = false
@@ -36,16 +53,20 @@ export default class VueComponent extends Vue {
     this.isResizing = false
   }
 
-  @Watch('vaccinations') private updateModelData() {
-    this.calculateValues()
-    this.unselectLines()
+  @Watch('logScale') updateScale() {
+    if (this.logScale) {
+      this.layout.yaxis.type = 'log'
+      this.layout.yaxis.autorange = true
+      //this.layout.yaxis.range = [Math.log10(0.01), Math.log10(2)]
+    } else {
+      this.layout.yaxis.type = 'linear'
+      delete this.layout.yaxis.range // [0, 1.5]
+      this.layout.yaxis.autorange = true
+    }
   }
 
-  // @Watch('logScale') updateScale() {
-  //   this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
-  // }
-
   @Watch('dataLines', { deep: true }) async updateUrl() {
+    console.log(this.dataLines)
     for (let i = 0; i < this.dataLines.length; i++) {
       if (
         this.dataLines[i].visible == 'legendonly' &&
@@ -71,6 +92,35 @@ export default class VueComponent extends Vue {
     }
   }
 
+  private restylePlot(event: any) {
+    // TODO
+    // console.log(event)
+  }
+
+  private setLayout() {
+    if (this.$store.state.graphStartDate && this.endDate) {
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
+    }
+  }
+
+  private calculateValues() {
+    //
+    let data = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
+    for (let i = 0; i < data.length; i++) {
+      if (!Object.keys(data[i]).includes('visible')) {
+        data[i].visible = 'true'
+      }
+    }
+    // for (let i = 0; i < this.dataLines.length; i++) {
+    //   if (!Object.keys(this.dataLines[i]).includes('visible')) {
+    //     this.dataLines[i].visible = true
+    //   }
+    // }
+    this.dataLines = data
+    console.log(this.dataLines)
+  }
+
   private unselectLines() {
     const query = this.$route.query as any
     const name = 'plot-' + this.metadata.abbreviation
@@ -84,68 +134,19 @@ export default class VueComponent extends Vue {
         for (let j = 0; j < this.dataLines.length; j++) {
           if (this.dataLines[j].name == nameArray[i]) {
             this.dataLines[j].visible = 'legendonly'
+            console.log('Unselect: ', this.dataLines[j].name)
           }
         }
       }
     }
   }
 
-  private calculateValues() {
-    if (this.vaccinations.length === 0) return
-
-    this.dataLines = []
-
-    // set end date
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
-
-    let formattedData = {
-      names: [],
-      date: [],
-      values: [],
-    } as {
-      [id: string]: any[]
-    }
-
-    const header = Object.keys(this.vaccinations[0])
-
-    // Skip date and day column
-    for (let i = 2; i < header.length; i++) {
-      formattedData.names.push(header[i])
-      formattedData.values.push([])
-    }
-
-    for (let i = 7; i < this.vaccinations.length; i = i += 7) {
-      for (let j = 2; j < header.length; j++) {
-        const value =
-          this.vaccinations[i][header[j]] +
-          this.vaccinations[i - 1][header[j]] +
-          this.vaccinations[i - 2][header[j]] +
-          this.vaccinations[i - 3][header[j]] +
-          this.vaccinations[i - 4][header[j]] +
-          this.vaccinations[i - 5][header[j]] +
-          this.vaccinations[i - 6][header[j]]
-        formattedData.values[j - 2].push(value / 7)
-      }
-      formattedData.date.push(this.vaccinations[i].date)
-    }
-
-    for (let i = 0; i < formattedData.names.length; i++) {
-      this.dataLines.push({
-        name: formattedData.names[i],
-        visible: true,
-        x: formattedData.date,
-        y: formattedData.values[i],
-      })
-    }
-  }
-
-  private layout = {
-    height: 240,
-    autosize: true,
+  private layout: any = {
+    // autosize: true,
     showlegend: true,
     legend: {
       orientation: 'h',
+      y: '-0.15',
     },
     font: {
       family: 'Roboto,Arial,Helvetica,sans-serif',
@@ -154,21 +155,16 @@ export default class VueComponent extends Vue {
     },
     margin: { t: 5, r: 10, b: 0, l: 60 },
     xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
       range: ['2020-02-09', '2020-12-31'],
+      fixedrange: true,
       type: 'date',
     },
     yaxis: {
-      // note this gets overwritten when the scale changes - see updateScale()
-      //fixedrange: window.innerWidth < 700,
+      type: 'log', // this.logScale ? 'log' : 'linear',
       fixedrange: true,
-      //type: this.logScale ? 'log' : 'linear',
-      type: 'linear',
       autorange: true,
-      //range: [0, 100],
-      title: '7-Day Vaccinations per Day',
-    } as any,
+      title: 'Population',
+    },
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
   }
@@ -193,7 +189,7 @@ export default class VueComponent extends Vue {
     ],
     toImageButtonOptions: {
       format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'daily-cases',
+      filename: 'r-values',
       width: 1200,
       height: 600,
       scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor

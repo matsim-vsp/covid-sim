@@ -135,7 +135,7 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('$route') private async routeChanged(to: any, from: any) {
-    console.log(this.$route)
+    //console.log(this.$route)
     this.isBurgerActive = false
     this.isDropdownActive = false
   }

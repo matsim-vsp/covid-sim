@@ -16,12 +16,15 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private city!: string
+  @Prop({ required: true }) private metadata!: any
 
   private color = '#04f'
 
   private lagDays = 7
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
+  private unselectedLinesOnLoad: string[] = []
 
   private originalDataUrl = PUBLIC_SVN + 'original-data/Fallzahlen/'
   private diviIncidenceNRWUrl =
@@ -41,22 +44,25 @@ export default class VueComponent extends Vue {
 
   private mounted() {
     this.updateScale()
-    this.fetchRealHospitalizationRates()
+    //this.fetchRealHospitalizationRates()
     this.calculate()
-    this.fetchBundeslandIncidenceRates()
+    //this.fetchBundeslandIncidenceRates()
+    this.unselectLines()
     //this.fetchDiviIncidenceNRW()
   }
 
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculate()
-      this.fetchBundeslandIncidenceRates()
+      //this.fetchBundeslandIncidenceRates()
+      this.unselectLines()
     }
   }
 
   @Watch('data') private updateModelData() {
     this.calculate()
-    this.fetchBundeslandIncidenceRates()
+    //this.fetchBundeslandIncidenceRates()
+    this.unselectLines()
     //this.fetchDiviIncidenceNRW()
   }
 
@@ -114,6 +120,51 @@ export default class VueComponent extends Vue {
     await this.$nextTick()
     this.layout = Object.assign({}, this.layout)
     this.isResizing = false
+  }
+
+  @Watch('dataLines', { deep: true }) async updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private async fetchDiviIncidenceNRW() {
@@ -195,6 +246,7 @@ export default class VueComponent extends Vue {
 
       this.dataLines.push({
         name: 'Model: New Hospitalizations / 100k',
+        visible: true,
         x: cullX,
         y: cullY,
         type: 'scatter',

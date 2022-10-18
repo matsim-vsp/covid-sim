@@ -24,6 +24,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private diviData!: any[]
+  @Prop({ required: true }) private metadata!: any
 
   private csvData: any = {
     berlin: require('@/assets/berlin-hospital.csv').default,
@@ -88,12 +89,14 @@ export default class VueComponent extends Vue {
   }
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
   private hospitalSeries: any[] = []
   private cityDetails: City = this.dataDetails.berlin
 
   private mounted() {
     this.prepareAdditionalHospitalData()
     this.buildPlot()
+    this.unselectLines()
     // set end date
     this.layout.xaxis.range[0] = this.$store.state.graphStartDate
     this.layout.xaxis.range[1] = this.endDate
@@ -113,10 +116,12 @@ export default class VueComponent extends Vue {
 
   @Watch('city') private switchCity() {
     this.buildPlot()
+    this.unselectLines()
   }
 
   @Watch('diviData') private switchDivi() {
     this.prepareHospitalData()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -134,6 +139,8 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('data') private updateModelData() {
+    if (!this.cityDetails) return
+
     let modelData = this.data.filter(item => this.cityDetails.fromModel.indexOf(item.name) > -1)
 
     const sevenDays = 7
@@ -175,6 +182,7 @@ export default class VueComponent extends Vue {
 
       const trace = {
         name: 'Model: ' + item.name,
+        visible: true,
         x: midWeekDates[0],
         y: infectionRate[0],
         line: item.line,
@@ -188,6 +196,7 @@ export default class VueComponent extends Vue {
       modelData.push(
         {
           name: 'Hospital Capacity',
+          visible: true,
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
             this.hospitalCapacity[this.city][0] / this.factor100k,
@@ -202,6 +211,7 @@ export default class VueComponent extends Vue {
         },
         {
           name: 'Hospital Max Reserve Capacity',
+          visible: true,
           x: [modelData[0].x[0], modelData[0].x[modelData[0].x.length - 1]],
           y: [
             this.hospitalCapacity[this.city][1] / this.factor100k,
@@ -223,77 +233,60 @@ export default class VueComponent extends Vue {
     this.dataLines.push(...this.hospitalSeries)
 
     // console.log({ dataLines: this.dataLines })
+    this.unselectLines()
   }
 
   @Watch('data') private prepareHospitalData() {
-    // const hospData = Papaparse.parse(this.csvData[this.city], {
-    //   header: true,
-    //   dynamicTyping: true,
-    //   skipEmptyLines: true,
-    // }).data
-
-    // const sevenDays = 7
-    // const susceptible = this.data.filter(item => item.name === 'Susceptible')
-
-    // // maybe data is not loaded yet
-    // if (!susceptible.length) return
-
-    // const totalPopulation = susceptible[0].y[0]
-    // this.factor100k = totalPopulation / 100000.0
+    if (!this.cityDetails) return
 
     this.hospitalSeries = []
 
-    for (let i = 0; i < this.cityDetails.fromModel.length; i++) {
-      // const column = this.cityDetails.fromCSV[i]
-      // if (this.cityDetails.csvLineNames.length <= i) continue
-      // const midWeekDates = []
-      // const infectionRate = []
-      // for (let i = 0; i < hospData.length; i++) {
-      //   infectionRate.push(hospData[i][column])
-      //   midWeekDates.push(hospData[i]['Datum'])
-      // }
-      // for (let j = 0; j < midWeekDates.length; j += 1) {
-      //   midWeekDates[j] = this.reformatDateBerlin(midWeekDates[j])
-      //   infectionRate[j] = infectionRate[j] / this.factor100k
-      // }
-      // Moved to new hosp plot
-      // this.hospitalSeries.push({
-      //   name: this.cityDetails.csvLineNames[i],
-      //   x: midWeekDates,
-      //   y: infectionRate,
-      //   line: {
-      //     dash: 'dot',
-      //     width: 2,
-      //     color: this.colors[this.cityDetails.fromModel[i]],
-      //   },
-      // })
-    }
-
-    const midWeekDates = []
-    const infectionRate = []
-
-    // add dividata, if we have some
-    if (this.diviData.length) {
-      // for (let j = sevenDays + 5; j < this.diviData[0].y.length; j += sevenDays) {
-      //   let avgSum = 0
-      //   for (let k = j - sevenDays; k <= j; k += 1) {
-      //     avgSum += this.diviData[0].y[k]
-      //   }
-      //   let avgerage = avgSum / 7 / this.factor100k
-      //   const rate = 0.1 * Math.round(10.0 * avgerage)
-      //   infectionRate.push(rate)
-      //   midWeekDates.push(this.diviData[0].x[j - 3])
-      // }
-      // Moved to new hosp plot
-      // this.hospitalSeries.push({
-      //   name: this.diviData[0].name,
-      //   x: midWeekDates,
-      //   y: infectionRate,
-      //   line: this.diviData[0].line,
-      // })
-    }
-
     if (this.extraHospitalData) this.hospitalSeries.push(this.extraHospitalData)
+  }
+
+  @Watch('dataLines', { deep: true }) async updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
   }
 
   private async prepareAdditionalHospitalData() {

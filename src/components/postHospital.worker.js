@@ -114,6 +114,7 @@ async function calculateValues(props) {
       if (seriesName.startsWith('occupancy')) {
         dataLines.push({
           name: seriesName,
+          visible: true,
           x: date,
           y: data,
           line: { width: 1 },
@@ -125,6 +126,7 @@ async function calculateValues(props) {
       if (seriesName.startsWith('intakes')) {
         dataLines.push({
           name: seriesName,
+          visible: true,
           x: date,
           y: data,
           line: { width: 1 },
@@ -169,6 +171,7 @@ async function addReportedDataRate(dataLines, totalPopulation, city) {
     const csvData = cacheReportedDataRate[city]
     dataLines.push({
       name: config.legendText,
+      visible: true,
       x: csvData.map(row => row.date.split('T')[0]),
       y: csvData.map(row => parseFloat(row[config.csvCasesColumn]) / factor100k),
       line: { width: 1 },
@@ -207,6 +210,7 @@ async function addReportedDataNewCases(dataLines, city) {
         if (dataLines.length)
           dataLines.push({
             name: 'Observed Hospitalization Case Rate',
+            visible: true,
             x: observedData.map(row => row.date),
             y: observedData.map(row => row.realHospitalizationRate),
             //type: 'scatter',
@@ -239,6 +243,7 @@ async function addReportedDataNewCases(dataLines, city) {
 
   dataLines.push({
     name: 'Observed: ' + region.name + ' (RKI)',
+    visible: true,
     x: regionData.map(row => row['Datum']),
     y: regionData.map(
       row =>
@@ -252,6 +257,7 @@ async function addReportedDataNewCases(dataLines, city) {
 
   dataLines.push({
     name: 'Adjusted: ' + region.name + ' (RKI)',
+    visible: true,
     x: regionData.map(row => row['Datum']),
     y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
     //type: 'scatter',
@@ -277,6 +283,7 @@ async function addReportedDataNewCases(dataLines, city) {
       if (dataLines.length && !diviExsists)
         dataLines.push({
           name: 'Observed : Nordrhein-Westfalen (DIVI)',
+          visible: true,
           x: incidenceNRW.map(row => row.Date),
           y: incidenceNRW.map(row => row.DIVIIncidence),
           //type: 'scatter',

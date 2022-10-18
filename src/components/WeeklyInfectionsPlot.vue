@@ -22,20 +22,24 @@ export default class VueComponent extends Vue {
   }
   @Prop({ required: true }) private unreportedIncidence!: any[]
   @Prop({ required: true }) private unreportedIncidenceNRW!: any[]
+  @Prop({ required: true }) private metadata!: any
 
   private color = ['#094', '#0c4']
 
   private lagDays = 1
 
   private dataLines: any[] = []
+  private unselectedLines: string[] = []
 
   private mounted() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   private handleRelayout(event: any) {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateValues()
+      this.unselectLines()
     }
   }
 
@@ -49,6 +53,7 @@ export default class VueComponent extends Vue {
 
   @Watch('data') private updateModelData() {
     this.calculateValues()
+    this.unselectLines()
   }
 
   @Watch('logScale') updateScale() {
@@ -77,6 +82,51 @@ export default class VueComponent extends Vue {
     this.calculateValues()
   }
 
+  @Watch('dataLines', { deep: true }) async updateUrl() {
+    for (let i = 0; i < this.dataLines.length; i++) {
+      if (
+        this.dataLines[i].visible == 'legendonly' &&
+        !this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.push(this.dataLines[i].name)
+      } else if (
+        this.dataLines[i].visible != 'legendonly' &&
+        this.unselectedLines.includes(this.dataLines[i].name)
+      ) {
+        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+      }
+    }
+
+    const params = Object.assign({}, this.$route.query)
+
+    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+    try {
+      await this.$router.replace({ query: params })
+    } catch (e) {
+      /** this is OK */
+    }
+  }
+
+  private unselectLines() {
+    const query = this.$route.query as any
+    const name = 'plot-' + this.metadata.abbreviation
+
+    if (Object.keys(query).includes(name)) {
+      let nameArray = query[name]
+      if (!Array.isArray(nameArray)) {
+        nameArray = [nameArray]
+      }
+      for (let i = 0; i < nameArray.length; i++) {
+        for (let j = 0; j < this.dataLines.length; j++) {
+          if (this.dataLines[j].name == nameArray[i]) {
+            this.dataLines[j].visible = 'legendonly'
+          }
+        }
+      }
+    }
+  }
+
   private async calculateUnreportedNRW() {
     if (this.unreportedIncidenceNRW.length > 1) {
       const unreportedIncidence: any = {
@@ -92,10 +142,12 @@ export default class VueComponent extends Vue {
       }
 
       unreportedIncidence.name = 'MAGS NRW Incidence'
+      unreportedIncidence.visible = true
       unreportedIncidence.x = []
       unreportedIncidence.y = []
 
       unreportedIncidenceX2.name = 'Assumed Reported and Unreported Cases (NRW)'
+      unreportedIncidenceX2.visible = true
       unreportedIncidenceX2.x = []
       unreportedIncidenceX2.y = []
 
@@ -119,6 +171,7 @@ export default class VueComponent extends Vue {
       }
 
       unreportedDataLine.name = 'Assumed Reported and Unreported Cases'
+      unreportedDataLine.visible = true
       unreportedDataLine.x = []
       unreportedDataLine.y = []
 
@@ -149,6 +202,7 @@ export default class VueComponent extends Vue {
       }
 
       observedLine.name = source.name
+      observedLine.visible = true
       observedLine.line = source.line
       observedLine.x = []
       observedLine.y = []
@@ -237,6 +291,7 @@ export default class VueComponent extends Vue {
     this.dataLines = [
       {
         name: 'Target: 50 per 100K',
+        visible: true,
         x: [0, susceptible.x[susceptible.x.length - 1]],
         y: [50, 50],
         fill: 'tozeroy',
@@ -259,6 +314,7 @@ export default class VueComponent extends Vue {
       // },
       {
         name: 'Model',
+        visible: true,
         x: midWeekDates, // susceptible.x.slice(averagingPeriod),
         y: infectionRate,
         type: 'scatter',

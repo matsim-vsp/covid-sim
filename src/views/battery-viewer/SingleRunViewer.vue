@@ -134,6 +134,7 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :data="diseaseData"
+                  :metadata="allPlots[1]"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -155,6 +156,7 @@
                   :intakesHosp="true"
                   :city="city"
                   :postHospUpdater="postHospUpdater1"
+                  :metadata="allPlots[2]"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -176,6 +178,7 @@
                   :intakesHosp="false"
                   :city="city"
                   :postHospUpdater="postHospUpdater2"
+                  :metadata="allPlots[3]"
                 )
 
           //- ---------- CASES COMPARISION -------
@@ -193,7 +196,8 @@
                 :rkiDetectionData="rkiDetectionRateData"
                 :logScale="logScale"
                 :unreportedIncidence="unreportedIncidence"
-                :unreportedIncidenceNRW="unreportedIncidenceNRW")
+                :unreportedIncidenceNRW="unreportedIncidenceNRW"
+                :metadata="allPlots[4]")
 
           //- ---------- VIRUS STRAINS -------
           .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[5].active")
@@ -211,6 +215,7 @@
                   :logScale="logScale"
                   :strainValues="mutationValues"
                   :city="city"
+                  :metadata="allPlots[5]"
                 )
 
           //- ---------- R-VALUES -------
@@ -230,7 +235,8 @@
                   :rValues="rValues"
                   :rValueDate="summaryRValueDate"
                   @avgR="gotNewSummaryRValue"
-                  @method="switchRMethod")
+                  @method="switchRMethod"
+                  :metadata="allPlots[6]")
 
           //- ---------- R VALUES 2 -------
           .linear-plot(v-if="hasRValuePurposes  && allPlots[7].active")
@@ -247,7 +253,8 @@
                   :endDate="endDate"
                   :logScale="false"
                   :rValues="rValues"
-                  @method="switchRMethod")
+                  @method="switchRMethod"
+                  :metadata="allPlots[7]")
 
           //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
           .linear-plot(v-if="infectionsByActivityType.length > 0  && allPlots[8].active")
@@ -262,6 +269,7 @@
                   :endDate="endDate"
                   :logScale="logScale"
                   :values="infectionsByActivityType"
+                  :metadata="allPlots[8]"
                 )
 
           //- ---------- VACCINE EFFECTIVENESS -------
@@ -281,6 +289,7 @@
                   :vaccineEffectivenessData="vaccineEffectivenessData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessFields"
                   vaccineType="mRNA"
+                  :metadata="allPlots[9]"
                 )
 
             .hideIt(v-show="allPlots[9].showPlot")
@@ -295,6 +304,7 @@
                   :vaccineEffectivenessData="vaccineEffectivenessData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessFields"
                   vaccineType="vector"
+                  :metadata="allPlots[9]"
                 )
 
           //- ---------- VACCINE EFFECTIVENESS VS STRAIN -------
@@ -313,6 +323,7 @@
                   :logScale="false"
                   :vaccineEffectivenessData="vaccineEffectivenessVsStrainData"
                   :vaccineEffectivenessFields="showVaccineEffectivenessVsStrainFields"
+                  :metadata="allPlots[10]"
                 )
 
           //- ---------- VACCINATED / UNVACCINATED -------
@@ -328,7 +339,8 @@
                 weekly-infection-by-vaccination.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[11]")
 
           //- ---------- VACCINATION / BOOSTER RATES -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[12].active")
@@ -343,7 +355,8 @@
                 vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[12]")
 
           //- ---------- VACCINATION PER TYPE -------
           .linear-plot(v-if="showIncidenceComp && vaccinationPerType.length > 0  && allPlots[13].active")
@@ -358,7 +371,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 vaccination-per-type.plotsize(v-else :endDate="endDate"
                 :logScale="logScale"
-                :vaccinations="vaccinationPerType")
+                :vaccinations="vaccinationPerType"
+                :metadata="allPlots[13]")
 
           //- ---------- ANTIBODIES -------
           .linear-plot(v-if="showIncidenceComp && antibodies.length > 0  && allPlots[14].active")
@@ -373,7 +387,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 antibodies.plotsize(v-else :endDate="endDate"
                 :logScale="logScale"
-                :antibodies="antibodies")
+                :antibodies="antibodies"
+                :metadata="allPlots[14]")
 
           //- ---------- HOSPITALIZATION 7-DAY MOVING NEW CASES -------
           .linear-plot(v-if="allPlots[15].active")
@@ -390,6 +405,7 @@
                 :endDate="endDate"
                 :city="city"
                 :logScale="logScale"
+                :metadata="allPlots[15]"
                 )
 
           //- ---------- HOSPITALIZATION RATES
@@ -404,7 +420,8 @@
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
                 hospitalization-plot.plotsize(v-else
                   :data="hospitalData" :logScale="logScale" :city="city"
-                  :diviData="diviData" :endDate="endDate" )
+                  :diviData="diviData" :endDate="endDate"
+                  :metadata="allPlots[16]")
 
           //- ---------- CASES COMPARISION BY VACCINATION -------
           .linear-plot(v-if="showIncidenceComp  && allPlots[17].active")
@@ -419,7 +436,8 @@
                 hospitalization-vaccination-comparison.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
-                :logScale="logScale")
+                :logScale="logScale"
+                :metadata="allPlots[17]")
 
           //- ---------- HEALTH OUTCOMES ------
           .linear-plot(v-if="allPlots[18].active")
@@ -431,8 +449,12 @@
               .plotarea
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                vue-plotly.plotsize(v-else
-                  :data="dataHealth" :layout="layout" :options="options")
+                health-outcomes.plotsize(v-else
+                  :data="data"
+                  :logScale="logScale"
+                  :endDate="endDate"
+                  :metadata="allPlots[18]"
+                )
 
           //- ---------- AGE GROUP BLOCK CHART ------
           .linear-plot(v-if="showByAgePlot && incidenceHeatMapData && allPlots[19].active")
@@ -461,7 +483,8 @@
                 age-group-line-chart.plotsize(v-else
                   :endDate="endDate"
                   :data="incidenceHeatMapData"
-                  :logScale="logScale")
+                  :logScale="logScale"
+                  :metadata="allPlots[20]")
 
           //- ---------- LEISURE OUTDOOR FRACTION ------
           .linear-plot(v-if="leisurOutdoorFractionData.length && allPlots[21].active")
@@ -476,6 +499,7 @@
                   :data="leisurOutdoorFractionData"
                   :logScale="false"
                   :endDate="endDate"
+                  :metadata="allPlots[21]"
                   )
 
             //- ---------- WEEKLY TESTS ------
@@ -490,6 +514,7 @@
                 weekly-tests.plotsize(v-else
                   :data="weeklyTestsData"
                   :endDate="endDate"
+                  :metadata="allPlots[22]"
                   )
 
           //- ---------- VEGA PLOTS ------
@@ -559,6 +584,7 @@ import PostHospital from '@/components/PostHospital.vue'
 import DiseaseImport from '@/components/DiseaseImport.vue'
 import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
 import Antibodies from '@/components/Antibodies.vue'
+import HealthOutcomes from '@/components/HealthOutcomes.vue'
 
 interface Measure {
   measure: string
@@ -599,6 +625,7 @@ interface VegaChartDefinition {
     VaccineEffectivenessVsStrain,
     VaccinationPerType,
     Antibodies,
+    HealthOutcomes,
   },
 })
 export default class VueComponent extends Vue {
@@ -619,6 +646,7 @@ export default class VueComponent extends Vue {
     {
       index: 0,
       name: 'Activity Levels by Type',
+      abbreviation: 'actLevPerTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -626,6 +654,7 @@ export default class VueComponent extends Vue {
     {
       index: 1,
       name: 'Disease Import', // NEW
+      abbreviation: 'disImp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -633,6 +662,7 @@ export default class VueComponent extends Vue {
     {
       index: 2,
       name: 'Hospitalization New Cases (post-process)', // NEW
+      abbreviation: 'hosNewCasPos',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -640,6 +670,7 @@ export default class VueComponent extends Vue {
     {
       index: 3,
       name: 'Hospitalization Rate (post-process)', // NEW
+      abbreviation: 'hosRatPos',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -647,6 +678,7 @@ export default class VueComponent extends Vue {
     {
       index: 4,
       name: 'Cases Comparison',
+      abbreviation: 'casCom',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -654,6 +686,7 @@ export default class VueComponent extends Vue {
     {
       index: 5,
       name: 'Virus Strains',
+      abbreviation: 'virStr',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -661,6 +694,7 @@ export default class VueComponent extends Vue {
     {
       index: 6,
       name: 'Simulated R-Values',
+      abbreviation: 'simRVal',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -668,6 +702,7 @@ export default class VueComponent extends Vue {
     {
       index: 7,
       name: 'Simulated R-Values by Purpose',
+      abbreviation: 'simRValByPur',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -675,6 +710,7 @@ export default class VueComponent extends Vue {
     {
       index: 8,
       name: 'Infections by Activity Type',
+      abbreviation: 'infByActTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -682,6 +718,7 @@ export default class VueComponent extends Vue {
     {
       index: 9,
       name: 'Vaccine Effectiveness (against infection)',
+      abbreviation: 'vacEffAgaInf',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -689,6 +726,7 @@ export default class VueComponent extends Vue {
     {
       index: 10,
       name: 'Vaccine Effectiveness Vs. Strain',
+      abbreviation: 'vacEffVsStr',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -696,6 +734,7 @@ export default class VueComponent extends Vue {
     {
       index: 11,
       name: 'Incidence comparison between vaccinated and unvaccinated persons',
+      abbreviation: 'incComVacAndUnvac',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -703,6 +742,7 @@ export default class VueComponent extends Vue {
     {
       index: 12,
       name: 'Vaccination Rates and Booster Rates',
+      abbreviation: 'VacRatBooRat',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -710,6 +750,7 @@ export default class VueComponent extends Vue {
     {
       index: 13,
       name: 'Vaccination per Type',
+      abbreviation: 'VacPerTyp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -717,6 +758,7 @@ export default class VueComponent extends Vue {
     {
       index: 14,
       name: 'Antibodies',
+      abbreviation: 'Antibodies',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -724,6 +766,7 @@ export default class VueComponent extends Vue {
     {
       index: 15,
       name: 'Hospitalization New Cases',
+      abbreviation: 'hospNewCas',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -731,6 +774,7 @@ export default class VueComponent extends Vue {
     {
       index: 16,
       name: 'Hospitalization Rate Comparison',
+      abbreviation: 'hospRatComp',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -738,14 +782,15 @@ export default class VueComponent extends Vue {
     {
       index: 17,
       name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
+      abbreviation: 'hospRatCompVacAndUnvac',
       active: true,
       usedInThisRun: true,
       showPlot: true,
     },
-
     {
       index: 18,
       name: 'Simulated Health Outcomes Over Time',
+      abbreviation: 'simHealOutOveTim',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -753,6 +798,7 @@ export default class VueComponent extends Vue {
     {
       index: 19,
       name: '7-Day Incidence by Age Group Over Time (Heatmap)',
+      abbreviation: 'inciHeatmap',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -760,6 +806,7 @@ export default class VueComponent extends Vue {
     {
       index: 20,
       name: '7-Day Incidence by Age Group Over Time (Linechart)',
+      abbreviation: 'inciLinechart',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -767,6 +814,7 @@ export default class VueComponent extends Vue {
     {
       index: 21,
       name: 'Leisure Outdoor Fraction',
+      abbreviation: 'leiOutFra',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -774,6 +822,7 @@ export default class VueComponent extends Vue {
     {
       index: 22,
       name: 'Weekly Tests',
+      abbreviation: 'weekTest',
       active: true,
       usedInThisRun: true,
       showPlot: true,
@@ -1072,7 +1121,7 @@ export default class VueComponent extends Vue {
   private currentRun: any = {}
 
   private data: any[] = []
-  private dataHealth: any[] = []
+  //private dataHealth: any[] = []
 
   private measureOptions: any = {}
   private runLookup: any = {}
@@ -1436,7 +1485,7 @@ export default class VueComponent extends Vue {
 
     this.updateTotalInfected()
     this.updateVegaCharts()
-    this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
+    //this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
 
     this.updatePlotMenu()
   }
