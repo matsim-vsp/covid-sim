@@ -2495,6 +2495,7 @@ h5 {
 
 .plotarea.activities {
   grid-template-rows: 18rem;
+  margin-bottom: 1rem;
 }
 
 .plotsize {
