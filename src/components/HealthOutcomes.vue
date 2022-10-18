@@ -1,5 +1,5 @@
 <template lang="pug">
-  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options")
+  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
 
   </template>
 
@@ -90,6 +90,11 @@ export default class VueComponent extends Vue {
     } catch (e) {
       /** this is OK */
     }
+  }
+
+  private restylePlot(event: any) {
+    // TODO
+    // console.log(event)
   }
 
   private setLayout() {
