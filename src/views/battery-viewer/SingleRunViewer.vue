@@ -244,7 +244,7 @@
               button.button.is-small.hider(@click="toggleShowPlot(7)") ..
 
             .hideIt(v-show="allPlots[7].showPlot")
-              p {{ rValueMethodDescription }}
+              p 7-day average
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found

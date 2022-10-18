@@ -140,6 +140,10 @@ export default class VueComponent extends Vue {
     const r: any[] = []
     const avgR = []
 
+    let date: any[] = []
+    let sevenDaysAverageDate: any[] = []
+    let sevenDaysAverage: any[] = []
+
     for (const value of this.rValues) {
       x.push(value.date)
       r.push(value[purpose])
@@ -160,11 +164,40 @@ export default class VueComponent extends Vue {
     this.layout.xaxis.range[1] = this.endDate
     this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)] // otherwise starts with different values. kai, jan'21
 
+    date = x.slice(center)
+
+    for (let i = 3; i < date.length; i = i + 7) {
+      sevenDaysAverageDate.push(date[i])
+      sevenDaysAverage.push(
+        (avgR[i - 3] +
+          avgR[i - 2] +
+          avgR[i - 1] +
+          avgR[i] +
+          avgR[i + 1] +
+          avgR[i + 3] +
+          avgR[i + 4]) /
+          7
+      )
+    }
+
+    // this.dataLines.push({
+    //   name: purpose,
+    //   visible: true,
+    //   x: x.slice(center),
+    //   y: avgR,
+    //   // type: 'bar',
+    //   line: {
+    //     width: 2,
+    //     // color: this.color,
+    //     shape: 'linear',
+    //   },
+    // })
+
     this.dataLines.push({
       name: purpose,
       visible: true,
-      x: x.slice(center),
-      y: avgR,
+      x: sevenDaysAverageDate,
+      y: sevenDaysAverage,
       // type: 'bar',
       line: {
         width: 2,
