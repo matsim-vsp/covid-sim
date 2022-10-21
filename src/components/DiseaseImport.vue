@@ -39,6 +39,8 @@ export default class VueComponent extends Vue {
   }
 
   @Watch('logScale') updateScale() {
+    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+    this.layout.xaxis.range[1] = this.endDate
     this.layout.yaxis = this.logScale
       ? {
           //fixedrange: window.innerWidth < 700,
@@ -163,8 +165,13 @@ export default class VueComponent extends Vue {
     margin: { t: 5, r: 10, b: 35, l: 60 },
     xaxis: {
       //fixedrange: window.innerWidth < 700,
+      //fixedrange: true,
+      //autorange: true,
+      //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      autorange: true,
+      //autorange: true,
+      range: ['2020-02-09', '2020-12-31'],
+      type: 'date',
     },
     yaxis: {
       // note this gets overwritten when the scale changes - see updateScale()
