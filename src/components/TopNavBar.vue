@@ -21,6 +21,12 @@
 
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+            a.navbar-link  2022.10.24
+            .navbar-dropdown
+              a.navbar-item(:href="'/cologne/2022-10-18/3-meas'") Report October 24
+
+      .navbar-start
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
             a.navbar-link  2022.08.09
             .navbar-dropdown
               a.navbar-item(:href="'/cologne/2022-08-06/1-vax'") Strain A and B. Report August 09
