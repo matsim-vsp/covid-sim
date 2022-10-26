@@ -242,7 +242,7 @@ async function addReportedDataNewCases(dataLines, city) {
   }
 
   dataLines.push({
-    name: 'Observed: ' + region.name + ' (RKI)',
+    name: 'Observed: ' + region.name + ' (RKI) WITH Covid',
     visible: true,
     x: regionData.map(row => row['Datum']),
     y: regionData.map(
@@ -256,10 +256,23 @@ async function addReportedDataNewCases(dataLines, city) {
   })
 
   dataLines.push({
-    name: 'Adjusted: ' + region.name + ' (RKI)',
+    name: 'Adjusted: ' + region.name + ' (RKI) WITH Covid',
     visible: true,
     x: regionData.map(row => row['Datum']),
     y: regionData.map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz']),
+    //type: 'scatter',
+    //marker: { color: '#4c6' },
+    line: { width: 1 },
+  })
+
+  const regexStartDate = /^202[2-9]/
+  const hospFromCovidAdj1 = regionData.filter(element => !regexStartDate.test(element.Datum)).map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz'] * 2 / 3)
+  const hospFromCovidAdj2 = regionData.filter(element => regexStartDate.test(element.Datum)).map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz'] / 3)
+  dataLines.push({
+    name: 'Adjusted: ' + region.name + ' (RKI) FROM Covid',
+    visible: true,
+    x: regionData.map(row => row['Datum']),
+    y: hospFromCovidAdj2.concat(hospFromCovidAdj1),
     //type: 'scatter',
     //marker: { color: '#4c6' },
     line: { width: 1 },
