@@ -265,6 +265,9 @@ async function addReportedDataNewCases(dataLines, city) {
     line: { width: 1 },
   })
 
+  // plot of hospitalisations from (rather than with) covid
+  // We assume that before 2022, 2/3 of hospitalisations with covid are from covid
+  // and starting on 2022-01-01, 1/3 of hospitalisations with covid are from covid 
   const regexStartDate = /^202[2-9]/
   const hospFromCovidAdj1 = regionData.filter(element => !regexStartDate.test(element.Datum)).map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz'] * 2 / 3)
   const hospFromCovidAdj2 = regionData.filter(element => regexStartDate.test(element.Datum)).map(row => row['PS_adjustierte_7T_Hospitalisierung_Inzidenz'] / 3)
