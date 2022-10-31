@@ -150,7 +150,9 @@ export default class VueComponent extends Vue {
     }
 
     // 0,1,2 *3* 4,5,6
-    const center = Math.floor(this.lagDays / 2)
+    let center = Math.floor(this.lagDays / 2)
+
+    center = center + 2
 
     for (let index = center; index < x.length - center; index++) {
       const average =
