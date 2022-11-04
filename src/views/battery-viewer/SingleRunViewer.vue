@@ -640,6 +640,18 @@ export default class VueComponent extends Vue {
   private postHospUpdater2 = 0
   private totalPopulation = 1
 
+  private activityColors = {
+    dayCare: '', // Daycare
+    home: '', // Home
+    leisurePrivate: '', // Private Leisure
+    leisurePublic: '', // Public Leisure
+    other: '', // Other Non Home
+    pt: '', // PT
+    schools: '', // Primary, Secondary, Other
+    university: '', // Higher Education
+    workBusiness: '', // Work,
+  }
+
   private sideMenuCategories = ['Select Scenario', 'Plots']
   private activeSideMenu = 0
   private allPlots = [
