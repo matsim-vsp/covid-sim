@@ -356,6 +356,7 @@
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
                 :logScale="logScale"
+                :vaccinationRatesDetailed="vaccinationAndBoosterRates"
                 :metadata="allPlots[12]")
 
           //- ---------- VACCINATION PER TYPE -------
@@ -1463,6 +1464,8 @@ export default class VueComponent extends Vue {
 
     this.loadRValues(this.currentRun)
 
+    this.loadVaccinationRatesAndBoosterRates(this.currentRun)
+
     this.loadInfectionsByActivityType(this.currentRun)
 
     this.loadWeeklyTests(this.currentRun)
@@ -1868,6 +1871,26 @@ export default class VueComponent extends Vue {
       this.weeklyTestsData = []
       this.hasWeeklyTests = false
       console.log('WeeklyTests: no', filename)
+    }
+  }
+
+  private vaccinationAndBoosterRates: any[] = []
+
+  private async loadVaccinationRatesAndBoosterRates(currentRun: any) {
+    if (!currentRun.RunId) {
+      this.vaccinationAndBoosterRates = []
+      return
+    }
+
+    const filename = currentRun.RunId + '.vaccinationsDetailed.tsv'
+
+    try {
+      const z = await this.zipWorker.extractFile(filename)
+
+      this.vaccinationAndBoosterRates = z.data
+    } catch (e) {
+      this.vaccinationAndBoosterRates = []
+      console.log('Vaccination Per Type: no', filename)
     }
   }
 

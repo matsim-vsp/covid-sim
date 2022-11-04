@@ -11,6 +11,7 @@ import VuePlotly from '@statnett/vue-plotly'
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
   @Prop({ required: true }) private data!: any[]
+  @Prop({ required: true }) private vaccinationRatesDetailed!: any[]
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private observed!: any[]
   @Prop({ required: true }) private endDate!: any
@@ -124,50 +125,54 @@ export default class VueComponent extends Vue {
    * We are calculating a seven day running infection rate.
    */
   private calculateValues() {
-    if (this.data.length === 0) return
+    if (this.vaccinationRatesDetailed) {
+      console.log('vaccinationRatesDetailed is valid')
+    } else {
+      if (this.data.length === 0) return
 
-    // set end date
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
+      // set end date
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
 
-    // Vaccinations
-    let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
-    let nBooster: any = this.data.filter(item => item.name === 'Boosted')[0]
+      // Vaccinations
+      let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
+      let nBooster: any = this.data.filter(item => item.name === 'Boosted')[0]
 
-    let nSusceptible: any = this.data.filter(item => item.name === 'Susceptible')[0]
-    let nTotalInfected: any = this.data.filter(item => item.name === 'Total Infected')[0]
-    let nRecovered: any = this.data.filter(item => item.name === 'Recovered')[0]
+      let nSusceptible: any = this.data.filter(item => item.name === 'Susceptible')[0]
+      let nTotalInfected: any = this.data.filter(item => item.name === 'Total Infected')[0]
+      let nRecovered: any = this.data.filter(item => item.name === 'Recovered')[0]
 
-    const nTotal = []
-    const vaccinated = []
-    const boosted = []
+      const nTotal = []
+      const vaccinated = []
+      const boosted = []
 
-    for (let i = 0; i < nSusceptible.y.length; i++) {
-      nTotal.push(nSusceptible.y[i] + nTotalInfected.y[i] + nRecovered.y[i])
-      vaccinated.push((100 * nVaccinated.y[i]) / nTotal[i])
-      boosted.push((100 * nBooster.y[i]) / nTotal[i])
+      for (let i = 0; i < nSusceptible.y.length; i++) {
+        nTotal.push(nSusceptible.y[i] + nTotalInfected.y[i] + nRecovered.y[i])
+        vaccinated.push((100 * nVaccinated.y[i]) / nTotal[i])
+        boosted.push((100 * nBooster.y[i]) / nTotal[i])
+      }
+
+      this.dataLines = [
+        {
+          name: '% Vaccinated',
+          visible: true,
+          x: nSusceptible.x,
+          y: vaccinated,
+          line: {
+            width: 3,
+          },
+        },
+        {
+          name: '% Vaccination Boosted',
+          visible: true,
+          x: nSusceptible.x,
+          y: boosted,
+          line: {
+            width: 3,
+          },
+        },
+      ]
     }
-
-    this.dataLines = [
-      {
-        name: '% Vaccinated',
-        visible: true,
-        x: nSusceptible.x,
-        y: vaccinated,
-        line: {
-          width: 3,
-        },
-      },
-      {
-        name: '% Vaccination Boosted',
-        visible: true,
-        x: nSusceptible.x,
-        y: boosted,
-        line: {
-          width: 3,
-        },
-      },
-    ]
   }
 
   private reformatDate(day: string) {
