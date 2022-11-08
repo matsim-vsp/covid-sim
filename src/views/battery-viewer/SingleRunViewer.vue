@@ -92,11 +92,10 @@
           .linear-plot.top-vega-plot(v-if="isZipLoaded && vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
-              :runId="runId"
+              :runId="currentRun.RunId"
               :configFile="chartKey"
               :logScale="logScale"
-              :yamlDef="vegaChartData[chartKey].yaml"
-              :data="vegaChartData[chartKey].data"
+              :vegaChartData="vegaChartData"
             )
 
         //- ----- SCALE AND SHIFT BUTTONS -----
@@ -522,11 +521,10 @@
             .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
               vega-lite-chart.plotsize(
                 :baseUrl="BATTERY_URL"
-                :runId="runId"
+                :runId="currentRun.RunId"
                 :configFile="chartKey"
                 :logScale="logScale"
-                :yamlDef="vegaChartData[chartKey].yaml"
-                :data="vegaChartData[chartKey].data"
+                :vegaChartData="vegaChartData"
               )
 
           i Run ID: {{ currentRun.RunId }}
@@ -595,7 +593,7 @@ interface VegaChartDefinition {
   yaml: any
   zip?: string
   url?: string
-  data?: any[]
+  data?: { [runId: string]: any[] }
   isVisible?: boolean
 }
 
@@ -978,7 +976,7 @@ export default class VueComponent extends Vue {
         const definition = yaml.parse(text)
         const isVisible = true
 
-        const chart: VegaChartDefinition = { yaml: definition, data: [], isVisible: isVisible }
+        const chart: VegaChartDefinition = { yaml: definition, data: {}, isVisible: isVisible }
 
         // is there a zip file?
         if (definition.data && definition.data.zip) {
@@ -1593,6 +1591,7 @@ export default class VueComponent extends Vue {
 
       try {
         const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
+        const beginRunId = this.currentRun.RunId as string
         this.zipWorker.extractFile(filename).then((z: any) => {
           const dateBracket = z.data.filter((point: any) => point.date <= this.endDate)
 
@@ -1604,7 +1603,7 @@ export default class VueComponent extends Vue {
           }
 
           // force set this so that Vue notices the new data
-          this.vegaChartData[key].data = dateBracket
+          if (chart.data) chart.data[beginRunId] = dateBracket
           this.vegaChartData = Object.assign({}, this.vegaChartData)
         })
       } catch (e) {

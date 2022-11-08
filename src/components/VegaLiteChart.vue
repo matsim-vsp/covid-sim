@@ -27,13 +27,12 @@ class VegaLiteChart extends Vue {
   private configFile!: string
 
   @Prop({ required: true })
-  private yamlDef!: any
-
-  @Prop({ required: true })
   private logScale!: boolean
 
   @Prop({ required: true })
-  private data!: any[]
+  private vegaChartData!: {
+    [config: string]: { yaml: any; data: { [runId: string]: any[] }; isVisible: boolean }
+  }
 
   private chartYaml: any = {}
 
@@ -56,7 +55,7 @@ class VegaLiteChart extends Vue {
     this.getVizDetails()
   }
 
-  @Watch('data') handleDataChanged() {
+  @Watch('vegaChartData') handleDataChanged() {
     this.processInputs()
   }
 
@@ -81,7 +80,7 @@ class VegaLiteChart extends Vue {
 
   private async processInputs() {
     // make a deep copy of passed-in definition object
-    this.chartYaml = JSON.parse(JSON.stringify(this.yamlDef))
+    this.chartYaml = JSON.parse(JSON.stringify(this.vegaChartData[this.configFile].yaml))
 
     // schema
     if (!this.chartYaml.$schema)
@@ -124,9 +123,13 @@ class VegaLiteChart extends Vue {
     this.chartYaml.config = Object.assign(this.chartYaml.config, config)
 
     // data
-    if (this.data.length) {
-      // data passed in already
-      this.chartYaml.data = { values: this.data }
+    const z = parseInt(this.runId)
+    if (
+      this.vegaChartData[this.configFile].data[z] &&
+      this.vegaChartData[this.configFile].data[z].length
+    ) {
+      // data passed in is fully-formed
+      this.chartYaml.data = { values: this.vegaChartData[this.configFile].data[z] }
       this.showChart = true
     } else {
       // data url
