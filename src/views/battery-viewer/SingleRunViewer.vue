@@ -1890,7 +1890,7 @@ export default class VueComponent extends Vue {
       this.vaccinationAndBoosterRates = z.data
     } catch (e) {
       this.vaccinationAndBoosterRates = []
-      console.log('Vaccination Per Type: no', filename)
+      console.log('vaccinationsDetailed Rates: no', filename)
     }
   }
 

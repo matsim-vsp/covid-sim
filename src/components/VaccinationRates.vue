@@ -125,6 +125,7 @@ export default class VueComponent extends Vue {
    * We are calculating a seven day running infection rate.
    */
   private calculateValues() {
+    console.log(this.vaccinationRatesDetailed)
     if (this.vaccinationRatesDetailed) {
       console.log('vaccinationRatesDetailed is valid')
     } else {
