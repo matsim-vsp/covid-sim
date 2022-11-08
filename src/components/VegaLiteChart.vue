@@ -12,7 +12,6 @@
 'use strict'
 
 import vegaEmbed from 'vega-embed'
-import yaml from 'yaml'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import moment from 'moment'
 
@@ -158,6 +157,7 @@ class VegaLiteChart extends Vue {
   }
 
   private async embedIt() {
+    // await this.$nextTick()
     // save buttons
     const exportActions = { export: true, source: false, compiled: false, editor: false }
 
@@ -176,6 +176,7 @@ class VegaLiteChart extends Vue {
         await vegaEmbed(`#${this.cleanConfigId}`, this.chartYaml, embedOptions)
       }
     } catch (e) {
+      console.error('VEGA NO BIG DEAL??! ' + e)
       // no chart? no big deal
     }
   }

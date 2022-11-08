@@ -89,7 +89,7 @@
 
         //- ------ Vega charts with top=true -----------
         .top-vega-plots(v-for="chartKey in Object.keys(vegaChartData)" :key="chartKey")
-          .linear-plot.top-vega-plot(v-if="vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
+          .linear-plot.top-vega-plot(v-if="isZipLoaded && vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
               :runId="runId"
@@ -1603,11 +1603,12 @@ export default class VueComponent extends Vue {
             dateBracket[dateBracket.length - 1].date = this.endDate
           }
 
-          chart.data = dateBracket
+          // force set this so that Vue notices the new data
+          this.vegaChartData[key].data = dateBracket
+          this.vegaChartData = Object.assign({}, this.vegaChartData)
         })
       } catch (e) {
-        console.log('YEEEARGH')
-        console.log(e)
+        console.error('YEEEARGH' + e)
       }
     }
   }
