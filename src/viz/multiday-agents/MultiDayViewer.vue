@@ -307,6 +307,9 @@ export default class VueComponent extends Vue {
 @import '@/styles.scss';
 
 #v3-app {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;

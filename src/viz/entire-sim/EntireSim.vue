@@ -545,6 +545,9 @@ export default VueComponent
 @import '@/styles.scss';
 
 #entire-sim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   display: grid;
   pointer-events: none;
   background-size: cover;
