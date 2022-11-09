@@ -559,30 +559,31 @@ import yaml from 'yaml'
 
 import store from '@/store'
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
-import ActivityLevelsPlot from '@/components/ActivityLevelsPlot.vue'
+
+import ActivityLevelsPlot from './ActivityLevelsPlot.vue'
+import AgeGroupLineChart from './AgeGroupLineChart.vue'
+import Antibodies from './Antibodies.vue'
 import ButtonGroup from './ButtonGroup.vue'
-import HeatMap from '@/components/HeatMap.vue'
-import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
-import Hospitalization7DayNewCasesPlot from '@/components/Hospitalization7DayNewCasesPlot.vue'
-import InfectionsByActivityType from '@/components/InfectionsByActivityType.vue'
-import MutationsPlot from '@/components/MutationsPlot.vue'
-import RValuePlot from '@/components/RValuePlot.vue'
-import RValueTwo from '@/components/RValueTwo.vue'
-import VegaLiteChart from '@/components/VegaLiteChart.vue'
-import WeeklyInfectionsPlot from '@/components/WeeklyInfectionsPlot.vue'
-import VaccinationRates from '@/components/VaccinationRates.vue'
-import VaccineEffectivenessPlot from '@/components/VaccinationEffectivenessPlot.vue'
-import VaccineEffectivenessVsStrain from '@/components/VaccinationEffectivenessVsStrain.vue'
-import VaccinationPerType from '@/components/VaccinationPerType.vue'
-import WeeklyInfectionByVaccination from '@/components/WeeklyInfectionByVaccination.vue'
-import HospitalizationVaccinationComparison from '@/components/HospitalizationVaccinationComparison.vue'
-import LeisureOutdoorFraction from '@/components/LeisureOutdoorFraction.vue'
-import WeeklyTests from '@/components/WeeklyTests.vue'
-import PostHospital from '@/components/PostHospital.vue'
-import DiseaseImport from '@/components/DiseaseImport.vue'
-import AgeGroupLineChart from '@/components/AgeGroupLineChart.vue'
-import Antibodies from '@/components/Antibodies.vue'
-import HealthOutcomes from '@/components/HealthOutcomes.vue'
+import DiseaseImport from './DiseaseImport.vue'
+import HealthOutcomes from './HealthOutcomes.vue'
+import HeatMap from './HeatMap.vue'
+import HospitalizationPlot from './HospitalizationPlot.vue'
+import Hospitalization7DayNewCasesPlot from './Hospitalization7DayNewCasesPlot.vue'
+import HospitalizationVaccinationComparison from './HospitalizationVaccinationComparison.vue'
+import InfectionsByActivityType from './InfectionsByActivityType.vue'
+import LeisureOutdoorFraction from './LeisureOutdoorFraction.vue'
+import MutationsPlot from './MutationsPlot.vue'
+import PostHospital from './PostHospital.vue'
+import RValuePlot from './RValuePlot.vue'
+import RValueTwo from './RValueTwo.vue'
+import VegaLiteChart from './VegaLiteChart.vue'
+import VaccinationPerType from './VaccinationPerType.vue'
+import VaccinationRates from './VaccinationRates.vue'
+import VaccineEffectivenessPlot from './VaccinationEffectivenessPlot.vue'
+import VaccineEffectivenessVsStrain from './VaccinationEffectivenessVsStrain.vue'
+import WeeklyInfectionByVaccination from './WeeklyInfectionByVaccination.vue'
+import WeeklyInfectionsPlot from './WeeklyInfectionsPlot.vue'
+import WeeklyTests from './WeeklyTests.vue'
 
 interface Measure {
   measure: string
@@ -611,7 +612,6 @@ interface VegaChartDefinition {
     RValuePlot,
     RValueTwo,
     VegaLiteChart,
-    VuePlotly,
     WeeklyInfectionsPlot,
     WeeklyInfectionByVaccination,
     HospitalizationVaccinationComparison,
@@ -624,6 +624,7 @@ interface VegaChartDefinition {
     VaccinationPerType,
     Antibodies,
     HealthOutcomes,
+    VuePlotly,
   },
 })
 export default class VueComponent extends Vue {

@@ -94,6 +94,7 @@ export default class VueComponent extends Vue {
   private cityDetails: City = this.dataDetails.berlin
 
   private mounted() {
+    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
     this.prepareAdditionalHospitalData()
     this.buildPlot()
     this.unselectLines()
@@ -357,7 +358,7 @@ export default class VueComponent extends Vue {
     yaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      type: this.logScale ? 'log' : 'linear',
+      type: 'log',
       autorange: true,
       title: 'Hospitalizations / 100k Pop.',
     },

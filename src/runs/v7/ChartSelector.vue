@@ -124,8 +124,8 @@ import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
 import MySlider from './SelectWidget.vue'
-import HospitalizationPlot from '@/components/HospitalizationPlot.vue'
-import RValuePlot from '@/components/RValuePlot.vue'
+import HospitalizationPlot from '@/views/v2/HospitalizationPlot.vue'
+import RValuePlot from '@/views/v2/RValuePlot.vue'
 
 @Component({
   components: {

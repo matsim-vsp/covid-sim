@@ -27,28 +27,28 @@
 
   .view-container
     .view-section
-      single-run-viewer.viewer(v-if="currentCity > -1"
-                              :runYaml="allRuns[currentCity].yaml"
-                              :runId="allRuns[currentCity].runId"
-                              :chartYamlFiles="chartYamlFiles")
+      //- the viewer component is versioned and set using yaml 'viewerVersion: 1' etc
+      component.viewer(v-if="currentCity > -1"
+        :is="viewerComponent"
+        :runYaml="allRuns[currentCity].yaml"
+        :runId="allRuns[currentCity].runId"
+        :chartYamlFiles="chartYamlFiles"
+      )
 
   //- .view-section-test
   //-   p1 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
-    
 
 </template>
 
 <script lang="ts">
 // ###########################################################################
 import YAML from 'yaml'
-import MarkdownIt from 'markdown-it'
-import * as moment from 'moment'
-
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import SingleRunViewer from './SingleRunViewer.vue'
+import { Route } from 'vue-router'
+
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 import SVNFileSystem from '@/util/SVNFileSystem'
-import { Route } from 'vue-router'
+import V2RunViewer from './v2/V2RunViewer.vue'
 
 interface Breadcrumb {
   title: string
@@ -58,7 +58,7 @@ interface Breadcrumb {
 
 @Component({
   components: {
-    SingleRunViewer,
+    V2RunViewer,
   },
 })
 export default class VueComponent extends Vue {
@@ -69,6 +69,10 @@ export default class VueComponent extends Vue {
   private runId: string = ''
   private city: string = ''
   private plusminus = '0'
+
+  // The viewer itself is now versioned
+  private defaultViewerComponent = 'V2RunViewer'
+  private viewerComponent = this.defaultViewerComponent
 
   private chartYamlFiles: string[] = []
 
@@ -110,6 +114,11 @@ export default class VueComponent extends Vue {
       const crumbs = this.buildBreadcrumbs(this.runId)
 
       this.chartYamlFiles = await this.getChartYamls()
+
+      // now we have versions of the viewer itself. default is V1
+      this.viewerComponent = readYaml.viewerVersion
+        ? `V${readYaml.viewerVersion}RunViewer`
+        : this.defaultViewerComponent
 
       this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
       this.city = readYaml.city
@@ -312,7 +321,7 @@ a.selected {
   padding: 2rem 3rem 0rem 3rem;
   background-color: black;
   color: white;
-  background: url(../../assets/images/banner.jpg);
+  background: url(../assets/images/banner.jpg);
   background-repeat: no-repeat;
   background-size: cover;
   height: max-content;

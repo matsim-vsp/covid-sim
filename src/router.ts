@@ -208,8 +208,7 @@ const routes = [
   },
   {
     path: '/*',
-    component: () =>
-      import(/* webpackChunkName: "runviewer" */ '@/views/battery-viewer/RunPage.vue'),
+    component: () => import(/* webpackChunkName: "runviewer" */ '@/views/RunPage.vue'),
   },
   {
     // catch-all back to home page

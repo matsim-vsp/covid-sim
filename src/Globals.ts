@@ -60,6 +60,7 @@ export interface Trip {
 }
 
 export interface RunYaml {
+  viewerVersion?: number
   city: string
   info: string
   readme: string
