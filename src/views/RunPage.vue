@@ -1,6 +1,7 @@
 <template lang="pug">
 #run-page
   .banner
+    .version-banner {{ viewerPrettyName }}
     .banner-text
       h2 VSP / Technische Universität Berlin
       h3 COVID-19 Analysis Portal
@@ -76,6 +77,7 @@ export default class VueComponent extends Vue {
   // The viewer itself is now versioned
   private defaultViewerComponent = 'V1RunViewer'
   private viewerComponent = this.defaultViewerComponent
+  private viewerPrettyName = ''
 
   private chartYamlFiles: string[] = []
 
@@ -122,6 +124,10 @@ export default class VueComponent extends Vue {
       this.viewerComponent = readYaml.viewerVersion
         ? `V${readYaml.viewerVersion}RunViewer`
         : this.defaultViewerComponent
+
+      this.viewerPrettyName = readYaml.viewerVersion
+        ? `Viewer V${readYaml.viewerVersion}`
+        : 'Viewer V1'
 
       this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
       this.city = readYaml.city
@@ -355,6 +361,21 @@ a.selected {
 .view-container {
   background-color: green;
   height: min-content;
+  position: relative;
+}
+
+.version-banner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  text-align: center;
+  padding: 0px 1rem;
+  color: black;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 2rem;
+  background-color: #fc4;
+  z-index: 10000;
 }
 
 @media only screen and (max-width: 750px) {
