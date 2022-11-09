@@ -133,6 +133,7 @@ export default class VueComponent extends Vue {
       this.city = readYaml.city
       this.currentCity = 0
     } catch (e) {
+      console.warn('' + e)
       this.attemptMulticityFromURL()
     }
   }
@@ -197,6 +198,15 @@ export default class VueComponent extends Vue {
         let subfolder = this.runId
         subfolder += subfolder.endsWith('/') ? folder : '/' + folder
         const readYaml = await this.loadYaml(subfolder)
+
+        // now we have versions of the viewer itself. default is V1
+        this.viewerComponent = readYaml.viewerVersion
+          ? `V${readYaml.viewerVersion}RunViewer`
+          : this.defaultViewerComponent
+
+        this.viewerPrettyName = readYaml.viewerVersion
+          ? `Viewer V${readYaml.viewerVersion}`
+          : 'Viewer V1'
 
         const crumbs = this.buildBreadcrumbs(subfolder)
         this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: subfolder, crumbs })
