@@ -48,6 +48,8 @@ import { Route } from 'vue-router'
 
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
 import SVNFileSystem from '@/util/SVNFileSystem'
+
+import V1RunViewer from './v1/V1RunViewer.vue'
 import V2RunViewer from './v2/V2RunViewer.vue'
 
 interface Breadcrumb {
@@ -58,6 +60,7 @@ interface Breadcrumb {
 
 @Component({
   components: {
+    V1RunViewer,
     V2RunViewer,
   },
 })
@@ -71,7 +74,7 @@ export default class VueComponent extends Vue {
   private plusminus = '0'
 
   // The viewer itself is now versioned
-  private defaultViewerComponent = 'V2RunViewer'
+  private defaultViewerComponent = 'V1RunViewer'
   private viewerComponent = this.defaultViewerComponent
 
   private chartYamlFiles: string[] = []
