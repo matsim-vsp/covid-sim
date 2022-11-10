@@ -92,7 +92,7 @@
           .linear-plot.top-vega-plot(v-if="isZipLoaded && vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
-              :runId="currentRun.RunId"
+              :currentRun="currentRun"
               :configFile="chartKey"
               :logScale="logScale"
               :vegaChartData="vegaChartData"
@@ -521,7 +521,7 @@
             .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
               vega-lite-chart.plotsize(
                 :baseUrl="BATTERY_URL"
-                :runId="currentRun.RunId"
+                :currentRun="currentRun"
                 :configFile="chartKey"
                 :logScale="logScale"
                 :vegaChartData="vegaChartData"
