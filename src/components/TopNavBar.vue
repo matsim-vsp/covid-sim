@@ -41,7 +41,7 @@
           a.navbar-link  2022.04.26
 
           .navbar-dropdown
-            a.navbar-item(:href="'/cologne/2022-04-13/?mutEscOm=6.0&timePeriodIgA=730.0&mutDate=2022-10-01'") Vaccination in autumn. Report April 26
+            a.navbar-item(:href="'/cologne/2022-04-13/1?timePeriodIgA=730.0&mutDate=2022-10-01&mutEscOm=6.0'") Vaccination in autumn. Report April 26
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2022.02.23
