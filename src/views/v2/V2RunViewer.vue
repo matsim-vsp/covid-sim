@@ -648,7 +648,7 @@ export default class VueComponent extends Vue {
     leisurePrivate: '#008000', // Private Leisure #A0CD9A
     leisurePublic: '#3CB371', // Public Leisure #ccedc7
     other: '#C53932', // Other Non Home C53932
-    pt: '#FFC125', // PT 84584E
+    pt: '#800080', // PT 84584E
     schools: '#964B00', // Primary, Secondary, Other -> brown
     university: '#FF69B4', // Higher Education -> pink
     workBusiness: '#808080', // Work, -> grey
