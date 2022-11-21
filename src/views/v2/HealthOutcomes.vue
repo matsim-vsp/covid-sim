@@ -97,6 +97,7 @@ export default class VueComponent extends Vue {
     // console.log(event)
   }
 
+  @Watch('endDate')
   private setLayout() {
     if (this.$store.state.graphStartDate && this.endDate) {
       this.layout.xaxis.range[0] = this.$store.state.graphStartDate
