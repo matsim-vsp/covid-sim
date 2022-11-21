@@ -1,7 +1,7 @@
 <template lang="pug">
-  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
+vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
 
-  </template>
+</template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
