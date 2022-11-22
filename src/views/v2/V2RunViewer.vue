@@ -354,7 +354,9 @@
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                vaccination-rates.plotsize(v-else :data="data"  :endDate="endDate"
+                vaccination-rates.plotsize(v-else :data="data"  
+                :vaccinationDetailed="vaccinationDetailed"
+                :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
                 :logScale="logScale"
@@ -1461,6 +1463,8 @@ export default class VueComponent extends Vue {
 
     this.loadVaccinationPerType(this.currentRun)
 
+    this.loadVaccinationDetailed(this.currentRun)
+
     this.loadAntibodies(this.currentRun)
 
     this.loadRValues(this.currentRun)
@@ -1892,6 +1896,26 @@ export default class VueComponent extends Vue {
     } catch (e) {
       this.vaccinationPerType = []
       console.log('Vaccination Per Type: no', filename)
+    }
+  }
+
+  private vaccinationDetailed: any[] = []
+
+  private async loadVaccinationDetailed(currentRun: any) {
+    if (!currentRun.RunId) {
+      this.vaccinationDetailed = []
+      return
+    }
+
+    const filename = currentRun.RunId + '.vaccinationsDetailed.tsv'
+
+    try {
+      const z = await this.zipWorker.extractFile(filename)
+
+      this.vaccinationDetailed = z.data
+    } catch (e) {
+      this.vaccinationDetailed = []
+      console.log('Vaccination Detailed: no', filename)
     }
   }
 
