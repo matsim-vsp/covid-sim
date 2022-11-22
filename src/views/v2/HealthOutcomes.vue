@@ -1,7 +1,7 @@
 <template lang="pug">
-  vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
+vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="options" @restyle="restylePlot")
 
-  </template>
+</template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -97,6 +97,7 @@ export default class VueComponent extends Vue {
     // console.log(event)
   }
 
+  @Watch('endDate')
   private setLayout() {
     if (this.$store.state.graphStartDate && this.endDate) {
       this.layout.xaxis.range[0] = this.$store.state.graphStartDate
