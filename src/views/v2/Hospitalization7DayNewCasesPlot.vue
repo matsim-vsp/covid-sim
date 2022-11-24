@@ -212,9 +212,12 @@ export default class VueComponent extends Vue {
 
     try {
       const susceptible = this.data.filter(v => v.name === 'Susceptible')[0]
-      if (!susceptible) return
+      const totalInfected = this.data.filter(item => item.name === 'Total Infected')[0]
+      const recovered = this.data.filter(item => item.name === 'Recovered')[0]
 
-      const totalPopulation = susceptible.y[0]
+      if (!susceptible || !totalInfected || !recovered) return
+
+      const totalPopulation = susceptible.y[0] + totalInfected.y[0] + recovered.y[0]
       const factor100k = totalPopulation / 100000.0
 
       const seriouslySickCumul = this.data.filter(v => v.name === 'Seriously Sick Cumulative')[0]
