@@ -127,7 +127,7 @@ export default class VueComponent extends Vue {
   @Watch('vaccinationDetailed')
   private calculateValues() {
     let vaccinationDetailedMap = new Map<number, Object>()
-    let names = ['First', 'Second', 'Third', 'Fourth']
+    let names = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
 
     if (this.data.length === 0) return
     if (this.vaccinationDetailed.length > 0) {
