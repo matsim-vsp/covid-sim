@@ -124,204 +124,55 @@ export default class VueComponent extends Vue {
   /**
    * We are calculating a seven day running infection rate.
    */
+  @Watch('vaccinationDetailed')
   private calculateValues() {
+    let vaccinationDetailedMap = new Map<number, Object>()
+    let names = ['First', 'Second', 'Third', 'Fourth']
+
     if (this.data.length === 0) return
-    if (this.vaccinationDetailed.length != 0) {
-      // DO THIS:::
-      let dateFirstVaccination = [] as any
-      let dateSecondVaccination = [] as any
-      let dateThirdVaccination = [] as any
-      let dateFourthVaccination = [] as any
-      let dateFifthVaccination = [] as any
-      let dateSixthVaccination = [] as any
-
-      let amountFirstVaccination = [] as any
-      let amountSecondVaccination = [] as any
-      let amountThirdVaccination = [] as any
-      let amountFourthVaccination = [] as any
-      let amountFifthVaccination = [] as any
-      let amountSixthVaccination = [] as any
-
-      let numberOfDifferentFirstVaccinations = [] as any
-      let numberOfDifferentSecondVaccinations = [] as any
-      let numberOfDifferentThirdVaccinations = [] as any
-      let numberOfDifferentFourthVaccinations = [] as any
-      let numberOfDifferentFifthVaccinations = [] as any
-      let numberOfDifferentSixthVaccinations = [] as any
-
+    if (this.vaccinationDetailed.length > 0) {
       for (let i = 0; i < this.vaccinationDetailed.length; i++) {
+        const number = this.vaccinationDetailed[i].number
+        const amount = this.vaccinationDetailed[i].amount
+        if (!vaccinationDetailedMap.has(number)) {
+          vaccinationDetailedMap.set(number, { x: [] as any, y: [] as any, amount: [] as any })
+        }
+
         const date = this.vaccinationDetailed[i].date
-        switch (this.vaccinationDetailed[i].number) {
-          case 1:
-            if (dateFirstVaccination.includes(date)) {
-              const index = dateFirstVaccination.indexOf(date)
-              amountFirstVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentFirstVaccinations[index]++
-            } else {
-              dateFirstVaccination.push(date)
-              amountFirstVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentFirstVaccinations.push(1)
-            }
-            break
-          case 2:
-            if (dateSecondVaccination.includes(date)) {
-              const index = dateSecondVaccination.indexOf(date)
-              amountSecondVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentSecondVaccinations[index]++
-            } else {
-              dateSecondVaccination.push(date)
-              amountSecondVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentSecondVaccinations.push(1)
-            }
-            break
-          case 3:
-            if (dateThirdVaccination.includes(date)) {
-              const index = dateThirdVaccination.indexOf(date)
-              amountThirdVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentThirdVaccinations[index]++
-            } else {
-              dateThirdVaccination.push(date)
-              amountThirdVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentThirdVaccinations.push(1)
-            }
-            break
-          case 4:
-            if (dateFourthVaccination.includes(date)) {
-              const index = dateFirstVaccination.indexOf(date)
-              amountFourthVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentFourthVaccinations[index]++
-            } else {
-              dateFourthVaccination.push(date)
-              amountFourthVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentFourthVaccinations.push(1)
-            }
-            break
-          case 5:
-            if (dateFifthVaccination.includes(date)) {
-              const index = dateFifthVaccination.indexOf(date)
-              amountFifthVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentFifthVaccinations[index]++
-            } else {
-              dateFifthVaccination.push(date)
-              amountFifthVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentFifthVaccinations.push(1)
-            }
-            break
-          case 6:
-            if (dateSixthVaccination.includes(date)) {
-              const index = dateSixthVaccination.indexOf(date)
-              amountSixthVaccination[index] += this.vaccinationDetailed[i].amount
-              numberOfDifferentSixthVaccinations[index]++
-            } else {
-              dateSixthVaccination.push(date)
-              amountSixthVaccination.push(this.vaccinationDetailed[i].amount)
-              numberOfDifferentSixthVaccinations.push(1)
-            }
-            break
-          default:
-          // code block
+
+        let object = vaccinationDetailedMap.get(number) as any
+
+        if (object.x.includes(date)) {
+          const index = object.x.indexOf(date)
+          object.y[index] += amount
+          object.amount[index] += 1
+        } else {
+          object.x.push(date)
+          object.y.push(amount)
+          object.amount.push(1)
         }
+
+        vaccinationDetailedMap.set(number, object)
       }
 
-      for (let i = 0; i < dateFirstVaccination.length; i++) {
-        if (numberOfDifferentFirstVaccinations[i] > 1) {
-          amountFirstVaccination[i] =
-            amountFirstVaccination[i] / numberOfDifferentFirstVaccinations[i]
+      for (let [key, value] of vaccinationDetailedMap) {
+        const data = value as any
+        for (let i = 0; i < data.x.length; i++) {
+          if (data.amount > 1) {
+            data.y = data.y / data.amount
+            data.amount = 1
+          }
         }
-      }
-
-      for (let i = 0; i < dateSecondVaccination.length; i++) {
-        if (numberOfDifferentSecondVaccinations[i] > 1) {
-          amountSecondVaccination[i] =
-            amountSecondVaccination[i] / numberOfDifferentSecondVaccinations[i]
-        }
-      }
-
-      for (let i = 0; i < dateThirdVaccination.length; i++) {
-        if (numberOfDifferentThirdVaccinations[i] > 1) {
-          amountThirdVaccination[i] =
-            amountThirdVaccination[i] / numberOfDifferentThirdVaccinations[i]
-        }
-      }
-
-      for (let i = 0; i < dateFourthVaccination.length; i++) {
-        if (numberOfDifferentFourthVaccinations[i] > 1) {
-          amountFourthVaccination[i] =
-            amountFourthVaccination[i] / numberOfDifferentFourthVaccinations[i]
-        }
-      }
-
-      for (let i = 0; i < dateFifthVaccination.length; i++) {
-        if (numberOfDifferentFifthVaccinations[i] > 1) {
-          amountFifthVaccination[i] =
-            amountFifthVaccination[i] / numberOfDifferentFifthVaccinations[i]
-        }
-      }
-
-      for (let i = 0; i < dateSixthVaccination.length; i++) {
-        if (numberOfDifferentSixthVaccinations[i] > 1) {
-          amountSixthVaccination[i] =
-            amountSixthVaccination[i] / numberOfDifferentSixthVaccinations[i]
-        }
-      }
-
-      this.dataLines = [
-        {
-          name: 'First',
+        this.dataLines.push({
+          name: names[key - 1],
           visible: true,
-          x: dateFirstVaccination,
-          y: amountFirstVaccination,
+          x: data.x,
+          y: data.y,
           line: {
             width: 3,
           },
-        },
-        {
-          name: 'Second',
-          visible: true,
-          x: dateSecondVaccination,
-          y: amountSecondVaccination,
-          line: {
-            width: 3,
-          },
-        },
-        {
-          name: 'Third',
-          visible: true,
-          x: dateThirdVaccination,
-          y: amountThirdVaccination,
-          line: {
-            width: 3,
-          },
-        },
-        {
-          name: 'Fourth',
-          visible: true,
-          x: dateFourthVaccination,
-          y: amountFourthVaccination,
-          line: {
-            width: 3,
-          },
-        },
-        {
-          name: 'Fifth',
-          visible: true,
-          x: dateFifthVaccination,
-          y: amountFifthVaccination,
-          line: {
-            width: 3,
-          },
-        },
-        {
-          name: 'Sixth',
-          visible: true,
-          x: dateSixthVaccination,
-          y: amountSixthVaccination,
-          line: {
-            width: 3,
-          },
-        },
-      ]
-      console.log(this.dataLines)
+        })
+      }
     } else {
       // set end date
       this.layout.xaxis.range[0] = this.$store.state.graphStartDate
@@ -366,6 +217,16 @@ export default class VueComponent extends Vue {
         },
       ]
     }
+  }
+
+  private checkIfVaccinationDetailedDataIsCorrect() {
+    if (!this.vaccinationDetailed.length) return false
+
+    /*
+    for (let i = 0; i < this.vaccinationDetailed.length; i++) {
+      console.log(this.vaccinationDetailed[i].number)
+    }
+    */
   }
 
   private reformatDate(day: string) {
