@@ -7,6 +7,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
+import { indexOf } from 'js-coroutines'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -44,6 +45,16 @@ export default class VueComponent extends Vue {
     if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
       this.calculateValues()
       this.unselectLines()
+    }
+  }
+
+  @Watch('logScale') updateScale() {
+    if (this.logScale) {
+      this.layout.yaxis.type = 'log'
+      this.layout.yaxis.autorange = true
+    } else {
+      this.layout.yaxis.type = 'linear'
+      this.layout.yaxis.autorange = true
     }
   }
 
@@ -127,15 +138,22 @@ export default class VueComponent extends Vue {
   @Watch('vaccinationDetailed')
   private calculateValues() {
     let vaccinationDetailedMap = new Map<number, Object>()
-    let names = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
+    let names = ['vaccinated', 'booster', '2nd booster', '3rd booster', '4th booster']
 
     if (this.data.length === 0) return
     if (this.vaccinationDetailed.length > 0) {
+      this.dataLines = []
       for (let i = 0; i < this.vaccinationDetailed.length; i++) {
         const number = this.vaccinationDetailed[i].number
         const amount = this.vaccinationDetailed[i].amount
         if (!vaccinationDetailedMap.has(number)) {
-          vaccinationDetailedMap.set(number, { x: [] as any, y: [] as any, amount: [] as any })
+          vaccinationDetailedMap.set(number, {
+            x: [] as any,
+            y: [] as any,
+            amount: [] as any,
+            xEdited: [] as any,
+            yEdited: [] as any,
+          })
         }
 
         const date = this.vaccinationDetailed[i].date
@@ -154,7 +172,6 @@ export default class VueComponent extends Vue {
 
         vaccinationDetailedMap.set(number, object)
       }
-
       for (let [key, value] of vaccinationDetailedMap) {
         const data = value as any
         for (let i = 0; i < data.x.length; i++) {
@@ -163,6 +180,40 @@ export default class VueComponent extends Vue {
             data.amount = 1
           }
         }
+        const firstDate = data.x[0]
+        const lastDate = data.x[data.x.length - 1]
+
+        for (var d = new Date(firstDate); d <= new Date(lastDate); d.setDate(d.getDate() + 1)) {
+          const date = d.toISOString().split('T')[0]
+          if (data.x.includes(date)) {
+            const index = data.x.indexOf(date)
+            data.xEdited.push(data.x[index])
+            data.yEdited.push(data.y[index])
+          } else {
+            data.xEdited.push(date)
+            data.yEdited.push(0)
+          }
+        }
+        data.x = []
+        data.y = []
+
+        for (let i = 3; i < data.xEdited.length; i = i + 7) {
+          data.x.push(data.xEdited[i])
+          data.y.push(
+            (data.yEdited[i - 3] +
+              data.yEdited[i - 2] +
+              data.yEdited[i - 1] +
+              data.yEdited[i] +
+              data.yEdited[i + 1] +
+              data.yEdited[i + 2] +
+              data.yEdited[i + 3]) /
+              7
+          )
+        }
+      }
+
+      for (let [key, value] of vaccinationDetailedMap) {
+        const data = value as any
         this.dataLines.push({
           name: names[key - 1],
           visible: true,
