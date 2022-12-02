@@ -13,6 +13,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import moment from 'moment'
 import VuePlotly from '@statnett/vue-plotly'
 import { debounce } from 'debounce'
+import { indexOf } from 'js-coroutines'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -23,8 +24,32 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private plusminus!: number
   @Prop({ required: true }) private zipWorker!: any
+  @Prop({ required: true }) private colorMatch!: any
 
   private dataLines: any[] = []
+
+  private plotNamesColor = [
+    'Work',
+    'Public Leisure',
+    'Private Leisure',
+    'Daycare',
+    'Primary Ed.',
+    'Secondary Ed.',
+    'Higher Ed.',
+    'Other Ed.',
+    'Other NonHome',
+  ]
+  private mainNamesColor = [
+    'workBusiness',
+    'leisurePublic',
+    'leisurePrivate',
+    'dayCare',
+    'schools',
+    'schools',
+    'university',
+    'schools',
+    'other',
+  ]
 
   private isResizing = false
 
@@ -100,6 +125,15 @@ export default class VueComponent extends Vue {
         showticklabels: false,
         ticks: '',
         title: '', // i == 1 + Math.floor(this.dataLines.length / 2) ? 'Activity Level,  0-100%' : '',
+      }
+    }
+    for (let i = 0; i <= this.dataLines.length; i++) {
+      if (this.dataLines[i] != undefined) {
+        if (this.plotNamesColor.includes(this.dataLines[i].name)) {
+          const index = this.plotNamesColor.indexOf(this.dataLines[i].name)
+          let name = this.mainNamesColor[index]
+          this.dataLines[i]['line'] = { color: this.colorMatch[name] }
+        }
       }
     }
   }

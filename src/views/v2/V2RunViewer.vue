@@ -33,7 +33,7 @@
               p.subhead(v-if="group.subheading") {{ group.subheading }}
 
               .measure(v-for="m in group.measures" :key="m.measure")
-                .measure-buttons(v-if="measureOptions[m.measure].length > 1")
+                .measure-buttons(v-if="measureOptions[m.measure] != undefined && measureOptions[m.measure].length > 1")
                   p {{ m.title }}
                   button-group(:measure="m" :options="measureOptions[m.measure]" @changed="sliderChanged")
 
@@ -84,7 +84,8 @@
           .plotarea.activities
             activity-levels-plot.plotsize(:city="city" :battery="runId"
               :currentRun="currentRun" :startDate="startDate" :endDate="endDate" :plusminus="plusminus"
-              :zipWorker="zipWorker")
+              :zipWorker="zipWorker"
+              :colorMatch="activityColors")
               //- @missing="showActivityLevels = false")
 
         //- ------ Vega charts with top=true -----------
@@ -92,7 +93,7 @@
           .linear-plot.top-vega-plot(v-if="isZipLoaded && vegaChartData[chartKey].yaml.showAbove === true && vegaChartData[chartKey].isVisible")
             vega-lite-chart.plotsize(
               :baseUrl="BATTERY_URL"
-              :runId="currentRun.RunId"
+              :currentRun="currentRun"
               :configFile="chartKey"
               :logScale="logScale"
               :vegaChartData="vegaChartData"
@@ -253,7 +254,8 @@
                   :logScale="false"
                   :rValues="rValues"
                   @method="switchRMethod"
-                  :metadata="allPlots[7]")
+                  :metadata="allPlots[7]"
+                  :colorMatch="activityColors")
 
           //- ---------- INFECTIONS BY ACTIVITY TYPE ---------
           .linear-plot(v-if="infectionsByActivityType.length > 0  && allPlots[8].active")
@@ -269,6 +271,7 @@
                   :logScale="logScale"
                   :values="infectionsByActivityType"
                   :metadata="allPlots[8]"
+                  :colorMatch="activityColors"
                 )
 
           //- ---------- VACCINE EFFECTIVENESS -------
@@ -521,7 +524,7 @@
             .linear-plot(v-if="vegaChartData[chartKey].yaml.showAbove != true")
               vega-lite-chart.plotsize(
                 :baseUrl="BATTERY_URL"
-                :runId="currentRun.RunId"
+                :currentRun="currentRun"
                 :configFile="chartKey"
                 :logScale="logScale"
                 :vegaChartData="vegaChartData"
@@ -640,15 +643,15 @@ export default class VueComponent extends Vue {
   private totalPopulation = 1
 
   private activityColors = {
-    dayCare: '', // Daycare
-    home: '', // Home
-    leisurePrivate: '', // Private Leisure
-    leisurePublic: '', // Public Leisure
-    other: '', // Other Non Home
-    pt: '', // PT
-    schools: '', // Primary, Secondary, Other
-    university: '', // Higher Education
-    workBusiness: '', // Work,
+    dayCare: '#0096FF', // Daycare #0096FF
+    home: '#EF8536', // Home
+    leisurePrivate: '#008000', // Private Leisure #A0CD9A
+    leisurePublic: '#3CB371', // Public Leisure #ccedc7
+    other: '#C53932', // Other Non Home C53932
+    pt: '#800080', // PT 84584E
+    schools: '#964B00', // Primary, Secondary, Other -> brown
+    university: '#FF69B4', // Higher Education -> pink
+    workBusiness: '#808080', // Work, -> grey
   }
 
   private sideMenuCategories = ['Select Scenario', 'Plots']

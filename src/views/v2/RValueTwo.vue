@@ -14,6 +14,32 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private rValues!: any[]
   @Prop({ required: true }) private metadata!: any
+  @Prop({ required: true }) private colorMatch!: any
+
+  private plotNamesColor = [
+    'work&business',
+    'leisPublic',
+    'leisPrivate',
+    'day care',
+    'schools',
+    'schools',
+    'university',
+    'other',
+    'pt',
+    'home',
+  ]
+  private mainNamesColor = [
+    'workBusiness',
+    'leisurePublic',
+    'leisurePrivate',
+    'dayCare',
+    'schools',
+    'schools',
+    'university',
+    'other',
+    'pt',
+    'home',
+  ]
 
   private color = '#04f'
 
@@ -123,6 +149,7 @@ export default class VueComponent extends Vue {
     const allPurposes: string[] = Object.keys(this.rValues[0])
     const purposes: string[] = []
     const skip = ['day', 'date', 'rValue', 'newContagious', 'scenario']
+    if (allPurposes.includes('leisPrivate')) skip.push('leisure')
 
     for (const purpose of allPurposes) {
       if (skip.indexOf(purpose) === -1) purposes.push(purpose)
@@ -132,6 +159,16 @@ export default class VueComponent extends Vue {
 
     for (const purpose of purposes.sort()) {
       this.calculateRValueForPurpose(purpose)
+    }
+
+    for (let i = 0; i <= this.dataLines.length; i++) {
+      if (this.dataLines[i] != undefined) {
+        if (this.plotNamesColor.includes(this.dataLines[i].name)) {
+          const index = this.plotNamesColor.indexOf(this.dataLines[i].name)
+          let name = this.mainNamesColor[index]
+          this.dataLines[i]['line'] = { color: this.colorMatch[name] }
+        }
+      }
     }
   }
 

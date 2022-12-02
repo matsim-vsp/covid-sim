@@ -15,6 +15,32 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private endDate!: string
   @Prop({ required: true }) private values!: any[]
   @Prop({ required: true }) private metadata!: any
+  @Prop({ required: true }) private colorMatch!: any
+
+  private plotNamesColor = [
+    'work&business',
+    'leisPublic',
+    'leisPrivate',
+    'day care',
+    'schools',
+    'schools',
+    'university',
+    'other',
+    'pt',
+    'home',
+  ]
+  private mainNamesColor = [
+    'workBusiness',
+    'leisurePublic',
+    'leisurePrivate',
+    'dayCare',
+    'schools',
+    'schools',
+    'university',
+    'other',
+    'pt',
+    'home',
+  ]
 
   private color = '#04f'
 
@@ -199,11 +225,22 @@ export default class VueComponent extends Vue {
     this.layout2.xaxis.range[1] = this.endDate
 
     for (const actType of Object.keys(infections).sort()) {
+      let color = 'FFFFFF'
+
+      if (this.plotNamesColor.includes(actType)) {
+        const index = this.plotNamesColor.indexOf(actType)
+        const name = this.mainNamesColor[index]
+        color = this.colorMatch[name]
+      }
+
       this.dataLines.push({
         name: actType,
         visible: true,
         x: date,
         y: infections[actType],
+        line: {
+          color: color,
+        },
         // mode: 'markers',
         // marker: { size: 4 },
       })
@@ -213,6 +250,9 @@ export default class VueComponent extends Vue {
         visible: true,
         x: date,
         y: shares[actType],
+        line: {
+          color: color,
+        },
         // mode: 'markers',
         // marker: { size: 4 },
       })

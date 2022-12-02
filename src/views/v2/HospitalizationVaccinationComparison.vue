@@ -229,7 +229,7 @@ export default class VueComponent extends Vue {
     var kh_geimpft = []
     var kh_ungeimpft = []
 
-    const totalPopulation = susceptible.y[0]
+    const totalPopulation = susceptible.y[0] + totalInfected.y[0] + recovered.y[0]
     let factor100k = totalPopulation / 100000.0
 
     for (var i = 0; i < seriouslySick.x.length; i++) {

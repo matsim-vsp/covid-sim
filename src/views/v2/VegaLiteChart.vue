@@ -21,7 +21,7 @@ class VegaLiteChart extends Vue {
   private baseUrl!: string
 
   @Prop({ required: true })
-  private runId!: string
+  private currentRun!: any
 
   @Prop({ required: true })
   private configFile!: string
@@ -123,13 +123,14 @@ class VegaLiteChart extends Vue {
     this.chartYaml.config = Object.assign(this.chartYaml.config, config)
 
     // data
-    const z = parseInt(this.runId)
+
+    const runId = this.currentRun.RunId
     if (
-      this.vegaChartData[this.configFile].data[z] &&
-      this.vegaChartData[this.configFile].data[z].length
+      this.vegaChartData[this.configFile].data[runId] &&
+      this.vegaChartData[this.configFile].data[runId].length
     ) {
       // data passed in is fully-formed
-      this.chartYaml.data = { values: this.vegaChartData[this.configFile].data[z] }
+      this.chartYaml.data = { values: this.vegaChartData[this.configFile].data[runId] }
       this.showChart = true
     } else {
       // data url
@@ -138,7 +139,7 @@ class VegaLiteChart extends Vue {
         delete this.chartYaml.url
       }
       if (this.chartYaml.data.url && !this.chartYaml.data.url.startsWith('http')) {
-        const localUrl = `${this.baseUrl}/${this.runId}/${this.chartYaml.data.url}`
+        const localUrl = `${this.baseUrl}/${runId}/${this.chartYaml.data.url}`
         this.chartYaml.data = { url: localUrl }
       }
     }
