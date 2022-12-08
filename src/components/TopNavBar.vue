@@ -22,8 +22,8 @@
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
             a.navbar-link  2022.12.02
             .navbar-dropdown
-              a.navbar-item(:href="'/cologne/2022-11-23/variants'") Report December 02
-              a.navbar-item(:href="'/cologne/2022-11-23/variants2'") Variant soup
+              a.navbar-item(:href="'/cologne/2022-11-23/variants'") Variant soup. Report December 02
+              a.navbar-item(:href="'/cologne/2022-11-23/variants2'") No immune escape. Report December 02
 
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
             a.navbar-link  2022.10.24
