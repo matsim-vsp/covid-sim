@@ -7,7 +7,6 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import { indexOf } from 'js-coroutines'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -30,6 +29,7 @@ export default class VueComponent extends Vue {
 
   private dataLines: any[] = []
   private unselectedLines: string[] = []
+  private useVaccinationDetailed = true
 
   private mounted() {
     try {
@@ -50,10 +50,10 @@ export default class VueComponent extends Vue {
 
   @Watch('logScale') updateScale() {
     if (this.logScale) {
-      this.layout.yaxis.type = 'log'
+      //this.layout.yaxis.type = 'log'
       this.layout.yaxis.autorange = true
     } else {
-      this.layout.yaxis.type = 'linear'
+      //this.layout.yaxis.type = 'linear'
       this.layout.yaxis.autorange = true
     }
   }
@@ -71,19 +71,19 @@ export default class VueComponent extends Vue {
     this.unselectLines()
   }
 
-  // @Watch('logScale') updateScale() {
+  // @Watch('logScale') updateScale2() {
   //   this.layout.yaxis = this.logScale
   //     ? {
-  //         fixedrange: window.innerWidth < 700,
+  //         //fixedrange: window.innerWidth < 700,
   //         type: 'log',
-  //         range: [Math.log10(2), Math.log10(5000)],
-  //         title: '7-Day Infections / 100k Pop.',
+  //         //range: [Math.log10(2), Math.log10(5000)],
+  //         //title: '7-Day Infections / 100k Pop.',
   //       }
   //     : {
-  //         fixedrange: window.innerWidth < 700,
+  //         //fixedrange: window.innerWidth < 700,
   //         type: 'linear',
-  //         autorange: true,
-  //         title: '7-Day Infections / 100k Pop.',
+  //         //autorange: true,
+  //         //title: '7-Day Infections / 100k Pop.',
   //       }
   // }
 
@@ -137,11 +137,12 @@ export default class VueComponent extends Vue {
    */
   @Watch('vaccinationDetailed')
   private calculateValues() {
+    this.updateScale()
     let vaccinationDetailedMap = new Map<number, Object>()
     let names = ['vaccinated', 'booster', '2nd booster', '3rd booster', '4th booster']
 
     if (this.data.length === 0) return
-    if (this.vaccinationDetailed.length > 0) {
+    if (this.checkIfVaccinationDetailedDataIsCorrect()) {
       this.dataLines = []
       for (let i = 0; i < this.vaccinationDetailed.length; i++) {
         const number = this.vaccinationDetailed[i].number
@@ -225,9 +226,13 @@ export default class VueComponent extends Vue {
         })
       }
     } else {
+      this.dataLines = []
       // set end date
       this.layout.xaxis.range[0] = this.$store.state.graphStartDate
       this.layout.xaxis.range[1] = this.endDate
+
+      this.layout.yaxis.autorange = false
+      this.layout.yaxis.range = [0, 100]
 
       // Vaccinations
       let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
@@ -271,8 +276,16 @@ export default class VueComponent extends Vue {
   }
 
   private checkIfVaccinationDetailedDataIsCorrect() {
-    if (!this.vaccinationDetailed.length) return false
+    for (let i = 0; i < this.vaccinationDetailed.length; i++) {
+      if (this.vaccinationDetailed[i].number % 1 != 0) {
+        //return false
+      }
+      //console.log(this.vaccinationDetailed[i].number % 1 != 0)
+    }
 
+    if (this.vaccinationDetailed.length == 0) return false
+
+    return true
     /*
     for (let i = 0; i < this.vaccinationDetailed.length; i++) {
       console.log(this.vaccinationDetailed[i].number)
@@ -313,7 +326,7 @@ export default class VueComponent extends Vue {
       type: 'linear',
       //autorange: false,
       autorange: true,
-      //range: [0, 100],
+      range: [0, 100],
       title: '% vaccinated/boosted',
     } as any,
     plot_bgcolor: '#f8f8f8',
