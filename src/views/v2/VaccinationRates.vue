@@ -218,7 +218,6 @@ export default class VueComponent extends Vue {
 
       for (let [key, value] of vaccinationDetailedMap) {
         const data = value as any
-        console.log(data.y)
         this.dataLines.push({
           name: names[key - 1],
           visible: true,
