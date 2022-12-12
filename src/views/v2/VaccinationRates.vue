@@ -144,6 +144,9 @@ export default class VueComponent extends Vue {
     if (this.data.length === 0) return
     if (this.checkIfVaccinationDetailedDataIsCorrect()) {
       this.dataLines = []
+
+      this.layout.yaxis.title = `7-Day Vaccinations per Day`
+
       for (let i = 0; i < this.vaccinationDetailed.length; i++) {
         const number = this.vaccinationDetailed[i].number
         const amount = this.vaccinationDetailed[i].amount
@@ -215,6 +218,7 @@ export default class VueComponent extends Vue {
 
       for (let [key, value] of vaccinationDetailedMap) {
         const data = value as any
+        console.log(data.y)
         this.dataLines.push({
           name: names[key - 1],
           visible: true,
@@ -227,6 +231,9 @@ export default class VueComponent extends Vue {
       }
     } else {
       this.dataLines = []
+
+      this.layout.yaxis.title = `% vaccinated/boosted`
+
       // set end date
       this.layout.xaxis.range[0] = this.$store.state.graphStartDate
       this.layout.xaxis.range[1] = this.endDate
@@ -252,12 +259,40 @@ export default class VueComponent extends Vue {
         boosted.push((100 * nBooster.y[i]) / nTotal[i])
       }
 
+      let date = []
+      let sevenDayAverageVaccinated = []
+      let sevenDayAverageBoostered = []
+
+      for (let i = 3; i < nSusceptible.x.length; i = i + 7) {
+        date.push(nSusceptible.x[i])
+        sevenDayAverageVaccinated.push(
+          (vaccinated[i - 3] +
+            vaccinated[i - 2] +
+            vaccinated[i - 1] +
+            vaccinated[i] +
+            vaccinated[i + 1] +
+            vaccinated[i + 2] +
+            vaccinated[i + 3]) /
+            7
+        )
+        sevenDayAverageBoostered.push(
+          (boosted[i - 3] +
+            boosted[i - 2] +
+            boosted[i - 1] +
+            boosted[i] +
+            boosted[i + 1] +
+            boosted[i + 2] +
+            boosted[i + 3]) /
+            7
+        )
+      }
+
       this.dataLines = [
         {
           name: '% Vaccinated',
           visible: true,
-          x: nSusceptible.x,
-          y: vaccinated,
+          x: date,
+          y: sevenDayAverageVaccinated,
           line: {
             width: 3,
           },
@@ -265,8 +300,8 @@ export default class VueComponent extends Vue {
         {
           name: '% Vaccination Boosted',
           visible: true,
-          x: nSusceptible.x,
-          y: boosted,
+          x: date,
+          y: sevenDayAverageBoostered,
           line: {
             width: 3,
           },
@@ -278,19 +313,13 @@ export default class VueComponent extends Vue {
   private checkIfVaccinationDetailedDataIsCorrect() {
     for (let i = 0; i < this.vaccinationDetailed.length; i++) {
       if (this.vaccinationDetailed[i].number % 1 != 0) {
-        //return false
+        return false
       }
-      //console.log(this.vaccinationDetailed[i].number % 1 != 0)
     }
 
     if (this.vaccinationDetailed.length == 0) return false
 
     return true
-    /*
-    for (let i = 0; i < this.vaccinationDetailed.length; i++) {
-      console.log(this.vaccinationDetailed[i].number)
-    }
-    */
   }
 
   private reformatDate(day: string) {
@@ -326,7 +355,7 @@ export default class VueComponent extends Vue {
       type: 'linear',
       //autorange: false,
       autorange: true,
-      range: [0, 100],
+      //range: [0, 100],
       title: '% vaccinated/boosted',
     } as any,
     plot_bgcolor: '#f8f8f8',
