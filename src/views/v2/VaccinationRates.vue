@@ -14,6 +14,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private logScale!: boolean
   @Prop({ required: true }) private observed!: any[]
   @Prop({ required: true }) private endDate!: any
+  @Prop({ required: true }) private vaccinationDetailed!: any[]
   @Prop({ required: true }) private rkiDetectionData!: {
     x?: any[]
     y?: any[]
@@ -28,6 +29,7 @@ export default class VueComponent extends Vue {
 
   private dataLines: any[] = []
   private unselectedLines: string[] = []
+  private useVaccinationDetailed = true
 
   private mounted() {
     try {
@@ -46,6 +48,16 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('logScale') updateScale() {
+    if (this.logScale) {
+      //this.layout.yaxis.type = 'log'
+      this.layout.yaxis.autorange = true
+    } else {
+      //this.layout.yaxis.type = 'linear'
+      this.layout.yaxis.autorange = true
+    }
+  }
+
   private isResizing = false
   @Watch('$store.state.isWideMode') async handleWideModeChanged() {
     this.isResizing = true
@@ -59,19 +71,19 @@ export default class VueComponent extends Vue {
     this.unselectLines()
   }
 
-  // @Watch('logScale') updateScale() {
+  // @Watch('logScale') updateScale2() {
   //   this.layout.yaxis = this.logScale
   //     ? {
-  //         fixedrange: window.innerWidth < 700,
+  //         //fixedrange: window.innerWidth < 700,
   //         type: 'log',
-  //         range: [Math.log10(2), Math.log10(5000)],
-  //         title: '7-Day Infections / 100k Pop.',
+  //         //range: [Math.log10(2), Math.log10(5000)],
+  //         //title: '7-Day Infections / 100k Pop.',
   //       }
   //     : {
-  //         fixedrange: window.innerWidth < 700,
+  //         //fixedrange: window.innerWidth < 700,
   //         type: 'linear',
-  //         autorange: true,
-  //         title: '7-Day Infections / 100k Pop.',
+  //         //autorange: true,
+  //         //title: '7-Day Infections / 100k Pop.',
   //       }
   // }
 
@@ -123,51 +135,190 @@ export default class VueComponent extends Vue {
   /**
    * We are calculating a seven day running infection rate.
    */
+  @Watch('vaccinationDetailed')
   private calculateValues() {
+    this.updateScale()
+    let vaccinationDetailedMap = new Map<number, Object>()
+    let names = ['vaccinated', 'booster', '2nd booster', '3rd booster', '4th booster']
+
     if (this.data.length === 0) return
+    if (this.checkIfVaccinationDetailedDataIsCorrect()) {
+      this.dataLines = []
 
-    // set end date
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
+      this.layout.yaxis.title = `7-Day Vaccinations per Day`
 
-    // Vaccinations
-    let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
-    let nBooster: any = this.data.filter(item => item.name === 'Boosted')[0]
+      for (let i = 0; i < this.vaccinationDetailed.length; i++) {
+        const number = this.vaccinationDetailed[i].number
+        const amount = this.vaccinationDetailed[i].amount
+        if (!vaccinationDetailedMap.has(number)) {
+          vaccinationDetailedMap.set(number, {
+            x: [] as any,
+            y: [] as any,
+            amount: [] as any,
+            xEdited: [] as any,
+            yEdited: [] as any,
+          })
+        }
 
-    let nSusceptible: any = this.data.filter(item => item.name === 'Susceptible')[0]
-    let nTotalInfected: any = this.data.filter(item => item.name === 'Total Infected')[0]
-    let nRecovered: any = this.data.filter(item => item.name === 'Recovered')[0]
+        const date = this.vaccinationDetailed[i].date
 
-    const nTotal = []
-    const vaccinated = []
-    const boosted = []
+        let object = vaccinationDetailedMap.get(number) as any
 
-    for (let i = 0; i < nSusceptible.y.length; i++) {
-      nTotal.push(nSusceptible.y[i] + nTotalInfected.y[i] + nRecovered.y[i])
-      vaccinated.push((100 * nVaccinated.y[i]) / nTotal[i])
-      boosted.push((100 * nBooster.y[i]) / nTotal[i])
+        if (object.x.includes(date)) {
+          const index = object.x.indexOf(date)
+          object.y[index] += amount
+          object.amount[index] += 1
+        } else {
+          object.x.push(date)
+          object.y.push(amount)
+          object.amount.push(1)
+        }
+
+        vaccinationDetailedMap.set(number, object)
+      }
+      for (let [key, value] of vaccinationDetailedMap) {
+        const data = value as any
+        for (let i = 0; i < data.x.length; i++) {
+          if (data.amount > 1) {
+            data.y = data.y / data.amount
+            data.amount = 1
+          }
+        }
+        const firstDate = data.x[0]
+        const lastDate = data.x[data.x.length - 1]
+
+        for (var d = new Date(firstDate); d <= new Date(lastDate); d.setDate(d.getDate() + 1)) {
+          const date = d.toISOString().split('T')[0]
+          if (data.x.includes(date)) {
+            const index = data.x.indexOf(date)
+            data.xEdited.push(data.x[index])
+            data.yEdited.push(data.y[index])
+          } else {
+            data.xEdited.push(date)
+            data.yEdited.push(0)
+          }
+        }
+        data.x = []
+        data.y = []
+
+        for (let i = 3; i < data.xEdited.length; i = i + 7) {
+          data.x.push(data.xEdited[i])
+          data.y.push(
+            (data.yEdited[i - 3] +
+              data.yEdited[i - 2] +
+              data.yEdited[i - 1] +
+              data.yEdited[i] +
+              data.yEdited[i + 1] +
+              data.yEdited[i + 2] +
+              data.yEdited[i + 3]) /
+              7
+          )
+        }
+      }
+
+      for (let [key, value] of vaccinationDetailedMap) {
+        const data = value as any
+        this.dataLines.push({
+          name: names[key - 1],
+          visible: true,
+          x: data.x,
+          y: data.y,
+          line: {
+            width: 3,
+          },
+        })
+      }
+    } else {
+      this.dataLines = []
+
+      this.layout.yaxis.title = `% vaccinated/boosted`
+
+      // set end date
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
+
+      this.layout.yaxis.autorange = false
+      this.layout.yaxis.range = [0, 100]
+
+      // Vaccinations
+      let nVaccinated: any = this.data.filter(item => item.name === 'Vaccinated')[0]
+      let nBooster: any = this.data.filter(item => item.name === 'Boosted')[0]
+
+      let nSusceptible: any = this.data.filter(item => item.name === 'Susceptible')[0]
+      let nTotalInfected: any = this.data.filter(item => item.name === 'Total Infected')[0]
+      let nRecovered: any = this.data.filter(item => item.name === 'Recovered')[0]
+
+      const nTotal = []
+      const vaccinated = []
+      const boosted = []
+
+      for (let i = 0; i < nSusceptible.y.length; i++) {
+        nTotal.push(nSusceptible.y[i] + nTotalInfected.y[i] + nRecovered.y[i])
+        vaccinated.push((100 * nVaccinated.y[i]) / nTotal[i])
+        boosted.push((100 * nBooster.y[i]) / nTotal[i])
+      }
+
+      let date = []
+      let sevenDayAverageVaccinated = []
+      let sevenDayAverageBoostered = []
+
+      for (let i = 3; i < nSusceptible.x.length; i = i + 7) {
+        date.push(nSusceptible.x[i])
+        sevenDayAverageVaccinated.push(
+          (vaccinated[i - 3] +
+            vaccinated[i - 2] +
+            vaccinated[i - 1] +
+            vaccinated[i] +
+            vaccinated[i + 1] +
+            vaccinated[i + 2] +
+            vaccinated[i + 3]) /
+            7
+        )
+        sevenDayAverageBoostered.push(
+          (boosted[i - 3] +
+            boosted[i - 2] +
+            boosted[i - 1] +
+            boosted[i] +
+            boosted[i + 1] +
+            boosted[i + 2] +
+            boosted[i + 3]) /
+            7
+        )
+      }
+
+      this.dataLines = [
+        {
+          name: '% Vaccinated',
+          visible: true,
+          x: date,
+          y: sevenDayAverageVaccinated,
+          line: {
+            width: 3,
+          },
+        },
+        {
+          name: '% Vaccination Boosted',
+          visible: true,
+          x: date,
+          y: sevenDayAverageBoostered,
+          line: {
+            width: 3,
+          },
+        },
+      ]
+    }
+  }
+
+  private checkIfVaccinationDetailedDataIsCorrect() {
+    for (let i = 0; i < this.vaccinationDetailed.length; i++) {
+      if (this.vaccinationDetailed[i].number % 1 != 0) {
+        return false
+      }
     }
 
-    this.dataLines = [
-      {
-        name: '% Vaccinated',
-        visible: true,
-        x: nSusceptible.x,
-        y: vaccinated,
-        line: {
-          width: 3,
-        },
-      },
-      {
-        name: '% Vaccination Boosted',
-        visible: true,
-        x: nSusceptible.x,
-        y: boosted,
-        line: {
-          width: 3,
-        },
-      },
-    ]
+    if (this.vaccinationDetailed.length == 0) return false
+
+    return true
   }
 
   private reformatDate(day: string) {
@@ -192,7 +343,8 @@ export default class VueComponent extends Vue {
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
-      range: [this.$store.state.graphStartDate, '2020-12-31'],
+      //range: [this.$store.state.graphStartDate, '2020-12-31'],
+      range: [this.$store.state.graphStartDate, '2022-12-31'],
       type: 'date',
     },
     yaxis: {
@@ -200,8 +352,9 @@ export default class VueComponent extends Vue {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
       type: 'linear',
-      autorange: false,
-      range: [0, 100],
+      //autorange: false,
+      autorange: true,
+      //range: [0, 100],
       title: '% vaccinated/boosted',
     } as any,
     plot_bgcolor: '#f8f8f8',
