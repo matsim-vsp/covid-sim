@@ -41,8 +41,14 @@ export default class VueComponent extends Vue {
   private mounted() {
     console.log(this.strainValues)
     this.loadStartURL()
+
+    // If the simulation begins in the middle of a pandemic, then we need to add together susceptible, infected, and
+    // recovered agents to get the total population. --jr nov'22
     const susceptible = this.data.filter(item => item.name === 'Susceptible')[0]
-    const totalPopulation = susceptible.y[0]
+    const totalInfected = this.data.filter(item => item.name === 'Total Infected')[0]
+    const recovered = this.data.filter(item => item.name === 'Recovered')[0]
+
+    const totalPopulation = susceptible.y[0] + totalInfected.y[0] + recovered.y[0]
     this.factor100k = totalPopulation / 100000.0
 
     this.calculateValues()
