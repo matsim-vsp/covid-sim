@@ -23,6 +23,8 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private unreportedIncidence!: any[]
   @Prop({ required: true }) private unreportedIncidenceNRW!: any[]
   @Prop({ required: true }) private metadata!: any
+  @Prop({ required: true }) private seedComparison!: any[]
+  @Prop({ required: true }) private showSeedComparison!: boolean
 
   private color = ['#094', '#0c4']
 
@@ -54,6 +56,22 @@ export default class VueComponent extends Vue {
   @Watch('data') private updateModelData() {
     this.calculateValues()
     this.unselectLines()
+  }
+
+  @Watch('showSeedComparison') updateShowSeedComparison() {
+    if (this.showSeedComparison) {
+      for (let i = 0; i < this.dataLines.length; i++) {
+        if (this.dataLines[i].name.startsWith('nShowingSymptoms')) {
+          this.dataLines[i].visible = true
+        }
+      }
+    } else {
+      for (let i = 0; i < this.dataLines.length; i++) {
+        if (this.dataLines[i].name.startsWith('nShowingSymptoms')) {
+          this.dataLines[i].visible = false
+        }
+      }
+    }
   }
 
   @Watch('logScale') updateScale() {
@@ -182,6 +200,51 @@ export default class VueComponent extends Vue {
       this.dataLines.push(unreportedDataLine)
     }
     this.calculateUnreportedNRW()
+  }
+
+  private calculateSeedComparison(factor100k: number) {
+    if (this.seedComparison.length == 0) return
+
+    let seedComparisonMap = new Map<string, Object>()
+    const columns = Object.keys(this.seedComparison[0])
+
+    for (let i = 0; i < columns.length; i++) {
+      if (columns[i].startsWith('nShowingSymptoms')) {
+        seedComparisonMap.set(columns[i], {
+          x: [] as any,
+          y: [] as any,
+        })
+      }
+    }
+
+    for (let i = 0; i < this.seedComparison.length; i++) {
+      for (let j = 0; j < columns.length; j++) {
+        if (columns[j].startsWith('nShowingSymptoms')) {
+          let object = seedComparisonMap.get(columns[j]) as any
+
+          object.x.push(this.seedComparison[i].date)
+          object.y.push(this.seedComparison[i][columns[j]] / factor100k)
+
+          seedComparisonMap.set(columns[j], object)
+        }
+      }
+    }
+
+    for (let [key, value] of seedComparisonMap) {
+      const data = value as any
+
+      this.dataLines.push({
+        name: key,
+        x: data.x,
+        y: data.y,
+        line: {
+          width: 5,
+          color: '#80808020',
+        },
+        showlegend: false,
+        visible: true,
+      })
+    }
   }
 
   private calculateObserved(factor100k: number) {
@@ -335,6 +398,8 @@ export default class VueComponent extends Vue {
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
+
+    this.calculateSeedComparison(factor100k)
 
     this.calculateObserved(factor100k)
   }

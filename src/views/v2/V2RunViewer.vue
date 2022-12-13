@@ -185,6 +185,8 @@
           .linear-plot(v-if="allPlots[4].active")
             h5 {{ cityCap }} {{allPlots[4].name}}
               button.button.is-small.hider(@click="toggleShowPlot(4)") ..
+              button.button.is-small.hider(v-if="seedComparison.length" @click="toggleSeedComparison()") Show Seeds
+
 
             .hideIt(v-show="allPlots[4].showPlot")
               p New persons showing symptoms (model) vs. new cases (reality)
@@ -197,7 +199,9 @@
                 :logScale="logScale"
                 :unreportedIncidence="unreportedIncidence"
                 :unreportedIncidenceNRW="unreportedIncidenceNRW"
-                :metadata="allPlots[4]")
+                :metadata="allPlots[4]"
+                :seedComparison="seedComparison"
+                :showSeedComparison="showSeedComparison")
 
           //- ---------- VIRUS STRAINS -------
           .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[5].active")
@@ -1152,6 +1156,11 @@ export default class VueComponent extends Vue {
     this.allPlots[which].showPlot = !this.allPlots[which].showPlot
   }
 
+  private showSeedComparison = false
+  private toggleSeedComparison() {
+    this.showSeedComparison = !this.showSeedComparison
+  }
+
   private layout = {
     autosize: true,
     showlegend: true,
@@ -1455,6 +1464,8 @@ export default class VueComponent extends Vue {
     this.postHospUpdater2++
 
     this.loadVaccineEffectivenessData(this.currentRun)
+
+    this.loadSeedComparison(this.currentRun)
 
     this.loadVaccineEffectivenessVsStrainData(this.currentRun)
 
@@ -1828,6 +1839,27 @@ export default class VueComponent extends Vue {
       this.vaccineEffectivenessData = []
       this.showVaccineEffectivenessFields = []
       console.log('NO VaccineEffectiveness:', filename)
+    }
+  }
+
+  private seedComparison: any[] = []
+
+  private async loadSeedComparison(currentRun: any) {
+    if (!currentRun.RunId) {
+      this.seedComparison = []
+      return
+    }
+
+    const filename = currentRun.RunId + '.infectionsPerSeed.tsv'
+
+    try {
+      const z = await this.zipWorker.extractFile(filename)
+
+      this.seedComparison = z.data
+      console.log(this.seedComparison)
+    } catch (e) {
+      this.seedComparison = []
+      console.log('Seed Comparison: no', filename)
     }
   }
 
