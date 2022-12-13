@@ -185,7 +185,7 @@
           .linear-plot(v-if="allPlots[4].active")
             h5 {{ cityCap }} {{allPlots[4].name}}
               button.button.is-small.hider(@click="toggleShowPlot(4)") ..
-              button.button.is-small.hider(v-if="seedComparison.length" @click="toggleSeedComparison()") Show Seeds
+              button.button.is-small.hider(v-if="seedComparison.length" :class="{ 'button-is-active': showSeedComparison }" @click="toggleSeedComparison()") Show Seeds
 
 
             .hideIt(v-show="allPlots[4].showPlot")
@@ -2439,6 +2439,10 @@ a.active-view-mode {
   border-radius: 10rem;
   font-size: 0.6rem;
   margin-left: 1rem;
+}
+
+.button-is-active {
+  background-color: #add8e6;
 }
 
 #single-run-viewer {

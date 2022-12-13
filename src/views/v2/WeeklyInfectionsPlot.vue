@@ -74,6 +74,11 @@ export default class VueComponent extends Vue {
     }
   }
 
+  @Watch('seedComparison') updateSeedComparison() {
+    this.calculateValues()
+    this.unselectLines()
+  }
+
   @Watch('logScale') updateScale() {
     this.layout.yaxis = this.logScale
       ? {
@@ -223,11 +228,29 @@ export default class VueComponent extends Vue {
           let object = seedComparisonMap.get(columns[j]) as any
 
           object.x.push(this.seedComparison[i].date)
-          object.y.push(this.seedComparison[i][columns[j]] / factor100k)
+          object.y.push(this.seedComparison[i][columns[j]])
 
           seedComparisonMap.set(columns[j], object)
         }
       }
+    }
+
+    for (let [key, value] of seedComparisonMap) {
+      const seedObject = value as any
+      const date = seedObject.x
+      const data = seedObject.y
+
+      let calculatedData = []
+      let calculatedDate = []
+
+      for (let i = 7; i < data.length; i = i + 7) {
+        const diff = data[i] - data[i - 7]
+        const rate = 0.1 * Math.round((10.0 * diff) / factor100k)
+        calculatedData.push(rate)
+        calculatedDate.push(date[i - 3])
+      }
+
+      seedComparisonMap.set(key, { x: calculatedDate, y: calculatedData })
     }
 
     for (let [key, value] of seedComparisonMap) {
@@ -245,6 +268,8 @@ export default class VueComponent extends Vue {
         visible: true,
       })
     }
+
+    this.updateShowSeedComparison()
   }
 
   private calculateObserved(factor100k: number) {
