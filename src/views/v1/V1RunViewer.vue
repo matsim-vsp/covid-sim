@@ -1598,8 +1598,6 @@ export default class VueComponent extends Vue {
       lookupKey = lookupKey.replace('undefined', offsetPrefix)
     }
 
-    // console.log(lookupKey)
-
     const newRun = this.runLookup[lookupKey]
 
     if (!newRun) {
@@ -2185,7 +2183,7 @@ export default class VueComponent extends Vue {
   private async loadInfoTxt() {
     console.log('_info.txt: generating lookups')
 
-    const infoTxt = await this.parseInfoTxt(this.city)
+    const infoTxt = (await this.parseInfoTxt(this.city)) as any[]
 
     const measures: any = {}
     const runLookup: any = {}
@@ -2200,7 +2198,7 @@ export default class VueComponent extends Vue {
 
     // get all possible values
     for (const row of infoTxt) {
-      if (!row.RunId) continue
+      if (row.RunId == undefined) continue
 
       // note this particular value, for every value
       for (const measure of Object.keys(measures)) {
@@ -2226,6 +2224,13 @@ export default class VueComponent extends Vue {
 
     // Runs v8 and v9 require this because they don't have an sz0 run:
     this.currentRun = infoTxt[0].RunId
+
+    // if there is only one run, just load it right away
+    if (Object.keys(runLookup).length == 1) {
+      this.currentRun = infoTxt[0]
+      this.loadZipFile(this.currentRun.RunId)
+      this.runChanged(this.currentRun)
+    }
   }
 
   private mdParser = new MarkdownIt()

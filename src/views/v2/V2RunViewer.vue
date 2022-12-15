@@ -359,7 +359,7 @@
               .plotarea.compact
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
-                vaccination-rates.plotsize(v-else :data="data"  
+                vaccination-rates.plotsize(v-else :data="data"
                 :vaccinationDetailed="vaccinationDetailed"
                 :endDate="endDate"
                 :observed="observedCases"
@@ -1084,6 +1084,7 @@ export default class VueComponent extends Vue {
     }
 
     await this.loadInfoTxt()
+
     this.runChanged({ RunId: '' })
     this.showActivityLevelPlot()
 
@@ -2321,7 +2322,7 @@ export default class VueComponent extends Vue {
 
     // get all possible values
     for (const row of infoTxt) {
-      if (!row.RunId) continue
+      if (row.RunId == undefined) continue
 
       // note this particular value, for every value
       for (const measure of Object.keys(measures)) {
@@ -2347,6 +2348,13 @@ export default class VueComponent extends Vue {
 
     // Runs v8 and v9 require this because they don't have an sz0 run:
     this.currentRun = infoTxt[0].RunId
+
+    // if there is only one run, just load it right away
+    if (Object.keys(runLookup).length == 1) {
+      this.currentRun = infoTxt[0]
+      this.loadZipFile(this.currentRun.RunId)
+      this.runChanged(this.currentRun)
+    }
   }
 
   private mdParser = new MarkdownIt()
