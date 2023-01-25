@@ -174,7 +174,7 @@ export default class VueComponent extends Vue {
         },
       }
 
-      sewageLine.name = 'Sewage Data'
+      sewageLine.name = 'Sewage Biomarker pro/mL'
       sewageLine.visible = true
       sewageLine.x = stammheimObservations.map(row => row.Genommen)
       sewageLine.y = stammheimObservations.map(row => row.AbwasserKonzentration)
@@ -517,7 +517,7 @@ export default class VueComponent extends Vue {
       type: 'log',
       // autorange: true,
       range: [Math.log10(2), Math.log10(14000)],
-      title: 'Sewage biomaker pro/mL',
+      title: 'Biomarker',
       overlaying: 'y',
       side: 'right',
     } as any,
