@@ -144,6 +144,8 @@ export default class VueComponent extends Vue {
     }
 
     const city = this.city || 'cologne'
+    const location = 'Stammheim'
+    const sewageFactor = 2.14
 
     const URL = PUBLIC_SVN + 'original-data/Abwasser/' + cleanedDataByCity[city]
     console.log({ URL })
@@ -156,9 +158,12 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
       }).data
 
+      const stammheimObservations = csv.filter(f => f.Standort == location)
+
       const sewageLine: any = {
         type: 'scatter',
         mode: 'markers',
+        yaxis: 'y2',
         marker: {
           size: 4.5,
           color: '#00000000',
@@ -169,8 +174,8 @@ export default class VueComponent extends Vue {
 
       sewageLine.name = 'Sewage Data'
       sewageLine.visible = true
-      sewageLine.x = csv.map(row => row.Genommen)
-      sewageLine.y = csv.map(row => row.AbwasserKonzentration)
+      sewageLine.x = stammheimObservations.map(row => row.Genommen)
+      sewageLine.y = stammheimObservations.map(row => row.AbwasserKonzentration)
 
       // sewageLine.line = source.line
       // if (source.marker) observedLine.marker = source.marker
@@ -500,7 +505,7 @@ export default class VueComponent extends Vue {
       size: 12,
       color: '#000',
     },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
+    margin: { t: 5, r: 25, b: 0, l: 60 },
     xaxis: {
       //fixedrange: window.innerWidth < 700,
       fixedrange: true,
@@ -516,6 +521,17 @@ export default class VueComponent extends Vue {
       range: [Math.log10(2), Math.log10(30000)],
       title: '7-Day Infections / 100k Pop.',
     } as any,
+    yaxis2: {
+      fixedrange: true,
+      type: 'log',
+      // autorange: true,
+      // range: [1.6, 3.5],
+      range: [Math.log10(2), Math.log10(30000)],
+      title: 'Sewage biomaker pro/mL',
+      overlaying: 'y',
+      side: 'right',
+    } as any,
+
     plot_bgcolor: '#f8f8f8',
     paper_bgcolor: '#f8f8f8',
   }
