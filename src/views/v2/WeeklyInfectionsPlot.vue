@@ -32,6 +32,8 @@ export default class VueComponent extends Vue {
 
   private color = ['#094', '#0c4']
 
+  private upperLogRange = 14000
+
   private lagDays = 1
 
   private dataLines: any[] = []
@@ -450,17 +452,6 @@ export default class VueComponent extends Vue {
           color: '#cdc',
         },
       },
-      // {
-      //   name: 'Target: 35 per 100K',
-      //   x: [0, susceptible.x[susceptible.x.length - 1]],
-      //   y: [35, 35],
-      //   fill: 'tozeroy',
-      //   line: {
-      //     width: 1.0,
-      //     // color: '#ddbbbb',
-      //     color: '#cdc',
-      //   },
-      // },
       {
         name: 'Model',
         visible: true,
@@ -525,8 +516,7 @@ export default class VueComponent extends Vue {
       fixedrange: true,
       type: 'log',
       // autorange: true,
-      // range: [1.6, 3.5],
-      range: [Math.log10(2), Math.log10(30000)],
+      range: [Math.log10(2), Math.log10(14000)],
       title: 'Sewage biomaker pro/mL',
       overlaying: 'y',
       side: 'right',
