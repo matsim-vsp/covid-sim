@@ -193,6 +193,7 @@
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
+
                 weekly-infections-plot.plotsize(v-else :data="data"  :endDate="endDate"
                 :observed="observedCases"
                 :rkiDetectionData="rkiDetectionRateData"
@@ -201,7 +202,9 @@
                 :unreportedIncidenceNRW="unreportedIncidenceNRW"
                 :metadata="allPlots[4]"
                 :seedComparison="seedComparison"
-                :showSeedComparison="showSeedComparison")
+                :showSeedComparison="showSeedComparison"
+                :city="city"
+                )
 
           //- ---------- VIRUS STRAINS -------
           .linear-plot(v-if="showVirusStrainsPlot && mutationValues.length > 0  && allPlots[5].active")

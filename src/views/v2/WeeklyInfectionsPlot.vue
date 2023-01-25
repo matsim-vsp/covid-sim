@@ -6,7 +6,10 @@
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import Papaparse from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
+
+import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -25,6 +28,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private metadata!: any
   @Prop({ required: true }) private seedComparison!: any[]
   @Prop({ required: true }) private showSeedComparison!: boolean
+  @Prop({ required: true }) private city!: string
 
   private color = ['#094', '#0c4']
 
@@ -33,7 +37,10 @@ export default class VueComponent extends Vue {
   private dataLines: any[] = []
   private unselectedLines: string[] = []
 
-  private mounted() {
+  private observedSewageData: any[] = []
+
+  private async mounted() {
+    await this.fetchSewageData()
     this.calculateValues()
     this.unselectLines()
   }
@@ -128,6 +135,50 @@ export default class VueComponent extends Vue {
       await this.$router.replace({ query: params })
     } catch (e) {
       /** this is OK */
+    }
+  }
+
+  private async fetchSewageData() {
+    const cleanedDataByCity: any = {
+      cologne: 'CologneSewageDataCleaned.csv',
+    }
+
+    const city = this.city || 'cologne'
+
+    const URL = PUBLIC_SVN + 'original-data/Abwasser/' + cleanedDataByCity[city]
+    console.log({ URL })
+
+    try {
+      const raw = await fetch(URL).then(response => response.text())
+      const csv = Papaparse.parse(raw, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const sewageLine: any = {
+        type: 'scatter',
+        mode: 'markers',
+        marker: {
+          size: 4.5,
+          color: '#00000000',
+          opacity: 0.6,
+          line: { color: '#ff0088', width: 1.5 },
+        },
+      }
+
+      sewageLine.name = 'Sewage Data'
+      sewageLine.visible = true
+      sewageLine.x = csv.map(row => row.Genommen)
+      sewageLine.y = csv.map(row => row.AbwasserKonzentration)
+
+      // sewageLine.line = source.line
+      // if (source.marker) observedLine.marker = source.marker
+
+      this.observedSewageData = [sewageLine]
+    } catch (e) {
+      console.error('Could not load ' + URL)
+      console.error('' + e)
     }
   }
 
@@ -420,6 +471,8 @@ export default class VueComponent extends Vue {
         },
       },
     ]
+
+    if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
