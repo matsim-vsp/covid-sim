@@ -290,6 +290,9 @@ export default class VueComponent extends Vue {
     var ba5Cologne: any[] = []
     var bq11Germany: any[] = []
     var bq11NRW: any[] = []
+    var xbb15: any[] = []
+
+    //  XBB.1.5
 
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
@@ -299,7 +302,6 @@ export default class VueComponent extends Vue {
 
     if (this.city !== '') {
       if (!(this.city in this.cacheRawVOCData)) {
-        console.log(this.svnUrl)
         const rawVOCData = await fetch(this.svnUrl).then(response => response.text())
         const VOCData = Papa.parse(rawVOCData, {
           //header: true,
@@ -326,6 +328,7 @@ export default class VueComponent extends Vue {
       var ba5CologneTempDouble = 0
       var bq11GermanyTempDouble = 0 // 14
       var bq11NRWTempDouble = 0 // 15
+      var xbb15TempDouble = 0 // 16
       var countDays = 0
 
       // console.log(VOCData)
@@ -355,6 +358,7 @@ export default class VueComponent extends Vue {
               header.push(VOCData[i][13].trim())
               header.push(VOCData[i][14].trim())
               header.push(VOCData[i][15].trim())
+              header.push(VOCData[i][16].trim())
             } else {
               header.push(VOCData[i][0])
               header.push(VOCData[i][1])
@@ -382,6 +386,7 @@ export default class VueComponent extends Vue {
               ba5CologneTempDouble = 0
               bq11GermanyTempDouble = 0
               bq11NRWTempDouble = 0
+              xbb15TempDouble = 0
             } else {
               countDays += 1
             }
@@ -403,6 +408,7 @@ export default class VueComponent extends Vue {
               var ba4CologneTemp = VOCData[i][13]
               var bq11GermanyTemp = VOCData[i][14]
               var bq11NRWTemp = VOCData[i][15]
+              var xbb15Temp = VOCData[i][15]
             } else {
               var dateTemp = VOCData[i][0]
               var alphaTemp = VOCData[i][1]
@@ -543,6 +549,14 @@ export default class VueComponent extends Vue {
                   bq11NRWTemp = parseFloat(bq11NRWTemp)
                 }
               }
+
+              if (xbb15Temp == null) {
+                xbb15Temp = 0
+              } else {
+                if (typeof xbb15Temp == 'string') {
+                  xbb15Temp = parseFloat(xbb15Temp)
+                }
+              }
             }
 
             alphaTempDouble += alphaTemp
@@ -560,6 +574,7 @@ export default class VueComponent extends Vue {
               ba5CologneTempDouble += ba5CologneTemp
               bq11GermanyTempDouble += bq11GermanyTemp
               bq11NRWTempDouble += bq11NRWTemp
+              xbb15TempDouble += xbb15Temp
             }
 
             if (countDays == 7 && this.city == 'cologne') {
@@ -578,6 +593,7 @@ export default class VueComponent extends Vue {
               ba5Cologne.push((ba5CologneTempDouble * 100) / 7)
               bq11Germany.push((bq11GermanyTempDouble * 100) / 7)
               bq11NRW.push((bq11NRWTempDouble * 100) / 7)
+              xbb15.push((xbb15TempDouble * 100) / 7)
 
               countDays = 0
               alphaTempDouble = 0
@@ -594,6 +610,7 @@ export default class VueComponent extends Vue {
               ba5CologneTempDouble = 0
               bq11GermanyTempDouble = 0
               bq11NRWTempDouble = 0
+              xbb15TempDouble = 0
             } else if (this.city == 'berlin') {
               date.push(dateTemp)
               alpha.push(alphaTempDouble)
@@ -629,6 +646,7 @@ export default class VueComponent extends Vue {
           '% BA.4 Reported (Germany)',
           '% BQ.1.1 Reported (Germany)',
           '% BQ.1.1 Reported (NRW)',
+          '% XBB.1.5 Reported (Germany)',
         ]
         color = ['', 'blue', '', '', '', 'red', '']
       } else if (this.city == 'berlin') {
@@ -792,6 +810,18 @@ export default class VueComponent extends Vue {
         y: bq11NRW,
         name: header[15],
         color: color[8],
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { size: 5 },
+        opacity: 0.5,
+      }
+
+      this.lineDataLookup[header[16]] = {
+        visible: true,
+        x: date,
+        y: bq11NRW,
+        name: header[16],
+        //color: color[8],
         type: 'scatter',
         mode: 'lines+markers',
         marker: { size: 5 },
