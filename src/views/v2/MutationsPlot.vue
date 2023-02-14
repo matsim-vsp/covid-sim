@@ -408,7 +408,7 @@ export default class VueComponent extends Vue {
               var ba4CologneTemp = VOCData[i][13]
               var bq11GermanyTemp = VOCData[i][14]
               var bq11NRWTemp = VOCData[i][15]
-              var xbb15Temp = VOCData[i][15]
+              var xbb15Temp = VOCData[i][16]
             } else {
               var dateTemp = VOCData[i][0]
               var alphaTemp = VOCData[i][1]
@@ -819,7 +819,7 @@ export default class VueComponent extends Vue {
       this.lineDataLookup[header[16]] = {
         visible: true,
         x: date,
-        y: bq11NRW,
+        y: xbb15,
         name: header[16],
         //color: color[8],
         type: 'scatter',
