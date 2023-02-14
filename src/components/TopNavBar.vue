@@ -58,7 +58,7 @@
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}" )
           a.navbar-link  Other Versions
           .navbar-dropdown(style="margin-left: -20rem;")
-            .panel(style="columns: 3")
+            .panel(:style="{columns: 2}")
               a.navbar-item(:href="'/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current'") 2022.01.20 Immune status and leisure measures. Report Jan. 20
               a.navbar-item(:href="'/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25'") 2021.12.17 Measures and Omicron variant. Report Dec. 17
               a.navbar-item(:href="'/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected'") 2021.11.19 Measures without activity reductions
