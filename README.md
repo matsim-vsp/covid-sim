@@ -86,6 +86,42 @@ Needed to install `nvm` to make this work.  Can't remember how I did that; possi
 - `/scripts`: Python scripts go here, which are used for preprocessing EpiSim results
 - `/public`: large .zip files, project notes, etc go in public. These files are pushed as-is by webpack; i.e. they are not packaged in any way
 
+## YAML Configuration
+
+### yaml file
+
+- viewerVersion (optional, number)
+- city (required, string)
+- info (required, string)
+- readme (required, string)
+- zipFolder (required, string)
+- timestamp (required, string)
+- offset (optional, number[])
+- startDate (optional, string)
+- endDate (optional, string)
+- defaultStartDate (optional, string)
+- startDates (optional, string[])
+- ignoredPlots (optional, string[])
+- graphStartDate (required, string)
+- heatMapMaxValue (optional, number)
+- rValueDate (optional, string)
+- optionGroups (required, [optionGroups](#optiongroups)[])
+  
+### optionGroups
+
+- day (optional, number)
+- heading (required, string)
+- subheading (optional, string)
+- measures (required, [measures](#measures)[])
+      
+### measures
+
+- measure (required, string)
+- title (required, string)
+- order (optional, string)
+- options (optional, number[])
+- asPercent (optional, boolean)
+
 ## Thank you!
 
 Good luck and thanks for the help! -- [Billy](https://github.com/billyc)
