@@ -1098,37 +1098,82 @@ export default class VueComponent extends Vue {
       this.allPlots[i].active = true
     }
     if (Object.keys(this.runYaml).includes('ignoredPlots')) {
-      if (this.runYaml.ignoredPlots?.includes('hospNewCases')) {
-        this.allPlots[15].active = false
+      if (this.runYaml.ignoredPlots?.includes('actLevPerTyp')) {
+        this.allPlots[0].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('hospRateComp')) {
-        this.allPlots[16].active = false
+      if (this.runYaml.ignoredPlots?.includes('disImp')) {
+        this.allPlots[1].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('vacEffInf')) {
+      if (this.runYaml.ignoredPlots?.includes('hosNewCasPos')) {
+        this.allPlots[2].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hosRatPos')) {
+        this.allPlots[3].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('casCom')) {
+        this.allPlots[4].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('virStr')) {
+        this.allPlots[5].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('simRVal')) {
+        this.allPlots[6].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('simRValByPur')) {
+        this.allPlots[7].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('infByActTyp')) {
+        this.allPlots[8].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('vacEffAgaInf')) {
         this.allPlots[9].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('vacEffStrain')) {
+      if (this.runYaml.ignoredPlots?.includes('vacEffVsStr')) {
         this.allPlots[10].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('incVacUnvac')) {
+      if (this.runYaml.ignoredPlots?.includes('incComVacAndUnvac')) {
         this.allPlots[11].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('vacBoostRate')) {
+      if (this.runYaml.ignoredPlots?.includes('VacRatBooRat')) {
         this.allPlots[12].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('vacType')) {
+      if (this.runYaml.ignoredPlots?.includes('VacPerTyp')) {
         this.allPlots[13].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('hospVacUnvac')) {
+      if (this.runYaml.ignoredPlots?.includes('Antibodies')) {
+        this.allPlots[14].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospNewCas')) {
+        this.allPlots[15].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospRatComp')) {
+        this.allPlots[16].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('hospRatCompVacAndUnvac')) {
         this.allPlots[17].active = false
       }
-      if (this.runYaml.ignoredPlots?.includes('healthOutcome')) {
+      if (this.runYaml.ignoredPlots?.includes('simHealOutOveTim')) {
         this.allPlots[18].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('inciHeatmap')) {
+        this.allPlots[19].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('inciLinechart')) {
+        this.allPlots[20].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('leiOutFra')) {
+        this.allPlots[21].active = false
+      }
+      if (this.runYaml.ignoredPlots?.includes('weekTest')) {
+        this.allPlots[22].active = false
       }
     }
 
     this.showPlotForCurrentSituation()
   }
+
+  // INFO
+  // ['actLevPerTyp', 'disImp', 'hosNewCasPos', 'hosRatPos', 'virStr', 'simRVal', 'simRValByPur', 'infByActTyp', 'vacEffAgaInf', 'vacEffVsStr', 'incComVacAndUnvac', 'VacRatBooRat', 'VacPerTyp', 'Antibodies', 'hospNewCas', 'hospRatComp', 'hospRatCompVacAndUnvac', 'simHealOutOveTim', 'inciHeatmap', 'inciLinechart', 'weekTest']
 
   @Watch('plusminus') private switchPlusMinus() {
     this.showPlotForCurrentSituation()
