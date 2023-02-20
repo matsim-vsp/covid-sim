@@ -11,6 +11,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import Papa from 'papaparse'
 import { PUBLIC_SVN } from '@/Globals'
+import { map } from 'js-coroutines'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -313,6 +314,62 @@ export default class VueComponent extends Vue {
       }
       const VOCData = this.cacheRawVOCData[this.city]
 
+      header = [
+        'Date',
+        '% B117 Reported',
+        '% Delta Reported',
+        '% Gamma Reported',
+        '% MUTB Reported',
+        '% SARS_CoV_2 Reported',
+        '% Omicron Reported (NRW)',
+        '% BA.1 Reported (Germany)',
+        '% BA.2 Reported (Germany)',
+        '% BA.1 Reported (Cologne)',
+        '% BA.2 Reported (Cologne)',
+        '% BA.2.9 Reported (Germany)',
+        '% BA.5 Reported (Germany)',
+        '% BA.4 Reported (Germany)',
+        '% BQ.1.1 Reported (Germany)',
+        '% BQ.1.1 Reported (NRW)',
+        '% XBB.1.5 Reported (Germany)',
+        '',
+      ]
+
+      const map1 = new Map()
+
+      for (let i = 0; i < VOCData[0].length; i++) {
+        map1.set(i, { name: VOCData[0][i], data: [] })
+      }
+
+      for (let i = 4; i < VOCData.length; i = i + 7) {
+        for (let j = 0; j < VOCData[i].length; j++) {
+          if (j == 0) map1.get(0).data.push(VOCData[i][j])
+          else {
+            let temp = 0
+            if (VOCData.length >= i + 4)
+              for (let k = i - 3; k < i + 4; k++) {
+                temp += VOCData[k][j]
+              }
+            map1.get(j).data.push(temp * 100)
+          }
+        }
+      }
+
+      for (let [key, value] of map1) {
+        if (key == 0) continue
+
+        this.lineDataLookup[value.name] = {
+          visible: true,
+          x: map1.get(0).data,
+          y: value.data,
+          type: 'scatter',
+          mode: 'lines+markers',
+          marker: { size: 5 },
+          opacity: 0.5,
+        }
+      }
+
+      /*
       var alphaTempDouble = 0
       var betaTempDouble = 0
       var gammaTempDouble = 0
@@ -827,6 +884,7 @@ export default class VueComponent extends Vue {
         marker: { size: 5 },
         opacity: 0.5,
       }
+      */
 
       this.dataLines2 = Object.values(this.lineDataLookup)
       this.dataLines3 = JSON.parse(JSON.stringify(this.dataLines2))
