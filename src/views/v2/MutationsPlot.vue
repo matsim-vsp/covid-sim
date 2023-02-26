@@ -314,6 +314,7 @@ export default class VueComponent extends Vue {
       }
       const VOCData = this.cacheRawVOCData[this.city]
 
+      /*
       header = [
         'Date',
         '% B117 Reported',
@@ -334,35 +335,61 @@ export default class VueComponent extends Vue {
         '% XBB.1.5 Reported (Germany)',
         '',
       ]
+      */
 
-      const map1 = new Map()
+      const headerNew = [
+        '',
+        '% SARS_CoV_2 Reported',
+        '% MUTB Reported',
+        '% Gamma Reported',
+        '% Delta Reported',
+        '% B117 Reported',
+        '% Omicron Reported (NRW)',
+        '% BA.1 Reported (Germany)',
+        '% BA.2 Reported (Germany)',
+        '% BA.1 Reported (Cologne)',
+        '% BA.2 Reported (Cologne)',
+        '% BA.2.9 Reported (Germany)',
+        '% BA.5 Reported (Germany)',
+        '% BA.4 Reported (Germany)',
+        '% BQ.1.1 Reported (Germany)',
+        '% BQ.1.1 Reported (NRW)',
+        '% XBB.1.5 Reported (Germany)',
+        '',
+        '',
+        '',
+      ]
+
+      const dataMap = new Map()
 
       for (let i = 0; i < VOCData[0].length; i++) {
-        map1.set(i, { name: VOCData[0][i], data: [] })
+        dataMap.set(i, { name: VOCData[0][i], data: [] })
       }
 
       for (let i = 4; i < VOCData.length; i = i + 7) {
         for (let j = 0; j < VOCData[i].length; j++) {
-          if (j == 0) map1.get(0).data.push(VOCData[i][j])
+          if (j == 0) dataMap.get(0).data.push(VOCData[i][j])
           else {
             let temp = 0
             if (VOCData.length >= i + 4)
               for (let k = i - 3; k < i + 4; k++) {
                 temp += VOCData[k][j]
               }
-            map1.get(j).data.push(temp * 100)
+            dataMap.get(j).data.push((temp * 100) / 7)
           }
         }
       }
 
-      for (let [key, value] of map1) {
-        if (key == 0) continue
+      for (let [key, value] of dataMap) {
+        // Skip Date and BA.2.9
+        if (key == 0 || key == 11) continue
 
         this.lineDataLookup[value.name] = {
           visible: true,
-          x: map1.get(0).data,
+          x: dataMap.get(0).data,
           y: value.data,
           type: 'scatter',
+          name: headerNew[key],
           mode: 'lines+markers',
           marker: { size: 5 },
           opacity: 0.5,
