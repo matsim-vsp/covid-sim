@@ -6,21 +6,21 @@ Each run has a `config.yaml` file. In this file settings can be made. The follow
 
 | name | required | data type | description |
 |------|-----------|----------|-------------|
-| viewerVersion | false | number | There are several versions of covid-sim. The current version is 2. Possible versions are: 1, 2. |
-| city | true | string | Covid-sim can map data from different cities. Possible are: berlin, cologne. |
-| info | true | string | desc... |
+| viewerVersion | false | number | There are several versions of covid-sim. The current version is 2. Possible versions are: 1 and 2. |
+| city | true | string | Covid-sim can map data from different cities. Possible are: berlin and cologne. |
+| info | true | string | Specifies the name of the file in which the run IDs are assigned to the settings. |
 | readme | true | string | For the description to be displayed above the plots, the name of the Markdown file can be specified, which is located in the same folder as the YAML file. |
 | zipFolder | true | string | For the data of the runs, the folder with the results can be specified here, which is located in the same folder as the YAML file. |
 | timestamp | true | string | Specifies the date in the format `YYYY-MM-DD` on which the run was set up. |
 | offset | false| number[] | desc... |
-| startDate | false | string | Specifies the start date in the format `YYYY-MM-DD` when the run starts. |
+| startDate | false | string | Specifies the start date in the format `YYYY-MM-DD` when the run starts. One of the two values `startDate` and `defaultStartDate` must be set. |
 | endDate | false | string | Specifies the start date in the format `YYYY-MM-DD` when the run ends. |
-| defaultStartDate | false | string | desc... |
-| startDates | false | string[] | desc... |
+| defaultStartDate | false | string | One of the two values `startDate` and `defaultStartDate` must be set. |
+| startDates | false | string[] | Are required if no `offset` has been specified. |
 | ignoredPlots | false | string[] | Plots can be hidden for specific runs. For this purpose, the short name of the plot must be specified at this point. For the respective short names see: [Plots](plots.md#plots). |
 | graphStartDate | true | string | Specifies the date in the format `YYYY-MM-DD` when the plots start. |
-| heatMapMaxValue | false | number | desc... |
-| rValueDate | false | string | desc... |
+| heatMapMaxValue | false | number | So that the results of different runs can be compared with the heatmap. A maximum value must be set, which can be adjusted here. |
+| rValueDate | false | string | The date for the displayed R-value can be set in the format 'YYYY-MM-DD'. The default date is: `2020-10-15`. |
 | optionGroups | true | [optionGroups](#optiongroups)[] | desc... |
   
 ### optionGroups
