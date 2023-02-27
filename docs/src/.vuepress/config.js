@@ -1,10 +1,12 @@
 const { description } = require('../../package')
 
 module.exports = {
+
+  base: '/docs/',
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#title
    */
-  title: 'Vuepress Docs Boilerplate',
+  title: 'COVID-SIM Documentation',
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#description
    */
@@ -28,32 +30,27 @@ module.exports = {
    */
   themeConfig: {
     repo: '',
-    editLinks: false,
+    editLinks: true,
     docsDir: '',
     editLinkText: '',
-    lastUpdated: false,
+    lastUpdated: true,
     nav: [
       {
-        text: 'Guide',
-        link: '/guide/',
-      },
-      {
-        text: 'Config',
-        link: '/config/'
-      },
-      {
-        text: 'VuePress',
-        link: 'https://v1.vuepress.vuejs.org'
+        text: 'Documentation',
+        link: '/documentation/',
       }
     ],
     sidebar: {
-      '/guide/': [
+      '/documentation/': [
         {
-          title: 'Guide',
-          collapsable: false,
+          title: 'Documentation',
+          collapsable: true,
           children: [
             '',
-            'using-vue',
+            'run-setup',
+            'configuration',
+            'website',
+            'plots',
           ]
         }
       ],
