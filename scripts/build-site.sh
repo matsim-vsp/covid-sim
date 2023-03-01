@@ -73,3 +73,5 @@ cd ../..
 echo BUILD: Finally lets build the site
 yarn install
 yarn run build && yarn run test:unit
+cd docs
+yarn build
