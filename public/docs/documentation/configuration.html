@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Configuration | COVID-SIM Documentation</title>
+    <meta name="generator" content="VuePress 1.9.9">
+    
+    <meta name="description" content="">
+    <meta name="theme-color" content="#3eaf7c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <link rel="preload" href="/docs/assets/css/0.styles.c280faa6.css" as="style"><link rel="preload" href="/docs/assets/js/app.8c272793.js" as="script"><link rel="preload" href="/docs/assets/js/2.5654c616.js" as="script"><link rel="preload" href="/docs/assets/js/13.ed7ca539.js" as="script"><link rel="prefetch" href="/docs/assets/js/10.cffa3b32.js"><link rel="prefetch" href="/docs/assets/js/11.74a815bb.js"><link rel="prefetch" href="/docs/assets/js/12.484cbcf2.js"><link rel="prefetch" href="/docs/assets/js/14.4eb701a7.js"><link rel="prefetch" href="/docs/assets/js/15.1d615553.js"><link rel="prefetch" href="/docs/assets/js/16.7d37a59a.js"><link rel="prefetch" href="/docs/assets/js/3.860f343c.js"><link rel="prefetch" href="/docs/assets/js/4.5ff761de.js"><link rel="prefetch" href="/docs/assets/js/5.4d0d6641.js"><link rel="prefetch" href="/docs/assets/js/6.d2f94f26.js"><link rel="prefetch" href="/docs/assets/js/7.86a14b8b.js"><link rel="prefetch" href="/docs/assets/js/8.36d157f2.js"><link rel="prefetch" href="/docs/assets/js/9.6ce7565e.js">
+    <link rel="stylesheet" href="/docs/assets/css/0.styles.c280faa6.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/docs/" class="home-link router-link-active"><!----> <span class="site-name">COVID-SIM Documentation</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/documentation/" class="nav-link router-link-active">
+  Documentation
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/documentation/" class="nav-link router-link-active">
+  Documentation
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>Documentation</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/docs/documentation/" aria-current="page" class="sidebar-link">Introduction</a></li><li><a href="/docs/documentation/run-setup.html" class="sidebar-link">MATSim Episim</a></li><li><a href="/docs/documentation/configuration.html" aria-current="page" class="active sidebar-link">Configuration</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/docs/documentation/configuration.html#yaml-file" class="sidebar-link">YAML File</a></li></ul></li><li><a href="/docs/documentation/website.html" class="sidebar-link">COVID Episim Website</a></li><li><a href="/docs/documentation/plots.html" class="sidebar-link">Plots</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="configuration"><a href="#configuration" class="header-anchor">#</a> Configuration</h1> <p>Each run has a <code>config.yaml</code> file. In this file settings can be made. The following settings are possible:</p> <h2 id="yaml-file"><a href="#yaml-file" class="header-anchor">#</a> YAML File</h2> <table><thead><tr><th>name</th> <th>required</th> <th>data type</th> <th>description</th></tr></thead> <tbody><tr><td>viewerVersion</td> <td>false</td> <td>number</td> <td>There are several versions of covid-sim. The current version is 2. Possible versions are: 1 and 2.</td></tr> <tr><td>city</td> <td>true</td> <td>string</td> <td>Covid-sim can map data from different cities. Possible are: berlin and cologne.</td></tr> <tr><td>info</td> <td>true</td> <td>string</td> <td>Specifies the name of the file in which the run IDs are assigned to the settings.</td></tr> <tr><td>readme</td> <td>true</td> <td>string</td> <td>For the description to be displayed above the plots, the name of the Markdown file can be specified, which is located in the same folder as the YAML file.</td></tr> <tr><td>zipFolder</td> <td>true</td> <td>string</td> <td>For the data of the runs, the folder with the results can be specified here, which is located in the same folder as the YAML file.</td></tr> <tr><td>timestamp</td> <td>true</td> <td>string</td> <td>Specifies the date in the format <code>YYYY-MM-DD</code> on which the run was set up.</td></tr> <tr><td>offset</td> <td>false</td> <td>number[]</td> <td>desc...</td></tr> <tr><td>startDate</td> <td>false</td> <td>string</td> <td>Specifies the start date in the format <code>YYYY-MM-DD</code> when the run starts. One of the two values <code>startDate</code> and <code>defaultStartDate</code> must be set.</td></tr> <tr><td>endDate</td> <td>false</td> <td>string</td> <td>Specifies the start date in the format <code>YYYY-MM-DD</code> when the run ends.</td></tr> <tr><td>defaultStartDate</td> <td>false</td> <td>string</td> <td>One of the two values <code>startDate</code> and <code>defaultStartDate</code> must be set.</td></tr> <tr><td>startDates</td> <td>false</td> <td>string[]</td> <td>Are required if no <code>offset</code> has been specified.</td></tr> <tr><td>ignoredPlots</td> <td>false</td> <td>string[]</td> <td>Plots can be hidden for specific runs. For this purpose, the short name of the plot must be specified at this point. For the respective short names see: <a href="/docs/documentation/plots.html#plots">Plots</a>.</td></tr> <tr><td>graphStartDate</td> <td>true</td> <td>string</td> <td>Specifies the date in the format <code>YYYY-MM-DD</code> when the plots start.</td></tr> <tr><td>heatMapMaxValue</td> <td>false</td> <td>number</td> <td>So that the results of different runs can be compared with the heatmap. A maximum value must be set, which can be adjusted here.</td></tr> <tr><td>rValueDate</td> <td>false</td> <td>string</td> <td>The date for the displayed R-value can be set in the format 'YYYY-MM-DD'. The default date is: <code>2020-10-15</code>.</td></tr> <tr><td>optionGroups</td> <td>true</td> <td><a href="#optiongroups">optionGroups</a>[]</td> <td>desc...</td></tr></tbody></table> <h3 id="optiongroups"><a href="#optiongroups" class="header-anchor">#</a> optionGroups</h3> <table><thead><tr><th>name</th> <th>required</th> <th>data type</th> <th>description</th></tr></thead> <tbody><tr><td>day</td> <td>false</td> <td>number</td> <td>desc...</td></tr> <tr><td>heading</td> <td>true</td> <td>string</td> <td>desc...</td></tr> <tr><td>subheading</td> <td>false</td> <td>string</td> <td>desc...</td></tr> <tr><td>measures</td> <td>true</td> <td><a href="#measures">measures</a>[]</td> <td>desc...</td></tr></tbody></table> <h3 id="measures"><a href="#measures" class="header-anchor">#</a> measures</h3> <table><thead><tr><th>name</th> <th>required</th> <th>data type</th> <th>description</th></tr></thead> <tbody><tr><td>measure</td> <td>true</td> <td>string</td> <td>desc...</td></tr> <tr><td>title</td> <td>true</td> <td>string</td> <td>desc...</td></tr> <tr><td>order</td> <td>false</td> <td>string</td> <td>desc...</td></tr> <tr><td>options</td> <td>false</td> <td>number[]</td> <td>desc...</td></tr> <tr><td>asPercent</td> <td>false</td> <td>boolean</td> <td>desc...</td></tr></tbody></table> <h3 id="example"><a href="#example" class="header-anchor">#</a> Example</h3> <p>This is an example YAML file which belongs to this <a href="https://covid-sim.info/cologne/2022-11-16/3-variants" target="_blank" rel="noopener noreferrer">run<span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a>.</p> <div class="language-yaml extra-class"><pre class="language-yaml"><code><span class="token punctuation">---</span>
+<span class="token key atrule">readme</span><span class="token punctuation">:</span> notes.md
+<span class="token key atrule">zip</span><span class="token punctuation">:</span> summaries.zip
+<span class="token key atrule">info</span><span class="token punctuation">:</span> _info.txt
+<span class="token key atrule">zipFolder</span><span class="token punctuation">:</span> summaries
+<span class="token key atrule">timestamp</span><span class="token punctuation">:</span> <span class="token datetime number">2022-11-18</span>
+<span class="token key atrule">viewerVersion</span><span class="token punctuation">:</span> <span class="token number">2</span>
+<span class="token key atrule">city</span><span class="token punctuation">:</span> cologne
+<span class="token key atrule">runName</span><span class="token punctuation">:</span> calibration
+<span class="token key atrule">defaultStartDate</span><span class="token punctuation">:</span> <span class="token datetime number">2020-02-25</span>
+<span class="token key atrule">graphStartDate</span><span class="token punctuation">:</span> <span class="token datetime number">2022-08-01</span>
+<span class="token key atrule">endDate</span><span class="token punctuation">:</span> <span class="token datetime number">2024-09-30</span>
+<span class="token key atrule">startDates</span><span class="token punctuation">:</span>
+<span class="token punctuation">-</span> <span class="token datetime number">2020-02-25</span>
+<span class="token key atrule">optionGroups</span><span class="token punctuation">:</span>
+<span class="token punctuation">-</span> <span class="token key atrule">day</span><span class="token punctuation">:</span> <span class="token number">-1</span>
+  <span class="token key atrule">heading</span><span class="token punctuation">:</span> <span class="token string">&quot;&quot;</span>
+  <span class="token key atrule">subheading</span><span class="token punctuation">:</span> <span class="token string">&quot;&quot;</span>
+  <span class="token key atrule">measures</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Vac Camp
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> vacCamp
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Strain A
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> StrainA
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Strain A Date
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> strainADate
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Esc
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> esc
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Esc L
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> escL
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Ci Corr
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> ciCorr
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Days
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> days
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Strain Rnd
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> strainRnd
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Line B
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> lineB
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Iga
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> iga
+  <span class="token punctuation">-</span> <span class="token key atrule">title</span><span class="token punctuation">:</span> Seasonal
+    <span class="token key atrule">measure</span><span class="token punctuation">:</span> seasonal
+</code></pre></div></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated:</span> <span class="time">2/27/2023, 1:40:00 PM</span></div></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/docs/documentation/run-setup.html" class="prev">
+        MATSim Episim
+      </a></span> <span class="next"><a href="/docs/documentation/website.html">
+        COVID Episim Website
+      </a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/docs/assets/js/app.8c272793.js" defer></script><script src="/docs/assets/js/2.5654c616.js" defer></script><script src="/docs/assets/js/13.ed7ca539.js" defer></script>
+  </body>
+</html>
