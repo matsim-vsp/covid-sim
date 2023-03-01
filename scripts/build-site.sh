@@ -69,9 +69,12 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Au
 # Back to root folder
 cd ../..
 
+# Build docs first
+cd docs
+yarn build
+cd ..
+
 # DONE WITH PREP! Build the site.
 echo BUILD: Finally lets build the site
 yarn install
 yarn run build && yarn run test:unit
-cd docs
-yarn build
