@@ -71,6 +71,7 @@ cd ../..
 
 # Build docs first
 cd docs
+yarn
 yarn build
 cd ..
 
