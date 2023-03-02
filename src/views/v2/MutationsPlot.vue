@@ -11,7 +11,6 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import Papa from 'papaparse'
 import { PUBLIC_SVN } from '@/Globals'
-import { map } from 'js-coroutines'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
