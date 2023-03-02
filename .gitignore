@@ -22,5 +22,5 @@ yarn-error.log*
 ~$*
 
 # Docs
-/docs/dist
+/docs/src/.vuepress/dist
 /docs/node_modules
