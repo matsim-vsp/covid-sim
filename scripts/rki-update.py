@@ -1,13 +1,12 @@
-#!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 #
 # RKI Data Parser
 #
-# Requires Python 3.7, pandas and dfply
+# Requires Python 3.7+, pandas and dfply
 # You can install pandas and dfply with one command:
 #   pip install pandas dfply
 #
-# Usage:  python rki-update.py [RKI-filename.csv]
+# Usage:  python3 rki-update.py [RKI-filename.csv]
 
 print("RKI Updater script")
 
@@ -30,7 +29,7 @@ csv = pd.read_csv(sys.argv[1], parse_dates=True)
 
 # split out dates
 csv >>= separate(
-    X.Refdatum,
+    X.NeuGenesen,  # This is actually the X.Refdatum but unix "cut" command is off-by-one
     ["year", "dash1", "month", "dash2", "day"],
     sep=[4, 5, 7, 8, 10],
     convert=True,
