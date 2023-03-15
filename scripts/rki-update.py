@@ -19,17 +19,17 @@ except:
     print("You can install them with:  pip install pandas dfply")
     sys.exit(1)
 
-if len(sys.argv) != 2:
-    print("Usage:  python rki-update.py [RKI-filename.csv]")
-    sys.exit(1)
+# if len(sys.argv) != 2:
+#     print("Usage:  python rki-update.py [RKI-filename.csv]")
+#     sys.exit(1)
 
-print("Reading csv:", sys.argv[1])
+# print("Reading csv:", sys.argv[1])
 
-csv = pd.read_csv(sys.argv[1], parse_dates=True)
+csv = pd.read_csv('https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv', parse_dates=True)
 
 # split out dates
 csv >>= separate(
-    X.NeuGenesen,  # This is actually the X.Refdatum but unix "cut" command is off-by-one
+    X.Refdatum,  # This is actually the X.Refdatum but unix "cut" command is off-by-one
     ["year", "dash1", "month", "dash2", "day"],
     sep=[4, 5, 7, 8, 10],
     convert=True,
@@ -40,15 +40,17 @@ csv >>= separate(
     sep=[4, 5, 7, 8, 10],
     convert=True,
     remove=False,
-) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day, X.myear, X.mmonth, X.mday)
+) >> select(X.IdLandkreis, X.AnzahlFall, X.year, X.month, X.day, X.myear, X.mmonth, X.mday)
+
+print(csv)
 
 # Berlin
 fname = "berlin-cases.csv"
 print(fname)
 berlin = (
     csv
-    >> filter_by(X.Bundesland == "Berlin")
-    >> group_by(X.Bundesland, X.year, X.month, X.day)
+    >> filter_by(X.IdLandkreis >=  11001, X.IdLandkreis <=  11012)
+    >> group_by(X.IdLandkreis, X.year, X.month, X.day)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.year, X.month, X.day)
 )
@@ -60,8 +62,8 @@ fname = "berlin-cases-meldedatum.csv"
 print(fname)
 mberlin = (
     csv
-    >> filter_by(X.Bundesland == "Berlin")
-    >> group_by(X.Bundesland, X.myear, X.mmonth, X.mday)
+    >> filter_by(X.IdLandkreis == 11001)
+    >> group_by(X.IdLandkreis, X.myear, X.mmonth, X.mday)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.myear, X.mmonth, X.mday)
     >> rename(year=X.myear, month=X.mmonth, day=X.mday)
@@ -74,8 +76,8 @@ fname = "cologne-cases.csv"
 print(fname)
 berlin = (
     csv
-    >> filter_by(X.Bundesland == "Berlin")
-    >> group_by(X.Bundesland, X.year, X.month, X.day)
+    >> filter_by(X.IdLandkreis == 5315)
+    >> group_by(X.IdLandkreis, X.year, X.month, X.day)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.year, X.month, X.day)
 )
@@ -87,8 +89,8 @@ fname = "cologne-cases-meldedatum.csv"
 print(fname)
 mberlin = (
     csv
-    >> filter_by(X.Bundesland == "Berlin")
-    >> group_by(X.Bundesland, X.myear, X.mmonth, X.mday)
+    >> filter_by(X.IdLandkreis == 5315)
+    >> group_by(X.IdLandkreis, X.myear, X.mmonth, X.mday)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.myear, X.mmonth, X.mday)
     >> rename(year=X.myear, month=X.mmonth, day=X.mday)
@@ -102,8 +104,8 @@ fname = "munich-cases.csv"
 print(fname)
 munich = (
     csv
-    >> filter_by(X.Landkreis == "SK München")
-    >> group_by(X.Landkreis, X.year, X.month, X.day)
+    >> filter_by(X.IdLandkreis == 9162)
+    >> group_by(X.IdLandkreis, X.year, X.month, X.day)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.year, X.month, X.day)
 )
@@ -115,8 +117,8 @@ fname = "cologne-cases.csv"
 print(fname)
 cologne = (
     csv
-    >> filter_by(X.Landkreis == "SK Köln")
-    >> group_by(X.Landkreis, X.year, X.month, X.day)
+    >> filter_by(X.IdLandkreis == 5315)
+    >> group_by(X.IdLandkreis, X.year, X.month, X.day)
     >> summarize(cases=X.AnzahlFall.sum())
     >> arrange(X.year, X.month, X.day)
 )
@@ -125,22 +127,24 @@ cologne.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
 
 # Heinsberg
-fname = "heinsberg-cases.csv"
-print(fname)
-heinsberg = (
-    csv
-    >> filter_by(X.Landkreis == "LK Heinsberg")
-    >> group_by(X.Landkreis, X.year, X.month, X.day)
-    >> summarize(cases=X.AnzahlFall.sum())
-    >> arrange(X.year, X.month, X.day)
-)
+# fname = "heinsberg-cases.csv"
+# print(fname)
+# heinsberg = (
+#     csv
+#     >> filter_by(X.IdLandkreis == 5370016)
+#     >> group_by(X.IdLandkreis, X.year, X.month, X.day)
+#     >> summarize(cases=X.AnzahlFall.sum())
+#     >> arrange(X.year, X.month, X.day)
+# )
 
-heinsberg.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
+# heinsberg.to_csv(fname, index=False, columns=["year", "month", "day", "cases"])
 
 ### same by reporting date (Meldedatum):
 
 # needs to be re-read because the original file is garbled (could be fixed)
-csv = pd.read_csv(sys.argv[1], parse_dates=True)
+csv = pd.read_csv('https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv', parse_dates=True)
+
+# sys.argv[1]
 
 # split out dates
 csv >>= separate(
@@ -149,15 +153,15 @@ csv >>= separate(
     sep=[4, 5, 7, 8, 10],
     convert=True,
     remove=False,
-) >> select(X.Bundesland, X.Landkreis, X.AnzahlFall, X.year, X.month, X.day)
+) >> select(X.IdLandkreis, X.AnzahlFall, X.year, X.month, X.day)
 
 # Berlin
 fname = "berlin-cases-by-reporting-date.csv"
 print(fname)
 berlin = (
         csv
-        >> filter_by(X.Bundesland == "Berlin")
-        >> group_by(X.Bundesland, X.year, X.month, X.day)
+        >> filter_by(X.IdLandkreis >=  11001, X.IdLandkreis <=  11012)
+        >> group_by(X.IdLandkreis, X.year, X.month, X.day)
         >> summarize(cases=X.AnzahlFall.sum())
         >> arrange(X.year, X.month, X.day)
 )
