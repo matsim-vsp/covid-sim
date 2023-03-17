@@ -312,6 +312,23 @@ export default class VueComponent extends Vue {
         '',
       ]
 
+      // Change colors: index corresponds to the headerCologne
+      const colors = [
+        '',
+        '#1f77b4',
+        '#ff0000',
+        '',
+        '',
+        '#ffa500',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '#e377c2',
+      ]
+
       const VOCMap = new Map()
 
       for (let i = 0; i < VOCData[0].length; i++) {
@@ -345,11 +362,14 @@ export default class VueComponent extends Vue {
 
       if (this.city == 'cologne') {
         for (let [key, value] of VOCMap) {
-          // Skip Date and BA.2.9
+          // Skip Date (0) and BA.2.9 (11)
           if (key == 0 || key == 11) continue
+
+          console.log(key, headerCologne[key])
 
           this.lineDataLookup[value.name] = {
             visible: true,
+            line: { color: colors[key] },
             x: VOCMap.get(0).data,
             y: value.data,
             type: 'scatter',
