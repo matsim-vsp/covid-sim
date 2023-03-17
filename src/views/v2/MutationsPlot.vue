@@ -386,8 +386,6 @@ export default class VueComponent extends Vue {
       this.dataLines2 = Object.values(this.lineDataLookup)
       this.dataLines3 = JSON.parse(JSON.stringify(this.dataLines2))
 
-      console.log(this.dataLines2)
-
       if (this.startURL !== undefined) {
         for (let i = 0; i < this.dataLines.length; i++) {
           if (this.startURL.includes(this.dataLines[i].name)) {
