@@ -19,6 +19,7 @@ except:
     print("You can install them with:  pip install pandas dfply")
     sys.exit(1)
 
+# commented out for local testing
 # if len(sys.argv) != 2:
 #     print("Usage:  python rki-update.py [RKI-filename.csv]")
 #     sys.exit(1)
