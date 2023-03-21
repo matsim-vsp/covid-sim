@@ -70,6 +70,11 @@ Data basis:
 - First plot: `PUBLIC_SVN + 'original-data/Fallzahlen/' + 'Cologne/VOC_Cologne_RKI.csv' respectively 'Berlin/VOC_Berlin.csv'`
 - Second and third plot: `RunId + '.strains.tsv'`
 
+Add new data:
+- As soon as new variants for Cologne are available, they will be added automatically.
+- For the new variants only the name in the [file](https://github.com/matsim-vsp/covid-sim/blob/master/src/views/v2/MutationsPlot.vue) has to be adjusted (headerCologne[] line 292)
+- In case new variants should not be displayed, the index must be added in the for loop (line 366) in the termination condition.
+
 ## Simulated R-Values
 
 ![Simulated R-Values Plot](./../images/sim-r-values.png)
