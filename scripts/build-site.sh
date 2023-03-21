@@ -11,18 +11,18 @@ IFS=$'\n\t'
 
 echo BUILD: Getting RKI_FILE
 
-RKI_FILE=https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data
+RKI_FILE=https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv
 
-wget -nv -O rki-all.csv $RKI_FILE
-ls -al rki-all.csv
-head rki-all.csv
+wget -nv -O rki.csv $RKI_FILE
+ls -al rki.csv
+head rki.csv
 
 echo "FILTER the RKI csv file ---"
 # NOTE: cut doesn't handle commas inside quotes! So the columns are off-by-one
 # The "NeuGenesen" column in the cut output is ACTUALLY the RefDatum.
-cut -d "," -f3,4,7,9,15,16 < rki-all.csv > rki.csv
-head rki.csv
-ls -al rki.csv
+# cut -d "," -f3,4,7,9,15,16 < rki-all.csv > rki.csv
+# head rki.csv
+# ls -al rki.csv
 
 # fetch the RKI hospitalization data from Github, data is in:
 # https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland
