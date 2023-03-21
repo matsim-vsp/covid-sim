@@ -1,10 +1,10 @@
 <template lang="pug">
-.mutations-plots(v-if="!isResizing")
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
-  vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
-  vue-plotly.plot3(:data="dataLines3" :layout="layout3" :options="options" @relayout="handleRelayout")
-
-</template>
+  .mutations-plots(v-if="!isResizing")
+    vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+    vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
+    vue-plotly.plot3(:data="dataLines3" :layout="layout3" :options="options" @relayout="handleRelayout")
+  
+  </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -270,30 +270,6 @@ export default class VueComponent extends Vue {
   private cacheRawVOCData: { [city: string]: any[] } = {}
 
   private async prepareData() {
-    // this.dataLines2 = []
-    var foundHeader = false
-    var header: any[] = []
-    var color: any[] = []
-    var date: any[] = []
-    var alpha: any[] = []
-    var beta: any[] = []
-    var gamma: any[] = []
-    var delta: any[] = []
-    var wild: any[] = []
-    var omicron: any[] = []
-    var ba1: any[] = []
-    var ba2: any[] = []
-    var ba1Cologne: any[] = []
-    var ba2Cologne: any[] = []
-    //var ba29Cologne: any[] = []
-    var ba4Cologne: any[] = []
-    var ba5Cologne: any[] = []
-    var bq11Germany: any[] = []
-    var bq11NRW: any[] = []
-    var xbb15: any[] = []
-
-    //  XBB.1.5
-
     if (this.city == 'cologne') {
       this.svnUrl = this.originalDataUrl + 'Cologne/VOC_Cologne_RKI.csv'
     } else if (this.city == 'berlin') {
@@ -313,519 +289,98 @@ export default class VueComponent extends Vue {
       }
       const VOCData = this.cacheRawVOCData[this.city]
 
-      var alphaTempDouble = 0
-      var betaTempDouble = 0
-      var gammaTempDouble = 0
-      var deltaTempDouble = 0
-      var omicronTempDouble = 0
-      var ba1TempDouble = 0
-      var ba2TempDouble = 0
-      var ba1CologneTempDouble = 0
-      var ba2CologneTempDouble = 0
-      var wildTempDouble = 0
-      //var ba29CologneTempDouble = 0
-      var ba4CologneTempDouble = 0
-      var ba5CologneTempDouble = 0
-      var bq11GermanyTempDouble = 0 // 14
-      var bq11NRWTempDouble = 0 // 15
-      var xbb15TempDouble = 0 // 16
-      var countDays = 0
+      const headerCologne = [
+        '',
+        '% SARS_CoV_2 Reported',
+        '% MUTB Reported',
+        '% Gamma Reported',
+        '% Delta Reported',
+        '% B117 Reported',
+        '% Omicron Reported (NRW)',
+        '% BA.1 Reported (Germany)',
+        '% BA.2 Reported (Germany)',
+        '% BA.1 Reported (Cologne)',
+        '% BA.2 Reported (Cologne)',
+        '% BA.2.9 Reported (Germany)',
+        '% BA.5 Reported (Germany)',
+        '% BA.4 Reported (Germany)',
+        '% BQ.1.1 Reported (Germany)',
+        '% BQ.1.1 Reported (NRW)',
+        '% XBB.1.5 Reported (Germany)',
+        '',
+        '',
+        '',
+      ]
 
-      // console.log(VOCData)
+      // Change colors: index corresponds to the headerCologne
+      const colors = [
+        '',
+        '#1f77b4',
+        '#ff0000',
+        '',
+        '',
+        '#ffa500',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '#e377c2',
+      ]
 
-      for (var i = 0; i < VOCData.length; i++) {
-        if (
-          !(
-            VOCData[i][0] == null &&
-            VOCData[i][1] == null &&
-            VOCData[i][2] == null &&
-            VOCData[i][3] == null &&
-            VOCData[i][4] == null
-          )
-        ) {
-          if (!foundHeader) {
-            if (this.city == 'cologne') {
-              header.push(VOCData[i][0])
-              header.push(VOCData[i][5])
-              header.push(VOCData[i][4])
-              header.push(VOCData[i][3])
-              header.push(VOCData[i][2])
-              header.push(VOCData[i][1])
-              header.push(VOCData[i][9])
-              header.push(VOCData[i][10])
-              header.push(VOCData[i][11].trim())
-              header.push(VOCData[i][12].trim())
-              header.push(VOCData[i][13].trim())
-              header.push(VOCData[i][14].trim())
-              header.push(VOCData[i][15].trim())
-              header.push(VOCData[i][16].trim())
-            } else {
-              header.push(VOCData[i][0])
-              header.push(VOCData[i][1])
-              header.push(VOCData[i][2])
-              header.push(VOCData[i][3])
-              header.push(VOCData[i][4])
-            }
-            foundHeader = true
-          } else {
-            // Data has a gap and is continued at this date
-            if (this.city == 'cologne' && VOCData[i][0] == '2021-12-06') {
-              countDays = 1
-              alphaTempDouble = 0
-              betaTempDouble = 0
-              gammaTempDouble = 0
-              deltaTempDouble = 0
-              omicronTempDouble = 0
-              wildTempDouble = 0
-              ba1TempDouble = 0
-              ba2TempDouble = 0
-              ba1CologneTempDouble = 0
-              ba2CologneTempDouble = 0
-              //ba29CologneTempDouble = 0
-              ba4CologneTempDouble = 0
-              ba5CologneTempDouble = 0
-              bq11GermanyTempDouble = 0
-              bq11NRWTempDouble = 0
-              xbb15TempDouble = 0
-            } else {
-              countDays += 1
-            }
+      const VOCMap = new Map()
 
-            if (this.city == 'cologne') {
-              var dateTemp = VOCData[i][0]
-              var alphaTemp = VOCData[i][5]
-              var betaTemp = VOCData[i][4]
-              var gammaTemp = VOCData[i][3]
-              var deltaTemp = VOCData[i][2]
-              var wildTemp = VOCData[i][1]
-              var omicronTemp = VOCData[i][6]
-              var ba1Temp = VOCData[i][7]
-              var ba2Temp = VOCData[i][8]
-              var ba1CologneTemp = VOCData[i][9]
-              var ba2CologneTemp = VOCData[i][10]
-              //var ba29CologneTemp = VOCData[i][11]
-              var ba5CologneTemp = VOCData[i][12]
-              var ba4CologneTemp = VOCData[i][13]
-              var bq11GermanyTemp = VOCData[i][14]
-              var bq11NRWTemp = VOCData[i][15]
-              var xbb15Temp = VOCData[i][16]
-            } else {
-              var dateTemp = VOCData[i][0]
-              var alphaTemp = VOCData[i][1]
-              var betaTemp = VOCData[i][2]
-              var gammaTemp = VOCData[i][3]
-              var deltaTemp = VOCData[i][4]
-            }
+      for (let i = 0; i < VOCData[0].length; i++) {
+        VOCMap.set(i, { name: VOCData[0][i], data: [] })
+      }
 
-            dateTemp = dateTemp.trim()
-
-            if (alphaTemp == null) {
-              alphaTemp = 0
-            } else {
-              if (typeof alphaTemp == 'string') {
-                alphaTemp = alphaTemp.substring(0, alphaTemp.length - 1)
-                alphaTemp = alphaTemp.replace(',', '.')
-                alphaTemp = parseFloat(alphaTemp)
+      for (let i = 4; i < VOCData.length; i = i + 7) {
+        for (let j = 0; j < VOCData[i].length; j++) {
+          if (j == 0) VOCMap.get(0).data.push(VOCData[i][j])
+          else {
+            let temp = 0
+            if (VOCData.length >= i + 4)
+              for (let k = i - 3; k < i + 4; k++) {
+                temp += VOCData[k][j]
               }
-            }
-
-            if (betaTemp == null) {
-              betaTemp = 0
-            } else {
-              if (typeof betaTemp == 'string') {
-                betaTemp = betaTemp.substring(0, betaTemp.length - 1)
-                betaTemp = betaTemp.replace(',', '.')
-                betaTemp = parseFloat(betaTemp)
-              }
-            }
-
-            if (gammaTemp == null) {
-              gammaTemp = 0
-            } else {
-              if (typeof gammaTemp == 'string') {
-                gammaTemp = gammaTemp.substring(0, gammaTemp.length - 1)
-                gammaTemp = gammaTemp.replace(',', '.')
-                gammaTemp = parseFloat(gammaTemp)
-              }
-            }
-
-            if (deltaTemp == null) {
-              deltaTemp = 0
-            } else {
-              if (typeof deltaTemp == 'string') {
-                deltaTemp = deltaTemp.substring(0, deltaTemp.length - 1)
-                deltaTemp = deltaTemp.replace(',', '.')
-                deltaTemp = parseFloat(deltaTemp)
-              }
-            }
-
-            if (this.city == 'cologne') {
-              if (wildTemp == null) {
-                wildTemp = 0
-              } else {
-                if (typeof wildTemp == 'string') {
-                  wildTemp = wildTemp.substring(0, wildTemp.length - 1)
-                  wildTemp = wildTemp.replace(',', '.')
-                  wildTemp = parseFloat(wildTemp)
-                }
-              }
-
-              if (omicronTemp == null) {
-                omicronTemp = 0
-              } else {
-                if (typeof omicronTemp == 'string') {
-                  omicronTemp = parseFloat(omicronTemp)
-                }
-              }
-
-              if (ba1Temp == null) {
-                ba1Temp = 0
-              } else {
-                if (typeof ba1Temp == 'string') {
-                  ba1Temp = parseFloat(ba1Temp)
-                }
-              }
-
-              if (ba2Temp == null) {
-                ba2Temp = 0
-              } else {
-                if (typeof ba2Temp == 'string') {
-                  ba2Temp = parseFloat(ba2Temp)
-                }
-              }
-
-              if (ba1CologneTemp == null) {
-                ba1CologneTemp = 0
-              } else {
-                if (typeof ba1CologneTemp == 'string') {
-                  ba1CologneTemp = parseFloat(ba1CologneTemp)
-                }
-              }
-
-              if (ba2CologneTemp == null) {
-                ba2CologneTemp = 0
-              } else {
-                if (typeof ba2CologneTemp == 'string') {
-                  ba2CologneTemp = parseFloat(ba2CologneTemp)
-                }
-              }
-
-              if (ba4CologneTemp == null) {
-                ba4CologneTemp = 0
-              } else {
-                if (typeof ba4CologneTemp == 'string') {
-                  ba4CologneTemp = parseFloat(ba4CologneTemp)
-                }
-              }
-
-              if (ba4CologneTemp == null) {
-                ba4CologneTemp = 0
-              } else {
-                if (typeof ba4CologneTemp == 'string') {
-                  ba4CologneTemp = parseFloat(ba4CologneTemp)
-                }
-              }
-
-              if (ba5CologneTemp == null) {
-                ba5CologneTemp = 0
-              } else {
-                if (typeof ba5CologneTemp == 'string') {
-                  ba5CologneTemp = parseFloat(ba5CologneTemp)
-                }
-              }
-
-              if (bq11GermanyTemp == null) {
-                bq11GermanyTemp = 0
-              } else {
-                if (typeof bq11GermanyTemp == 'string') {
-                  bq11GermanyTemp = parseFloat(bq11GermanyTemp)
-                }
-              }
-
-              if (bq11NRWTemp == null) {
-                bq11NRWTemp = 0
-              } else {
-                if (typeof bq11NRWTemp == 'string') {
-                  bq11NRWTemp = parseFloat(bq11NRWTemp)
-                }
-              }
-
-              if (xbb15Temp == null) {
-                xbb15Temp = 0
-              } else {
-                if (typeof xbb15Temp == 'string') {
-                  xbb15Temp = parseFloat(xbb15Temp)
-                }
-              }
-            }
-
-            alphaTempDouble += alphaTemp
-            betaTempDouble += betaTemp
-            gammaTempDouble += gammaTemp
-            deltaTempDouble += deltaTemp
-            if (this.city == 'cologne') {
-              wildTempDouble += wildTemp
-              omicronTempDouble += omicronTemp
-              ba1TempDouble += ba1Temp
-              ba2TempDouble += ba2Temp
-              ba1CologneTempDouble += ba1CologneTemp
-              ba2CologneTempDouble += ba2CologneTemp
-              ba4CologneTempDouble += ba4CologneTemp
-              ba5CologneTempDouble += ba5CologneTemp
-              bq11GermanyTempDouble += bq11GermanyTemp
-              bq11NRWTempDouble += bq11NRWTemp
-              xbb15TempDouble += xbb15Temp
-            }
-
-            if (countDays == 7 && this.city == 'cologne') {
-              date.push(dateTemp)
-              alpha.push((alphaTempDouble * 100) / 7)
-              beta.push((betaTempDouble * 100) / 7)
-              gamma.push((gammaTempDouble * 100) / 7)
-              delta.push((deltaTempDouble * 100) / 7)
-              wild.push((wildTempDouble * 100) / 7)
-              omicron.push((omicronTempDouble * 100) / 7)
-              ba1.push((ba1TempDouble * 100) / 7)
-              ba2.push((ba2TempDouble * 100) / 7)
-              ba1Cologne.push((ba1CologneTempDouble * 100) / 7)
-              ba2Cologne.push((ba2CologneTempDouble * 100) / 7)
-              ba4Cologne.push((ba4CologneTempDouble * 100) / 7)
-              ba5Cologne.push((ba5CologneTempDouble * 100) / 7)
-              bq11Germany.push((bq11GermanyTempDouble * 100) / 7)
-              bq11NRW.push((bq11NRWTempDouble * 100) / 7)
-              xbb15.push((xbb15TempDouble * 100) / 7)
-
-              countDays = 0
-              alphaTempDouble = 0
-              betaTempDouble = 0
-              gammaTempDouble = 0
-              deltaTempDouble = 0
-              wildTempDouble = 0
-              omicronTempDouble = 0
-              ba1TempDouble = 0
-              ba2TempDouble = 0
-              ba1CologneTempDouble = 0
-              ba2CologneTempDouble = 0
-              ba4CologneTempDouble = 0
-              ba5CologneTempDouble = 0
-              bq11GermanyTempDouble = 0
-              bq11NRWTempDouble = 0
-              xbb15TempDouble = 0
-            } else if (this.city == 'berlin') {
-              date.push(dateTemp)
-              alpha.push(alphaTempDouble)
-              beta.push(betaTempDouble)
-              gamma.push(gammaTempDouble)
-              delta.push(deltaTempDouble)
-
-              alphaTempDouble = 0
-              betaTempDouble = 0
-              gammaTempDouble = 0
-              deltaTempDouble = 0
-            }
+            VOCMap.get(j).data.push((temp * 100) / 7)
           }
         }
       }
 
-      // chnage names
-      if (this.city == 'cologne') {
-        header = [
-          'Date',
-          '% B117 Reported',
-          '% Delta Reported',
-          '% Gamma Reported',
-          '% MUTB Reported',
-          '% SARS_CoV_2 Reported',
-          '% Omicron Reported (NRW)',
-          '% BA.1 Reported (Germany)',
-          '% BA.2 Reported (Germany)',
-          '% BA.1 Reported (Cologne)',
-          '% BA.2 Reported (Cologne)',
-          '% BA.2.9 Reported (Germany)',
-          '% BA.5 Reported (Germany)',
-          '% BA.4 Reported (Germany)',
-          '% BQ.1.1 Reported (Germany)',
-          '% BQ.1.1 Reported (NRW)',
-          '% XBB.1.5 Reported (Germany)',
-        ]
-        color = ['', 'blue', '', '', '', 'red', '']
-      } else if (this.city == 'berlin') {
-        header = ['Date', '% B117 Reported', 'Beta', 'Gamma', 'MUTB Reported']
-        color = ['', '', '', '', '']
-      }
-
-      if (this.city == 'cologne') {
-        this.lineDataLookup[header[5]] = {
-          visible: true,
-          x: date,
-          y: wild,
-          name: header[5],
-          color: color[5],
-          type: 'scatter',
-          mode: 'lines+markers',
-          marker: { size: 5 },
-          opacity: 0.5,
+      // Remove null values at the end
+      for (let [key, value] of VOCMap) {
+        if (key != 0) {
+          console.log(value.data)
+          for (let i = value.data.length - 1; i >= 0; i--) {
+            if (value.data[i] == 0) value.data.pop()
+            else break
+          }
         }
       }
 
-      this.lineDataLookup[header[1]] = {
-        visible: true,
-        x: date,
-        y: alpha,
-        name: header[1],
-        color: color[1],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[2]] = {
-        visible: true,
-        x: date,
-        y: beta,
-        name: header[2],
-        color: color[2],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[3]] = {
-        visible: true,
-        x: date,
-        y: gamma,
-        name: header[3],
-        color: color[3],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[4]] = {
-        visible: true,
-        x: date,
-        y: delta,
-        name: header[4],
-        color: color[4],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[6]] = {
-        visible: true,
-        x: date,
-        y: omicron,
-        name: header[6],
-        color: color[6],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[7]] = {
-        visible: true,
-        x: date,
-        y: ba1,
-        name: header[7],
-        color: color[7],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[8]] = {
-        visible: true,
-        x: date,
-        y: ba2,
-        name: header[8],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[9]] = {
-        visible: true,
-        x: date,
-        y: ba1Cologne,
-        name: header[9],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-      this.lineDataLookup[header[10]] = {
-        visible: true,
-        x: date,
-        y: ba2Cologne,
-        name: header[10],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
+      if (this.city == 'cologne') {
+        for (let [key, value] of VOCMap) {
+          // Skip Date (0) and BA.2.9 (11)
+          if (key == 0 || key == 11) continue
 
-      this.lineDataLookup[header[11]] = {
-        visible: true,
-        x: date,
-        y: ba4Cologne,
-        name: header[13],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
+          console.log(key, headerCologne[key])
 
-      this.lineDataLookup[header[12]] = {
-        visible: true,
-        x: date,
-        y: ba5Cologne,
-        name: header[12],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-
-      this.lineDataLookup[header[14]] = {
-        visible: true,
-        x: date,
-        y: bq11Germany,
-        name: header[14],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-
-      this.lineDataLookup[header[15]] = {
-        visible: true,
-        x: date,
-        y: bq11NRW,
-        name: header[15],
-        color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
-      }
-
-      this.lineDataLookup[header[16]] = {
-        visible: true,
-        x: date,
-        y: xbb15,
-        name: header[16],
-        //color: color[8],
-        type: 'scatter',
-        mode: 'lines+markers',
-        marker: { size: 5 },
-        opacity: 0.5,
+          this.lineDataLookup[value.name] = {
+            visible: true,
+            line: { color: colors[key] },
+            x: VOCMap.get(0).data,
+            y: value.data,
+            type: 'scatter',
+            name: headerCologne[key],
+            mode: 'lines+markers',
+            marker: { size: 5 },
+            opacity: 0.5,
+          }
+        }
+      } else if (this.city == 'berlin') {
+        // TODO: If someday the berlin scenario should work on v2
       }
 
       this.dataLines2 = Object.values(this.lineDataLookup)
