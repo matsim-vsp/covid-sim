@@ -19,14 +19,13 @@ except:
     print("You can install them with:  pip install pandas dfply")
     sys.exit(1)
 
-# commented out for local testing
-# if len(sys.argv) != 2:
-#     print("Usage:  python rki-update.py [RKI-filename.csv]")
-#     sys.exit(1)
+if len(sys.argv) != 2:
+    print("Usage:  python rki-update.py [RKI-filename.csv]")
+    sys.exit(1)
 
-# print("Reading csv:", sys.argv[1])
+print("Reading csv:", sys.argv[1])
 
-csv = pd.read_csv('https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv', parse_dates=True)
+csv = pd.read_csv(sys.argv[1], parse_dates=True)
 
 # split out dates
 csv >>= separate(
