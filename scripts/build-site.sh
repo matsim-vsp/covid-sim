@@ -57,6 +57,7 @@ echo BUILD: Process DIVI Cases
 cd Fallzahlen/DIVI
 
 export SRC="https://diviexchange.blob.core.windows.net/%24web/zeitreihe-tagesdaten.csv"
+# export SRC="https://github.com/robert-koch-institut/Intensivkapazitaeten_und_COVID-19-Intensivbettenbelegung_in_Deutschland/blob/0b98fce502cadcdab724abc456e80c02ba258c0a/Intensivregister_Landkreise_Kapazitaeten.csv"
 export OUT="zeitreihe-tagesdaten.csv"
 wget -qO - ${SRC} > $OUT
 
