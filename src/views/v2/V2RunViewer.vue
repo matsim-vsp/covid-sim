@@ -2147,7 +2147,7 @@ export default class VueComponent extends Vue {
     // pull the cases field out of the CSV
     for (const datapoint of data) {
       try {
-        const day = datapoint.date
+        const day = datapoint.datum
         if (datapoint.faelle_covid_aktuell) {
           dates.push(day)
           cases.push(datapoint.faelle_covid_aktuell)
