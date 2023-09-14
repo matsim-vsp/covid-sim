@@ -33,7 +33,9 @@ cp -f COVID-Hospitalization/Archiv/`ls COVID-Hospitalization/Archiv | tail -1` s
 echo BUILD: Create [city]-cases.csv files
 # create the [city]-cases.csv files
 python3 --version
+echo Before rki-update.py
 python3 scripts/rki-update.py rki.csv
+echo After rki-update.py
 
 echo BUILD: Check out SVN and move *.csv files
 # put them in the right places
