@@ -15,6 +15,9 @@ RKI_FILE=https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV
 
 wget -nv -O rki.csv $RKI_FILE
 ls -al rki.csv
+# Filter by IdLandkreis, AnzahlFall, Meldedatum, Refdatum
+cut -d ',' -f 1,4,5,10 rki.csv > temp.csv
+mv temp.csv rki.csv
 head rki.csv
 
 echo "FILTER the RKI csv file ---"
