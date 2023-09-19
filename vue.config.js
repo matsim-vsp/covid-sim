@@ -23,9 +23,9 @@ module.exports = {
       .end()
   },
   configureWebpack: {
-    output: {
-      globalObject: 'self',
-    },
+    // output: {
+    //   globalObject: 'self',
+    // },
     plugins: [new ThreadsPlugin()],
     module: {
       rules: [
