@@ -23,6 +23,8 @@ export default class VueComponent extends Vue {
     this.updateScale()
     this.calculateValues()
     this.unselectLines()
+
+    console.log(this.data)
   }
 
   private isResizing = false
@@ -106,7 +108,6 @@ export default class VueComponent extends Vue {
   private calculateValues() {
     this.dataLines = []
     if (this.data.length == 0) return
-
     // old plots without strain type
     if (Object.keys(this.data[0]).includes('nInfected')) {
       let x = []
@@ -125,10 +126,9 @@ export default class VueComponent extends Vue {
       // new plots with strain type
     } else {
       let strainTypes = [] as any
-
       let strainObjects = []
-
-      for (let i = 0; i < 20; i++) {
+      // 100 is the number of max different diseases
+      for (let i = 0; i < 100; i++) {
         if (!strainTypes.includes(this.data[i].strain)) {
           strainTypes.push(this.data[i].strain)
           strainObjects.push({
@@ -138,15 +138,15 @@ export default class VueComponent extends Vue {
             y: [] as any,
             line: { width: 1 },
           })
+        } else {
+          break
         }
       }
-
       for (let i = 0; i < this.data.length; i++) {
         const index = strainTypes.indexOf(this.data[i].strain)
         strainObjects[index].x.push(this.data[i].date)
         strainObjects[index].y.push(this.data[i].n)
       }
-
       this.dataLines = strainObjects
     }
   }
