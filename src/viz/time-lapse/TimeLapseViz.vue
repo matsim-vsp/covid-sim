@@ -132,7 +132,7 @@ export default class VueComponent extends Vue {
   private setInitialDay() {
     // set specified day, if we got one
     const param = '' + this.$route.query.day
-    if (param && parseInt(param) != NaN) {
+    if (param && Number.isFinite(param)) {
       const day = parseInt(param)
       if (day >= 1 || day < this.numDays) {
         this.newDay = day - 1 // stupid 0day
@@ -350,6 +350,7 @@ img.theme-button:hover {
   display: flex;
   flex-direction: row;
   margin: 0 0;
+  margin-top: 3rem;
   padding: 0 0.5rem 0 1rem;
   background-color: #228855dd;
 

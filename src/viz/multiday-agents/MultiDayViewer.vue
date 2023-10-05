@@ -146,7 +146,7 @@ export default class VueComponent extends Vue {
   private setInitialDay() {
     // set specified day, if we got one
     const param = '' + this.$route.query.day
-    if (param && parseInt(param) != NaN) {
+    if (param && Number.isFinite(param)) {
       const day = parseInt(param)
       if (day >= 1 || day < this.numDays) {
         this.newDay = day - 1 // stupid 0day
@@ -320,6 +320,7 @@ export default class VueComponent extends Vue {
   width: 100%;
   pointer-events: none;
   display: grid;
+  margin-top: 3rem;
   grid-template-columns: 1fr 6rem;
   grid-template-rows: auto auto 1fr auto auto auto;
   grid-template-areas:
