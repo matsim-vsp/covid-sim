@@ -48,14 +48,19 @@ svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --dep
 cp *cases* src/assets
 cp *cases* Fallzahlen/RKI
 
+echo BUILD: Fetch RKI Hospitalization cases from GitHub
+wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
+cp COVID-SARI-* Fallzahlen/RKI
+
 echo BUILD: Commit cases to SVN
 
 TIMESTAMP=`date`
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Fallzahlen
 
-# Get Berlin hospital data too
+# Get hospital data too
 cp Fallzahlen/Berlin/berlin-hospital.csv src/assets
 cp Fallzahlen/Other/*.csv src/assets
+cp Fallzahlen/RKI/COVID-SARI-* src/assets
 
 echo BUILD: Process DIVI Cases
 
