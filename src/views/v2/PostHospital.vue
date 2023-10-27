@@ -13,6 +13,8 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import { spawn, Thread, Worker } from 'threads'
+import Papa from 'papaparse'
+import moment from 'moment'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -25,6 +27,7 @@ export default class VueComponent extends Vue {
   @Prop({ required: true }) private city!: string
   @Prop({ required: true }) private postHospUpdater!: number
   @Prop({ required: true }) private metadata!: any
+  @Prop({ required: true }) private showRKI!: boolean
 
   private dataLines: any[] = []
   private unselectedLines: string[] = []
@@ -32,6 +35,9 @@ export default class VueComponent extends Vue {
   private postProcessWorker: any = null
 
   private updaterCount = 0
+
+  private rkiCovidSariHospitalizationData = require('@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv')
+    .default
 
   private mounted() {
     this.updateScale()
@@ -158,10 +164,45 @@ export default class VueComponent extends Vue {
       intakesHosp: this.intakesHosp,
     })
 
+    if (this.showRKI) {
+      const rkiLine = this.getRkiHospitalizationLines()
+      lines.push(rkiLine)
+    }
+
     this.dataLines = lines
     this.updaterCount = this.postHospUpdater
 
     await this.unselectLines()
+  }
+
+  private getRkiHospitalizationLines() {
+    let hospData = []
+    try {
+      const allHospitalData = Papa.parse(this.rkiCovidSariHospitalizationData, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+      }).data
+
+      const filterAllAges = allHospitalData.filter(row => row.agegroup === '00+')
+
+      hospData = filterAllAges
+    } catch (e) {
+      // just leave it blank
+    }
+
+    const line = {
+      line: { width: 2, dash: 'dot', color: 'purple' },
+      name: 'Observed: COVID-SARI (DE)',
+      visible: true,
+      y: hospData.map(row => row.sari_covid19_incidence),
+      x: hospData.map(row =>
+        moment(row.date)
+          .add(3, 'days')
+          .toDate()
+      ),
+    }
+    return line
   }
 
   private layout = {

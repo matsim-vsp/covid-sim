@@ -157,6 +157,7 @@
                   :city="city"
                   :postHospUpdater="postHospUpdater1"
                   :metadata="allPlots[2]"
+                  :showRKI="true"
                 )
 
           //- //- ---------- Post Hospital -------
@@ -179,6 +180,7 @@
                   :city="city"
                   :postHospUpdater="postHospUpdater2"
                   :metadata="allPlots[3]"
+                  :showRKI="false"
                 )
 
           //- ---------- CASES COMPARISION -------
