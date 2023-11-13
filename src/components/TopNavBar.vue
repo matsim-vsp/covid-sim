@@ -20,6 +20,10 @@
       @click='clickedBurger')
       .navbar-start
         .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
+          a.navbar-link  2023.11.13
+          .navbar-dropdown
+            a.navbar-item(:href="'/jakob/2023-11-06/1-bmbf-calibrate-eg-B'") Report November 13
+        .navbar-item.has-dropdown.is-hoverable(:class="{'is-active': isDropdownActive}")
           a.navbar-link  2023.02.27
           .navbar-dropdown
             a.navbar-item(:href="'/cologne/2023-02-15/2-firstWave'") Report February 27
