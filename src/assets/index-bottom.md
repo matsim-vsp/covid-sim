@@ -1,4 +1,4 @@
-## Other COVID-19 scenario simulations on the web
+## Other COVID-19 ressources on the web
 
 Many other teams worldwide are working on COVID-19 simulations, here are a few that we are aware of.
 
@@ -16,7 +16,7 @@ Many other teams worldwide are working on COVID-19 simulations, here are a few t
 
 - https://thomasvanboeckel.wixsite.com/hegep 
 
-Human mobility data over the course of the pandemics:
+Human mobility data over the course of the pandemic:
 
 - https://www.google.com/covid19/mobility/
 
@@ -36,5 +36,28 @@ Other regularly updated information sources:
 
 Nice visualizations of any kind related to COVID-19:
  
- - https://infogram.com/covid19-cases-eu-1hdw2jw11xyj4l0
+- https://infogram.com/covid19-cases-eu-1hdw2jw11xyj4l0
   
+Information on circulating VOCs/VOIs:
+
+- https://nextstrain.org/
+
+- https://covariants.org/
+
+- https://www.ecdc.europa.eu/en/covid-19/variants-concern
+
+- https://www.ecdc.europa.eu/sites/default/files/documents/PathogenVariant_public_mappings.csv
+
+- https://public.data.rki.de/t/public/views/IGS_Dashboard/DashboardVOC
+
+- https://www.bay-voc.lmu.de/abwassermonitoring
+
+Sewage data (only German sources):
+
+- https://corona-pandemieradar.de/de/abwasser
+
+- https://lua.rlp.de/de/unsere-themen/infektionsschutz/meldedaten-coronavirus/abwassermonitoring/
+
+- https://www.lzg.nrw.de/inf_schutz/surveillance/abwasser/index.html
+
+- https://www.bay-voc.lmu.de/abwassermonitoring
