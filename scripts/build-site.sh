@@ -9,6 +9,14 @@ set -xeuo pipefail
 IFS=$'\n\t'
 # -----------------------------------------------------
 
+
+pip install html_to_json
+echo Before sewage-data-parser.py
+python3 scripts/sewage-data-parser.py rki.csv
+echo After sewage-data-parser.py
+cp *abwassersurveillance* Fallzahlen/RKI
+
+
 echo BUILD: Getting RKI_FILE
 
 RKI_FILE=https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv
@@ -54,11 +62,9 @@ cp COVID-SARI-* Fallzahlen/RKI
 
 
 
-echo Before sewage-data-parser.py
-python3 scripts/sewage-data-parser.py rki.csv
-echo After sewage-data-parser.py
 
-cp *abwassersurveillance* Fallzahlen/RKI
+
+
 
 
 echo BUILD: Commit cases to SVN
