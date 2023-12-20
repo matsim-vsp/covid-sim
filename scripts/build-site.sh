@@ -10,11 +10,6 @@ IFS=$'\n\t'
 # -----------------------------------------------------
 
 
-pip install html_to_json
-echo Before sewage-data-parser.py
-python3 scripts/sewage-data-parser.py rki.csv
-echo After sewage-data-parser.py
-cp *abwassersurveillance* Fallzahlen/RKI
 
 
 echo BUILD: Getting RKI_FILE
@@ -61,7 +56,11 @@ wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinziden
 cp COVID-SARI-* Fallzahlen/RKI
 
 
-
+pip install html_to_json
+echo Before sewage-data-parser.py
+python3 scripts/sewage-data-parser.py rki.csv
+echo After sewage-data-parser.py
+cp *abwassersurveillance* Fallzahlen/RKI
 
 
 
