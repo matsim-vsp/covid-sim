@@ -10,7 +10,19 @@ IFS=$'\n\t'
 # -----------------------------------------------------
 
 
+echo BUILD: Getting the abwassersurveillance data
 
+TIMESTAMP=`date`
+
+svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
+    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
+
+pip install html_to_json
+python3 scripts/sewage-data-parser.py
+cp *abwassersurveillance* Abwasser/
+
+svn add Abwasser/abwassersurveillance.csv
+svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
 
 echo BUILD: Getting RKI_FILE
 
@@ -55,16 +67,8 @@ echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
 cp COVID-SARI-* Fallzahlen/RKI
 
-
-pip install html_to_json
-python3 scripts/sewage-data-parser.py
-cp *abwassersurveillance* Fallzahlen/RKI
-
-
-
 echo BUILD: Commit cases to SVN
 
-TIMESTAMP=`date`
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Fallzahlen
 
 # Get hospital data too
