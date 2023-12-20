@@ -21,7 +21,6 @@ pip install html_to_json
 python3 scripts/sewage-data-parser.py
 cp *abwassersurveillance* Abwasser/
 
-svn add Abwasser/abwassersurveillance.csv
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
 
 echo BUILD: Getting RKI_FILE
