@@ -52,6 +52,15 @@ echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
 cp COVID-SARI-* Fallzahlen/RKI
 
+
+
+echo Before sewage-data-parser.py
+python3 scripts/sewage-data-parser.py rki.csv
+echo After sewage-data-parser.py
+
+cp *abwassersurveillance* Fallzahlen/RKI
+
+
 echo BUILD: Commit cases to SVN
 
 TIMESTAMP=`date`
