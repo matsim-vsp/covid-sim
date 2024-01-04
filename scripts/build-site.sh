@@ -9,9 +9,6 @@ set -xeuo pipefail
 IFS=$'\n\t'
 # -----------------------------------------------------
 
-
-echo BUILD: Getting the abwassersurveillance data
-
 TIMESTAMP=`date`
 
 svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
