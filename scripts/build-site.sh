@@ -18,6 +18,7 @@ svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --dep
     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
 
 pip install html_to_json
+pip install bs2json
 python3 scripts/sewage_data_parser.py Köln
 cp *sewage_data* Abwasser/
 
