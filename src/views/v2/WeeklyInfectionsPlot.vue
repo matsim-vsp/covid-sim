@@ -1,8 +1,8 @@
 <template lang="pug">
-#vue-component(v-if="!isResizing")
-  vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
-
-</template>
+  #vue-component(v-if="!isResizing")
+    vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+  
+  </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
@@ -183,6 +183,50 @@ export default class VueComponent extends Vue {
       // if (source.marker) observedLine.marker = source.marker
 
       this.observedSewageData = [sewageLine]
+    } catch (e) {
+      console.error('Could not load ' + URL)
+      console.error('' + e)
+    }
+
+    // SEWAGE DATA PANDEMIERADAR
+    try {
+      const raw = await fetch(
+        'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/abwassersurveillance.csv'
+      ).then(response => response.text())
+      const csv = Papaparse.parse(raw, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const dates = []
+      const viruslast = []
+
+      for (let i = 0; i < csv.length; i++) {
+        dates.push(csv[i].date)
+        viruslast.push(csv[i].viruslast)
+      }
+
+      const abwassersurveillanceLine: any = {
+        type: 'line',
+        mode: 'lines+markers',
+        yaxis: 'y2',
+        marker: {
+          size: 4.5,
+          color: '#56aed7',
+          opacity: 0.6,
+          line: { color: '#56aed7', width: 1.5 },
+        },
+      }
+
+      abwassersurveillanceLine.x = dates
+      abwassersurveillanceLine.y = viruslast
+      abwassersurveillanceLine.name = 'Viruslast im Abwasser in Genkopien / Liter (in Tausend)'
+      abwassersurveillanceLine.visible = true
+
+      this.observedSewageData.push(abwassersurveillanceLine)
+
+      console.log(this.observedSewageData)
     } catch (e) {
       console.error('Could not load ' + URL)
       console.error('' + e)
@@ -468,7 +512,9 @@ export default class VueComponent extends Vue {
       },
     ]
 
-    if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
+    if (this.observedSewageData.length)
+      for (let i = 0; i < this.observedSewageData.length; i++)
+        this.dataLines.push(this.observedSewageData[i])
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
