@@ -10,6 +10,7 @@ import Papaparse from 'papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 
 import { PUBLIC_SVN } from '@/Globals'
+import { RGBA_ASTC_10x10_Format } from 'three'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {
@@ -174,7 +175,7 @@ export default class VueComponent extends Vue {
         },
       }
 
-      sewageLine.name = 'Sewage Biomarker pro/mL'
+      sewageLine.name = 'Sewage Biomarker pro/mL (Gesundheitsamt Koeln)'
       sewageLine.visible = true
       sewageLine.x = stammheimObservations.map(row => row.Genommen)
       sewageLine.y = stammheimObservations.map(row => row.AbwasserKonzentration)
@@ -183,6 +184,57 @@ export default class VueComponent extends Vue {
       // if (source.marker) observedLine.marker = source.marker
 
       this.observedSewageData = [sewageLine]
+    } catch (e) {
+      console.error('Could not load ' + URL)
+      console.error('' + e)
+    }
+
+    // koeln_sewage_data.csv
+
+    const URL_RKI_SEWAGE = PUBLIC_SVN + 'original-data/Abwasser/koeln_sewage_data.csv'
+
+    try {
+      const raw = await fetch(URL_RKI_SEWAGE).then(response => response.text())
+      const csv = Papaparse.parse(raw, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      console.log(csv)
+
+      const sewageLine: any = {
+        type: 'scatter',
+        mode: 'markers',
+        yaxis: 'y2',
+        marker: {
+          size: 4.5,
+          color: '#00000000',
+          opacity: 0.6,
+          line: { color: '#33cc33', width: 1.5 },
+        },
+      }
+
+      sewageLine.x = []
+      sewageLine.y = []
+
+      // Add all date for thursdays to the plot
+      for (let i = 0; i < csv.length; i++) {
+        const date = new Date(csv[i].date)
+        // 4 = thursday
+        if (date.getDay() == 4) {
+          sewageLine.x.push(csv[i].date)
+          sewageLine.y.push(Math.pow(10, csv[i].virusload_avg) / 1000)
+        }
+      }
+
+      console.log(sewageLine)
+      sewageLine.name = 'Cologne Sewage Biomarker pro/mL (RKI)'
+      sewageLine.visible = true
+
+      this.observedSewageData.push(sewageLine)
+
+      console.log(this.observedSewageData)
     } catch (e) {
       console.error('Could not load ' + URL)
       console.error('' + e)
@@ -469,6 +521,9 @@ export default class VueComponent extends Vue {
     ]
 
     if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
+    if (this.observedSewageData.length > 1) this.dataLines.push(this.observedSewageData[1])
+
+    console.log(this.dataLines)
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
