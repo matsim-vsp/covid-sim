@@ -151,7 +151,6 @@ export default class VueComponent extends Vue {
     const sewageFactor = 2.14
 
     const URL = PUBLIC_SVN + 'original-data/Abwasser/' + cleanedDataByCity[city]
-    console.log({ URL })
 
     try {
       const raw = await fetch(URL).then(response => response.text())
@@ -201,8 +200,6 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
       }).data
 
-      console.log(csv)
-
       const sewageLine: any = {
         type: 'scatter',
         mode: 'markers',
@@ -228,13 +225,10 @@ export default class VueComponent extends Vue {
         }
       }
 
-      console.log(sewageLine)
       sewageLine.name = 'Cologne Sewage Biomarker pro/mL (RKI)'
       sewageLine.visible = true
 
       this.observedSewageData.push(sewageLine)
-
-      console.log(this.observedSewageData)
     } catch (e) {
       console.error('Could not load ' + URL)
       console.error('' + e)
@@ -522,8 +516,6 @@ export default class VueComponent extends Vue {
 
     if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
     if (this.observedSewageData.length > 1) this.dataLines.push(this.observedSewageData[1])
-
-    console.log(this.dataLines)
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
