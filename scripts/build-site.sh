@@ -9,17 +9,17 @@ set -xeuo pipefail
 IFS=$'\n\t'
 # -----------------------------------------------------
 
-TIMESTAMP=`date`
+# TIMESTAMP=`date`
 
-svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
-    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
+# svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
+#     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
 
-pip install html_to_json
-pip install bs2json
-python3 scripts/sewage_data_parser.py Köln
-cp *sewage_data* Abwasser/
+# pip install html_to_json
+# pip install bs2json
+# python3 scripts/sewage_data_parser.py Köln
+# cp *sewage_data* Abwasser/
 
-svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
+# svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
 
 echo BUILD: Getting RKI_FILE
 
