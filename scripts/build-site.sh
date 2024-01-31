@@ -9,7 +9,7 @@ set -xeuo pipefail
 IFS=$'\n\t'
 # -----------------------------------------------------
 
-# TIMESTAMP=`date`
+TIMESTAMP=`date`
 
 # svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
 #     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
