@@ -99,14 +99,14 @@ def main(city_name):
         print(len(matching_scripts))
 
         # Convert scripts to JSON and extract data
-        parsed_data = convert_script_to_json(matching_scripts[3]) # 2
+        parsed_data = convert_script_to_json(matching_scripts[3])
         date_values_avg, map_values_avg, virus_loads_avg = extract_plot_data(parsed_data, 4)
         date_values_dots, map_values_dots, virus_loads_dots = extract_plot_data(parsed_data, 2)
 
         # Convert the second <script> tag containing city data
-        json_data_city = convert_script_to_json(matching_scripts[2]) # 2    
+        json_data_city = convert_script_to_json(matching_scripts[2])
         city_data = json_data_city["map"][city_name]
-            
+        
         # Write data to a CSV file
         file_city_name = city_name.replace('ä', 'ae')
         file_city_name = file_city_name.replace('ö', 'oe')
