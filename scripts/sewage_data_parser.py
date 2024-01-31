@@ -4,8 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from bs2json import BS2Json
 import csv
-# import pandas as pd
-# import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def fetch_data_from_website(url):
     # Send an HTTP request to the website
@@ -33,8 +33,14 @@ def convert_script_to_json(script):
     return json.loads(json_data)
 
 def extract_plot_data(parsed_data, index):
+    # print(parsed_data["x"])
+    print(parsed_data.keys())
     # Extract data points from the plot (specified by index)
     data_point = parsed_data["x"]["data"][index]
+    print(data_point.keys())
+    # print(data_point["x"])  # Date values
+    # print(data_point["key"])  # Map values
+    # print(data_point["y"])  # Virus load values
     date_values = data_point["x"]
     map_values = data_point["key"]
     virus_loads = data_point["y"]
@@ -60,25 +66,25 @@ def write_data_to_csv(filename, fields, data, city_data):
             if avg_date:
                 writer.writerow([avg_date, avg_value, dot_value])
 
-# def plot_data(data_frame):
-#     # Plot the data
-#     plt.figure(figsize=(12, 6))
-#     plt.plot(data_frame['date'], data_frame['virusload_avg'], color='black', label='virusload_avg')
-#     plt.scatter(data_frame['date'], data_frame['virusload'], color='gray', label='virusload', marker='o', alpha=0.5)
+def plot_data(data_frame):
+    # Plot the data
+    plt.figure(figsize=(12, 6))
+    plt.plot(data_frame['date'], data_frame['virusload_avg'], color='black', label='virusload_avg')
+    plt.scatter(data_frame['date'], data_frame['virusload'], color='gray', label='virusload', marker='o', alpha=0.5)
 
-#     # Format the x-axis date format
-#     plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
+    # Format the x-axis date format
+    plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
 
-#     # Add labels and legend
-#     plt.xlabel('Date')
-#     plt.ylabel('Virusload')
-#     plt.title('Virusload Data')
-#     plt.legend()
+    # Add labels and legend
+    plt.xlabel('Date')
+    plt.ylabel('Virusload')
+    plt.title('Virusload Data')
+    plt.legend()
 
-#     # Display the plot
-#     plt.grid(True)
-#     plt.tight_layout()
-#     plt.show()
+    # Display the plot
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
 def main(city_name):
     # Define the URL of the website containing the data
@@ -91,20 +97,52 @@ def main(city_name):
         # Fetch data from the website
         html_content = fetch_data_from_website(URL)
 
+        print("Data fetched successfully.")
+
         # Parse HTML content
         soup = parse_html(html_content)
 
+        print("HTML content parsed successfully.")
+
         # Search for scripts containing the desired data
         matching_scripts = find_matching_scripts(soup, '2022')
+        print(len(matching_scripts))
+
+        print("Matching scripts found successfully.")
 
         # Convert scripts to JSON and extract data
-        parsed_data = convert_script_to_json(matching_scripts[2])
+        parsed_data = convert_script_to_json(matching_scripts[3]) # 2
+        # print(parsed_data.keys()) # items, group
+        print(parsed_data.keys())
+        # print(parsed_data["map"].keys())
         date_values_avg, map_values_avg, virus_loads_avg = extract_plot_data(parsed_data, 4)
         date_values_dots, map_values_dots, virus_loads_dots = extract_plot_data(parsed_data, 2)
 
+        # print(len(date_values_avg))
+        # print(len(map_values_avg))
+        # print(len(virus_loads_avg))
+        # print(len(date_values_dots))
+        # print(len(map_values_dots))
+        # print(len(virus_loads_dots))
+
+        print("Data extracted successfully.")
+
+        # print(date_values_avg)
+
         # Convert the second <script> tag containing city data
-        json_data_city = convert_script_to_json(matching_scripts[1])
+
+
+        json_data_city = convert_script_to_json(matching_scripts[2]) # 2
+        print(len(json_data_city["map"]["Köln"]))
+        print(json_data_city.keys())
         city_data = json_data_city["map"][city_name]
+
+        # print(map_values_avg)
+        
+
+
+
+        print("City data extracted successfully.")
 
         # Write data to a CSV file
         file_city_name = city_name.replace('ä', 'ae')
@@ -116,10 +154,10 @@ def main(city_name):
                                                                  date_values_dots, map_values_dots, virus_loads_dots], city_data)
 
         # Read the CSV file into a DataFrame
-        # data_frame = pd.read_csv(f'{city_name}_abwassersurveillance_avg.csv', parse_dates=['date'])
+        data_frame = pd.read_csv(f'{file_city_name}_sewage_data.csv', parse_dates=['date'])
 
         # Plot the data
-        # plot_data(data_frame)
+        plot_data(data_frame)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
