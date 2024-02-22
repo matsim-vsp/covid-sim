@@ -1,5 +1,11 @@
 const reports: { md: string; title: string; url: string; html: string }[] = [
   {
+    md: '/reports/report-2024-02-22.md',
+    title: '22 February 2024',
+    url: 'https://doi.org/10.14279/depositonce-19869',
+    html: '',
+  },
+  {
     md: '/reports/report-2023-11-13.md',
     title: '13 November 2023',
     url: 'https://doi.org/10.14279/depositonce-19016',
