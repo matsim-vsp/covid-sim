@@ -64,6 +64,8 @@ def combine_csv_files(folder_path, output_file):
                                  'virusload': f'virusload_{os.path.splitext(filename)[0]}'}, inplace=True)
             combined_data = pd.merge(combined_data, data[['date', f'virusload_avg_{os.path.splitext(filename)[0]}', f'virusload_{os.path.splitext(filename)[0]}']], on='date', how='outer')
 
+    # Daten nach Datum sortieren
+    combined_data.sort_values(by=['date'], inplace=True)
     # Ergebnisse in eine neue CSV-Datei schreiben
     combined_data.to_csv(output_file, index=False)
 
@@ -193,7 +195,7 @@ def main(city_name, parse_all_cities, germany):
                                                                         date_values_dots, map_values_dots, virus_loads_dots], city_data)
 
         # Read the CSV file into a DataFrame
-        # data_frame = pd.read_csv('./Abwasser/compelte_germany_sewage_data.csv', parse_dates=['date'])
+        # data_frame = pd.read_csv('/Users/friedrichvoelkers/GIT/covid-sim/Abwasser/sewage_combined_data.csv', parse_dates=['date'])
 
         # Plot the data
         # plot_data(data_frame)
