@@ -16,12 +16,8 @@ svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --dep
 
 pip install html_to_json
 pip install bs2json
-python3 scripts/sewage_data_parser.py Köln
-python3 scripts/sewage_data_parser.py Osnabrück
-python3 scripts/sewage_data_parser.py Aachen
-python3 scripts/sewage_data_parser.py Oldenburg
-python3 scripts/sewage_data_parser.py Hannover-Gümmerwald
-python3 scripts/sewage_data_parser.py Hannover-Herrenhausen
+python3 scripts/sewage_data_parser.py -c Köln
+python3 scripts/sewage_data_parser.py -a True
 cp *sewage_data* Abwasser/
 
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
