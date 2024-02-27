@@ -96,7 +96,6 @@ def main(city_name):
 
         # Search for scripts containing the desired data
         matching_scripts = find_matching_scripts(soup, '2022')
-        print(len(matching_scripts))
 
         # Convert scripts to JSON and extract data
         parsed_data = convert_script_to_json(matching_scripts[3])
