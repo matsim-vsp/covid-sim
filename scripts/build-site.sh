@@ -18,7 +18,10 @@ pip install html_to_json
 pip install bs2json
 python3 scripts/sewage_data_parser.py -c Köln
 python3 scripts/sewage_data_parser.py -a True
-cp *sewage_data* Abwasser/
+# ls
+# pwd
+# cp ./Abwasser/*sewage_data* Abwasser/
+# cp ./Abwasser/sewage_combined_data.csv* Abwasser/
 
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
 

@@ -132,7 +132,7 @@ def main(city_name, parse_all_cities):
         json_data_city = convert_script_to_json(matching_scripts[2])
 
         if parse_all_cities:
-            os.makedirs("./sewage", exist_ok=True)
+            os.makedirs("./Abwasser/sewage", exist_ok=True)
             for city_name in json_data_city["map"]:
                 city_data = json_data_city["map"][city_name]
                 
@@ -146,11 +146,11 @@ def main(city_name, parse_all_cities):
                 file_city_name = file_city_name.replace(')', '')
                 file_city_name = file_city_name.replace('-', '_')
                 file_city_name = file_city_name.lower()
-                write_data_to_csv(f'sewage/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
+                write_data_to_csv(f'Abwasser/sewage/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
                                                                         date_values_dots, map_values_dots, virus_loads_dots], city_data)
                 
-            combine_csv_files("./sewage", "sewage_combined_data.csv")    
-            shutil.rmtree("./sewage")            
+            combine_csv_files("./Abwasser/sewage", "./Abwasser/sewage_combined_data.csv")    
+            shutil.rmtree("./Abwasser/sewage")            
         else:
             city_data = json_data_city["map"][city_name]
             
@@ -164,7 +164,7 @@ def main(city_name, parse_all_cities):
             file_city_name = file_city_name.replace(')', '')
             file_city_name = file_city_name.replace('-', '_')
             file_city_name = file_city_name.lower()
-            write_data_to_csv(f'{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
+            write_data_to_csv(f'Abwasser/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
                                                                     date_values_dots, map_values_dots, virus_loads_dots], city_data)
 
         # Read the CSV file into a DataFrame
