@@ -18,6 +18,7 @@ pip install html_to_json
 pip install bs2json
 python3 scripts/sewage_data_parser.py -c Köln
 python3 scripts/sewage_data_parser.py -a True
+python3 scripts/sewage_data_parser.py -g True
 # ls
 # pwd
 # cp ./Abwasser/*sewage_data* Abwasser/

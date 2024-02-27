@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import shutil
+from matplotlib import pyplot as plt
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -86,27 +87,44 @@ def write_data_to_csv(filename, fields, data, city_data):
             if avg_date:
                 writer.writerow([avg_date, avg_value, dot_value])
 
-# def plot_data(data_frame):
-#     # Plot the data
-#     plt.figure(figsize=(12, 6))
-#     plt.plot(data_frame['date'], data_frame['virusload_avg'], color='black', label='virusload_avg')
-#     plt.scatter(data_frame['date'], data_frame['virusload'], color='gray', label='virusload', marker='o', alpha=0.5)
+def write_complete_germany_data_to_csv(filename, fields, data):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(fields)
 
-#     # Format the x-axis date format
-#     plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
+        for i in range(len(data[0])):
 
-#     # Add labels and legend
-#     plt.xlabel('Date')
-#     plt.ylabel('Virusload')
-#     plt.title('Virusload Data')
-#     plt.legend()
+            date_avg = data[0][i]
+            virusload_avg = data[2][i]
+            virusload_dots = ""
 
-#     # Display the plot
-#     plt.grid(True)
-#     plt.tight_layout()
-#     plt.show()
+            if date_avg in data[3]:
+                index = data[3].index(date_avg)
+                virusload_dots = data[5][index]
 
-def main(city_name, parse_all_cities):
+            writer.writerow([date_avg, virusload_avg, virusload_dots]) # date_values_avg, map_values_avg, virus_loads_avg, date_values_dots, map_values_dots, virus_loads_dots
+
+def plot_data(data_frame):
+    # Plot the data
+    plt.figure(figsize=(12, 6))
+    plt.plot(data_frame['date'], data_frame['virusload_avg'], color='black', label='virusload_avg')
+    plt.scatter(data_frame['date'], data_frame['virusload'], color='gray', label='virusload', marker='o', alpha=0.5)
+
+    # Format the x-axis date format
+    plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
+
+    # Add labels and legend
+    plt.xlabel('Date')
+    plt.ylabel('Virusload')
+    plt.title('Virusload Data')
+    plt.legend()
+
+    # Display the plot
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+def main(city_name, parse_all_cities, germany):
     # Define the URL of the website containing the data
     URL = 'https://www.rki.de/DE/Content/Institut/OrgEinheiten/Abt3/FG32/Abwassersurveillance/Bericht_Abwassersurveillance.html?__blob=publicationFile'
 
@@ -124,16 +142,41 @@ def main(city_name, parse_all_cities):
         matching_scripts = find_matching_scripts(soup, '2022')
 
         # Convert scripts to JSON and extract data
-        parsed_data = convert_script_to_json(matching_scripts[3])
+        parsed_data = convert_script_to_json(matching_scripts[1 if germany else 3])
         date_values_avg, map_values_avg, virus_loads_avg = extract_plot_data(parsed_data, 4)
         date_values_dots, map_values_dots, virus_loads_dots = extract_plot_data(parsed_data, 2)
 
-        # Convert the second <script> tag containing city data
-        json_data_city = convert_script_to_json(matching_scripts[2])
+        os.makedirs("./Abwasser", exist_ok=True)
+        if germany:
+            write_complete_germany_data_to_csv('./Abwasser/complete_germany_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
+                                                                            date_values_dots, map_values_dots, virus_loads_dots])
 
-        if parse_all_cities:
-            os.makedirs("./Abwasser/sewage", exist_ok=True)
-            for city_name in json_data_city["map"]:
+        else:
+            # Convert the second <script> tag containing city data
+            json_data_city = convert_script_to_json(matching_scripts[2])
+            
+
+            if parse_all_cities:
+                os.makedirs("./Abwasser/sewage", exist_ok=True)
+                for city_name in json_data_city["map"]:
+                    city_data = json_data_city["map"][city_name]
+                    
+                    # Write data to a CSV file
+                    file_city_name = city_name.replace('ä', 'ae')
+                    file_city_name = file_city_name.replace('ö', 'oe')
+                    file_city_name = file_city_name.replace('ü', 'ue')
+                    file_city_name = file_city_name.replace('ß', 'ss')
+                    file_city_name = file_city_name.replace(' ', '_')
+                    file_city_name = file_city_name.replace('(', '')
+                    file_city_name = file_city_name.replace(')', '')
+                    file_city_name = file_city_name.replace('-', '_')
+                    file_city_name = file_city_name.lower()
+                    write_data_to_csv(f'Abwasser/sewage/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
+                                                                            date_values_dots, map_values_dots, virus_loads_dots], city_data)
+                    
+                combine_csv_files("./Abwasser/sewage", "./Abwasser/sewage_combined_data.csv")    
+                shutil.rmtree("./Abwasser/sewage")            
+            elif city_name:
                 city_data = json_data_city["map"][city_name]
                 
                 # Write data to a CSV file
@@ -146,29 +189,11 @@ def main(city_name, parse_all_cities):
                 file_city_name = file_city_name.replace(')', '')
                 file_city_name = file_city_name.replace('-', '_')
                 file_city_name = file_city_name.lower()
-                write_data_to_csv(f'Abwasser/sewage/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
+                write_data_to_csv(f'Abwasser/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
                                                                         date_values_dots, map_values_dots, virus_loads_dots], city_data)
-                
-            combine_csv_files("./Abwasser/sewage", "./Abwasser/sewage_combined_data.csv")    
-            shutil.rmtree("./Abwasser/sewage")            
-        else:
-            city_data = json_data_city["map"][city_name]
-            
-            # Write data to a CSV file
-            file_city_name = city_name.replace('ä', 'ae')
-            file_city_name = file_city_name.replace('ö', 'oe')
-            file_city_name = file_city_name.replace('ü', 'ue')
-            file_city_name = file_city_name.replace('ß', 'ss')
-            file_city_name = file_city_name.replace(' ', '_')
-            file_city_name = file_city_name.replace('(', '')
-            file_city_name = file_city_name.replace(')', '')
-            file_city_name = file_city_name.replace('-', '_')
-            file_city_name = file_city_name.lower()
-            write_data_to_csv(f'Abwasser/{file_city_name}_sewage_data.csv', fields, [date_values_avg, map_values_avg, virus_loads_avg,
-                                                                    date_values_dots, map_values_dots, virus_loads_dots], city_data)
 
         # Read the CSV file into a DataFrame
-        # data_frame = pd.read_csv(f'{file_city_name}_sewage_data.csv', parse_dates=['date'])
+        # data_frame = pd.read_csv('./Abwasser/compelte_germany_sewage_data.csv', parse_dates=['date'])
 
         # Plot the data
         # plot_data(data_frame)
@@ -178,7 +203,8 @@ def main(city_name, parse_all_cities):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch and analyze virusload data from RKI website.")
-    parser.add_argument('-c', '--cityName', help="Name of the city for which to analyze virusload data.", required=False)
+    parser.add_argument('-c', '--cityName', help="Name of the city for which to analyze virusload data.")
     parser.add_argument('-a', '--allCities', help="If you want to parse only one city, set this to False and set city_nmame to the city you want to parse. If you want to parse all cities, set this to True.")
+    parser.add_argument('-g', '--germany', help="If you want the aggregated data for Germany, set this to True.")
     args = parser.parse_args()
-    main(args.cityName, args.allCities)
+    main(args.cityName, args.allCities, args.germany)
