@@ -26,8 +26,13 @@
   p: a(href='https://senozon.com' target="_blank") Senozon Deutschland GmbH
 
   .team Supported By
-  a(href='https://bmbf.de' target="_blank")
-    img(src="@/assets/images/bmbf-logo.png")
+
+  .logos
+    a(href='https://bmbf.de' target="_blank")
+      img(src="@/assets/images/bmbf-cropped.png")
+
+    a(href='https://mathplus.de' target="_blank")
+      img(src="@/assets/images/math-plus-cropped.png")
 
 </template>
 

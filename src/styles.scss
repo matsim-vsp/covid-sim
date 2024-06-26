@@ -56,3 +56,10 @@ $colorPurple: #7957d5;
   --shadowMode: 0px 0px 5px 5px rgba(192, 192, 255, 0.12);
   --borderThin: 1px solid #15151d;
 }
+
+.logos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
