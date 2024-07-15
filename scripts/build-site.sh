@@ -11,21 +11,19 @@ IFS=$'\n\t'
 
 TIMESTAMP=`date`
 
+# RKI Abwasser ----------------------------------------
 svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
     https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Abwasser/
 
-pip install html_to_json
-pip install bs2json
+# fetch rki sewage data from GitHub into Abwasser/amelag_einzelstandorte.tsv
+wget https://raw.githubusercontent.com/robert-koch-institut/Abwassersurveillance_AMELAG/main/amelag_einzelstandorte.tsv -O Abwasser/amelag_einzelstandorte.tsv
+
+# add additional Abwasser cities here:
 python3 scripts/sewage_data_parser.py -c Köln
-python3 scripts/sewage_data_parser.py -a True
-python3 scripts/sewage_data_parser.py -g True
-# ls
-# pwd
-# cp ./Abwasser/*sewage_data* Abwasser/
-# cp ./Abwasser/sewage_combined_data.csv* Abwasser/
 
 svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "autobuild: $TIMESTAMP" Abwasser
 
+# RKI Infection Data ---------------------------------
 echo BUILD: Getting RKI_FILE
 
 RKI_FILE=https://media.githubusercontent.com/media/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/main/Aktuell_Deutschland_SarsCov2_Infektionen.csv
