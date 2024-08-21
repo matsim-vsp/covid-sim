@@ -57,6 +57,8 @@
   .right-content
     .page-section.content
       .readme(v-html="topNotes")
+      .infection-map-row(v-if="hasInfectionMapData" style="margin-top: 1rem; text-align: right;")
+        button.button.infection-map(@click="showInfectionMap") 📍 Infection Map
 
     .page-section.preamble(:style="{backgroundColor: 'white'}")
       h3.select-scenario &nbsp;
@@ -1514,6 +1516,8 @@ export default class VueComponent extends Vue {
     this.postHospUpdater1++
     this.postHospUpdater2++
 
+    this.checkForInfectionMap()
+
     this.loadVaccineEffectivenessData(this.currentRun)
 
     this.loadSeedComparison(this.currentRun)
@@ -1869,6 +1873,30 @@ export default class VueComponent extends Vue {
 
   private vaccineEffectivenessData: any[] = []
   private showVaccineEffectivenessFields: string[] = []
+
+  private hasInfectionMapData = false
+  private async checkForInfectionMap() {
+    const url = new URL(window.location.href)
+    const currentFolder = `${this.BATTERY_URL}${url.pathname.slice(1)}/summaries`
+    const RunId = this.currentRun.RunId
+    const infectionFileUrl = `${currentFolder}/${RunId}-infections.csv`
+
+    // see if file exists
+    this.hasInfectionMapData = false
+    try {
+      const response = await fetch(infectionFileUrl, { method: 'HEAD' })
+      if (response.status >= 200 && response.status < 300) this.hasInfectionMapData = true
+    } catch {}
+  }
+
+  private showInfectionMap() {
+    const url = new URL(window.location.href)
+    const currentFolder = `${url.pathname.slice(1)}/summaries`
+    const RunId = this.currentRun.RunId
+    const infectionFileUrl = `?path=${currentFolder}/${RunId}-infections.csv`
+    const finalUrl = '/infection-map' + infectionFileUrl
+    window.location.href = finalUrl
+  }
 
   private async loadVaccineEffectivenessData(currentRun: any) {
     if (!currentRun.RunId) {
