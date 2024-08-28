@@ -1893,7 +1893,7 @@ export default class VueComponent extends Vue {
     const url = new URL(window.location.href)
     const currentFolder = `${url.pathname.slice(1)}/summaries`
     const RunId = this.currentRun.RunId
-    const infectionFileUrl = `?path=${currentFolder}/${RunId}-infections.csv`
+    const infectionFileUrl = `?path=${currentFolder}/${RunId}.infections.csv.gz`
     const finalUrl = '/infection-map' + infectionFileUrl
     window.location.href = finalUrl
   }
