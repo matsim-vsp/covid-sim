@@ -41,9 +41,11 @@ export default class VueComponent extends Vue {
   private unselectedLines: string[] = []
 
   private observedSewageData: any[] = []
+  private brandenburgIncidence: any[] = []
 
   private async mounted() {
     await this.fetchSewageData()
+    if (this.city === 'brandenburg') await this.fetchBrandenburgIncidenceData()
     this.calculateValues()
     this.unselectLines()
   }
@@ -138,6 +140,59 @@ export default class VueComponent extends Vue {
       await this.$router.replace({ query: params })
     } catch (e) {
       /** this is OK */
+    }
+  }
+
+  private async fetchBrandenburgIncidenceData() {
+    const URL =
+      PUBLIC_SVN + 'original-data/Fallzahlen/RKI/COVID-19-Faelle_7-Tage-Inzidenz_Bundeslaender.csv'
+
+    const BRANDENBURG_ID = 16
+
+    try {
+      const raw = await fetch(URL).then(response => response.text())
+      const csv = Papaparse.parse(raw, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const brandenburgIncidence = csv.filter(
+        f => f.Bundesland_id === BRANDENBURG_ID && f.Altersgruppe === '00+'
+      )
+
+      const updatedArray = brandenburgIncidence.map(obj => {
+        const newObj = { ...obj }
+        delete newObj.Bevoelkerung
+        delete newObj.Bundesland_id
+        delete newObj['Faelle_7-Tage']
+        delete newObj.Faelle_gesamt
+        delete newObj.Faelle_neu
+        delete newObj.Altersgruppe
+        return newObj
+      })
+
+      const incidenceLine: any = {
+        name: 'RKI Brandenburg Incidence',
+        visible: true,
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 3 },
+        line: {
+          width: 3,
+          color: '#080',
+          dash: 'dot',
+        },
+      }
+
+      incidenceLine.visible = true
+      incidenceLine.x = updatedArray.map(row => row.Meldedatum)
+      incidenceLine.y = updatedArray.map(row => row['Inzidenz_7-Tage'])
+
+      this.brandenburgIncidence = [incidenceLine]
+    } catch (e) {
+      console.error('Could not load ' + URL)
+      console.error('' + e)
     }
   }
 
@@ -516,6 +571,10 @@ export default class VueComponent extends Vue {
 
     if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
     if (this.observedSewageData.length > 1) this.dataLines.push(this.observedSewageData[1])
+
+    // console.log('brandenburgIncidence:', this.brandenburgIncidence)
+    if (this.city === 'brandenburg' && this.brandenburgIncidence.length)
+      this.dataLines.push(this.brandenburgIncidence[0])
 
     // add RKI detection data if it exists
     if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
