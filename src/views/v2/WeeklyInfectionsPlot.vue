@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papaparse from '@simwrapper/papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 
 import { PUBLIC_SVN } from '@/Globals'
 import { RGBA_ASTC_10x10_Format } from 'three'

@@ -6,7 +6,7 @@ vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="optio
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Papaparse from '@simwrapper/papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import { PUBLIC_SVN } from '@/Globals'
 
 interface City {

@@ -5,7 +5,7 @@ vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="optio
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 
 @Component({ components: { VuePlotly }, props: {} })
 export default class VueComponent extends Vue {

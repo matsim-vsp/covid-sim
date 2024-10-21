@@ -58,7 +58,7 @@
 // ###########################################################################
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import Papa from '@simwrapper/papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
 

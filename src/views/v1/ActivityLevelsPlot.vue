@@ -11,7 +11,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import moment from 'moment'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import { debounce } from 'debounce'
 
 @Component({ components: { VuePlotly }, props: {} })

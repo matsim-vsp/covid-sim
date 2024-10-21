@@ -5,7 +5,7 @@ vue-plotly(:data="dataLines" :layout="layout" :options="options" @relayout="hand
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import { weekdays } from 'moment'
 
 @Component({ components: { VuePlotly }, props: {} })

@@ -570,7 +570,7 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { spawn, Thread, Worker } from 'threads'
 import MarkdownIt from 'markdown-it'
 import Papa from '@simwrapper/papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import moment from 'moment'
 import yaml from 'yaml'
 
