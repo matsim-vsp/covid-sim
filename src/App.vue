@@ -32,9 +32,6 @@ export default {
       state: store.state,
     }
   },
-  mounted() {
-    console.log('YAA APP MOUNTED')
-  },
 }
 </script>
 

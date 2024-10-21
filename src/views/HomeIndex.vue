@@ -117,7 +117,7 @@ const rCalculators = allCalculators
 
 export default defineComponent({
   name: 'HomeIndex',
-  // components: { Colophon, ReportViewer, VizCard },
+  components: { Colophon, ReportViewer, VizCard },
   data() {
     return {
       modelruns: [

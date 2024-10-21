@@ -30,83 +30,91 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import MarkdownIt from 'markdown-it'
 import YAML from 'yaml'
 
 import { PUBLIC_SVN } from '@/Globals'
 import SVNFileSystem from '@/util/SVNFileSystem'
 
-@Component({ components: {}, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private modelRuns!: any[]
+export default defineComponent({
+  name: 'BlogList',
+  props: {
+    modelRuns: { type: Array as PropType<any[]>, required: true },
+  },
+  data() {
+    return {
+      svnPosts: new SVNFileSystem(PUBLIC_SVN + 'posts'),
+      mdParser: new MarkdownIt(),
+      posts: [] as any[],
+      showMore: false,
+    }
+  },
+  computed: {
+    listOfPosts() {
+      if (this.showMore) return this.posts
+      return this.posts.slice(0, 6)
+    },
+  },
 
-  private svnPosts = new SVNFileSystem(PUBLIC_SVN + 'posts')
-
-  private mdParser = new MarkdownIt()
-
-  private posts: any[] = []
-  private showMore = false
-
-  private get listOfPosts() {
-    if (this.showMore) return this.posts
-    return this.posts.slice(0, 6)
-  }
-
-  private mounted() {
+  mounted() {
     this.loadPosts() // this will return immediately and load in background
-  }
+  },
 
-  private clickedDownload(href: string) {
-    window.location.href = href
-  }
+  methods: {
+    clickedDownload(href: string) {
+      window.location.href = href
+    },
 
-  private async loadPosts() {
-    const folderContents = await this.svnPosts.getDirectory('')
-    const files = folderContents.files.sort().reverse()
+    async loadPosts() {
+      const folderContents = await this.svnPosts.getDirectory('')
+      const files = folderContents.files.sort().reverse()
 
-    const allPosts: any[] = []
-    for (const filename of folderContents.files) {
-      // skip files that are not 0000-00-00-blah.md
-      if (!filename.match(/^\d{4}-\d{2}-\d{2}-.*\.md$/)) continue
+      const allPosts: any[] = []
+      for (const filename of files) {
+        // skip files that are not 0000-00-00-blah.md
+        if (!filename.match(/^\d{4}-\d{2}-\d{2}-.*\.md$/)) continue
 
-      try {
-        const text = await this.svnPosts.getFile(filename)
-        // get and parse yaml slice
-        const mdStart = text.indexOf('\n---')
-        if (mdStart === -1) continue
+        try {
+          const text = await this.svnPosts.getFile(filename)
+          // get and parse yaml slice
+          const mdStart = text.indexOf('\n---')
+          if (mdStart === -1) continue
 
-        const yamlSlice = text.substring(4, mdStart)
-        const mdSlice = '**Summary:** ' + text.substring(mdStart + 5).trim()
+          const yamlSlice = text.substring(4, mdStart)
+          const mdSlice = '**Summary:** ' + text.substring(mdStart + 5).trim()
 
-        const yml = YAML.parse(yamlSlice)
-        yml.filename = filename
+          const yml = YAML.parse(yamlSlice)
+          yml.filename = filename
 
-        const md = this.mdParser.render(mdSlice)
-        yml.md = md
-        yml.sortBy = filename.substring(0, 10)
+          const md = this.mdParser.render(mdSlice)
+          yml.md = md
+          yml.sortBy = filename.substring(0, 10)
 
-        allPosts.push(yml)
-      } catch (e) {
-        console.error(e)
+          allPosts.push(yml)
+        } catch (e) {
+          console.error(e)
+        }
       }
-    }
 
-    // merge in model runs! KRAZY
-    for (const mRun of this.modelRuns) {
-      mRun.sortBy = mRun.date
-      mRun.type = 'modelrun'
-      allPosts.push(mRun)
-    }
+      // merge in model runs! KRAZY
+      for (const mRun of this.modelRuns) {
+        mRun.sortBy = mRun.date
+        mRun.type = 'modelrun'
+        allPosts.push(mRun)
+      }
 
-    // sortie
-    this.posts = allPosts
-      .sort((a, b) => {
-        return a.sortBy < b.sortBy ? -1 : 1
-      })
-      .reverse()
-  }
-}
+      // sortie
+      this.posts = allPosts
+        .sort((a, b) => {
+          return a.sortBy < b.sortBy ? -1 : 1
+        })
+        .reverse()
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
