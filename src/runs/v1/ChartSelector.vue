@@ -21,166 +21,167 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papa from '@simwrapper/papaparse'
-import VuePlotly from '@/components/VuePlotly.vue'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import ZipLoader from 'zip-loader'
+import Papa from '@simwrapper/papaparse'
 
 import MySlider from './SelectWidget.vue'
+import VuePlotly from '@/components/VuePlotly.vue'
 
-@Component({
-  components: {
-    MySlider,
-    VuePlotly,
+export default defineComponent({
+  name: 'ChartSelector',
+  components: { MySlider, VuePlotly },
+  props: {
+    state: { type: Object, required: true },
+  },
+
+  data() {
+    return {
+      zipFile: '/v1-data.zip',
+      currentRun: {} as any,
+      data: [] as any[],
+      layout: {
+        autosize: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { l: 50, t: 10, r: 10, b: 0 },
+        yaxis: {
+          autorange: true,
+        },
+        xaxis: {},
+      },
+      loglayout: {
+        autosize: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { l: 50, t: 10, r: 10, b: 0 },
+        yaxis: {
+          type: 'log',
+          autorange: true,
+        },
+      },
+
+      options: {
+        displayModeBar: false,
+        responsive: true,
+      },
+
+      currentSituation: {} as any,
+      loadedSeriesData: {} as any,
+      zipLoader: {} as any,
+
+      labels: {
+        nSusceptible: 'Susceptible',
+        nInfectedButNotContagious: 'Infected, not contagious',
+        nContagious: 'Contagious',
+        nSeriouslySick: 'Seriously Sick',
+        nCritical: 'Critical',
+        nTotalInfected: 'Total Infected',
+        nInfectedCumulative: 'Infected Cumulative',
+        nRecovered: 'Recovered',
+        nInQuarantine: 'In Quarantine',
+      } as any,
+    }
+  },
+
+  mounted() {
+    this.loadZipData()
+  },
+
+  methods: {
+    async loadZipData() {
+      this.zipLoader = new ZipLoader(this.zipFile)
+
+      await this.zipLoader.load()
+
+      console.log('zip loaded!')
+      this.runChanged()
+    },
+
+    async runChanged() {
+      console.log({ run: this.currentRun })
+
+      if (this.loadedSeriesData[this.currentRun.RunId]) {
+        this.data = this.loadedSeriesData[this.currentRun.RunId]
+        return
+      }
+
+      const csv: any[] = await this.loadCSV(this.currentRun)
+      const timeSerieses = this.generateSeriesFromCSVData(csv)
+
+      // cache the result
+      this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
+
+      this.data = timeSerieses
+    },
+
+    sliderChanged(measure: any, value: any) {
+      this.currentSituation[measure] = value
+      this.showPlotForCurrentSituation()
+    },
+
+    showPlotForCurrentSituation() {
+      let lookupKey = ''
+      for (const measure of Object.keys(this.state.measures))
+        lookupKey += this.currentSituation[measure] + '-'
+
+      this.currentRun = this.state.runLookup[lookupKey]
+      if (!this.currentRun) return
+
+      this.runChanged()
+    },
+
+    unpack(rows: any[], key: any) {
+      let v = rows.map(function (row) {
+        if (key === 'day') return row[key]
+        return row[key] * 4
+      })
+
+      v = v.slice(0, 150)
+      return v
+    },
+
+    async loadCSV(currentRun: any) {
+      if (!currentRun.RunId) return []
+
+      const filename = currentRun.RunId + '.infections.txt'
+      console.log('Extracting', filename)
+
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true })
+
+      return z.data
+    },
+
+    generateSeriesFromCSVData(data: any[]) {
+      const serieses = []
+
+      const x: number[] = this.unpack(data, 'day')
+
+      for (const column of Object.keys(this.labels)) {
+        const name = this.labels[column]
+        const y: number[] = this.unpack(data, column)
+        serieses.push({ x, y, name })
+      }
+
+      return serieses
+    },
   },
 })
-export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-
-  private zipFile = '/v1-data.zip'
-  private currentRun: any = {}
-  private data: any = []
-
-  private layout = {
-    autosize: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { l: 50, t: 10, r: 10, b: 0 },
-    yaxis: {
-      autorange: true,
-    },
-    xaxis: {},
-  }
-
-  private loglayout = {
-    autosize: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { l: 50, t: 10, r: 10, b: 0 },
-    yaxis: {
-      type: 'log',
-      autorange: true,
-    },
-  }
-
-  private options = {
-    displayModeBar: false,
-    responsive: true,
-  }
-
-  private currentSituation: any = {}
-  private loadedSeriesData: any = {}
-  private zipLoader: any
-
-  private labels: any = {
-    nSusceptible: 'Susceptible',
-    nInfectedButNotContagious: 'Infected, not contagious',
-    nContagious: 'Contagious',
-    nSeriouslySick: 'Seriously Sick',
-    nCritical: 'Critical',
-    nTotalInfected: 'Total Infected',
-    nInfectedCumulative: 'Infected Cumulative',
-    nRecovered: 'Recovered',
-    nInQuarantine: 'In Quarantine',
-  }
-
-  private mounted() {
-    this.loadZipData()
-  }
-
-  private async loadZipData() {
-    this.zipLoader = new ZipLoader(this.zipFile)
-
-    await this.zipLoader.load()
-
-    console.log('zip loaded!')
-    this.runChanged()
-  }
-
-  private async runChanged() {
-    console.log({ run: this.currentRun })
-
-    if (this.loadedSeriesData[this.currentRun.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
-      return
-    }
-
-    const csv: any[] = await this.loadCSV(this.currentRun)
-    const timeSerieses = this.generateSeriesFromCSVData(csv)
-
-    // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
-
-    this.data = timeSerieses
-  }
-
-  private sliderChanged(measure: any, value: any) {
-    this.currentSituation[measure] = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private showPlotForCurrentSituation() {
-    let lookupKey = ''
-    for (const measure of Object.keys(this.state.measures))
-      lookupKey += this.currentSituation[measure] + '-'
-
-    this.currentRun = this.state.runLookup[lookupKey]
-    if (!this.currentRun) return
-
-    this.runChanged()
-  }
-
-  private unpack(rows: any[], key: any) {
-    let v = rows.map(function (row) {
-      if (key === 'day') return row[key]
-      return row[key] * 4
-    })
-
-    v = v.slice(0, 150)
-    return v
-  }
-
-  private async loadCSV(currentRun: any) {
-    if (!currentRun.RunId) return []
-
-    const filename = currentRun.RunId + '.infections.txt'
-    console.log('Extracting', filename)
-
-    let text = this.zipLoader.extractAsText(filename)
-    const z = Papa.parse(text, { header: true, dynamicTyping: true })
-
-    return z.data
-  }
-
-  private generateSeriesFromCSVData(data: any[]) {
-    const serieses = []
-
-    const x: number[] = this.unpack(data, 'day')
-
-    for (const column of Object.keys(this.labels)) {
-      const name = this.labels[column]
-      const y: number[] = this.unpack(data, column)
-      serieses.push({ x, y, name })
-    }
-
-    return serieses
-  }
-}
-
-// ###########################################################################
 </script>
 
 <style scoped>

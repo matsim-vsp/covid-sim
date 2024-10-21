@@ -6,22 +6,27 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import VueSlideBar from 'vue-slide-bar'
 
-@Component({
-  components: {
-    VueSlideBar,
+export default defineComponent({
+  name: 'SelectWidget',
+  components: { VueSlideBar },
+  props: {
+    state: { type: Object, required: true },
+    measure: { type: String, required: true },
   },
-})
-export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-  @Prop() private measure!: any
 
-  private value: any = 0
-  private stops: any[] = [0, 1000]
+  data() {
+    return {
+      value: 0 as any,
+      stops: [0, 1000],
+    }
+  },
 
-  private mounted() {
+  mounted() {
     const experiments = []
     for (const x of this.state.measures[this.measure]) {
       experiments.push(x === 1000 ? 'Never' : x)
@@ -29,15 +34,16 @@ export default class SectionViewer extends Vue {
 
     this.stops = experiments
     this.value = 'Never'
-  }
+  },
 
-  @Watch('value')
-  private valueChanged() {
-    let answer = this.value
-    if (answer === 'Never') answer = 1000
-    this.$emit('changed', this.measure, answer)
-  }
-}
+  watch: {
+    value() {
+      let answer = this.value
+      if (answer === 'Never') answer = 1000
+      this.$emit('changed', this.measure, answer)
+    },
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
