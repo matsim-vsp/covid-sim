@@ -19,7 +19,13 @@
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 
-import html from '@/assets/animation-helptext.md?raw'
+import Markdown from 'markdown-it'
+import mdHelpText from '@/assets/animation-helptext.md?raw'
+const html = new Markdown({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).render(mdHelpText)
 
 export default defineComponent({
   name: 'ModalMarkdownDialog',

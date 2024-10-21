@@ -26,8 +26,10 @@ import EventBus from '@/EventBus.vue'
 export default defineComponent({
   name: 'PlaybackControls',
   components: { VueSlider },
+
   data: () => {
     const maxSliderVal = 100000.0
+
     return {
       state: store.state,
       sliderValue: 0,
@@ -41,20 +43,11 @@ export default defineComponent({
         lazy: true,
         tooltip: 'active',
         'tooltip-placement': 'top',
-        'tooltip-formatter': {} as any,
-      },
+      } as any,
     }
   },
 
   methods: {
-    onKeyPressed(ev: KeyboardEvent) {
-      if (ev.code === 'Space') this.toggleSimulation()
-    },
-
-    toggleSimulation() {
-      this.$emit('click')
-    },
-
     convertSecondsToClockTimeMinutes(index: number) {
       const seconds = this.getSecondsFromSlider(index)
 
@@ -65,6 +58,14 @@ export default defineComponent({
       } catch (e) {
         return '00:00'
       }
+    },
+
+    onKeyPressed(ev: KeyboardEvent) {
+      if (ev.code === 'Space') this.toggleSimulation()
+    },
+
+    toggleSimulation() {
+      this.$emit('click')
     },
 
     dragStart() {
@@ -90,6 +91,7 @@ export default defineComponent({
 
   mounted() {
     this.sliderOptions['tooltip-formatter'] = this.convertSecondsToClockTimeMinutes
+
     EventBus.$on(EventBus.SIMULATION_PERCENT, (time: number) => {
       this.sliderValue = Math.floor(this.maxSliderVal * time)
     })
@@ -104,6 +106,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import '~/vue-slider-component/theme/antd.css';
 @import '@/styles.scss';
 
 .my-vue-component {

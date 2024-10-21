@@ -1,15 +1,14 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
+import Vue from 'vue'
 
-const eventbus = defineComponent({
-  name: 'EventBus',
-  data() {
-    return {
-      SIMULATION_PERCENT: 'sim-percent',
-      DRAG: 'sim-drag',
-    }
-  },
-})
+class EventBusClass extends Vue {
+  public SIMULATION_PERCENT: string = 'sim-percent'
+  public DRAG: string = 'sim-drag'
 
-export default new eventbus()
+  constructor() {
+    super()
+  }
+}
+
+export default new EventBusClass()
 </script>

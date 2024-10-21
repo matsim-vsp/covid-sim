@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.bavue-component
   .content
 
     .stuff(v-html="mdContent")
@@ -12,10 +12,12 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
-import MarkdownIt from 'markdown-it'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import MarkdownIt from 'markdown-it'
+import textNoSuchRun from '@/assets/no-such-run.md?raw'
+const mdParser = new MarkdownIt()
 
 interface Breadcrumb {
   title: string
@@ -23,22 +25,18 @@ interface Breadcrumb {
   isActive?: boolean
 }
 
-@Component({
-  components: {},
+export default defineComponent({
+  name: 'MessagePane',
+  data() {
+    return {
+      mdContent: '',
+      currentCity: -1,
+    }
+  },
+  mounted() {
+    this.mdContent = mdParser.render(textNoSuchRun)
+  },
 })
-export default class VueComponent extends Vue {
-  private mdContent = ''
-  private mdParser = new MarkdownIt()
-
-  public mounted() {
-    const text = require('@/assets/no-such-run.md')
-    this.mdContent = text // this.mdParser.render(text)
-  }
-
-  private currentCity = -1
-}
-
-// ###########################################################################
 </script>
 
 <style scoped lang="scss">
