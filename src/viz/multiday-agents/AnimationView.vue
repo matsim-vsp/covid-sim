@@ -209,7 +209,7 @@ export default class AnimationView extends Vue {
 
   private setupDragListener() {
     const parent = this
-    EventBus.$on(EventBus.DRAG, function(seconds: number) {
+    EventBus.$on(EventBus.DRAG, function (seconds: number) {
       if (seconds === -1) {
         // start drag
         parent.wasSimulationRunning = parent.state.isRunning

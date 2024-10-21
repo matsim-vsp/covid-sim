@@ -529,7 +529,7 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { spawn, Thread, Worker } from 'threads'
 import MarkdownIt from 'markdown-it'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import moment from 'moment'
 import yaml from 'yaml'
@@ -2274,7 +2274,7 @@ export default class VueComponent extends Vue {
   }
 
   private allPlotsCheckIsUsedInThisRun() {
-    return this.allPlots.filter(function(u) {
+    return this.allPlots.filter(function (u) {
       return u.usedInThisRun
     })
   }

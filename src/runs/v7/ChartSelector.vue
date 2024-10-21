@@ -118,7 +118,7 @@
 <script lang="ts">
 // ###########################################################################
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import VuePlotly from '@statnett/vue-plotly'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
@@ -354,7 +354,7 @@ export default class SectionViewer extends Vue {
   }
 
   private unpack(rows: any[], key: any) {
-    let v = rows.map(function(row) {
+    let v = rows.map(function (row) {
       if (key === 'day') return row[key]
       return row[key]
     })

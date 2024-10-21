@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 
 import { PUBLIC_SVN } from '@/Globals'
 

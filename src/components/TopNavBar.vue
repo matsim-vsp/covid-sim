@@ -127,24 +127,31 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
 
-@Component({})
-export default class VueComponent extends Vue {
-  private isBurgerActive = false
-  private isDropdownActive = false
+export default defineComponent({
+  name: 'TopNavBar',
+  data() {
+    return {
+      isBurgerActive: false,
+      isDropdownActive: false,
+    }
+  },
 
-  private clickedBurger() {
-    console.log('clicked!')
-    this.isBurgerActive = !this.isBurgerActive
-  }
+  methods: {
+    clickedBurger() {
+      console.log('clicked!')
+      this.isBurgerActive = !this.isBurgerActive
+    },
+  },
 
-  @Watch('$route') private async routeChanged(to: any, from: any) {
-    //console.log(this.$route)
-    this.isBurgerActive = false
-    this.isDropdownActive = false
-  }
-}
+  watch: {
+    $route() {
+      this.isBurgerActive = false
+      this.isDropdownActive = false
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">

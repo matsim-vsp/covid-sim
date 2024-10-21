@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 

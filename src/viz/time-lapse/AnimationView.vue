@@ -6,7 +6,7 @@
 <script lang="ts">
 import { Component, Vue, Watch, Prop } from 'vue-property-decorator'
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import ZipLoader from 'zip-loader'
 import * as THREE from 'three'
 
@@ -192,7 +192,7 @@ export default class AnimationView extends Vue {
 
   private setupDragListener() {
     const parent = this
-    EventBus.$on(EventBus.DRAG, function(seconds: number) {
+    EventBus.$on(EventBus.DRAG, function (seconds: number) {
       if (seconds === -1) {
         // start drag
         parent.wasSimulationRunning = parent.state.isRunning

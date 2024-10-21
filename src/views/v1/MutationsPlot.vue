@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })

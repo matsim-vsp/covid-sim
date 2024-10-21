@@ -1,6 +1,6 @@
 import { expose } from 'threads/worker'
 import { PUBLIC_SVN } from '@/Globals'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 
 // configuration ----------------------------
 

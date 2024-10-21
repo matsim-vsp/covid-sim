@@ -13,7 +13,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
 import { spawn, Thread, Worker } from 'threads'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import moment from 'moment'
 
 @Component({ components: { VuePlotly }, props: {} })
@@ -36,8 +36,8 @@ export default class VueComponent extends Vue {
 
   private updaterCount = 0
 
-  private rkiCovidSariHospitalizationData = require('@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv')
-    .default
+  private rkiCovidSariHospitalizationData =
+    require('@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv').default
 
   private mounted() {
     this.updateScale()
@@ -196,11 +196,7 @@ export default class VueComponent extends Vue {
       name: 'Observed: COVID-SARI (DE)',
       visible: true,
       y: hospData.map(row => row.sari_covid19_incidence),
-      x: hospData.map(row =>
-        moment(row.date)
-          .add(3, 'days')
-          .toDate()
-      ),
+      x: hospData.map(row => moment(row.date).add(3, 'days').toDate()),
     }
     return line
   }

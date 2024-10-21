@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 import readBlob from 'read-blob'

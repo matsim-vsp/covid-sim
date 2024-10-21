@@ -168,7 +168,7 @@ export default class VueComponent extends Vue {
   }
 
   private unpack(rows: any[], key: any) {
-    let v = rows.map(function(row) {
+    let v = rows.map(function (row) {
       if (key === 'day') return row[key]
 
       const v = 100.0 * parseFloat(row[key].split('_')[0])

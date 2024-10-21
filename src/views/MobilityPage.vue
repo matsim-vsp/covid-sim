@@ -108,7 +108,7 @@ de:
                     :data="allData" :outOfHomeDurationPlot="false"
                     :yAxisName="'Percent [%]'" :plotInterval="[-1, 3, 3]"
                     :activity="activity" :time="'week'" :loadPage="loadPage")
-                
+
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
           ul(v-if="yaml.notes")
@@ -121,7 +121,7 @@ de:
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
 import { getHolidays, Region } from 'feiertagejs'
@@ -287,8 +287,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekend'][date] = {
           outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekends[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekends[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,
@@ -305,8 +305,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
           outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekdays[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,
@@ -327,8 +327,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['week'][date] = {
           outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekly[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekly[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,

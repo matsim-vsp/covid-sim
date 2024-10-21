@@ -76,19 +76,19 @@ de:
          h3 {{ $t('start-end-date') }}
          .button-row
           .dateselect.date-choices(v-if="statusTime == 5 || statusTime == 7")
-            
+
             select.select-menue(v-model='startdate')
               option(v-for="date in allWeekDates") {{ date }}
           .dateselect.date-choices(v-if="statusTime == 6")
-            
+
             select.select-menue(v-model='startdate')
               option(v-for="date in allWeekdayDates") {{ date }}
           .dateselect.date-choices(v-if="statusTime == 5 || statusTime == 7")
-            
+
             select.select-menue(v-model='enddate')
               option(v-for="date in allWeekDates") {{ date }}
           .dateselect.date-choices(v-if="statusTime == 6")
-            
+
             select.select-menue(v-model='enddate')
               option(v-for="date in allWeekdayDates") {{ date }}
 
@@ -96,9 +96,9 @@ de:
 
          ul(v-if="yaml.info")
           li.notes-item(v-for="line in yaml.info" v-html="parseMarkdown(line)")
-         
-          
-          
+
+
+
 
       .plot-area
         h2 {{ $t('mobility-trends') }}
@@ -175,12 +175,12 @@ de:
                   p.plotsize(v-if="dataLoadingFail") Data not found...
                   mobility-plot-landkreise.plotsize(v-else
                     :landkreis="selectedLandkreisOne" :data="allData"
-                    :kind="activity" :week="'week'" :yAxisName="'Percent [%]'" 
+                    :kind="activity" :week="'week'" :yAxisName="'Percent [%]'"
                     :landkreisTwo="selectedLandkreisTwo" :percent="true")
 
-              
 
-              
+
+
 
           h3(v-if="yaml.notes"): b {{ $t('remarks') }}:
 
@@ -194,7 +194,7 @@ de:
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
 
@@ -503,8 +503,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekend'][date] = {
           outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekends[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekends[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,
@@ -524,8 +524,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['weekday'][date] = {
           outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekdays[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekdays[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,
@@ -551,8 +551,8 @@ export default class VueComponent extends Vue {
       if (this.allData[landkreis] !== undefined) {
         this.allData[landkreis]['week'][date] = {
           outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona: this.mobilityWeekly[i]
-            .percentageChangeComparedToBeforeCorona,
+          percentageChangeComparedToBeforeCorona:
+            this.mobilityWeekly[i].percentageChangeComparedToBeforeCorona,
           sharePersonLeavingHome: sharePerson,
           dailyRangePerPerson: dailyRange,
           endHomeActs: 0,

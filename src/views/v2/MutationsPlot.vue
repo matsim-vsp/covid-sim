@@ -3,13 +3,13 @@
     vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
     vue-plotly.plot2(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
     vue-plotly.plot3(:data="dataLines3" :layout="layout3" :options="options" @relayout="handleRelayout")
-  
+
   </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@statnett/vue-plotly'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import { PUBLIC_SVN } from '@/Globals'
 
 @Component({ components: { VuePlotly }, props: {} })

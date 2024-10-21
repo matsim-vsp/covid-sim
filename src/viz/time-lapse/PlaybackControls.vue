@@ -67,7 +67,7 @@ export default class VueComponent extends Vue {
   mounted() {
     const parent = this
 
-    EventBus.$on(EventBus.SIMULATION_PERCENT, function(time: number) {
+    EventBus.$on(EventBus.SIMULATION_PERCENT, function (time: number) {
       parent.sliderValue = time
     })
 

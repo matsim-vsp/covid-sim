@@ -89,10 +89,10 @@ const routes = [
     path: '/timelapse',
     component: () => import(/* webpackChunkName: "multiday" */ '@/viz/time-lapse/TimeLapseViz.vue'),
   },
-  {
-    path: '/entiresim',
-    component: () => import(/* webpackChunkName: "entiresim" */ '@/viz/entire-sim/EntireSim.vue'),
-  },
+  // {
+  //   path: '/entiresim',
+  //   component: () => import(/* webpackChunkName: "entiresim" */ '@/viz/entire-sim/EntireSim.vue'),
+  // },
   {
     path: '/shader',
     redirect: '/multiday',
@@ -219,7 +219,7 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: '/',
   routes, // native-like back/forward and top-of-page routing
   scrollBehavior(to, from, savedPosition) {
     if (to.path === from.path) return

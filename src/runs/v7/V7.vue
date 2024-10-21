@@ -22,7 +22,7 @@
 <script lang="ts">
 // ###########################################################################
 import YAML from 'yaml'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import * as moment from 'moment'
 
 import { Component, Vue, Watch } from 'vue-property-decorator'

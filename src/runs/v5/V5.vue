@@ -10,7 +10,7 @@
 <script lang="ts">
 // ###########################################################################
 import YAML from 'yaml'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 
 import { Component, Vue } from 'vue-property-decorator'
 import SectionViewer from '@/runs/v5/ChartSelector.vue'
