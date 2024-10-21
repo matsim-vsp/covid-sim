@@ -42,3 +42,4 @@ declare module '@luma.gl/core'
 declare module '@math.gl/polygon'
 
 declare module '@aftersim/pako'
+declare module '@simwrapper/papaparse'
