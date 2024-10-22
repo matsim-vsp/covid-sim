@@ -1,5 +1,5 @@
 <template lang="pug">
-#home
+.imprint
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -28,7 +28,7 @@ export default class VueComponent extends Vue {
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#home {
+.imprint {
   background-color: $paleBackground;
 }
 

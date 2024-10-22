@@ -1,22 +1,3 @@
-<i18n>
-en:
-  badpage: 'That page not found, sorry!'
-  headline1: 'R-Value and Risk Calculators'
-  description: 'Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.'
-de:
-  badpage: 'Seite wurde nicht gefunden.'
-  headline1: 'R-Wert-Rechner und Ansteckungsrechner'
-  description: 'Mit Hilfe des **„R-Wert-Rechners“** kann der Effekt verschiedener Maßnahmen bzw. Maßnahmenpakete auf das Infektionsgeschehen bestimmmt werden.
-    Der R-Wert gibt an, wie viele weitere Personen eine infizierte Person im Durchschnitt mit dem Corona-Virus ansteckt.
-    Daher ist es erforderlich den R-Wert langfristig kleiner 1 zu halten, um die Corona-Pandemie nachhaltig einzudämmen.
-
-
-    Mit Hilfe des **„Ansteckungsrechners“** lässt sich die rechnerische Wahrscheinlichkeit ermitteln, wenn in bestimmten Situationen eine ansteckende Person anwesend ist, sich selbst mit dem Virus zu infizieren.
-
-
-    Weitere Infos zur Methodik der gesamten Simulation finden Sie auf unserer [Startseite](https://covid-sim.info/) .'
-</i18n>
-
 <template lang="pug">
 #home
   .banner
@@ -43,21 +24,64 @@ de:
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+const i18n = {
+  messages: {
+    en: {
+      badpage: 'That page not found, sorry!',
+      headline1: 'R-Value and Risk Calculators',
+      description:
+        'Measures such as contact tracing, mask-wearing and school closures could each impact the ability of the disease to spread. The following R-Value Calculators allow you to experiment with these and other measures to see how they contribute to the R-Value of the disease.',
+    },
+    de: {
+      badpage: 'Seite wurde nicht gefunden.',
+      headline1: 'R-Wert-Rechner und Ansteckungsrechner',
+      description: `Mit Hilfe des **„R-Wert-Rechners“** kann der Effekt verschiedener Maßnahmen bzw. Maßnahmenpakete auf das Infektionsgeschehen bestimmmt werden.
+    Der R-Wert gibt an, wie viele weitere Personen eine infizierte Person im Durchschnitt mit dem Corona-Virus ansteckt.
+    Daher ist es erforderlich den R-Wert langfristig kleiner 1 zu halten, um die Corona-Pandemie nachhaltig einzudämmen.
+
+    Mit Hilfe des **„Ansteckungsrechners“** lässt sich die rechnerische Wahrscheinlichkeit ermitteln, wenn in bestimmten Situationen eine ansteckende Person anwesend ist, sich selbst mit dem Virus zu infizieren.
+
+
+    Weitere Infos zur Methodik der gesamten Simulation finden Sie auf unserer [Startseite](https://covid-sim.info/) .`,
+    },
+  },
+}
+
 import MarkdownIt from 'markdown-it'
 
 import Colophon from '@/components/Colophon.vue'
 import allCalculators from '@/assets/calculators'
 
-@Component({ components: { Colophon }, props: {} })
-export default class VueComponent extends Vue {
-  private rCalculators = allCalculators
-  private mdParser = new MarkdownIt()
+const mdParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
-  private mdDescription(msg: string) {
-    return this.mdParser.render(msg)
-  }
-}
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'Calculators',
+  i18n,
+  components: { Colophon },
+  props: {},
+  data() {
+    return {
+      rCalculators: allCalculators,
+    }
+  },
+
+  mounted() {},
+  computed: {},
+  watch: {},
+
+  methods: {
+    mdDescription(msg: string) {
+      return mdParser.render(msg)
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">

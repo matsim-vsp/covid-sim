@@ -42,9 +42,7 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
 import YAML from 'yaml'
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 
 import { RunYaml, PUBLIC_SVN } from '@/Globals'
@@ -59,145 +57,75 @@ interface Breadcrumb {
   isActive?: boolean
 }
 
-@Component({
-  components: {
-    V1RunViewer,
-    V2RunViewer,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'RunPage',
+  components: { V1RunViewer, V2RunViewer },
+  props: {},
+
+  data() {
+    return {
+      publicPath: '/',
+      badPage: false,
+      runId: '',
+      city: '',
+      plusminus: '0',
+
+      // The viewer itself is now versioned
+      defaultViewerComponent: 'V1RunViewer',
+      viewerComponent: 'V1RunViewer',
+      viewerPrettyName: '',
+
+      chartYamlFiles: [] as string[],
+      allRuns: [] as { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[],
+
+      svnRoot: new SVNFileSystem(PUBLIC_SVN + 'battery/'),
+      currentCity: -1,
+    }
   },
-})
-export default class VueComponent extends Vue {
-  private publicPath = '/'
 
-  private badPage = false
-
-  private runId: string = ''
-  private city: string = ''
-  private plusminus = '0'
-
-  // The viewer itself is now versioned
-  private defaultViewerComponent = 'V1RunViewer'
-  private viewerComponent = this.defaultViewerComponent
-  private viewerPrettyName = ''
-
-  private chartYamlFiles: string[] = []
-
-  private allRuns: { name: string; yaml: RunYaml; runId: string; crumbs: Breadcrumb[] }[] = []
-
-  @Watch('$route') routeChanged(to: Route, from: Route) {
-    //console.log('ROUTE CHANGED', to)
-
-    // skip a reload if only the search query changed.
-    if (to.path === from.path) return
-
+  mounted() {
     this.buildPageForURL()
-  }
+  },
 
-  public mounted() {
-    this.buildPageForURL()
-  }
-
-  public beforeDestroy() {
+  beforeDestroy() {
     document.title = 'covid-sim.info'
-  }
+  },
 
-  private async buildPageForURL() {
-    this.badPage = false
-    //console.log({ route: this.$route })
-    this.runId = this.$route.params.pathMatch
+  computed: {},
+  watch: {
+    $route(to: Route, from: Route) {
+      console.log('ROUTE CHANGED', to)
 
-    let trim = this.runId.endsWith('/') ? 1 : 0
-    document.title = this.runId.slice(0, this.runId.length - trim) + ' : covid-sim.info'
-    this.currentCity = -1
-    this.allRuns = []
+      // skip a reload if only the search query changed.
+      if (to.path === from.path) return
 
-    // Try to fetch metadata.yaml from the URL.
-    // If it exists, show the run.
-    // If it does not exist, we will try to build a multi-city page
-    try {
-      const readYaml = await this.loadYaml(this.runId)
-      // got something!
-      const crumbs = this.buildBreadcrumbs(this.runId)
+      this.buildPageForURL()
+    },
+  },
 
-      this.chartYamlFiles = await this.getChartYamls()
+  methods: {
+    async buildPageForURL() {
+      this.badPage = false
+      //console.log({ route: this.$route })
+      this.runId = this.$route.params.pathMatch
 
-      // now we have versions of the viewer itself. default is V1
-      this.viewerComponent = readYaml.viewerVersion
-        ? `V${readYaml.viewerVersion}RunViewer`
-        : this.defaultViewerComponent
+      let trim = this.runId.endsWith('/') ? 1 : 0
+      document.title = this.runId.slice(0, this.runId.length - trim) + ' : covid-sim.info'
+      this.currentCity = -1
+      this.allRuns = []
 
-      this.viewerPrettyName = readYaml.viewerVersion
-        ? `Viewer V${readYaml.viewerVersion}`
-        : 'Viewer V1'
-
-      this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
-      this.city = readYaml.city
-      this.currentCity = 0
-    } catch (e) {
-      console.warn('' + e)
-      this.attemptMulticityFromURL()
-    }
-  }
-
-  private svnRoot = new SVNFileSystem(PUBLIC_SVN + 'battery/')
-
-  private buildBreadcrumbs(folder: string) {
-    const crumbs: Breadcrumb[] = []
-    const pathElements = folder.split('/')
-
-    let url = '/runs/'
-
-    for (const p of pathElements) {
-      if (!p) continue
-
-      url += p + '/'
-      crumbs.push({ title: p, url })
-    }
-
-    crumbs[crumbs.length - 1].isActive = true
-    return crumbs
-  }
-
-  private async getChartYamls(): Promise<string[]> {
-    // Perhaps we want to see some charts! Check the dir for chart*.yaml files
-    const yamlFiles = []
-    const folderContents = await this.svnRoot.getDirectory(this.runId)
-    for (const file of folderContents.files) {
-      if (file.match(/^chart.*\.yaml$/)) yamlFiles.push(file)
-    }
-    return yamlFiles
-  }
-
-  private async attemptMulticityFromURL() {
-    // We know at this point that the given URL does not contain a run.
-    // We hope that it instead contains subfolders, which each contain a run.
-
-    const folderContents = await this.svnRoot.getDirectory(this.runId)
-    if (folderContents.dirs.length) {
-      this.fetchMultiYamls(folderContents.dirs)
-    } else {
-      // User gave a bad URL; maybe tell them.
-      this.setBadPage()
-    }
-  }
-
-  private currentCity = -1
-
-  private switchCity(index: number) {
-    // console.log('switchCity: ', index)
-    this.currentCity = index
-    this.city = this.allRuns[index].name
-    this.$nextTick()
-  }
-
-  // Try to get a yaml for each folder
-  private async fetchMultiYamls(dirs: string[]) {
-    this.allRuns = []
-
-    for (const folder of dirs) {
+      // Try to fetch metadata.yaml from the URL.
+      // If it exists, show the run.
+      // If it does not exist, we will try to build a multi-city page
       try {
-        let subfolder = this.runId
-        subfolder += subfolder.endsWith('/') ? folder : '/' + folder
-        const readYaml = await this.loadYaml(subfolder)
+        const readYaml = await this.loadYaml(this.runId)
+        // got something!
+        const crumbs = this.buildBreadcrumbs(this.runId)
+
+        this.chartYamlFiles = await this.getChartYamls()
 
         // now we have versions of the viewer itself. default is V1
         this.viewerComponent = readYaml.viewerVersion
@@ -208,41 +136,115 @@ export default class VueComponent extends Vue {
           ? `Viewer V${readYaml.viewerVersion}`
           : 'Viewer V1'
 
-        const crumbs = this.buildBreadcrumbs(subfolder)
-        this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: subfolder, crumbs })
-
-        // load first one!
-        if (this.currentCity == -1) {
-          this.currentCity = 0
-          this.city = readYaml.city
-        }
+        this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
+        this.city = readYaml.city
+        this.currentCity = 0
       } catch (e) {
-        // if that folder was a dud, just ignore it
+        console.warn('' + e)
+        this.attemptMulticityFromURL()
       }
-    }
+    },
 
-    if (!this.allRuns.length) this.setBadPage()
-  }
+    buildBreadcrumbs(folder: string) {
+      const crumbs: Breadcrumb[] = []
+      const pathElements = folder.split('/')
 
-  private setBadPage() {
-    console.log('BAD USER! No such URL.', this.runId)
-    // add some bad-page helper thingy here
-    this.badPage = true
-  }
+      let url = '/runs/'
 
-  // this will throw an error if /path/metadata.yaml is not found
-  private async loadYaml(path: string) {
-    const url = PUBLIC_SVN + 'battery/' + path + '/metadata.yaml'
+      for (const p of pathElements) {
+        if (!p) continue
 
-    const response = await fetch(url)
-    const text = await response.text()
-    const yml: RunYaml = YAML.parse(text)
+        url += p + '/'
+        crumbs.push({ title: p, url })
+      }
 
-    return yml
-  }
-}
+      crumbs[crumbs.length - 1].isActive = true
+      return crumbs
+    },
 
-// ###########################################################################
+    async getChartYamls(): Promise<string[]> {
+      // Perhaps we want to see some charts! Check the dir for chart*.yaml files
+      const yamlFiles = []
+      const folderContents = await this.svnRoot.getDirectory(this.runId)
+      for (const file of folderContents.files) {
+        if (file.match(/^chart.*\.yaml$/)) yamlFiles.push(file)
+      }
+      return yamlFiles
+    },
+
+    async attemptMulticityFromURL() {
+      // We know at this point that the given URL does not contain a run.
+      // We hope that it instead contains subfolders, which each contain a run.
+
+      const folderContents = await this.svnRoot.getDirectory(this.runId)
+      if (folderContents.dirs.length) {
+        this.fetchMultiYamls(folderContents.dirs)
+      } else {
+        // User gave a bad URL; maybe tell them.
+        this.setBadPage()
+      }
+    },
+
+    switchCity(index: number) {
+      // console.log('switchCity: ', index)
+      this.currentCity = index
+      this.city = this.allRuns[index].name
+      this.$nextTick()
+    },
+
+    // Try to get a yaml for each folder
+    async fetchMultiYamls(dirs: string[]) {
+      this.allRuns = []
+
+      for (const folder of dirs) {
+        try {
+          let subfolder = this.runId
+          subfolder += subfolder.endsWith('/') ? folder : '/' + folder
+          const readYaml = await this.loadYaml(subfolder)
+
+          // now we have versions of the viewer itself. default is V1
+          this.viewerComponent = readYaml.viewerVersion
+            ? `V${readYaml.viewerVersion}RunViewer`
+            : this.defaultViewerComponent
+
+          this.viewerPrettyName = readYaml.viewerVersion
+            ? `Viewer V${readYaml.viewerVersion}`
+            : 'Viewer V1'
+
+          const crumbs = this.buildBreadcrumbs(subfolder)
+          this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: subfolder, crumbs })
+
+          // load first one!
+          if (this.currentCity == -1) {
+            this.currentCity = 0
+            this.city = readYaml.city
+          }
+        } catch (e) {
+          // if that folder was a dud, just ignore it
+        }
+      }
+
+      if (!this.allRuns.length) this.setBadPage()
+    },
+
+    setBadPage() {
+      console.log('BAD USER! No such URL.', this.runId)
+      // add some bad-page helper thingy here
+      this.badPage = true
+    },
+
+    // this will throw an error if /path/metadata.yaml is not found
+    async loadYaml(path: string) {
+      const url = PUBLIC_SVN + 'battery/' + path + '/metadata.yaml'
+
+      const response = await fetch(url)
+      const text = await response.text()
+      const yml: RunYaml = YAML.parse(text)
+
+      return yml
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">

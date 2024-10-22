@@ -1,44 +1,5 @@
-<i18n>
-en:
-  badpage: 'That page not found, sorry!'
-  mobility-trends: 'Mobility Dashboard'
-  remarks: 'Remarks'
-  type: 'Select Type:'
-  duration: 'Duration'
-  distance: 'Travel Distances'
-  proportion: 'Proportion of Mobile Persons'
-  duration-heading: 'Amount of Time Spent Outside the Home'
-  distance-heading: 'Average distance traveled'
-  proportion-heading: 'Proportion of mobile persons'
-  duration-heading-percent: 'Percent Change in Duration of out of home Activities Compared to Pre-COVID-19'
-  week: 'Week'
-  weekday: 'Weekday'
-  weekend: 'Weekend'
-  y-axis-one: 'Zeit pro Tag [h]'
-  y-axis-two: 'Distanz pro Person [km/h]'
-  y-axis-percent: 'Prozent [%]'
-de:
-  badpage: 'Seite wurde nicht gefunden.'
-  mobility-trends: 'Mobility Dashboard'
-  remarks: 'Bemerkungen'
-  type: 'Art auswählen:'
-  duration: 'Dauer'
-  distance: 'Distanz'
-  proportion: 'Anteil mobiler Personen'
-  duration-heading: 'Zeit, die außerhalb des Hauses verbracht wurde'
-  distance-heading: 'Durchschnittlich zurückgelegte Distanz'
-  proportion-heading: 'Anteil mobiler Personen'
-  duration-heading-percent: 'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19'
-  week: 'Woche'
-  weekday: 'Wochentag'
-  weekend: 'Wochenende'
-  y-axis-one: 'Time per Day [h]'
-  y-axis-two: 'Distance per Person [km/h]'
-  y-axis-percent: 'Percent [%]'
-</i18n>
-
 <template lang="pug">
-#home
+.mobility-page
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -118,6 +79,51 @@ de:
 </template>
 
 <script lang="ts">
+const i18n = {
+  messages: {
+    en: {
+      badpage: 'That page not found, sorry!',
+      'mobility-trends': 'Mobility Dashboard',
+      remarks: 'Remarks',
+      type: 'Select Type:',
+      duration: 'Duration',
+      distance: 'Travel Distances',
+      proportion: 'Proportion of Mobile Persons',
+      'duration-heading': 'Amount of Time Spent Outside the Home',
+      'distance-heading': 'Average distance traveled',
+      'proportion-heading': 'Proportion of mobile persons',
+      'duration-heading-percent':
+        'Percent Change in Duration of out of home Activities Compared to Pre-COVID-19',
+      week: 'Week',
+      weekday: 'Weekday',
+      weekend: 'Weekend',
+      'y-axis-one': 'Zeit pro Tag [h]',
+      'y-axis-two': 'Distanz pro Person [km/h]',
+      'y-axis-percent': 'Prozent [%]',
+    },
+    de: {
+      badpage: 'Seite wurde nicht gefunden.',
+      'mobility-trends': 'Mobility Dashboard',
+      remarks: 'Bemerkungen',
+      type: 'Art auswählen:',
+      duration: 'Dauer',
+      distance: 'Distanz',
+      proportion: 'Anteil mobiler Personen',
+      'duration-heading': 'Zeit, die außerhalb des Hauses verbracht wurde',
+      'distance-heading': 'Durchschnittlich zurückgelegte Distanz',
+      'proportion-heading': 'Anteil mobiler Personen',
+      'duration-heading-percent':
+        'Prozentuale Veränderung der Dauer außhäusiger Aktivitäten im Vergleich zu vor COVID-19',
+      week: 'Woche',
+      weekday: 'Wochentag',
+      weekend: 'Wochenende',
+      'y-axis-one': 'Time per Day [h]',
+      'y-axis-two': 'Distance per Person [km/h]',
+      'y-axis-percent': 'Percent [%]',
+    },
+  },
+}
+
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
@@ -139,355 +145,374 @@ type MobilityYaml = {
   notes: string[]
 }
 
-@Component({
+const public_svn =
+  'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
+
+const markdownParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
+
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'MobilityPage',
+  i18n,
   components: { VueSlider, Colophon, MobilityPlot, MobilityMap },
   props: {},
-})
-export default class VueComponent extends Vue {
-  private badPage = false
 
-  private public_svn =
-    'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
+  data() {
+    return {
+      badPage: false,
 
-  private bundeslaender = this.public_svn + 'mobilityData/bundeslaender'
-  private mobility = '/mobilityData_OverviewBL_'
-  private range = '/range_OverviewBL_'
-  private weekdays = 'weekdays.csv'
-  private weekends = 'weekends.csv'
-  private weekly = 'weekly.csv'
+      bundeslaender: public_svn + 'mobilityData/bundeslaender',
+      mobility: '/mobilityData_OverviewBL_',
+      range: '/range_OverviewBL_',
+      weekdays: 'weekdays.csv',
+      weekends: 'weekends.csv',
+      weekly: 'weekly.csv',
 
-  private mobilityWeekdays: any[] = []
-  private mobilityWeekends: any[] = []
-  private mobilityWeekly: any[] = []
+      mobilityWeekdays: [] as any[],
+      mobilityWeekends: [] as any[],
+      mobilityWeekly: [] as any[],
 
-  private timelineyWeekdays: any[] = []
-  private timelineWeekends: any[] = []
-  private timelineWeekly: any[] = []
+      timelineyWeekdays: [] as any[],
+      timelineWeekends: [] as any[],
+      timelineWeekly: [] as any[],
 
-  private allBundeslaenderNew: any[] = []
+      allBundeslaenderNew: [] as any[],
 
-  private yaml: MobilityYaml = { description: '', notes: [] }
+      yaml: { description: '', notes: [] } as MobilityYaml,
 
-  private allData: any[] = []
-  private loadPage = 'Start Loading'
+      allData: [] as any[],
+      loadPage: 'Start Loading',
 
-  private minWeekMobility = 10000
-  private maxWeekMobility = 0
+      minWeekMobility: 10000,
+      maxWeekMobility: 0,
 
-  private markdownParser = new MarkdownIt()
-  private data: any[] = []
-  private rangeData: any[] = []
-  private dataLoadingFail = false
-  private formattedData: any[] = []
-  private allBundeslaender: any[] = []
-  private status = 1
-  private activity = 'outOfHomeDuration'
-  private yAxisNAme = 'Time per Day [h]'
-  private plotHeading = 'Amount of Time Spent Outside the Home'
-  private bundeslandHoliday: { [id: string]: Region } = {
-    'Baden-Württemberg': 'BW',
-    Hessen: 'HE',
-    Berlin: 'BE',
-    Brandenburg: 'BB',
-    Sachsen: 'SN',
-    Bayern: 'BY',
-    'Nordrhein-Westfalen': 'NW',
-    Hamburg: 'HH',
-    'Mecklenburg-Vorpommern': 'MV',
-    Niedersachsen: 'NI',
-    Deutschland: 'BUND',
-    Bremen: 'HB',
-    Thüringen: 'TH',
-    Saarland: 'SL',
-    'Sachsen-Anhalt': 'ST',
-    'Rheinland-Pfalz': 'RP',
-    'Schleswig-Holstein': 'SH',
-  }
+      data: [] as any[],
+      rangeData: [] as any[],
+      dataLoadingFail: false,
+      formattedData: [] as any[],
+      allBundeslaender: [] as any[],
+      status: 1,
+      activity: 'outOfHomeDuration',
+      yAxisNAme: 'Time per Day [h]',
+      plotHeading: 'Amount of Time Spent Outside the Home',
+      bundeslandHoliday: {
+        'Baden-Württemberg': 'BW',
+        Hessen: 'HE',
+        Berlin: 'BE',
+        Brandenburg: 'BB',
+        Sachsen: 'SN',
+        Bayern: 'BY',
+        'Nordrhein-Westfalen': 'NW',
+        Hamburg: 'HH',
+        'Mecklenburg-Vorpommern': 'MV',
+        Niedersachsen: 'NI',
+        Deutschland: 'BUND',
+        Bremen: 'HB',
+        Thüringen: 'TH',
+        Saarland: 'SL',
+        'Sachsen-Anhalt': 'ST',
+        'Rheinland-Pfalz': 'RP',
+        'Schleswig-Holstein': 'SH',
+      } as { [id: string]: Region },
+    }
+  },
 
-  @Watch('$route') routeChanged(to: Route, from: Route) {
+  mounted() {
     this.buildPageForURL()
-  }
+  },
 
-  private mounted() {
-    this.buildPageForURL()
-  }
+  computed: {
+    topDescription() {
+      if (!this.yaml.description) return ''
+      return markdownParser.render(this.yaml.description)
+    },
+  },
 
-  private async buildUI() {
-    this.openPage(window.location.href)
+  watch: {
+    $route() {
+      this.buildPageForURL()
+    },
+  },
 
-    this.mobilityWeekends = await this.loadLandkreisData(
-      this.bundeslaender + this.mobility + this.weekends
-    )
+  methods: {
+    async buildUI() {
+      this.openPage(window.location.href)
 
-    this.mobilityWeekly = await this.loadLandkreisData(
-      this.bundeslaender + this.mobility + this.weekly
-    )
-
-    this.mobilityWeekdays = await this.loadLandkreisData(
-      this.bundeslaender + this.mobility + this.weekdays
-    )
-
-    this.timelineWeekends = await this.loadLandkreiseTimeline(
-      this.bundeslaender + this.range + this.weekends
-    )
-
-    this.timelineyWeekdays = await this.loadLandkreiseTimeline(
-      this.bundeslaender + this.range + this.weekdays
-    )
-
-    this.timelineWeekly = await this.loadLandkreiseTimeline(
-      this.bundeslaender + this.range + this.weekly
-    )
-
-    this.loadAllLandkreise()
-
-    this.combineData()
-    this.loadPage = 'Loaded'
-  }
-
-  private async loadLandkreisData(url: string) {
-    try {
-      // load from subversion
-      const rawData = await fetch(url).then(response => response.text())
-      const parsed = Papaparse.parse(rawData, {
-        delimiter: ';',
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
-
-      // convert dates to ISO format
-      const withDates = parsed.map(row => {
-        const d = row.date.toString()
-        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
-        return row
-      })
-      return withDates
-    } catch (e) {
-      this.dataLoadingFail = true
-      console.error(e)
-    }
-    return []
-  }
-
-  private async combineData() {
-    for (var i = 0; i < this.allBundeslaenderNew.length; i++) {
-      this.allData[this.allBundeslaenderNew[i]] = []
-      this.allData[this.allBundeslaenderNew[i]]['week'] = []
-      this.allData[this.allBundeslaenderNew[i]]['weekend'] = []
-      this.allData[this.allBundeslaenderNew[i]]['weekday'] = []
-    }
-
-    for (var i = 0; i < this.mobilityWeekends.length; i++) {
-      var landkreis = this.mobilityWeekends[i].BundeslandID
-      var date = this.mobilityWeekends[i].date
-      var duration = this.mobilityWeekends[i].outOfHomeDuration
-      var dailyRange = this.timelineWeekends[i].dailyRangePerPerson
-      var sharePerson = this.timelineWeekends[i].sharePersonLeavingHome
-      if (this.allData[landkreis] !== undefined) {
-        this.allData[landkreis]['weekend'][date] = {
-          outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona:
-            this.mobilityWeekends[i].percentageChangeComparedToBeforeCorona,
-          sharePersonLeavingHome: sharePerson,
-          dailyRangePerPerson: dailyRange,
-          endHomeActs: 0,
-        }
-      }
-    }
-
-    for (var i = 0; i < this.mobilityWeekdays.length; i++) {
-      var landkreis = this.mobilityWeekdays[i].BundeslandID
-      var date = this.mobilityWeekdays[i].date
-      var dailyRange = this.timelineyWeekdays[i].dailyRangePerPerson
-      var sharePerson = this.timelineyWeekdays[i].sharePersonLeavingHome
-      var duration = this.mobilityWeekdays[i].outOfHomeDuration
-      if (this.allData[landkreis] !== undefined) {
-        this.allData[landkreis]['weekday'][date] = {
-          outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
-          percentageChangeComparedToBeforeCorona:
-            this.mobilityWeekdays[i].percentageChangeComparedToBeforeCorona,
-          sharePersonLeavingHome: sharePerson,
-          dailyRangePerPerson: dailyRange,
-          endHomeActs: 0,
-        }
-      }
-    }
-
-    for (var i = 0; i < this.mobilityWeekly.length; i++) {
-      var landkreis = this.mobilityWeekly[i].BundeslandID
-      var date = this.mobilityWeekly[i].date
-      var dailyRange = this.timelineWeekly[i].dailyRangePerPerson
-      var sharePerson = this.timelineWeekly[i].sharePersonLeavingHome
-      var duration = this.mobilityWeekly[i].outOfHomeDuration
-      if (typeof duration == 'string') {
-        duration = parseFloat(duration.replace(',', '.'))
-      }
-
-      if (this.allData[landkreis] !== undefined) {
-        this.allData[landkreis]['week'][date] = {
-          outOfHomeDuration: duration,
-          percentageChangeComparedToBeforeCorona:
-            this.mobilityWeekly[i].percentageChangeComparedToBeforeCorona,
-          sharePersonLeavingHome: sharePerson,
-          dailyRangePerPerson: dailyRange,
-          endHomeActs: 0,
-        }
-      }
-    }
-  }
-
-  private async openPage(url: string) {
-    var urlSplit = url.split('/')
-    var urlInfo = urlSplit[urlSplit.length - 1]
-    if (urlInfo == 'duration') {
-      this.clickButton(1)
-    } else if (urlInfo == 'distance') {
-      this.clickButton(2)
-    } else if (urlInfo == 'proportion-mobile-persons') {
-      this.clickButton(3)
-    } else if (urlInfo == 'mobility') {
-      this.clickButton(1)
-    }
-  }
-
-  private async clickButton(statusNum: number) {
-    this.status = statusNum
-    if (statusNum == 1) {
-      this.activity = 'outOfHomeDuration'
-      this.yAxisNAme = 'Time per Day [h]'
-      this.plotHeading = 'Amount of Time Spent Outside the Home'
-      window.history.pushState('duration', 'Title', '/mobility/duration')
-    } else if (statusNum == 2) {
-      this.activity = 'dailyRangePerPerson'
-      this.yAxisNAme = 'Distance per Person [km]'
-      this.plotHeading = 'Average distance traveled '
-      window.history.pushState('distance', 'Title', '/mobility/distance')
-    } else if (statusNum == 3) {
-      this.activity = 'sharePersonLeavingHome'
-      this.yAxisNAme = 'Percent [%]'
-      this.plotHeading = 'Proportion of mobile persons'
-      window.history.pushState(
-        'proportion-mobile-persons',
-        'Title',
-        '/mobility/proportion-mobile-persons'
+      this.mobilityWeekends = await this.loadLandkreisData(
+        this.bundeslaender + this.mobility + this.weekends
       )
-    }
-  }
 
-  private async loadAllLandkreise() {
-    for (var i = 0; i < 402; i++) {
-      var bl = this.mobilityWeekends[i].BundeslandID
-      this.allBundeslaenderNew.push(bl)
-    }
-    this.allBundeslaenderNew.sort()
-  }
+      this.mobilityWeekly = await this.loadLandkreisData(
+        this.bundeslaender + this.mobility + this.weekly
+      )
 
-  private async loadLandkreiseTimeline(url: string) {
-    try {
-      // load from subversion
-      const rawData = await fetch(url).then(response => response.text())
-      const parsed = Papaparse.parse(rawData, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
+      this.mobilityWeekdays = await this.loadLandkreisData(
+        this.bundeslaender + this.mobility + this.weekdays
+      )
 
-      // convert dates to ISO format
+      this.timelineWeekends = await this.loadLandkreiseTimeline(
+        this.bundeslaender + this.range + this.weekends
+      )
 
-      const withDates = parsed.map(row => {
-        const d = row.date.toString()
-        row.date = `20${d.substring(6, 8)}-${d.substring(3, 5)}-${d.substring(0, 2)}`
-        return row
-      })
+      this.timelineyWeekdays = await this.loadLandkreiseTimeline(
+        this.bundeslaender + this.range + this.weekdays
+      )
 
-      return withDates
-    } catch (e) {
-      this.dataLoadingFail = true
-      console.error(e)
-    }
-    return []
-  }
+      this.timelineWeekly = await this.loadLandkreiseTimeline(
+        this.bundeslaender + this.range + this.weekly
+      )
 
-  private async loadRange() {
-    const url = PUBLIC_SVN + 'mobilityData/bundeslaender/range_OverviewBL.csv'
+      this.loadAllLandkreise()
 
-    try {
-      // load from subversion
-      const rawData = await fetch(url).then(response => response.text())
-      const parsed = Papaparse.parse(rawData, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
+      this.combineData()
+      this.loadPage = 'Loaded'
+    },
 
-      // convert dates to ISO format
-      const withDates = parsed.map(row => {
-        const d = row.date.toString()
-        row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
-        return row
-      })
-      return withDates
-    } catch (e) {
-      this.dataLoadingFail = true
-      console.error(e)
-    }
-    return []
-  }
-
-  private parseMarkdown(text: string) {
-    return this.markdownParser.render(text)
-  }
-
-  private get topDescription() {
-    if (!this.yaml.description) return ''
-    return this.markdownParser.render(this.yaml.description)
-  }
-
-  private async buildPageForURL() {
-    this.badPage = false
-
-    const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = PUBLIC_SVN + `mobilityData/bundeslaender/config.${lang}.yaml`
-
-    let responseText = ''
-
-    try {
-      const response = await fetch(url)
-      responseText = await response.text()
-    } catch (e) {
-      console.error(e)
-    }
-
-    // maybe .de. doesn't exist, fallback .en.:
-    if (!responseText && url.indexOf('.de.') > -1) {
-      console.warn('no', url, 'falling back to .en.')
-      const en_url = url.replace('.de.', '.en.')
-      console.log(en_url)
+    async loadLandkreisData(url: string) {
       try {
-        const response = await fetch(en_url)
+        // load from subversion
+        const rawData = await fetch(url).then(response => response.text())
+        const parsed = Papaparse.parse(rawData, {
+          delimiter: ';',
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        // convert dates to ISO format
+        const withDates = parsed.map((row: any) => {
+          const d = row.date.toString()
+          row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+          return row
+        })
+        return withDates
+      } catch (e) {
+        this.dataLoadingFail = true
+        console.error(e)
+      }
+      return []
+    },
+
+    async combineData() {
+      for (var i = 0; i < this.allBundeslaenderNew.length; i++) {
+        this.allData[this.allBundeslaenderNew[i]] = []
+        this.allData[this.allBundeslaenderNew[i]]['week'] = []
+        this.allData[this.allBundeslaenderNew[i]]['weekend'] = []
+        this.allData[this.allBundeslaenderNew[i]]['weekday'] = []
+      }
+
+      for (var i = 0; i < this.mobilityWeekends.length; i++) {
+        var landkreis = this.mobilityWeekends[i].BundeslandID
+        var date = this.mobilityWeekends[i].date
+        var duration = this.mobilityWeekends[i].outOfHomeDuration
+        var dailyRange = this.timelineWeekends[i].dailyRangePerPerson
+        var sharePerson = this.timelineWeekends[i].sharePersonLeavingHome
+        if (this.allData[landkreis] !== undefined) {
+          this.allData[landkreis]['weekend'][date] = {
+            outOfHomeDuration: duration,
+            percentageChangeComparedToBeforeCorona:
+              this.mobilityWeekends[i].percentageChangeComparedToBeforeCorona,
+            sharePersonLeavingHome: sharePerson,
+            dailyRangePerPerson: dailyRange,
+            endHomeActs: 0,
+          }
+        }
+      }
+
+      for (var i = 0; i < this.mobilityWeekdays.length; i++) {
+        var landkreis = this.mobilityWeekdays[i].BundeslandID
+        var date = this.mobilityWeekdays[i].date
+        var dailyRange = this.timelineyWeekdays[i].dailyRangePerPerson
+        var sharePerson = this.timelineyWeekdays[i].sharePersonLeavingHome
+        var duration = this.mobilityWeekdays[i].outOfHomeDuration
+        if (this.allData[landkreis] !== undefined) {
+          this.allData[landkreis]['weekday'][date] = {
+            outOfHomeDuration: this.mobilityWeekdays[i].outOfHomeDuration,
+            percentageChangeComparedToBeforeCorona:
+              this.mobilityWeekdays[i].percentageChangeComparedToBeforeCorona,
+            sharePersonLeavingHome: sharePerson,
+            dailyRangePerPerson: dailyRange,
+            endHomeActs: 0,
+          }
+        }
+      }
+
+      for (var i = 0; i < this.mobilityWeekly.length; i++) {
+        var landkreis = this.mobilityWeekly[i].BundeslandID
+        var date = this.mobilityWeekly[i].date
+        var dailyRange = this.timelineWeekly[i].dailyRangePerPerson
+        var sharePerson = this.timelineWeekly[i].sharePersonLeavingHome
+        var duration = this.mobilityWeekly[i].outOfHomeDuration
+        if (typeof duration == 'string') {
+          duration = parseFloat(duration.replace(',', '.'))
+        }
+
+        if (this.allData[landkreis] !== undefined) {
+          this.allData[landkreis]['week'][date] = {
+            outOfHomeDuration: duration,
+            percentageChangeComparedToBeforeCorona:
+              this.mobilityWeekly[i].percentageChangeComparedToBeforeCorona,
+            sharePersonLeavingHome: sharePerson,
+            dailyRangePerPerson: dailyRange,
+            endHomeActs: 0,
+          }
+        }
+      }
+    },
+
+    async openPage(url: string) {
+      var urlSplit = url.split('/')
+      var urlInfo = urlSplit[urlSplit.length - 1]
+      if (urlInfo == 'duration') {
+        this.clickButton(1)
+      } else if (urlInfo == 'distance') {
+        this.clickButton(2)
+      } else if (urlInfo == 'proportion-mobile-persons') {
+        this.clickButton(3)
+      } else if (urlInfo == 'mobility') {
+        this.clickButton(1)
+      }
+    },
+
+    async clickButton(statusNum: number) {
+      this.status = statusNum
+      if (statusNum == 1) {
+        this.activity = 'outOfHomeDuration'
+        this.yAxisNAme = 'Time per Day [h]'
+        this.plotHeading = 'Amount of Time Spent Outside the Home'
+        window.history.pushState('duration', 'Title', '/mobility/duration')
+      } else if (statusNum == 2) {
+        this.activity = 'dailyRangePerPerson'
+        this.yAxisNAme = 'Distance per Person [km]'
+        this.plotHeading = 'Average distance traveled '
+        window.history.pushState('distance', 'Title', '/mobility/distance')
+      } else if (statusNum == 3) {
+        this.activity = 'sharePersonLeavingHome'
+        this.yAxisNAme = 'Percent [%]'
+        this.plotHeading = 'Proportion of mobile persons'
+        window.history.pushState(
+          'proportion-mobile-persons',
+          'Title',
+          '/mobility/proportion-mobile-persons'
+        )
+      }
+    },
+
+    async loadAllLandkreise() {
+      for (var i = 0; i < 402; i++) {
+        var bl = this.mobilityWeekends[i].BundeslandID
+        this.allBundeslaenderNew.push(bl)
+      }
+      this.allBundeslaenderNew.sort()
+    },
+
+    async loadLandkreiseTimeline(url: string) {
+      try {
+        // load from subversion
+        const rawData = await fetch(url).then(response => response.text())
+        const parsed = Papaparse.parse(rawData, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        // convert dates to ISO format
+
+        const withDates = parsed.map((row: any) => {
+          const d = row.date.toString()
+          row.date = `20${d.substring(6, 8)}-${d.substring(3, 5)}-${d.substring(0, 2)}`
+          return row
+        })
+
+        return withDates
+      } catch (e) {
+        this.dataLoadingFail = true
+        console.error(e)
+      }
+      return []
+    },
+
+    async loadRange() {
+      const url = PUBLIC_SVN + 'mobilityData/bundeslaender/range_OverviewBL.csv'
+
+      try {
+        // load from subversion
+        const rawData = await fetch(url).then(response => response.text())
+        const parsed = Papaparse.parse(rawData, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        // convert dates to ISO format
+        const withDates = parsed.map((row: any) => {
+          const d = row.date.toString()
+          row.date = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
+          return row
+        })
+        return withDates
+      } catch (e) {
+        this.dataLoadingFail = true
+        console.error(e)
+      }
+      return []
+    },
+
+    parseMarkdown(text: string) {
+      return markdownParser.render(text)
+    },
+
+    async buildPageForURL() {
+      this.badPage = false
+
+      const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
+      const url = PUBLIC_SVN + `mobilityData/bundeslaender/config.${lang}.yaml`
+
+      let responseText = ''
+
+      try {
+        const response = await fetch(url)
         responseText = await response.text()
       } catch (e) {
         console.error(e)
       }
-    }
 
-    if (!responseText) {
-      this.badPage = true
-      return
-    }
+      // maybe .de. doesn't exist, fallback .en.:
+      if (!responseText && url.indexOf('.de.') > -1) {
+        console.warn('no', url, 'falling back to .en.')
+        const en_url = url.replace('.de.', '.en.')
+        console.log(en_url)
+        try {
+          const response = await fetch(en_url)
+          responseText = await response.text()
+        } catch (e) {
+          console.error(e)
+        }
+      }
 
-    this.yaml = YAML.parse(responseText)
+      if (!responseText) {
+        this.badPage = true
+        return
+      }
 
-    this.buildUI()
-  }
-}
+      this.yaml = YAML.parse(responseText)
+
+      this.buildUI()
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#home {
+.mobility-page {
   background-color: $paleBackground;
 }
 

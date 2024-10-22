@@ -1,5 +1,5 @@
 <template lang="pug">
-#home
+.home-index
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -452,7 +452,7 @@ export default defineComponent({
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#home {
+.home-index {
   background-color: $paleBackground;
 }
 

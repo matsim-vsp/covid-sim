@@ -1,22 +1,5 @@
-<i18n>
-en:
-  r-value-calculator: 'R-Value Calculator'
-  badpage: 'That page not found, sorry!'
-  base-r-value: 'Base R Value'
-  calculated-r-value: 'Calculated R Value'
-  remarks: 'Remarks'
-  older-calculators: 'All Calculators:'
-de:
-  r-value-calculator: 'R-Wert-Rechner'
-  badpage: 'Seite wurde nicht gefunden.'
-  base-r-value: 'Basis R-Wert'
-  calculated-r-value: 'Resultierender R-Wert'
-  remarks: 'Bemerkungen'
-  older-calculators: 'Alle Rechner:'
-</i18n>
-
 <template lang="pug">
-#home
+.r-caoculator
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -103,7 +86,27 @@ de:
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+const i18n = {
+  messages: {
+    en: {
+      'r-value-calculator': 'R-Value Calculator',
+      badpage: 'That page not found, sorry!',
+      'base-r-value': 'Base R Value',
+      'calculated-r-value': 'Calculated R Value',
+      remarks: 'Remarks',
+      'older-calculators': 'All Calculators:',
+    },
+    de: {
+      'r-value-calculator': 'R-Wert-Rechner',
+      badpage: 'Seite wurde nicht gefunden.',
+      'base-r-value': 'Basis R-Wert',
+      'calculated-r-value': 'Resultierender R-Wert',
+      remarks: 'Bemerkungen',
+      'older-calculators': 'Alle Rechner:',
+    },
+  },
+}
+
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
@@ -124,214 +127,229 @@ type RCalcYaml = {
   notes: string[]
 }
 
-@Component({ components: { VueSlider, Colophon }, props: {} })
-export default class VueComponent extends Vue {
-  private calcId = ''
+const markdownParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
-  private yaml: RCalcYaml = { baseValue: 0, optionGroups: {}, additiveGroups: {}, notes: [] }
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private adjustedR = 2.5
-  private selectedBaseR = 2.5
+export default defineComponent({
+  name: 'RCalculator',
+  i18n,
+  components: { VueSlider, Colophon },
+  props: {},
 
-  private badPage = false
+  data() {
+    return {
+      calcId: '',
+      yaml: { baseValue: 0, optionGroups: {}, additiveGroups: {}, notes: [] } as RCalcYaml,
+      adjustedR: 2.5,
+      selectedBaseR: 2.5,
+      finalR: 2.5,
+      badPage: false,
 
-  private oldCalculators = allCalculators
+      oldCalculators: allCalculators,
 
-  private markdownParser = new MarkdownIt()
-
-  private parseMarkdown(text: string) {
-    return this.markdownParser.render(text)
-  }
-
-  private get topDescription() {
-    if (!this.yaml.description) return ''
-    return this.markdownParser.render(this.yaml.description)
-  }
-
-  @Watch('$route') routeChanged(to: Route, from: Route) {
-    this.buildPageForURL()
-  }
-
-  private handleNewBaseValue(base: number) {
-    this.selectedBaseR = base
-    this.updateR()
-  }
-
-  private async mounted() {
-    this.buildPageForURL()
-  }
-
-  private async buildPageForURL() {
-    this.badPage = false
-
-    this.calcId = this.$route.params.rcalc
-
-    const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = PUBLIC_SVN + `r-calculator/${this.calcId}.${lang}.yaml`
-
-    let responseText = ''
-
-    try {
-      const response = await fetch(url)
-      responseText = await response.text()
-    } catch (e) {
-      console.error(e)
+      lookup: {} as { [measure: string]: { title: string; value: number }[] },
+      sliders: {} as { [measure: string]: { title: string; value: number } },
+      factors: {} as { [measure: string]: number },
+      additions: {} as { [measure: string]: number },
     }
+  },
 
-    // maybe .de. doesn't exist, fallback .en.:
-    if (!responseText && url.indexOf('.de.') > -1) {
-      console.warn('no', url, 'falling back to .en.')
-      const en_url = url.replace('.de.', '.en.')
-      console.log(en_url)
+  mounted() {
+    this.buildPageForURL()
+  },
+
+  computed: {
+    topDescription() {
+      if (!this.yaml.description) return ''
+      return markdownParser.render(this.yaml.description)
+    },
+
+    optionGroups() {
+      return Object.keys(this.yaml.optionGroups)
+    },
+
+    additiveGroups() {
+      return Object.keys(this.yaml.additiveGroups)
+    },
+  },
+
+  watch: {
+    $route() {
+      this.buildPageForURL()
+    },
+  },
+
+  methods: {
+    parseMarkdown(text: string) {
+      return markdownParser.render(text)
+    },
+
+    handleNewBaseValue(base: number) {
+      this.selectedBaseR = base
+      this.updateR()
+    },
+
+    async buildPageForURL() {
+      this.badPage = false
+
+      this.calcId = this.$route.params.rcalc
+
+      const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
+      const url = PUBLIC_SVN + `r-calculator/${this.calcId}.${lang}.yaml`
+
+      let responseText = ''
+
       try {
-        const response = await fetch(en_url)
+        const response = await fetch(url)
         responseText = await response.text()
       } catch (e) {
         console.error(e)
       }
-    }
 
-    if (!responseText) {
-      this.badPage = true
-      return
-    }
-
-    this.yaml = YAML.parse(responseText)
-
-    // some old yamls might not have any additive groups
-    if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
-
-    this.buildUI()
-    this.updateR()
-  }
-
-  private async handleButton(measure: string) {
-    const slider = this.sliders[measure]
-    this.factors[measure] = slider.value
-    this.updateR()
-    this.$forceUpdate()
-  }
-
-  private async handleAdditiveButton(measure: string) {
-    const slider = this.sliders[measure]
-    this.additions[measure] = slider.value
-    this.updateR()
-    this.$forceUpdate()
-  }
-
-  private get optionGroups() {
-    return Object.keys(this.yaml.optionGroups)
-  }
-
-  private get additiveGroups() {
-    return Object.keys(this.yaml.additiveGroups)
-  }
-
-  private finalR = 2.5
-
-  private updateR() {
-    let r = 3.0
-    if (this.yaml.baseValue) r = this.yaml.baseValue
-    else if (this.yaml.baseValues) r = this.selectedBaseR
-
-    // additive factors
-    for (const addition of Object.values(this.additions)) r += addition
-
-    // multiplicative factors
-    for (const factor of Object.values(this.factors)) r *= factor
-
-    // fancy!
-    this.finalR = r
-    this.animateTowardNewRValue()
-  }
-
-  private animateTowardNewRValue() {
-    const diff = this.finalR - this.adjustedR
-    const step = this.adjustedR + diff * 0.2
-    this.adjustedR = step
-
-    if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
-      this.adjustedR = this.finalR
-    } else {
-      setTimeout(this.animateTowardNewRValue, 16)
-    }
-  }
-
-  private lookup: { [measure: string]: { title: string; value: number }[] } = {}
-
-  private sliders: { [measure: string]: { title: string; value: number } } = {}
-
-  private factors: { [measure: string]: number } = {}
-  private additions: { [measure: string]: number } = {}
-
-  private buildUI() {
-    if (this.yaml.baseValues) {
-      this.selectedBaseR = Object.values(this.yaml.baseValues[0])[0]
-    }
-
-    // multiplicative factors
-    for (const group of Object.keys(this.yaml.optionGroups)) {
-      const measures = this.yaml.optionGroups[group]
-      this.lookup[group] = []
-
-      for (const measure of measures) {
-        const title = Object.keys(measure)[0]
-        const value = measure[title]
-
-        if (!isNaN(value)) {
-          this.lookup[group].push({ title, value })
-
-          // first?
-          if (this.yaml.optionGroups[group] === undefined) {
-            this.factors[group] = value
-            this.sliders[group] = this.lookup[group][0]
-          }
-        } else {
-          // user specified a default with an asterisk* after the number
-          const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          const choice = { title, value: trimAsterisk }
-          this.lookup[group].push(choice)
-          this.sliders[group] = choice
-          this.factors[group] = trimAsterisk
+      // maybe .de. doesn't exist, fallback .en.:
+      if (!responseText && url.indexOf('.de.') > -1) {
+        console.warn('no', url, 'falling back to .en.')
+        const en_url = url.replace('.de.', '.en.')
+        console.log(en_url)
+        try {
+          const response = await fetch(en_url)
+          responseText = await response.text()
+        } catch (e) {
+          console.error(e)
         }
       }
-    }
 
-    // additive factors
-    for (const group of Object.keys(this.yaml.additiveGroups)) {
-      const measures = this.yaml.additiveGroups[group]
-      this.lookup[group] = []
+      if (!responseText) {
+        this.badPage = true
+        return
+      }
 
-      for (const measure of measures) {
-        const title = Object.keys(measure)[0]
-        const value = measure[title]
+      this.yaml = YAML.parse(responseText)
 
-        if (!isNaN(value)) {
-          this.lookup[group].push({ title, value })
+      // some old yamls might not have any additive groups
+      if (!this.yaml.additiveGroups) this.yaml.additiveGroups = {}
 
-          // first?
-          if (this.yaml.additiveGroups[group] === undefined) {
-            this.additions[group] = value
-            this.sliders[group] = this.lookup[group][0]
+      this.buildUI()
+      this.updateR()
+    },
+
+    async handleButton(measure: string) {
+      const slider = this.sliders[measure]
+      this.factors[measure] = slider.value
+      this.updateR()
+      this.$forceUpdate()
+    },
+
+    async handleAdditiveButton(measure: string) {
+      const slider = this.sliders[measure]
+      this.additions[measure] = slider.value
+      this.updateR()
+      this.$forceUpdate()
+    },
+
+    updateR() {
+      let r = 3.0
+      if (this.yaml.baseValue) r = this.yaml.baseValue
+      else if (this.yaml.baseValues) r = this.selectedBaseR
+
+      // additive factors
+      for (const addition of Object.values(this.additions)) r += addition
+
+      // multiplicative factors
+      for (const factor of Object.values(this.factors)) r *= factor
+
+      // fancy!
+      this.finalR = r
+      this.animateTowardNewRValue()
+    },
+
+    animateTowardNewRValue() {
+      const diff = this.finalR - this.adjustedR
+      const step = this.adjustedR + diff * 0.2
+      this.adjustedR = step
+
+      if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
+        this.adjustedR = this.finalR
+      } else {
+        setTimeout(this.animateTowardNewRValue, 16)
+      }
+    },
+
+    buildUI() {
+      if (this.yaml.baseValues) {
+        this.selectedBaseR = Object.values(this.yaml.baseValues[0])[0]
+      }
+
+      // multiplicative factors
+      for (const group of Object.keys(this.yaml.optionGroups)) {
+        const measures = this.yaml.optionGroups[group]
+        this.lookup[group] = []
+
+        for (const measure of measures) {
+          const title = Object.keys(measure)[0]
+          const value = measure[title]
+
+          if (!isNaN(value)) {
+            this.lookup[group].push({ title, value })
+
+            // first?
+            if (this.yaml.optionGroups[group] === undefined) {
+              this.factors[group] = value
+              this.sliders[group] = this.lookup[group][0]
+            }
+          } else {
+            // user specified a default with an asterisk* after the number
+            const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
+            const choice = { title, value: trimAsterisk }
+            this.lookup[group].push(choice)
+            this.sliders[group] = choice
+            this.factors[group] = trimAsterisk
           }
-        } else {
-          // user specified a default with an asterisk* after the number
-          const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          const choice = { title, value: trimAsterisk }
-          this.lookup[group].push(choice)
-          this.sliders[group] = choice
-          this.additions[group] = trimAsterisk
         }
       }
-    }
-  }
-}
+
+      // additive factors
+      for (const group of Object.keys(this.yaml.additiveGroups)) {
+        const measures = this.yaml.additiveGroups[group]
+        this.lookup[group] = []
+
+        for (const measure of measures) {
+          const title = Object.keys(measure)[0]
+          const value = measure[title]
+
+          if (!isNaN(value)) {
+            this.lookup[group].push({ title, value })
+
+            // first?
+            if (this.yaml.additiveGroups[group] === undefined) {
+              this.additions[group] = value
+              this.sliders[group] = this.lookup[group][0]
+            }
+          } else {
+            // user specified a default with an asterisk* after the number
+            const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
+            const choice = { title, value: trimAsterisk }
+            this.lookup[group].push(choice)
+            this.sliders[group] = choice
+            this.additions[group] = trimAsterisk
+          }
+        }
+      }
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#home {
+.r-caoculator {
   background-color: $paleBackground;
 }
 
