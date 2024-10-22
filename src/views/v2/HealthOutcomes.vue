@@ -4,199 +4,214 @@ vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="optio
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@/components/VuePlotly.vue'
 
-@Component({ components: { VuePlotly }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private endDate!: string
-  @Prop({ required: true }) private metadata!: any
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private dataLines: any[] = []
-  private unselectedLines: string[] = []
+export default defineComponent({
+  name: 'HealthOutcomes',
+  components: { VuePlotly },
+  props: {
+    data: { type: Array as PropType<any[]>, required: true },
+    logScale: { type: Boolean, required: true },
+    endDate: { type: String, required: true },
+    metadata: { type: Object, required: true },
+  },
+  data() {
+    return {
+      isResizing: false,
 
-  private ignoreRowHealth = [
-    'SusceptibleVaccinated',
-    'ContagiousVaccinated',
-    'ShowingSymptomsVaccinated',
-    'SeriouslySickVaccinated',
-    'CriticalVaccinated',
-    'TotalInfectedVaccinated',
-    'InfectedCumulativeVaccinated',
-    'ShowingSymptomsCumulativeVaccinated',
-    'ContagiousCumulativeVaccinated',
-    'SeriouslySickCumulativeVaccinated',
-    'CriticalCumulativeVaccinated',
-    'RecoveredVaccinated',
-    'Cumulative Hospitalized',
-  ]
+      dataLines: [] as any[],
+      unselectedLines: [] as string[],
 
-  private mounted() {
-    //this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+      ignoreRowHealth: [
+        'SusceptibleVaccinated',
+        'ContagiousVaccinated',
+        'ShowingSymptomsVaccinated',
+        'SeriouslySickVaccinated',
+        'CriticalVaccinated',
+        'TotalInfectedVaccinated',
+        'InfectedCumulativeVaccinated',
+        'ShowingSymptomsCumulativeVaccinated',
+        'ContagiousCumulativeVaccinated',
+        'SeriouslySickCumulativeVaccinated',
+        'CriticalCumulativeVaccinated',
+        'RecoveredVaccinated',
+        'Cumulative Hospitalized',
+      ],
+
+      layout: {
+        // autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+          y: '-0.15',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 0, l: 60 },
+        xaxis: {
+          range: ['2020-02-09', '2020-12-31'],
+          fixedrange: true,
+          type: 'date',
+        },
+        yaxis: {
+          type: 'log', // this.logScale ? 'log' : 'linear',
+          fixedrange: true,
+          autorange: true,
+          title: 'Population',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'r-values',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+    }
+  },
+
+  mounted() {
     this.setLayout()
     this.calculateValues()
     this.unselectLines()
-  }
+  },
 
-  @Watch('data') private updateModelData() {
-    this.calculateValues()
-    this.unselectLines()
-  }
-
-  private isResizing = false
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.isResizing = false
-  }
-
-  @Watch('logScale') updateScale() {
-    if (this.logScale) {
-      this.layout.yaxis.type = 'log'
-      this.layout.yaxis.autorange = true
-      //this.layout.yaxis.range = [Math.log10(0.01), Math.log10(2)]
-    } else {
-      this.layout.yaxis.type = 'linear'
-      delete this.layout.yaxis.range // [0, 1.5]
-      this.layout.yaxis.autorange = true
-    }
-  }
-
-  @Watch('dataLines', { deep: true }) async updateUrl() {
-    console.log(this.dataLines)
-    for (let i = 0; i < this.dataLines.length; i++) {
-      if (
-        this.dataLines[i].visible == 'legendonly' &&
-        !this.unselectedLines.includes(this.dataLines[i].name)
-      ) {
-        this.unselectedLines.push(this.dataLines[i].name)
-      } else if (
-        this.dataLines[i].visible != 'legendonly' &&
-        this.unselectedLines.includes(this.dataLines[i].name)
-      ) {
-        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+  computed: {},
+  watch: {
+    endDate() {
+      if (this.$store.state.graphStartDate && this.endDate) {
+        this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+        this.layout.xaxis.range[1] = this.endDate
       }
-    }
+    },
 
-    const params = Object.assign({}, this.$route.query)
+    data() {
+      this.calculateValues()
+      this.unselectLines()
+    },
 
-    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.isResizing = false
+    },
 
-    try {
-      await this.$router.replace({ query: params })
-    } catch (e) {
-      /** this is OK */
-    }
-  }
+    logScale() {
+      this.setLayout()
+    },
 
-  private restylePlot(event: any) {
-    // TODO
-    // console.log(event)
-  }
+    dataLines: {
+      deep: true,
+      handler: async function () {
+        console.log(this.dataLines)
+        for (let i = 0; i < this.dataLines.length; i++) {
+          if (
+            this.dataLines[i].visible == 'legendonly' &&
+            !this.unselectedLines.includes(this.dataLines[i].name)
+          ) {
+            this.unselectedLines.push(this.dataLines[i].name)
+          } else if (
+            this.dataLines[i].visible != 'legendonly' &&
+            this.unselectedLines.includes(this.dataLines[i].name)
+          ) {
+            this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+          }
+        }
 
-  @Watch('endDate')
-  private setLayout() {
-    if (this.$store.state.graphStartDate && this.endDate) {
-      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-      this.layout.xaxis.range[1] = this.endDate
-    }
-  }
+        const params = Object.assign({}, this.$route.query)
 
-  private calculateValues() {
-    //
-    let data = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
-    for (let i = 0; i < data.length; i++) {
-      if (!Object.keys(data[i]).includes('visible')) {
-        data[i].visible = 'true'
+        params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+        try {
+          await this.$router.replace({ query: params })
+        } catch (e) {
+          /** this is OK */
+        }
+      },
+    },
+  },
+
+  methods: {
+    setLayout() {
+      if (this.logScale) {
+        this.layout.yaxis.type = 'log'
+        this.layout.yaxis.autorange = true
+        //this.layout.yaxis.range = [Math.log10(0.01), Math.log10(2)]
+      } else {
+        this.layout.yaxis.type = 'linear'
+        delete this.layout.yaxis.range // [0, 1.5]
+        this.layout.yaxis.autorange = true
       }
-    }
-    // for (let i = 0; i < this.dataLines.length; i++) {
-    //   if (!Object.keys(this.dataLines[i]).includes('visible')) {
-    //     this.dataLines[i].visible = true
-    //   }
-    // }
-    this.dataLines = data
-    console.log(this.dataLines)
-  }
+    },
 
-  private unselectLines() {
-    const query = this.$route.query as any
-    const name = 'plot-' + this.metadata.abbreviation
+    restylePlot(event: any) {
+      // TODO
+      // console.log(event)
+    },
 
-    if (Object.keys(query).includes(name)) {
-      let nameArray = query[name]
-      if (!Array.isArray(nameArray)) {
-        nameArray = [nameArray]
+    calculateValues() {
+      //
+      let data = this.data.filter(row => !this.ignoreRowHealth.includes(row.name))
+      for (let i = 0; i < data.length; i++) {
+        if (!Object.keys(data[i]).includes('visible')) {
+          data[i].visible = 'true'
+        }
       }
-      for (let i = 0; i < nameArray.length; i++) {
-        for (let j = 0; j < this.dataLines.length; j++) {
-          if (this.dataLines[j].name == nameArray[i]) {
-            this.dataLines[j].visible = 'legendonly'
-            console.log('Unselect: ', this.dataLines[j].name)
+
+      this.dataLines = data
+      console.log(this.dataLines)
+    },
+
+    unselectLines() {
+      const query = this.$route.query as any
+      const name = 'plot-' + this.metadata.abbreviation
+
+      if (Object.keys(query).includes(name)) {
+        let nameArray = query[name]
+        if (!Array.isArray(nameArray)) {
+          nameArray = [nameArray]
+        }
+        for (let i = 0; i < nameArray.length; i++) {
+          for (let j = 0; j < this.dataLines.length; j++) {
+            if (this.dataLines[j].name == nameArray[i]) {
+              this.dataLines[j].visible = 'legendonly'
+              console.log('Unselect: ', this.dataLines[j].name)
+            }
           }
         }
       }
-    }
-  }
-
-  private layout: any = {
-    // autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-      y: '-0.15',
     },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
-    xaxis: {
-      range: ['2020-02-09', '2020-12-31'],
-      fixedrange: true,
-      type: 'date',
-    },
-    yaxis: {
-      type: 'log', // this.logScale ? 'log' : 'linear',
-      fixedrange: true,
-      autorange: true,
-      title: 'Population',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'r-values',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">

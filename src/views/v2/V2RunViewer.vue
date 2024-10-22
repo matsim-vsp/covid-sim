@@ -566,7 +566,7 @@
 
 <script lang="ts">
 // ###########################################################################
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+
 import { spawn, Thread, Worker } from 'threads'
 import MarkdownIt from 'markdown-it'
 import Papa from '@simwrapper/papaparse'
@@ -602,6 +602,8 @@ import WeeklyInfectionByVaccination from './WeeklyInfectionByVaccination.vue'
 import WeeklyInfectionsPlot from './WeeklyInfectionsPlot.vue'
 import WeeklyTests from './WeeklyTests.vue'
 
+import ZipExtractorWorker from '@/zipExtractor.worker?worker'
+
 interface Measure {
   measure: string
   title: string
@@ -615,7 +617,16 @@ interface VegaChartDefinition {
   isVisible?: boolean
 }
 
-@Component({
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+const BATTERY_URL = PUBLIC_SVN + 'battery/'
+const RKI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
+const DIVI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
+const JAKARTA_URL = PUBLIC_SVN + 'original-data/Fallzahlen/Other/'
+
+export default defineComponent({
+  // name: 'V2RunViewer',
   components: {
     ActivityLevelsPlot,
     ButtonGroup,
@@ -643,1570 +654,1592 @@ interface VegaChartDefinition {
     HealthOutcomes,
     VuePlotly,
   },
-})
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private runYaml!: RunYaml
-  @Prop({ required: true }) private runId!: string
-  @Prop({ required: true }) private chartYamlFiles!: string[]
+  props: {
+    runYaml: { type: Object as PropType<RunYaml>, required: true },
+    runId: { type: String, required: true },
+    chartYamlFiles: { type: Array as PropType<string[]>, required: true },
+  },
+  data() {
+    return {
+      berlin_population: 3574568,
 
-  // var for side-menu
-  private state = store.state
+      state: store.state,
 
-  private postHospUpdater1 = 0
-  private postHospUpdater2 = 0
-  private totalPopulation = 1
+      isResizing: false,
 
-  private activityColors = {
-    dayCare: '#0096FF', // Daycare #0096FF
-    home: '#EF8536', // Home
-    leisurePrivate: '#008000', // Private Leisure #A0CD9A
-    leisurePublic: '#3CB371', // Public Leisure #ccedc7
-    other: '#C53932', // Other Non Home C53932
-    pt: '#800080', // PT 84584E
-    schools: '#964B00', // Primary, Secondary, Other -> brown
-    university: '#FF69B4', // Higher Education -> pink
-    workBusiness: '#808080', // Work, -> grey
-  }
+      postHospUpdater1: 0,
+      postHospUpdater2: 0,
+      totalPopulation: 1,
 
-  private sideMenuCategories = ['Select Scenario', 'Plots']
-  private activeSideMenu = 0
-  private allPlots = [
-    {
-      index: 0,
-      name: 'Activity Levels by Type',
-      abbreviation: 'actLevPerTyp',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 1,
-      name: 'Disease Import', // NEW
-      abbreviation: 'disImp',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 2,
-      name: 'Hospitalization New Cases (post-process)', // NEW
-      abbreviation: 'hosNewCasPos',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 3,
-      name: 'Hospitalization Rate (post-process)', // NEW
-      abbreviation: 'hosRatPos',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 4,
-      name: 'Cases Comparison',
-      abbreviation: 'casCom',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 5,
-      name: 'Virus Strains',
-      abbreviation: 'virStr',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 6,
-      name: 'Simulated R-Values',
-      abbreviation: 'simRVal',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 7,
-      name: 'Simulated R-Values by Purpose',
-      abbreviation: 'simRValByPur',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 8,
-      name: 'Infections by Activity Type',
-      abbreviation: 'infByActTyp',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 9,
-      name: 'Vaccine Effectiveness (against infection)',
-      abbreviation: 'vacEffAgaInf',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 10,
-      name: 'Vaccine Effectiveness Vs. Strain',
-      abbreviation: 'vacEffVsStr',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 11,
-      name: 'Incidence comparison between vaccinated and unvaccinated persons',
-      abbreviation: 'incComVacAndUnvac',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 12,
-      name: 'Vaccination Rates and Booster Rates',
-      abbreviation: 'VacRatBooRat',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 13,
-      name: 'Vaccination per Type',
-      abbreviation: 'VacPerTyp',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 14,
-      name: 'Antibodies',
-      abbreviation: 'Antibodies',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 15,
-      name: 'Hospitalization New Cases',
-      abbreviation: 'hospNewCas',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 16,
-      name: 'Hospitalization Rate Comparison',
-      abbreviation: 'hospRatComp',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 17,
-      name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
-      abbreviation: 'hospRatCompVacAndUnvac',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 18,
-      name: 'Simulated Health Outcomes Over Time',
-      abbreviation: 'simHealOutOveTim',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 19,
-      name: '7-Day Incidence by Age Group Over Time (Heatmap)',
-      abbreviation: 'inciHeatmap',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 20,
-      name: '7-Day Incidence by Age Group Over Time (Linechart)',
-      abbreviation: 'inciLinechart',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 21,
-      name: 'Leisure Outdoor Fraction',
-      abbreviation: 'leiOutFra',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-    {
-      index: 22,
-      name: 'Weekly Tests',
-      abbreviation: 'weekTest',
-      active: true,
-      usedInThisRun: true,
-      showPlot: true,
-    },
-  ]
+      unreportedIncidence: [] as any[],
+      unreportedIncidenceNRW: [] as any[],
 
-  private berlin_population = 3574568
+      currentSituation: {} as any,
+      loadedSeriesData: {} as any,
+      labels: {
+        nSusceptible: 'Susceptible',
+        nSusceptibleVaccinated: 'SusceptibleVaccinated',
+        nInfectedButNotContagious: 'Infected, not contagious',
+        nContagious: 'Contagious',
+        nContagiousVaccinated: 'ContagiousVaccinated',
+        nShowingSymptoms: 'Showing Symptoms',
+        nShowingSymptomsVaccinated: 'ShowingSymptomsVaccinated',
+        nSeriouslySick: 'Seriously Sick',
+        nSeriouslySickCumulative: 'Seriously Sick Cumulative',
+        nSeriouslySickVaccinated: 'SeriouslySickVaccinated',
+        nCritical: 'Critical',
+        nCriticalVaccinated: 'CriticalVaccinated',
+        nTotalInfected: 'Total Infected',
+        nTotalInfectedVaccinated: 'TotalInfectedVaccinated',
+        nInfectedCumulative: 'Infected Cumulative',
+        nInfectedCumulativeVaccinated: 'InfectedCumulativeVaccinated',
+        nRecovered: 'Recovered',
+        nInQuarantine: 'In Quarantine',
+        nHospitalCumulative: 'Cumulative Hospitalized',
+        nShowingSymptomsCumulative: 'Showing Symptoms Cum.',
+        nShowingSymptomsCumulativeVaccinated: 'ShowingSymptomsCumulativeVaccinated',
+        nVaccinated: 'Vaccinated',
+        nContagiousCumulativeVaccinated: 'ContagiousCumulativeVaccinated',
+        nSeriouslySickCumulativeVaccinated: 'SeriouslySickCumulativeVaccinated',
+        nCriticalCumulativeVaccinated: 'CriticalCumulativeVaccinated',
+        nRecoveredVaccinated: 'RecoveredVaccinated',
+        nReVaccinated: 'Boosted',
+      } as any,
 
-  // this is a fudge factor to get the ALM e.V. numbers on approx
-  // the same scale as the other WeeklyInfectionPlot values.
-  // It has no other meaning.
-  private scaleRKISurveillanceAnteil = 40.0
+      zipWorker: null as any,
 
-  // convenience from yaml
-  private startDate: string = ''
-  private city: string = ''
-  private offset: number[] = []
+      rkiDetectionRateData: {} as { x?: any[]; y?: any[]; line?: any; name?: string },
 
-  private DEFAULT_R_VALUE_DATE = '2020-10-15'
-  private summaryRValueDate = ''
-  private summaryRValue = ''
+      hasBaseRun: false,
 
-  private MAX_DAYS = 4000
-  private cumulativeInfected = 0
+      infectionsByActivityType: [] as any[],
+      hasRValuePurposes: false,
+      vaccineEffectivenessData: [] as any[],
+      showVaccineEffectivenessFields: [] as string[],
+      seedComparison: [] as any[],
+      vaccineEffectivenessVsStrainData: [] as any[],
+      showVaccineEffectivenessVsStrainFields: [] as string[],
 
-  private isZipLoaded = false
-  private isDataMissing = false
-  private plusminus = 0
+      hasInfectionMapData: false,
+      hasLeisurOutdoorFraction: false,
+      hasWeeklyTests: false,
+      vaccinationPerType: [] as any[],
+      vaccinationDetailed: [] as any[],
 
-  private logScale = true
-  private cityMarkdownNotes: string = ''
-  private plotTag = '{{PLOTS}}'
+      antibodies: [] as any[],
+      mutationValues: [] as any[],
+      csvCache: {} as { [filename: string]: Promise<any[]> }, // holds CSV tables
 
-  private rValueMethodDescription = 'Based on four-day new infections'
-  private showActivityLevels = false
-  private zipActivityLevelFileName = 'XX.zip'
+      mdParser: new MarkdownIt({
+        html: true,
+        linkify: true,
+        typographer: true,
+      }),
 
-  private publicPath = '/'
+      hospitalData: [] as any[],
+      rValues: [] as any[],
+      incidenceHeatMapData: '',
+      leisurOutdoorFractionData: [] as any[],
+      weeklyTestsData: [] as any[], // includes nReVaccinated values
+      diseaseData: [] as any[],
+      postHospital: [] as any[],
 
-  private BATTERY_URL = PUBLIC_SVN + 'battery/'
-  private RKI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/RKI/'
-  private DIVI_URL = PUBLIC_SVN + 'original-data/Fallzahlen/DIVI/'
-  private JAKARTA_URL = PUBLIC_SVN + 'original-data/Fallzahlen/Other/'
+      previousRun: '',
 
-  private isUsingRealDates = false
-  private endDate = '2020-08-31'
+      activityColors: {
+        dayCare: '#0096FF', // Daycare #0096FF
+        home: '#EF8536', // Home
+        leisurePrivate: '#008000', // Private Leisure #A0CD9A
+        leisurePublic: '#3CB371', // Public Leisure #ccedc7
+        other: '#C53932', // Other Non Home C53932
+        pt: '#800080', // PT 84584E
+        schools: '#964B00', // Primary, Secondary, Other -> brown
+        university: '#FF69B4', // Higher Education -> pink
+        workBusiness: '#808080', // Work, -> grey
+      } as any,
 
-  private cityCSV: any = {
-    berlin: this.RKI_URL + 'berlin-cases.csv',
-    munich: this.RKI_URL + 'munich-cases.csv',
-    heinsberg: this.RKI_URL + 'heinsberg-cases.csv',
-    jakarta: this.JAKARTA_URL + 'jakarta-cases.CSV',
-    cologne: this.RKI_URL + 'cologne-cases.csv',
-  }
+      sideMenuCategories: ['Select Scenario', 'Plots'],
+      activeSideMenu: 0,
 
-  private cityCSVMeldedatum: any = {
-    berlin: this.RKI_URL + 'berlin-cases-meldedatum.csv',
-  }
+      singleValueOptions: {} as any,
+      singleValueOptionKeys: [] as any[],
+      vegaChartData: {} as { [chart: string]: VegaChartDefinition },
 
-  private cityRKISurveillance: any = {
-    berlin: this.RKI_URL + 'SARS-CoV2_surveillance.csv',
-  }
+      allPlots: [
+        {
+          index: 0,
+          name: 'Activity Levels by Type',
+          abbreviation: 'actLevPerTyp',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 1,
+          name: 'Disease Import', // NEW
+          abbreviation: 'disImp',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 2,
+          name: 'Hospitalization New Cases (post-process)', // NEW
+          abbreviation: 'hosNewCasPos',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 3,
+          name: 'Hospitalization Rate (post-process)', // NEW
+          abbreviation: 'hosRatPos',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 4,
+          name: 'Cases Comparison',
+          abbreviation: 'casCom',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 5,
+          name: 'Virus Strains',
+          abbreviation: 'virStr',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 6,
+          name: 'Simulated R-Values',
+          abbreviation: 'simRVal',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 7,
+          name: 'Simulated R-Values by Purpose',
+          abbreviation: 'simRValByPur',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 8,
+          name: 'Infections by Activity Type',
+          abbreviation: 'infByActTyp',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 9,
+          name: 'Vaccine Effectiveness (against infection)',
+          abbreviation: 'vacEffAgaInf',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 10,
+          name: 'Vaccine Effectiveness Vs. Strain',
+          abbreviation: 'vacEffVsStr',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 11,
+          name: 'Incidence comparison between vaccinated and unvaccinated persons',
+          abbreviation: 'incComVacAndUnvac',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 12,
+          name: 'Vaccination Rates and Booster Rates',
+          abbreviation: 'VacRatBooRat',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 13,
+          name: 'Vaccination per Type',
+          abbreviation: 'VacPerTyp',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 14,
+          name: 'Antibodies',
+          abbreviation: 'Antibodies',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 15,
+          name: 'Hospitalization New Cases',
+          abbreviation: 'hospNewCas',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 16,
+          name: 'Hospitalization Rate Comparison',
+          abbreviation: 'hospRatComp',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 17,
+          name: 'Hospitalization Rate Comparison for vaccinated and unvaccinated persons',
+          abbreviation: 'hospRatCompVacAndUnvac',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 18,
+          name: 'Simulated Health Outcomes Over Time',
+          abbreviation: 'simHealOutOveTim',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 19,
+          name: '7-Day Incidence by Age Group Over Time (Heatmap)',
+          abbreviation: 'inciHeatmap',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 20,
+          name: '7-Day Incidence by Age Group Over Time (Linechart)',
+          abbreviation: 'inciLinechart',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 21,
+          name: 'Leisure Outdoor Fraction',
+          abbreviation: 'leiOutFra',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+        {
+          index: 22,
+          name: 'Weekly Tests',
+          abbreviation: 'weekTest',
+          active: true,
+          usedInThisRun: true,
+          showPlot: true,
+        },
+      ],
 
-  private cityCSVTests: any = {
-    berlin: this.RKI_URL + 'berlin-cases-tests.csv',
-  }
+      // this is a fudge factor to get the ALM e.V. numbers on approx
+      // the same scale as the other WeeklyInfectionPlot values.
+      // It has no other meaning.
+      scaleRKISurveillanceAnteil: 40.0,
 
-  private cityDIVI: any = {
-    berlin: this.DIVI_URL + 'berlin-divi-processed.csv',
-    munich: this.DIVI_URL + 'munich-divi-processed.csv',
-    cologne: this.DIVI_URL + 'cologne-divi-processed.csv',
-  }
+      // convenience from yaml
+      startDate: '',
+      city: '',
+      offset: [] as number[],
 
-  private get showVirusStrainsPlot() {
-    return this.city !== 'jakarta'
-  }
+      DEFAULT_R_VALUE_DATE: '2020-10-15',
+      summaryRValueDate: '',
+      summaryRValue: '',
 
-  private get showByAgePlot() {
-    return this.city !== 'jakarta'
-  }
+      MAX_DAYS: 4000,
+      cumulativeInfected: 0,
 
-  private getGroupTitle(group: any) {
-    return this.calendarForSimDay(group.day) || group.heading || 'General Options'
-  }
+      isZipLoaded: false,
+      isDataMissing: false,
+      plusminus: 0,
 
-  private cachedOptionKeys = ''
+      logScale: true,
+      cityMarkdownNotes: '',
+      plotTag: '{{PLOTS}}',
 
-  private hasMultipleOptions(group: any) {
-    let hasMultiple = false
-    // see if any measures have multiple values
-    for (const m of group.measures) {
-      if (!this.measureOptions[m.measure]) continue
+      rValueMethodDescription: 'Based on four-day new infections',
+      showActivityLevels: false,
+      zipActivityLevelFileName: 'XX.zip',
 
-      const numOptions = this.measureOptions[m.measure].length
-      if (numOptions > 1) {
-        hasMultiple = true
-      } else {
-        this.setValueForSingleOptionMeasure(m.measure)
-      }
+      publicPath: '/',
+
+      isUsingRealDates: false,
+      endDate: '2020-08-31',
+
+      cachedOptionKeys: '',
+
+      BATTERY_URL,
+
+      cityCSV: {
+        berlin: RKI_URL + 'berlin-cases.csv',
+        munich: RKI_URL + 'munich-cases.csv',
+        heinsberg: RKI_URL + 'heinsberg-cases.csv',
+        jakarta: JAKARTA_URL + 'jakarta-cases.CSV',
+        cologne: RKI_URL + 'cologne-cases.csv',
+      } as any,
+
+      cityCSVMeldedatum: {
+        berlin: RKI_URL + 'berlin-cases-meldedatum.csv',
+      } as any,
+
+      cityRKISurveillance: {
+        berlin: RKI_URL + 'SARS-CoV2_surveillance.csv',
+      } as any,
+
+      cityCSVTests: {
+        berlin: RKI_URL + 'berlin-cases-tests.csv',
+      } as any,
+
+      cityDIVI: {
+        berlin: DIVI_URL + 'berlin-divi-processed.csv',
+        munich: DIVI_URL + 'munich-divi-processed.csv',
+        cologne: DIVI_URL + 'cologne-divi-processed.csv',
+      } as any,
+
+      isBase: false,
+      currentRun: {} as any,
+
+      data: [] as any[],
+
+      measureOptions: {} as any,
+      runLookup: {} as any,
+
+      observedCases: [] as any[],
+      diviData: [] as any[],
+
+      showIncidenceComp: false,
+      showSeedComparison: false,
+
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+          y: '-0.15',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 0, l: 60 },
+        xaxis: {
+          range: ['2020-02-09', '2020-12-31'],
+          fixedrange: true,
+          type: 'date',
+        },
+        yaxis: {
+          type: 'log',
+          fixedrange: true,
+          autorange: true,
+          title: 'Population',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'covid-plot',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
     }
+  },
 
-    // update the single-value parameters, after everything else has settled down
-    const keys = Object.keys(this.singleValueOptions)
-    const keysStringify = JSON.stringify(keys)
-    if (this.cachedOptionKeys !== keysStringify) {
-      this.singleValueOptionKeys = keys
-      this.cachedOptionKeys = keysStringify
-    }
-
-    return hasMultiple
-  }
-
-  private singleValueOptions: any = {}
-  private singleValueOptionKeys: any[] = []
-
-  // some measures only have one option! Set its value.
-  private setValueForSingleOptionMeasure(measure: string) {
-    let onlyValue = this.measureOptions[measure][0]
-    if (onlyValue.endsWith('%') && !onlyValue.startsWith('+')) {
-      const answer = onlyValue.substring(0, onlyValue.length - 1)
-      onlyValue = '' + parseFloat(answer) / 100.0
-      if (onlyValue === '0') onlyValue = '0.0'
-      if (onlyValue === '1') onlyValue = '1.0'
-    }
-    const wait = true
-
-    this.singleValueOptions[measure] = onlyValue
-    this.sliderChanged(measure, onlyValue, wait)
-  }
-
-  private vegaChartData: { [chart: string]: VegaChartDefinition } = {}
-
-  // read the yaml files for each vega chart
-  // if a zip file is specified, note that so we can fetch its content later
-  private async loadVegaYamlFiles() {
-    for (const yamlFile of this.chartYamlFiles) {
-      try {
-        const url = `${this.BATTERY_URL}/${this.runId}/${yamlFile}`
-        const response = await fetch(url).then()
-        const text = await response.text()
-        const definition = yaml.parse(text)
-        const isVisible = true
-
-        const chart: VegaChartDefinition = { yaml: definition, data: {}, isVisible: isVisible }
-
-        // is there a zip file?
-        if (definition.data && definition.data.zip) {
-          chart.zip = definition.data.zip
-          chart.url = definition.data.url
-        }
-
-        this.vegaChartData[yamlFile] = chart
-      } catch (e) {
-        console.error({ e })
-      }
-    }
-  }
-
-  @Watch('chartYamlFiles') private async handleChartListChanged() {
-    this.vegaChartData = {}
-    this.loadVegaYamlFiles()
-  }
-
-  private async clearZipLoaderLookups() {
-    await this.zipWorker.clear()
-    this.csvCache = {}
-    this.cachedOptionKeys = ''
-  }
-
-  private async setWideMode(mode: boolean) {
-    this.$store.commit('setWideMode', mode)
-    await this.$nextTick()
-    this.$forceUpdate()
-  }
-
-  @Watch('runYaml') private async switchYaml() {
-    if (!this.runYaml.city) return
-
-    this.summaryRValueDate = this.runYaml.rValueDate || this.DEFAULT_R_VALUE_DATE
-
-    await this.clearZipLoaderLookups()
-    this.isUsingRealDates = false
-
-    this.$nextTick()
-
-    this.city = this.runYaml.city
-    this.offset = []
-    this.vegaChartData = {}
-
-    await this.loadVegaYamlFiles()
-
-    // set start date
-    if (this.runYaml.startDate) this.startDate = this.runYaml.startDate
-    else if (this.runYaml.defaultStartDate) this.startDate = this.runYaml.defaultStartDate
-    else {
-      alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
-      return
-    }
-
-    // set start date for Graphs -- not the same as start date of simulation
-    this.$store.commit('setGraphStartDate', this.runYaml.graphStartDate || '2020-02-09') // this.startDate)
-
-    // set end date
-    this.endDate = this.runYaml.endDate ? this.runYaml.endDate : '2020-08-31'
-    // console.log({ endDate: this.endDate })
-    this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
-
-    // build offsets
-    if (!this.runYaml.offset && !this.runYaml.startDates) {
-      alert('Uh-oh, YAML file has no offsets AND no startDates!')
-      return
-    }
-
-    if (!this.runYaml.offset) {
-      if (!this.runYaml.startDates) {
-        alert("Need startDates in YAML if we don't have offsets")
-        return
-      }
-      this.isUsingRealDates = true
-      const defaultDate = moment(this.runYaml.defaultStartDate)
-      for (const d of this.runYaml.startDates) {
-        const date = moment(d)
-        const diff = date.diff(defaultDate, 'days')
-        this.offset.push(diff)
-        if (date.isSame(d)) this.plusminus = diff
-      }
-    } else {
-      this.offset = this.runYaml.offset
-      this.plusminus = this.runYaml.offset[0]
-    }
-
-    this.updateNotes()
-
-    // berlin has some observed data, other cities don't
-    if (this.cityCSV[this.city]) {
-      this.observedCases = await this.prepareObservedData(this.city)
-      this.diviData = await this.prepareDiviData(this.city)
-    }
-
-    await this.loadInfoTxt()
-
-    this.runChanged({ RunId: '' })
-    this.showActivityLevelPlot()
-
-    this.hasBaseRun = await this.isThereABaseRun()
-
-    //chang disabled plots
-    for (let i = 0; i < this.allPlots.length; i++) {
-      this.allPlots[i].active = true
-    }
-    if (Object.keys(this.runYaml).includes('ignoredPlots')) {
-      if (this.runYaml.ignoredPlots?.includes('actLevPerTyp')) {
-        this.allPlots[0].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('disImp')) {
-        this.allPlots[1].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('hosNewCasPos')) {
-        this.allPlots[2].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('hosRatPos')) {
-        this.allPlots[3].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('casCom')) {
-        this.allPlots[4].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('virStr')) {
-        this.allPlots[5].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('simRVal')) {
-        this.allPlots[6].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('simRValByPur')) {
-        this.allPlots[7].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('infByActTyp')) {
-        this.allPlots[8].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('vacEffAgaInf')) {
-        this.allPlots[9].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('vacEffVsStr')) {
-        this.allPlots[10].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('incComVacAndUnvac')) {
-        this.allPlots[11].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('VacRatBooRat')) {
-        this.allPlots[12].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('VacPerTyp')) {
-        this.allPlots[13].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('Antibodies')) {
-        this.allPlots[14].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('hospNewCas')) {
-        this.allPlots[15].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('hospRatComp')) {
-        this.allPlots[16].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('hospRatCompVacAndUnvac')) {
-        this.allPlots[17].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('simHealOutOveTim')) {
-        this.allPlots[18].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('inciHeatmap')) {
-        this.allPlots[19].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('inciLinechart')) {
-        this.allPlots[20].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('leiOutFra')) {
-        this.allPlots[21].active = false
-      }
-      if (this.runYaml.ignoredPlots?.includes('weekTest')) {
-        this.allPlots[22].active = false
-      }
-    }
-
-    this.showPlotForCurrentSituation()
-  }
-
-  // INFO
-  // ['actLevPerTyp', 'disImp', 'hosNewCasPos', 'hosRatPos', 'virStr', 'simRVal', 'simRValByPur', 'infByActTyp', 'vacEffAgaInf', 'vacEffVsStr', 'incComVacAndUnvac', 'VacRatBooRat', 'VacPerTyp', 'Antibodies', 'hospNewCas', 'hospRatComp', 'hospRatCompVacAndUnvac', 'simHealOutOveTim', 'inciHeatmap', 'inciLinechart', 'weekTest']
-
-  @Watch('plusminus') private switchPlusMinus() {
-    this.showPlotForCurrentSituation()
-  }
-
-  @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
-  }
-
-  private switchRMethod(method: string) {
-    this.rValueMethodDescription = method
-  }
-
-  private isBase = false
-  private currentRun: any = {}
-
-  private data: any[] = []
-  //private dataHealth: any[] = []
-
-  private measureOptions: any = {}
-  private runLookup: any = {}
-
-  private observedCases: any[] = []
-  private diviData: any[] = []
-
-  private showIncidenceComp = false
-
-  private toggleShowPlot(which: number) {
-    this.allPlots[which].showPlot = !this.allPlots[which].showPlot
-  }
-
-  private showSeedComparison = false
-  private toggleSeedComparison() {
-    this.showSeedComparison = !this.showSeedComparison
-  }
-
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-      y: '-0.15',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
-    xaxis: {
-      range: ['2020-02-09', '2020-12-31'],
-      fixedrange: true,
-      type: 'date',
-    },
-    yaxis: {
-      type: this.logScale ? 'log' : 'linear',
-      fixedrange: true,
-      autorange: true,
-      title: 'Population',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private strOffset(offset: number) {
-    return (offset > 0 ? '+' : '') + offset
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'covid-plot',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-
-  private setBase(value: boolean) {
-    this.isBase = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private setPlusMinus(value: string) {
-    const shift = parseInt(value)
-    // console.log('SET PLUS MINUS:', shift)
-    this.plusminus = shift
-  }
-
-  private get cityCap() {
-    return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
-  }
-
-  private async isThereABaseRun() {
-    if (!this.isZipLoaded) return false
-
-    const baseFilename = 'sz0' + '.infections.txt.csv'
-    const hasBase = await this.zipWorker.hasFile(baseFilename)
-
-    console.log('DOES SZ0 EXIST: ', hasBase)
-    return hasBase
-  }
-
-  private currentSituation: any = {}
-  private loadedSeriesData: any = {}
-  // private zipLoader: any = {}
-
-  private labels: any = {
-    nSusceptible: 'Susceptible',
-    nSusceptibleVaccinated: 'SusceptibleVaccinated',
-    nInfectedButNotContagious: 'Infected, not contagious',
-    nContagious: 'Contagious',
-    nContagiousVaccinated: 'ContagiousVaccinated',
-    nShowingSymptoms: 'Showing Symptoms',
-    nShowingSymptomsVaccinated: 'ShowingSymptomsVaccinated',
-    nSeriouslySick: 'Seriously Sick',
-    nSeriouslySickCumulative: 'Seriously Sick Cumulative',
-    nSeriouslySickVaccinated: 'SeriouslySickVaccinated',
-    nCritical: 'Critical',
-    nCriticalVaccinated: 'CriticalVaccinated',
-    nTotalInfected: 'Total Infected',
-    nTotalInfectedVaccinated: 'TotalInfectedVaccinated',
-    nInfectedCumulative: 'Infected Cumulative',
-    nInfectedCumulativeVaccinated: 'InfectedCumulativeVaccinated',
-    nRecovered: 'Recovered',
-    nInQuarantine: 'In Quarantine',
-    nHospitalCumulative: 'Cumulative Hospitalized',
-    nShowingSymptomsCumulative: 'Showing Symptoms Cum.',
-    nShowingSymptomsCumulativeVaccinated: 'ShowingSymptomsCumulativeVaccinated',
-    nVaccinated: 'Vaccinated',
-    nContagiousCumulativeVaccinated: 'ContagiousCumulativeVaccinated',
-    nSeriouslySickCumulativeVaccinated: 'SeriouslySickCumulativeVaccinated',
-    nCriticalCumulativeVaccinated: 'CriticalCumulativeVaccinated',
-    nRecoveredVaccinated: 'RecoveredVaccinated',
-    nReVaccinated: 'Boosted',
-  }
-
-  private zipWorker: any = null
-
-  private async mounted() {
-    this.zipWorker = await spawn(new Worker('../../zipExtractor.worker'))
+  async mounted() {
+    this.zipWorker = await spawn(new ZipExtractorWorker())
 
     this.loadCoronaDetectionRateData()
     this.switchYaml()
-  }
+  },
 
-  private beforeDestroy() {
+  beforeDestroy() {
     if (this.zipWorker) Thread.terminate(this.zipWorker)
-  }
-
-  private isResizing = false
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.isResizing = false
-  }
-
-  private unreportedIncidence: any = {}
-
-  @Watch('cityCap') async loadUnreportedIncidence() {
-    if (this.cityCap == 'Cologne') {
-      const url =
-        'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferCologne.csv'
-
-      try {
-        const response = await fetch(url)
-        const csvContents = await response.text()
-        this.unreportedIncidence = Papa.parse(csvContents, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-        }).data
-      } catch (e) {
-        console.warn(e)
-      }
-    }
-  }
-
-  private unreportedIncidenceNRW: any = {}
-
-  @Watch('cityCap') async loadUnreportedIncidenceNRW() {
-    if (this.cityCap == 'Cologne') {
-      const url =
-        'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferNRW.csv'
-
-      try {
-        const response = await fetch(url)
-        const csvContents = await response.text()
-        this.unreportedIncidenceNRW = Papa.parse(csvContents, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-        }).data
-      } catch (e) {
-        console.warn(e)
-      }
-    }
-  }
-
-  private rkiDetectionRateData: { x?: any[]; y?: any[]; line?: any; name?: string } = {}
-
-  private async loadCoronaDetectionRateData() {
-    // Load CSV data of Corona-Datenspende from RKI -- Berlin+Brandenburg only
-
-    const url =
-      'https://raw.githubusercontent.com/corona-datenspende/data-updates/master/detections/detection.csv'
-
-    try {
-      const response = await fetch(url)
-      const csvContents = await response.text()
-      const rawdata = Papa.parse(csvContents, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
-
-      const region = rawdata.filter((a: any) => a.state_de === 'Berlin')
-
-      const trimmedData = region
-        .map(a => {
-          return { date: a.date, rkiDetected: this.berlin_population * a.detection_rate_trend }
-        })
-        .sort((a, b) => (a.date < b.date ? -1 : 1))
-
-      const x = trimmedData.map(a => a.date)
-      const y = trimmedData.map(a => a.rkiDetected)
-
-      const plotData = {
-        name: 'NEW RKI Detection Rate Trend',
-        visible: 'legendonly',
-        x,
-        y,
-        line: {
-          dash: 'dot',
-          width: 2,
-          color: 'rgb(200,0,0)',
-        },
-      }
-      this.rkiDetectionRateData = plotData
-    } catch (e) {
-      console.warn(e)
-    }
-  }
-
-  private get prettyInfected() {
-    if (!this.cumulativeInfected) return ''
-
-    const rounded = 100 * Math.round(this.cumulativeInfected * 0.01)
-    return Number(rounded).toLocaleString()
-  }
-
-  private hasBaseRun = false
-
-  private async loadZipFile(whichZip: string) {
-    // if (whichZip in this.zipLoaderLookup) return this.zipLoaderLookup[whichZip]
-    // const loader = new Promise(async (resolve, reject) => {
-
-    await this.zipWorker.setZipFile({
-      BATTERY_URL: this.BATTERY_URL,
-      runId: this.runId,
-      zipFolder: this.runYaml.zipFolder,
-      whichZip,
-    })
-
-    this.isZipLoaded = true
-    // resolve(instance)
-    // const zloader = new ZipLoader(filepath)
-    // await zloader.load()
-  }
-
-  private async showActivityLevelPlot() {
-    this.showActivityLevels = true
-  }
-
-  private hospitalData: any[] = []
-  private rValues: any[] = []
-  private incidenceHeatMapData: string = ''
-  private leisurOutdoorFractionData: any[] = []
-  private weeklyTestsData: any[] = [] // includes nReVaccinated values
-  private diseaseData: any[] = []
-  private postHospital: any[] = []
-
-  private previousRun = ''
-
-  private async runChanged(newRun: { RunId: string }) {
-    if (this.currentRun?.RunId === this.previousRun) {
-      return
-    } else {
-      this.previousRun = this.currentRun.RunId
-    }
-
-    const ignoreRow = 'Cumulative Hospitalized'
-    const ignoreRowHealth = [
-      'SusceptibleVaccinated',
-      'ContagiousVaccinated',
-      'ShowingSymptomsVaccinated',
-      'SeriouslySickVaccinated',
-      'CriticalVaccinated',
-      'TotalInfectedVaccinated',
-      'InfectedCumulativeVaccinated',
-      'ShowingSymptomsCumulativeVaccinated',
-      'ContagiousCumulativeVaccinated',
-      'SeriouslySickCumulativeVaccinated',
-      'CriticalCumulativeVaccinated',
-      'RecoveredVaccinated',
-      'Cumulative Hospitalized',
-    ]
-
-    // load run dataset
-
-    const csv: any[] = await this.loadCSVs(newRun)
-
-    // zip might not yet be loaded
-    if (csv.length === 0) return
-
-    this.currentRun = newRun
-
-    this.postHospUpdater1++
-    this.postHospUpdater2++
-
-    this.checkForInfectionMap()
-
-    this.loadVaccineEffectivenessData(this.currentRun)
-
-    this.loadSeedComparison(this.currentRun)
-
-    this.loadVaccineEffectivenessVsStrainData(this.currentRun)
-
-    this.loadIncidenceHeatMapData(this.currentRun)
-
-    this.loadMutationValues(this.currentRun)
-
-    this.loadVaccinationPerType(this.currentRun)
-
-    this.loadVaccinationDetailed(this.currentRun)
-
-    this.loadAntibodies(this.currentRun)
-
-    this.loadRValues(this.currentRun)
-
-    this.loadInfectionsByActivityType(this.currentRun)
-
-    this.loadWeeklyTests(this.currentRun)
-
-    this.loadDiseaseImport(this.currentRun)
-
-    this.loadPostHospital(this.currentRun)
-
-    this.loadLeisurOutdoorFraction(this.currentRun)
-
-    // const duration = performance.now() - start
-    // console.log('DURATION:', duration / 1000)
-
-    const timeSerieses = this.generateSeriesFromCSVData(csv)
-
-    // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
-
-    // populate the data where we need it
-    this.hospitalData = timeSerieses
-    this.data = timeSerieses.filter(row => row.name !== ignoreRow)
-
-    // figure out total population
-    for (let i = 0; i < this.data.length; i++) {
-      if (this.data[i].name === 'Susceptible') {
-        this.totalPopulation = this.data[i].y[0]
-        break
-      }
-    }
-
-    this.addDataFromInfectionsCSVToData('nReVaccinated')
-
-    this.updateTotalInfected()
-    this.updateVegaCharts()
-    //this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
-
-    this.updatePlotMenu()
-  }
-
-  private updatePlotMenu() {
-    if (!this.showActivityLevels) {
-      this.allPlots[0].usedInThisRun = false
-    }
-
-    if (this.diseaseData.length == 0) {
-      this.allPlots[1].usedInThisRun = false
-    }
-
-    if (this.postHospital.length == 0) {
-      this.allPlots[2].usedInThisRun = false
-      this.allPlots[3].usedInThisRun = false
-    }
-
-    if (!this.showVirusStrainsPlot || !(this.mutationValues.length > 0)) {
-      this.allPlots[5].usedInThisRun = false
-    }
-
-    if (!this.hasRValuePurposes) {
-      this.allPlots[7].usedInThisRun = false
-    }
-
-    if (!(this.infectionsByActivityType.length > 0)) {
-      this.allPlots[8].usedInThisRun = false
-    }
-
-    if (!this.showVaccineEffectivenessFields.length) {
-      this.allPlots[9].usedInThisRun = false
-    }
-
-    if (!this.showVaccineEffectivenessVsStrainFields.length) {
-      this.allPlots[10].usedInThisRun = false
-    }
-
-    if (!this.showIncidenceComp) {
-      this.allPlots[11].usedInThisRun = false
-      this.allPlots[12].usedInThisRun = false
-      this.allPlots[17].usedInThisRun = false
-    }
-
-    if (!this.showIncidenceComp || !(this.vaccinationPerType.length > 0)) {
-      this.allPlots[13].usedInThisRun = false
-    }
-
-    if (!this.showIncidenceComp || !(this.antibodies.length > 0)) {
-      this.allPlots[14].usedInThisRun = false
-    }
-
-    if (this.city == 'heinsberg') {
-      this.allPlots[16].usedInThisRun = false
-    }
-
-    if (!this.showByAgePlot || !this.incidenceHeatMapData) {
-      this.allPlots[19].usedInThisRun = false
-      this.allPlots[20].usedInThisRun = false
-    }
-
-    if (!this.leisurOutdoorFractionData.length) {
-      this.allPlots[21].usedInThisRun = false
-    }
-
-    if (!this.weeklyTestsData.length) {
-      this.allPlots[22].usedInThisRun = false
-    }
-  }
-
-  private addDataFromInfectionsCSVToData(valueName: string) {
-    if (this.weeklyTestsData.length) {
-      var dates = []
-      var values = []
-      for (var i = 0; i < this.weeklyTestsData.length; i++) {
-        dates[i] = this.weeklyTestsData[i].date
-        values[i] = this.weeklyTestsData[i].nReVaccinated
-      }
-      var nReVaccinated = {
-        name: valueName,
-        x: dates,
-        y: values,
-      }
-      this.data.push(nReVaccinated)
-    }
-  }
-
-  private updateVegaCharts() {
-    for (const key of Object.keys(this.vegaChartData)) {
-      const chart = this.vegaChartData[key]
-      // nothing to do if no zip file was specified
-      if (!chart.zip || !chart.url) continue
-
-      try {
-        const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
-        const beginRunId = this.currentRun.RunId as string
-        this.zipWorker.extractFile(filename).then((z: any) => {
-          const dateBracket = z.data.filter((point: any) => point.date <= this.endDate)
-
-          // if data doesn't go out to end-date, straightline it
-          const lastEntry = dateBracket[dateBracket.length - 1]
-          if (lastEntry.date < this.endDate) {
-            dateBracket.push(lastEntry)
-            dateBracket[dateBracket.length - 1].date = this.endDate
-          }
-
-          // force set this so that Vue notices the new data
-          if (chart.data) chart.data[beginRunId] = dateBracket
-          this.vegaChartData = Object.assign({}, this.vegaChartData)
-        })
-      } catch (e) {
-        console.error('YEEEARGH' + e)
-      }
-    }
-  }
-
-  private updateTotalInfected() {
-    const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-
-    for (let i = 0; i < infectedCumulative.x.length; i++) {
-      if (infectedCumulative.x[i] === this.endDate) {
-        // console.log('got it:', infectedCumulative.x[i], infectedCumulative.y[i])
-        this.cumulativeInfected = infectedCumulative.y[i]
+  },
+
+  computed: {
+    prettyInfected() {
+      if (!this.cumulativeInfected) return ''
+      const rounded = 100 * Math.round(this.cumulativeInfected * 0.01)
+      return Number(rounded).toLocaleString()
+    },
+
+    cityCap() {
+      return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
+    },
+
+    showVirusStrainsPlot() {
+      return this.city !== 'jakarta'
+    },
+    showByAgePlot() {
+      return this.city !== 'jakarta'
+    },
+
+    topNotes() {
+      if (!this.cityMarkdownNotes) return ''
+
+      const i = this.cityMarkdownNotes.indexOf(this.plotTag)
+
+      if (i < 0) return this.cityMarkdownNotes
+      return this.cityMarkdownNotes.substring(0, i)
+    },
+
+    bottomNotes() {
+      if (!this.cityMarkdownNotes) return ''
+
+      const i = this.cityMarkdownNotes.indexOf(this.plotTag)
+
+      if (i < 0) return ''
+      return this.cityMarkdownNotes.substring(i + this.plotTag.length)
+    },
+  },
+
+  watch: {
+    cityCap() {
+      this.loadUnreportedIncidence()
+      this.loadUnreportedIncidenceNRW()
+    },
+
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.isResizing = false
+    },
+
+    plusminus() {
+      this.showPlotForCurrentSituation()
+    },
+
+    logScale() {
+      this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+    },
+
+    chartYamlFiles() {
+      this.vegaChartData = {}
+      this.loadVegaYamlFiles()
+    },
+
+    runYaml() {
+      this.switchYaml()
+    },
+  },
+
+  methods: {
+    async loadWeeklyTests(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.weeklyTestsData = []
+        this.hasWeeklyTests = false
         return
       }
-    }
 
-    // if we got here, date never matched. Just show max.
-    this.cumulativeInfected = Math.max(...infectedCumulative.y)
-  }
+      const filename = currentRun.RunId + '.infections.txt.csv'
 
-  private gotNewSummaryRValue(v: string) {
-    this.summaryRValue = v
-  }
-
-  private sliderChanged(measure: any, value: any, wait?: boolean) {
-    // console.log(measure, value)
-    this.currentSituation[measure] = value
-    if (!wait) this.showPlotForCurrentSituation()
-  }
-
-  private showPlotForCurrentSituation() {
-    if (this.isBase) {
-      this.runChanged({ RunId: 'sz0' })
-      return
-    }
-
-    let lookupKey = ''
-    for (const measure of Object.keys(this.measureOptions))
-      lookupKey += this.currentSituation[measure] + '-'
-
-    // determine: use offset numeral, or offset date?
-    if (this.isUsingRealDates) {
-      const defaultDate = moment(this.runYaml.defaultStartDate)
-      const diff = defaultDate.add(this.plusminus, 'days')
-      // console.log(diff)
-      lookupKey = lookupKey.replace('undefined', diff.format('YYYY-MM-DD'))
-    } else {
-      const offsetPrefix = '' + this.plusminus
-      lookupKey = lookupKey.replace('undefined', offsetPrefix)
-    }
-
-    // console.log(lookupKey)
-
-    const newRun = this.runLookup[lookupKey]
-
-    if (!newRun) {
-      this.isDataMissing = true
-      console.log('Could not find this run in the zip:' + lookupKey)
-      return
-    }
-
-    this.isDataMissing = false
-    this.runChanged(newRun)
-  }
-
-  private unpack(rows: any[], key: any) {
-    let v = rows.map(row => {
-      if (key === 'day') return row[key]
-      return row[key]
-    })
-
-    v = v.slice(0, this.MAX_DAYS)
-
-    // maybe the sim ended early - go out to 150 anyway
-    if (v.length < this.MAX_DAYS) {
-      v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
-    }
-    return v
-  }
-
-  private async loadIncidenceHeatMapData(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.incidenceHeatMapData = ''
-      return
-    }
-
-    const filename = currentRun.RunId + '.post.incidenceByAge.tsv'
-
-    try {
-      let text = await this.zipWorker.extractRawText(filename)
-      this.incidenceHeatMapData = text
-    } catch (e) {
-      this.incidenceHeatMapData = ''
-      console.log('NO INCIDENCE HEAT MAP DATA:', filename)
-    }
-  }
-
-  private infectionsByActivityType: any[] = []
-  private async loadInfectionsByActivityType(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.infectionsByActivityType = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.infectionsPerActivity.txt.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.infectionsByActivityType = z.data
-    } catch (e) {
-      this.infectionsByActivityType = []
-      console.log('INFECTIONSPERACTIVITY: no', filename)
-    }
-  }
-
-  private hasRValuePurposes = false
-
-  private async loadRValues(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.rValues = []
-      this.hasRValuePurposes = false
-      return
-    }
-
-    const filename = currentRun.RunId + '.rValues.txt.csv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.rValues = z.data
-      if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
-    } catch (e) {
-      this.rValues = []
-      this.hasRValuePurposes = false
-      console.log('RVALUES: no', filename)
-    }
-  }
-
-  private async loadDiseaseImport(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.diseaseData = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.diseaseImport.tsv'
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.diseaseData = z.data
-    } catch (e) {
-      console.log('DiseaseData: no', filename)
-      this.diseaseData = []
-    }
-  }
-  private async loadPostHospital(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.postHospital = []
-      return
-    }
-    const filename = currentRun.RunId + '.post.hospital.tsv'
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.postHospital = z.data
-    } catch (e) {
-      console.log('postHospital: no', filename)
-      this.postHospital = []
-    }
-  }
-
-  private hasLeisurOutdoorFraction = false
-
-  private async loadLeisurOutdoorFraction(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.leisurOutdoorFractionData = []
-      this.hasLeisurOutdoorFraction = false
-      return
-    }
-
-    const filename = currentRun.RunId + '.outdoorFraction.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.leisurOutdoorFractionData = z.data
-      if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
-    } catch (e) {
-      this.leisurOutdoorFractionData = []
-      this.hasLeisurOutdoorFraction = false
-      console.log('LeisurOutdoorFraction: no', filename)
-    }
-  }
-
-  private vaccineEffectivenessData: any[] = []
-  private showVaccineEffectivenessFields: string[] = []
-
-  private hasInfectionMapData = false
-  private async checkForInfectionMap() {
-    const url = new URL(window.location.href)
-    const currentFolder = `${this.BATTERY_URL}${url.pathname.slice(1)}/summaries`
-    const RunId = this.currentRun.RunId
-    const infectionFileUrl = `${currentFolder}/${RunId}.infectionLoc.csv.gz`
-
-    // see if file exists
-    this.hasInfectionMapData = false
-    try {
-      const response = await fetch(infectionFileUrl, { method: 'HEAD' })
-      if (response.status >= 200 && response.status < 300) this.hasInfectionMapData = true
-    } catch {}
-  }
-
-  private showInfectionMap() {
-    const url = new URL(window.location.href)
-    const currentFolder = `${url.pathname.slice(1)}/summaries`
-    const RunId = this.currentRun.RunId
-    const infectionFileUrl = `?path=${currentFolder}/${RunId}.infectionLoc.csv.gz`
-    const finalUrl = '/infection-map' + infectionFileUrl
-    window.location.href = finalUrl
-  }
-
-  private async loadVaccineEffectivenessData(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.vaccineEffectivenessData = []
-      this.showVaccineEffectivenessFields = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.post.vaccineEff.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      if (z.meta.fields.indexOf('day') > -1) {
-        this.vaccineEffectivenessData = z.data
-        this.showVaccineEffectivenessFields = z.meta.fields
-      }
-    } catch (e) {
-      this.vaccineEffectivenessData = []
-      this.showVaccineEffectivenessFields = []
-      console.log('NO VaccineEffectiveness:', filename)
-    }
-  }
-
-  private seedComparison: any[] = []
-
-  private async loadSeedComparison(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.seedComparison = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.infectionsPerSeed.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      this.seedComparison = z.data
-      console.log(this.seedComparison)
-    } catch (e) {
-      this.seedComparison = []
-      console.log('Seed Comparison: no', filename)
-    }
-  }
-
-  private vaccineEffectivenessVsStrainData: any[] = []
-  private showVaccineEffectivenessVsStrainFields: string[] = []
-
-  private async loadVaccineEffectivenessVsStrainData(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.vaccineEffectivenessVsStrainData = []
-      this.showVaccineEffectivenessVsStrainFields = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.post.ve.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      if (z.meta.fields.indexOf('day') > -1) {
-        this.vaccineEffectivenessVsStrainData = z.data
-        this.showVaccineEffectivenessVsStrainFields = z.meta.fields
-      }
-    } catch (e) {
-      this.vaccineEffectivenessVsStrainData = []
-      this.showVaccineEffectivenessVsStrainFields = []
-      console.log('NO VaccineEffectivenessVsStrain:', filename)
-    }
-  }
-
-  private hasWeeklyTests = false
-
-  private async loadWeeklyTests(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.weeklyTestsData = []
-      this.hasWeeklyTests = false
-      return
-    }
-
-    const filename = currentRun.RunId + '.infections.txt.csv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      this.weeklyTestsData = z.data
-      if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
-    } catch (e) {
-      this.weeklyTestsData = []
-      this.hasWeeklyTests = false
-      console.log('WeeklyTests: no', filename)
-    }
-  }
-
-  private vaccinationPerType: any[] = []
-
-  private async loadVaccinationPerType(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.vaccinationPerType = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.vaccinations.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      this.vaccinationPerType = z.data
-    } catch (e) {
-      this.vaccinationPerType = []
-      console.log('Vaccination Per Type: no', filename)
-    }
-  }
-
-  private vaccinationDetailed: any[] = []
-
-  private async loadVaccinationDetailed(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.vaccinationDetailed = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.vaccinationsDetailed.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-
-      this.vaccinationDetailed = z.data
-    } catch (e) {
-      this.vaccinationDetailed = []
-      console.log('Vaccination Detailed: no', filename)
-    }
-  }
-
-  private antibodies: any[] = []
-
-  private async loadAntibodies(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.antibodies = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.antibodies.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.antibodies = z.data
-    } catch (e) {
-      this.antibodies = []
-      console.log('Antibodies: no', filename)
-    }
-  }
-
-  private mutationValues: any[] = []
-
-  private async loadMutationValues(currentRun: any) {
-    if (!currentRun.RunId) {
-      this.mutationValues = []
-      return
-    }
-
-    const filename = currentRun.RunId + '.strains.tsv'
-
-    try {
-      const z = await this.zipWorker.extractFile(filename)
-      this.mutationValues = z.data
-    } catch (e) {
-      this.mutationValues = []
-      console.log('MUTATIONS: no', filename)
-    }
-  }
-
-  private csvCache: { [filename: string]: Promise<any[]> } = {} // holds CSV tables
-
-  private async loadCSVs(currentRun: any) {
-    if (!currentRun.RunId) return []
-
-    // get the ZipLoader for this run
-
-    await this.zipWorker.setZipFile({
-      BATTERY_URL: this.BATTERY_URL,
-      runId: this.runId,
-      zipFolder: this.runYaml.zipFolder,
-      whichZip: currentRun.RunId,
-    })
-
-    this.isZipLoaded = true
-
-    const filename = currentRun.RunId + '.infections.txt.csv'
-
-    if (filename in this.csvCache) {
-      console.log(filename + 'is in cache: retrieving now')
-      return await this.csvCache[filename]
-    }
-
-    this.csvCache[filename] = new Promise(async (resolve, reject) => {
-      const z = await this.zipWorker.extractFile(filename)
-      resolve(z.data)
-    })
-
-    return await this.csvCache[filename]
-  }
-
-  private calendarForSimDay(day: number) {
-    if (day === -1) return ''
-
-    const date = moment(this.startDate)
-      .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
-      .format('MMM DD')
-
-    return date
-  }
-
-  private calculateDatefromSimulationDay(day: number) {
-    const date = moment(this.startDate)
-      .add(this.plusminus, 'days')
-      .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
-      .format('YYYY-MM-DD')
-    return date
-  }
-
-  private generateSeriesFromCSVData(data: any[]) {
-    const serieses = []
-
-    const days: number[] = this.unpack(data, 'day')
-    const x = days.map(d => this.calculateDatefromSimulationDay(d))
-
-    for (const column of Object.keys(this.labels)) {
-      const name = this.labels[column]
-
-      if (name === 'In Quarantine') continue
-
-      const y: number[] = this.unpack(data, column)
-      serieses.push({ x, y, name })
-    }
-
-    if (serieses[1].y[0] === undefined) {
-      this.showIncidenceComp = false
-    } else {
-      this.showIncidenceComp = true
-    }
-
-    // Add Observed Data
-    if (this.observedCases.length > 0) {
-      // only add RKI line, because DIVI cumulative doesn't start at the beginning
-      // of the epidemic.
-      serieses.push(this.observedCases[0])
-    }
-
-    // // Add RKI Detection-Rate-Trend Data
-    if (
-      (this.city === 'berlin' && this.rkiDetectionRateData.x) ||
-      (this.city === 'cologne' && this.rkiDetectionRateData.x)
-    ) {
-      serieses.push(this.rkiDetectionRateData)
-    }
-
-    return serieses
-  }
-
-  private async prepareDiviData(newCity: string) {
-    const serieses: any[] = []
-
-    if (!this.cityDIVI[newCity]) return serieses
-
-    const response = await fetch(this.cityDIVI[newCity])
-    const csvContents = await response.text()
-    const data = Papa.parse(csvContents, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
-
-    const dates: any = []
-    const cases: any = []
-    let cumulative = 0
-
-    // pull the cases field out of the CSV
-    for (const datapoint of data) {
       try {
-        const day = datapoint.datum
-        if (datapoint.faelle_covid_aktuell) {
-          dates.push(day)
-          cases.push(datapoint.faelle_covid_aktuell)
+        const z = await this.zipWorker.extractFile(filename)
+
+        this.weeklyTestsData = z.data
+        if (z.meta.fields.indexOf('home') > -1) this.hasWeeklyTests = true
+      } catch (e) {
+        this.weeklyTestsData = []
+        this.hasWeeklyTests = false
+        console.log('WeeklyTests: no', filename)
+      }
+    },
+
+    async loadVaccinationPerType(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.vaccinationPerType = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.vaccinations.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+
+        this.vaccinationPerType = z.data
+      } catch (e) {
+        this.vaccinationPerType = []
+        console.log('Vaccination Per Type: no', filename)
+      }
+    },
+
+    async loadVaccinationDetailed(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.vaccinationDetailed = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.vaccinationsDetailed.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+
+        this.vaccinationDetailed = z.data
+      } catch (e) {
+        this.vaccinationDetailed = []
+        console.log('Vaccination Detailed: no', filename)
+      }
+    },
+
+    async loadAntibodies(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.antibodies = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.antibodies.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.antibodies = z.data
+      } catch (e) {
+        this.antibodies = []
+        console.log('Antibodies: no', filename)
+      }
+    },
+
+    async loadMutationValues(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.mutationValues = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.strains.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.mutationValues = z.data
+      } catch (e) {
+        this.mutationValues = []
+        console.log('MUTATIONS: no', filename)
+      }
+    },
+
+    async loadLeisurOutdoorFraction(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.leisurOutdoorFractionData = []
+        this.hasLeisurOutdoorFraction = false
+        return
+      }
+
+      const filename = currentRun.RunId + '.outdoorFraction.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.leisurOutdoorFractionData = z.data
+        if (z.meta.fields.indexOf('home') > -1) this.hasLeisurOutdoorFraction = true
+      } catch (e) {
+        this.leisurOutdoorFractionData = []
+        this.hasLeisurOutdoorFraction = false
+        console.log('LeisurOutdoorFraction: no', filename)
+      }
+    },
+
+    async checkForInfectionMap() {
+      const url = new URL(window.location.href)
+      const currentFolder = `${this.BATTERY_URL}${url.pathname.slice(1)}/summaries`
+      const RunId = this.currentRun.RunId
+      const infectionFileUrl = `${currentFolder}/${RunId}.infectionLoc.csv.gz`
+
+      // see if file exists
+      this.hasInfectionMapData = false
+      try {
+        const response = await fetch(infectionFileUrl, { method: 'HEAD' })
+        if (response.status >= 200 && response.status < 300) this.hasInfectionMapData = true
+      } catch {}
+    },
+
+    showInfectionMap() {
+      const url = new URL(window.location.href)
+      const currentFolder = `${url.pathname.slice(1)}/summaries`
+      const RunId = this.currentRun.RunId
+      const infectionFileUrl = `?path=${currentFolder}/${RunId}.infectionLoc.csv.gz`
+      const finalUrl = '/infection-map' + infectionFileUrl
+      window.location.href = finalUrl
+    },
+
+    async loadVaccineEffectivenessData(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.vaccineEffectivenessData = []
+        this.showVaccineEffectivenessFields = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.post.vaccineEff.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+
+        if (z.meta.fields.indexOf('day') > -1) {
+          this.vaccineEffectivenessData = z.data
+          this.showVaccineEffectivenessFields = z.meta.fields
         }
       } catch (e) {
-        // well, some lines are badly formatted. ignore them
+        this.vaccineEffectivenessData = []
+        this.showVaccineEffectivenessFields = []
+        console.log('NO VaccineEffectiveness:', filename)
       }
-    }
+    },
 
-    serieses.push({
-      name: 'Reported: ' + this.cityCap + ' Intensive Care (DIVI)',
-      x: dates,
-      y: cases,
-      line: {
-        dash: 'dot',
-        width: 2,
-        color: 'rgb(0,200,50)',
-      },
-    })
+    async loadSeedComparison(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.seedComparison = []
+        return
+      }
 
-    return serieses
-  }
+      const filename = currentRun.RunId + '.infectionsPerSeed.tsv'
 
-  private async prepareObservedData(newCity: string) {
-    const serieses = []
+      try {
+        const z = await this.zipWorker.extractFile(filename)
 
-    // 1 - CASES DATA
-    if (this.cityCSV[newCity]) {
-      const response = await fetch(this.cityCSV[newCity])
+        this.seedComparison = z.data
+        console.log(this.seedComparison)
+      } catch (e) {
+        this.seedComparison = []
+        console.log('Seed Comparison: no', filename)
+      }
+    },
+
+    async loadVaccineEffectivenessVsStrainData(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.vaccineEffectivenessVsStrainData = []
+        this.showVaccineEffectivenessVsStrainFields = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.post.ve.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+
+        if (z.meta.fields.indexOf('day') > -1) {
+          this.vaccineEffectivenessVsStrainData = z.data
+          this.showVaccineEffectivenessVsStrainFields = z.meta.fields
+        }
+      } catch (e) {
+        this.vaccineEffectivenessVsStrainData = []
+        this.showVaccineEffectivenessVsStrainFields = []
+        console.log('NO VaccineEffectivenessVsStrain:', filename)
+      }
+    },
+
+    async loadInfectionsByActivityType(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.infectionsByActivityType = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.infectionsPerActivity.txt.tsv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.infectionsByActivityType = z.data
+      } catch (e) {
+        this.infectionsByActivityType = []
+        console.log('INFECTIONSPERACTIVITY: no', filename)
+      }
+    },
+
+    async loadRValues(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.rValues = []
+        this.hasRValuePurposes = false
+        return
+      }
+
+      const filename = currentRun.RunId + '.rValues.txt.csv'
+
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.rValues = z.data
+        if (z.meta.fields.indexOf('home') > -1) this.hasRValuePurposes = true
+      } catch (e) {
+        this.rValues = []
+        this.hasRValuePurposes = false
+        console.log('RVALUES: no', filename)
+      }
+    },
+
+    async loadDiseaseImport(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.diseaseData = []
+        return
+      }
+
+      const filename = currentRun.RunId + '.diseaseImport.tsv'
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.diseaseData = z.data
+      } catch (e) {
+        console.log('DiseaseData: no', filename)
+        this.diseaseData = []
+      }
+    },
+
+    async loadPostHospital(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.postHospital = []
+        return
+      }
+      const filename = currentRun.RunId + '.post.hospital.tsv'
+      try {
+        const z = await this.zipWorker.extractFile(filename)
+        this.postHospital = z.data
+      } catch (e) {
+        console.log('postHospital: no', filename)
+        this.postHospital = []
+      }
+    },
+
+    async showActivityLevelPlot() {
+      this.showActivityLevels = true
+    },
+
+    async runChanged(newRun: { RunId: string }) {
+      if (this.currentRun?.RunId === this.previousRun) {
+        return
+      } else {
+        this.previousRun = this.currentRun.RunId
+      }
+
+      const ignoreRow = 'Cumulative Hospitalized'
+      const ignoreRowHealth = [
+        'SusceptibleVaccinated',
+        'ContagiousVaccinated',
+        'ShowingSymptomsVaccinated',
+        'SeriouslySickVaccinated',
+        'CriticalVaccinated',
+        'TotalInfectedVaccinated',
+        'InfectedCumulativeVaccinated',
+        'ShowingSymptomsCumulativeVaccinated',
+        'ContagiousCumulativeVaccinated',
+        'SeriouslySickCumulativeVaccinated',
+        'CriticalCumulativeVaccinated',
+        'RecoveredVaccinated',
+        'Cumulative Hospitalized',
+      ]
+
+      // load run dataset
+
+      const csv: any[] = await this.loadCSVs(newRun)
+
+      // zip might not yet be loaded
+      if (csv.length === 0) return
+
+      this.currentRun = newRun
+
+      this.postHospUpdater1++
+      this.postHospUpdater2++
+
+      this.checkForInfectionMap()
+
+      this.loadVaccineEffectivenessData(this.currentRun)
+
+      this.loadSeedComparison(this.currentRun)
+
+      this.loadVaccineEffectivenessVsStrainData(this.currentRun)
+
+      this.loadIncidenceHeatMapData(this.currentRun)
+
+      this.loadMutationValues(this.currentRun)
+
+      this.loadVaccinationPerType(this.currentRun)
+
+      this.loadVaccinationDetailed(this.currentRun)
+
+      this.loadAntibodies(this.currentRun)
+
+      this.loadRValues(this.currentRun)
+
+      this.loadInfectionsByActivityType(this.currentRun)
+
+      this.loadWeeklyTests(this.currentRun)
+
+      this.loadDiseaseImport(this.currentRun)
+
+      this.loadPostHospital(this.currentRun)
+
+      this.loadLeisurOutdoorFraction(this.currentRun)
+
+      // const duration = performance.now() - start
+      // console.log('DURATION:', duration / 1000)
+
+      const timeSerieses = this.generateSeriesFromCSVData(csv)
+
+      // cache the result
+      this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
+
+      // populate the data where we need it
+      this.hospitalData = timeSerieses
+      this.data = timeSerieses.filter(row => row.name !== ignoreRow)
+
+      // figure out total population
+      for (let i = 0; i < this.data.length; i++) {
+        if (this.data[i].name === 'Susceptible') {
+          this.totalPopulation = this.data[i].y[0]
+          break
+        }
+      }
+
+      this.addDataFromInfectionsCSVToData('nReVaccinated')
+
+      this.updateTotalInfected()
+      this.updateVegaCharts()
+      //this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
+
+      this.updatePlotMenu()
+    },
+
+    updatePlotMenu() {
+      if (!this.showActivityLevels) {
+        this.allPlots[0].usedInThisRun = false
+      }
+
+      if (this.diseaseData.length == 0) {
+        this.allPlots[1].usedInThisRun = false
+      }
+
+      if (this.postHospital.length == 0) {
+        this.allPlots[2].usedInThisRun = false
+        this.allPlots[3].usedInThisRun = false
+      }
+
+      if (!this.showVirusStrainsPlot || !(this.mutationValues.length > 0)) {
+        this.allPlots[5].usedInThisRun = false
+      }
+
+      if (!this.hasRValuePurposes) {
+        this.allPlots[7].usedInThisRun = false
+      }
+
+      if (!(this.infectionsByActivityType.length > 0)) {
+        this.allPlots[8].usedInThisRun = false
+      }
+
+      if (!this.showVaccineEffectivenessFields.length) {
+        this.allPlots[9].usedInThisRun = false
+      }
+
+      if (!this.showVaccineEffectivenessVsStrainFields.length) {
+        this.allPlots[10].usedInThisRun = false
+      }
+
+      if (!this.showIncidenceComp) {
+        this.allPlots[11].usedInThisRun = false
+        this.allPlots[12].usedInThisRun = false
+        this.allPlots[17].usedInThisRun = false
+      }
+
+      if (!this.showIncidenceComp || !(this.vaccinationPerType.length > 0)) {
+        this.allPlots[13].usedInThisRun = false
+      }
+
+      if (!this.showIncidenceComp || !(this.antibodies.length > 0)) {
+        this.allPlots[14].usedInThisRun = false
+      }
+
+      if (this.city == 'heinsberg') {
+        this.allPlots[16].usedInThisRun = false
+      }
+
+      if (!this.showByAgePlot || !this.incidenceHeatMapData) {
+        this.allPlots[19].usedInThisRun = false
+        this.allPlots[20].usedInThisRun = false
+      }
+
+      if (!this.leisurOutdoorFractionData.length) {
+        this.allPlots[21].usedInThisRun = false
+      }
+
+      if (!this.weeklyTestsData.length) {
+        this.allPlots[22].usedInThisRun = false
+      }
+    },
+
+    addDataFromInfectionsCSVToData(valueName: string) {
+      if (this.weeklyTestsData.length) {
+        var dates = []
+        var values = []
+        for (var i = 0; i < this.weeklyTestsData.length; i++) {
+          dates[i] = this.weeklyTestsData[i].date
+          values[i] = this.weeklyTestsData[i].nReVaccinated
+        }
+        var nReVaccinated = {
+          name: valueName,
+          x: dates,
+          y: values,
+        }
+        this.data.push(nReVaccinated)
+      }
+    },
+
+    updateVegaCharts() {
+      for (const key of Object.keys(this.vegaChartData)) {
+        const chart = this.vegaChartData[key]
+        // nothing to do if no zip file was specified
+        if (!chart.zip || !chart.url) continue
+
+        try {
+          const filename = chart.url.replace('$RUN$', this.currentRun.RunId)
+          const beginRunId = this.currentRun.RunId as string
+          this.zipWorker.extractFile(filename).then((z: any) => {
+            const dateBracket = z.data.filter((point: any) => point.date <= this.endDate)
+
+            // if data doesn't go out to end-date, straightline it
+            const lastEntry = dateBracket[dateBracket.length - 1]
+            if (lastEntry.date < this.endDate) {
+              dateBracket.push(lastEntry)
+              dateBracket[dateBracket.length - 1].date = this.endDate
+            }
+
+            // force set this so that Vue notices the new data
+            if (chart.data) chart.data[beginRunId] = dateBracket
+            this.vegaChartData = Object.assign({}, this.vegaChartData)
+          })
+        } catch (e) {
+          console.error('YEEEARGH' + e)
+        }
+      }
+    },
+
+    updateTotalInfected() {
+      const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
+
+      for (let i = 0; i < infectedCumulative.x.length; i++) {
+        if (infectedCumulative.x[i] === this.endDate) {
+          // console.log('got it:', infectedCumulative.x[i], infectedCumulative.y[i])
+          this.cumulativeInfected = infectedCumulative.y[i]
+          return
+        }
+      }
+
+      // if we got here, date never matched. Just show max.
+      this.cumulativeInfected = Math.max(...infectedCumulative.y)
+    },
+
+    gotNewSummaryRValue(v: string) {
+      this.summaryRValue = v
+    },
+
+    sliderChanged(measure: any, value: any, wait?: boolean) {
+      // console.log(measure, value)
+      this.currentSituation[measure] = value
+      if (!wait) this.showPlotForCurrentSituation()
+    },
+
+    showPlotForCurrentSituation() {
+      if (this.isBase) {
+        this.runChanged({ RunId: 'sz0' })
+        return
+      }
+
+      let lookupKey = ''
+      for (const measure of Object.keys(this.measureOptions))
+        lookupKey += this.currentSituation[measure] + '-'
+
+      // determine: use offset numeral, or offset date?
+      if (this.isUsingRealDates) {
+        const defaultDate = moment(this.runYaml.defaultStartDate)
+        const diff = defaultDate.add(this.plusminus, 'days')
+        // console.log(diff)
+        lookupKey = lookupKey.replace('undefined', diff.format('YYYY-MM-DD'))
+      } else {
+        const offsetPrefix = '' + this.plusminus
+        lookupKey = lookupKey.replace('undefined', offsetPrefix)
+      }
+
+      // console.log(lookupKey)
+
+      const newRun = this.runLookup[lookupKey]
+
+      if (!newRun) {
+        this.isDataMissing = true
+        console.log('Could not find this run in the zip:' + lookupKey)
+        return
+      }
+
+      this.isDataMissing = false
+      this.runChanged(newRun)
+    },
+
+    unpack(rows: any[], key: any) {
+      let v = rows.map(row => {
+        if (key === 'day') return row[key]
+        return row[key]
+      })
+
+      v = v.slice(0, this.MAX_DAYS)
+
+      // maybe the sim ended early - go out to 150 anyway
+      if (v.length < this.MAX_DAYS) {
+        v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
+      }
+      return v
+    },
+
+    async loadIncidenceHeatMapData(currentRun: any) {
+      if (!currentRun.RunId) {
+        this.incidenceHeatMapData = ''
+        return
+      }
+
+      const filename = currentRun.RunId + '.post.incidenceByAge.tsv'
+
+      try {
+        let text = await this.zipWorker.extractRawText(filename)
+        this.incidenceHeatMapData = text
+      } catch (e) {
+        this.incidenceHeatMapData = ''
+        console.log('NO INCIDENCE HEAT MAP DATA:', filename)
+      }
+    },
+
+    async loadCoronaDetectionRateData() {
+      // Load CSV data of Corona-Datenspende from RKI -- Berlin+Brandenburg only
+
+      const url =
+        'https://raw.githubusercontent.com/corona-datenspende/data-updates/master/detections/detection.csv'
+
+      try {
+        const response = await fetch(url)
+        const csvContents = await response.text()
+        const rawdata = Papa.parse(csvContents, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        const region = rawdata.filter((a: any) => a.state_de === 'Berlin') as any[]
+
+        const trimmedData = region
+          .map(a => {
+            return { date: a.date, rkiDetected: this.berlin_population * a.detection_rate_trend }
+          })
+          .sort((a, b) => (a.date < b.date ? -1 : 1))
+
+        const x = trimmedData.map(a => a.date)
+        const y = trimmedData.map(a => a.rkiDetected)
+
+        const plotData = {
+          name: 'NEW RKI Detection Rate Trend',
+          visible: 'legendonly',
+          x,
+          y,
+          line: {
+            dash: 'dot',
+            width: 2,
+            color: 'rgb(200,0,0)',
+          },
+        }
+        this.rkiDetectionRateData = plotData
+      } catch (e) {
+        console.warn(e)
+      }
+    },
+
+    async loadZipFile(whichZip: string) {
+      // if (whichZip in this.zipLoaderLookup) return this.zipLoaderLookup[whichZip]
+      // const loader = new Promise(async (resolve, reject) => {
+
+      await this.zipWorker.setZipFile({
+        BATTERY_URL: this.BATTERY_URL,
+        runId: this.runId,
+        zipFolder: this.runYaml.zipFolder,
+        whichZip,
+      })
+
+      this.isZipLoaded = true
+      // resolve(instance)
+      // const zloader = new ZipLoader(filepath)
+      // await zloader.load()
+    },
+
+    async updateNotes() {
+      const url = this.BATTERY_URL + this.runId + '/' + this.runYaml.readme
+
+      const response = await fetch(url)
+
+      if (response.status !== 200) return
+
+      const text = await response.text()
+
+      // bad url
+      if (text.startsWith('<!DOCTYPE')) return
+
+      this.cityMarkdownNotes = this.mdParser.render(text)
+    },
+
+    updateSideMenu(categorie: string) {
+      const index = this.sideMenuCategories.indexOf(categorie)
+      this.activeSideMenu = index == this.activeSideMenu ? -1 : index
+    },
+
+    allPlotsCheckIsUsedInThisRun() {
+      return this.allPlots.filter(function (u) {
+        return u.usedInThisRun
+      })
+    },
+
+    showVegaPlots(id: string) {
+      if (this.vegaChartData[id].isVisible) {
+        this.vegaChartData[id].isVisible = false
+      } else {
+        this.vegaChartData[id].isVisible = true
+      }
+    },
+
+    showPlotMenu(index: any) {
+      if (index === 'allActive') {
+        this.allPlots.forEach(element => (element.active = true))
+      } else if (index === 'allInactive') {
+        this.allPlots.forEach(element => (element.active = false))
+      } else {
+        this.allPlots[index].active = !this.allPlots[index].active
+      }
+    },
+
+    async loadUnreportedIncidence() {
+      if (this.cityCap == 'Cologne') {
+        const url =
+          'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferCologne.csv'
+
+        try {
+          const response = await fetch(url)
+          const csvContents = await response.text()
+          this.unreportedIncidence = Papa.parse(csvContents, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+          }).data
+        } catch (e) {
+          console.warn(e)
+        }
+      }
+    },
+
+    async loadUnreportedIncidenceNRW() {
+      if (this.cityCap == 'Cologne') {
+        const url =
+          'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/underreporting/InzidenzDunkelzifferNRW.csv'
+
+        try {
+          const response = await fetch(url)
+          const csvContents = await response.text()
+          this.unreportedIncidenceNRW = Papa.parse(csvContents, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+          }).data
+        } catch (e) {
+          console.warn(e)
+        }
+      }
+    },
+
+    setBase(value: boolean) {
+      this.isBase = value
+      this.showPlotForCurrentSituation()
+    },
+
+    setPlusMinus(value: string) {
+      const shift = parseInt(value)
+      // console.log('SET PLUS MINUS:', shift)
+      this.plusminus = shift
+    },
+
+    async isThereABaseRun() {
+      if (!this.isZipLoaded) return false
+
+      const baseFilename = 'sz0' + '.infections.txt.csv'
+      const hasBase = await this.zipWorker.hasFile(baseFilename)
+
+      console.log('DOES SZ0 EXIST: ', hasBase)
+      return hasBase
+    },
+
+    async switchYaml() {
+      if (!this.runYaml.city) return
+
+      this.summaryRValueDate = this.runYaml.rValueDate || this.DEFAULT_R_VALUE_DATE
+
+      await this.clearZipLoaderLookups()
+      this.isUsingRealDates = false
+
+      this.$nextTick()
+
+      this.city = this.runYaml.city
+      this.offset = []
+      this.vegaChartData = {}
+
+      await this.loadVegaYamlFiles()
+
+      // set start date
+      if (this.runYaml.startDate) this.startDate = this.runYaml.startDate
+      else if (this.runYaml.defaultStartDate) this.startDate = this.runYaml.defaultStartDate
+      else {
+        alert('Uh-oh, YAML file has no startDate AND no defaultStartDate!')
+        return
+      }
+
+      // set start date for Graphs -- not the same as start date of simulation
+      this.$store.commit('setGraphStartDate', this.runYaml.graphStartDate || '2020-02-09') // this.startDate)
+
+      // set end date
+      this.endDate = this.runYaml.endDate ? this.runYaml.endDate : '2020-08-31'
+      // console.log({ endDate: this.endDate })
+      this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+
+      // build offsets
+      if (!this.runYaml.offset && !this.runYaml.startDates) {
+        alert('Uh-oh, YAML file has no offsets AND no startDates!')
+        return
+      }
+
+      if (!this.runYaml.offset) {
+        if (!this.runYaml.startDates) {
+          alert("Need startDates in YAML if we don't have offsets")
+          return
+        }
+        this.isUsingRealDates = true
+        const defaultDate = moment(this.runYaml.defaultStartDate)
+        for (const d of this.runYaml.startDates) {
+          const date = moment(d)
+          const diff = date.diff(defaultDate, 'days')
+          this.offset.push(diff)
+          if (date.isSame(d)) this.plusminus = diff
+        }
+      } else {
+        this.offset = this.runYaml.offset
+        this.plusminus = this.runYaml.offset[0]
+      }
+
+      this.updateNotes()
+
+      // berlin has some observed data, other cities don't
+      if (this.cityCSV[this.city]) {
+        this.observedCases = await this.prepareObservedData(this.city)
+        this.diviData = await this.prepareDiviData(this.city)
+      }
+
+      await this.loadInfoTxt()
+
+      this.runChanged({ RunId: '' })
+      this.showActivityLevelPlot()
+
+      this.hasBaseRun = await this.isThereABaseRun()
+
+      //chang disabled plots
+      for (let i = 0; i < this.allPlots.length; i++) {
+        this.allPlots[i].active = true
+      }
+      if (Object.keys(this.runYaml).includes('ignoredPlots')) {
+        if (this.runYaml.ignoredPlots?.includes('actLevPerTyp')) {
+          this.allPlots[0].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('disImp')) {
+          this.allPlots[1].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('hosNewCasPos')) {
+          this.allPlots[2].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('hosRatPos')) {
+          this.allPlots[3].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('casCom')) {
+          this.allPlots[4].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('virStr')) {
+          this.allPlots[5].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('simRVal')) {
+          this.allPlots[6].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('simRValByPur')) {
+          this.allPlots[7].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('infByActTyp')) {
+          this.allPlots[8].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('vacEffAgaInf')) {
+          this.allPlots[9].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('vacEffVsStr')) {
+          this.allPlots[10].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('incComVacAndUnvac')) {
+          this.allPlots[11].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('VacRatBooRat')) {
+          this.allPlots[12].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('VacPerTyp')) {
+          this.allPlots[13].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('Antibodies')) {
+          this.allPlots[14].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('hospNewCas')) {
+          this.allPlots[15].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('hospRatComp')) {
+          this.allPlots[16].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('hospRatCompVacAndUnvac')) {
+          this.allPlots[17].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('simHealOutOveTim')) {
+          this.allPlots[18].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('inciHeatmap')) {
+          this.allPlots[19].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('inciLinechart')) {
+          this.allPlots[20].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('leiOutFra')) {
+          this.allPlots[21].active = false
+        }
+        if (this.runYaml.ignoredPlots?.includes('weekTest')) {
+          this.allPlots[22].active = false
+        }
+      }
+
+      this.showPlotForCurrentSituation()
+    },
+
+    strOffset(offset: number) {
+      return (offset > 0 ? '+' : '') + offset
+    },
+
+    switchRMethod(method: string) {
+      this.rValueMethodDescription = method
+    },
+
+    toggleShowPlot(which: number) {
+      this.allPlots[which].showPlot = !this.allPlots[which].showPlot
+    },
+
+    toggleSeedComparison() {
+      this.showSeedComparison = !this.showSeedComparison
+    },
+
+    async clearZipLoaderLookups() {
+      await this.zipWorker.clear()
+      this.csvCache = {}
+      this.cachedOptionKeys = ''
+    },
+
+    async setWideMode(mode: boolean) {
+      this.$store.commit('setWideMode', mode)
+      await this.$nextTick()
+      this.$forceUpdate()
+    },
+
+    getGroupTitle(group: any) {
+      return this.calendarForSimDay(group.day) || group.heading || 'General Options'
+    },
+
+    hasMultipleOptions(group: any) {
+      let hasMultiple = false
+      // see if any measures have multiple values
+      for (const m of group.measures) {
+        if (!this.measureOptions[m.measure]) continue
+
+        const numOptions = this.measureOptions[m.measure].length
+        if (numOptions > 1) {
+          hasMultiple = true
+        } else {
+          this.setValueForSingleOptionMeasure(m.measure)
+        }
+      }
+
+      // update the single-value parameters, after everything else has settled down
+      const keys = Object.keys(this.singleValueOptions)
+      const keysStringify = JSON.stringify(keys)
+      if (this.cachedOptionKeys !== keysStringify) {
+        this.singleValueOptionKeys = keys
+        this.cachedOptionKeys = keysStringify
+      }
+
+      return hasMultiple
+    },
+
+    // some measures only have one option! Set its value.
+    setValueForSingleOptionMeasure(measure: string) {
+      let onlyValue = this.measureOptions[measure][0]
+      if (onlyValue.endsWith('%') && !onlyValue.startsWith('+')) {
+        const answer = onlyValue.substring(0, onlyValue.length - 1)
+        onlyValue = '' + parseFloat(answer) / 100.0
+        if (onlyValue === '0') onlyValue = '0.0'
+        if (onlyValue === '1') onlyValue = '1.0'
+      }
+      const wait = true
+
+      this.singleValueOptions[measure] = onlyValue
+      this.sliderChanged(measure, onlyValue, wait)
+    },
+
+    // read the yaml files for each vega chart
+    // if a zip file is specified, note that so we can fetch its content later
+    async loadVegaYamlFiles() {
+      for (const yamlFile of this.chartYamlFiles) {
+        try {
+          const url = `${this.BATTERY_URL}/${this.runId}/${yamlFile}`
+          const response = await fetch(url).then()
+          const text = await response.text()
+          const definition = yaml.parse(text)
+          const isVisible = true
+
+          const chart: VegaChartDefinition = { yaml: definition, data: {}, isVisible: isVisible }
+
+          // is there a zip file?
+          if (definition.data && definition.data.zip) {
+            chart.zip = definition.data.zip
+            chart.url = definition.data.url
+          }
+
+          this.vegaChartData[yamlFile] = chart
+        } catch (e) {
+          console.error({ e })
+        }
+      }
+    },
+
+    async loadCSVs(currentRun: any) {
+      if (!currentRun.RunId) return []
+
+      // get the ZipLoader for this run
+
+      await this.zipWorker.setZipFile({
+        BATTERY_URL: this.BATTERY_URL,
+        runId: this.runId,
+        zipFolder: this.runYaml.zipFolder,
+        whichZip: currentRun.RunId,
+      })
+
+      this.isZipLoaded = true
+
+      const filename = currentRun.RunId + '.infections.txt.csv'
+
+      if (filename in this.csvCache) {
+        console.log(filename + 'is in cache: retrieving now')
+        return await this.csvCache[filename]
+      }
+
+      this.csvCache[filename] = new Promise(async (resolve, reject) => {
+        const z = await this.zipWorker.extractFile(filename)
+        resolve(z.data)
+      })
+
+      return await this.csvCache[filename]
+    },
+
+    calendarForSimDay(day: number) {
+      if (day === -1) return ''
+
+      const date = moment(this.startDate)
+        .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
+        .format('MMM DD')
+
+      return date
+    },
+
+    calculateDatefromSimulationDay(day: number) {
+      const date = moment(this.startDate)
+        .add(this.plusminus, 'days')
+        .add(day - 1, 'days') // Day ONE is first day, so add days BEYOND day one
+        .format('YYYY-MM-DD')
+      return date
+    },
+
+    generateSeriesFromCSVData(data: any[]) {
+      const serieses = []
+
+      const days: number[] = this.unpack(data, 'day')
+      const x = days.map(d => this.calculateDatefromSimulationDay(d))
+
+      for (const column of Object.keys(this.labels)) {
+        const name = this.labels[column]
+
+        if (name === 'In Quarantine') continue
+
+        const y: number[] = this.unpack(data, column)
+        serieses.push({ x, y, name })
+      }
+
+      if (serieses[1].y[0] === undefined) {
+        this.showIncidenceComp = false
+      } else {
+        this.showIncidenceComp = true
+      }
+
+      // Add Observed Data
+      if (this.observedCases.length > 0) {
+        // only add RKI line, because DIVI cumulative doesn't start at the beginning
+        // of the epidemic.
+        serieses.push(this.observedCases[0])
+      }
+
+      // // Add RKI Detection-Rate-Trend Data
+      if (
+        (this.city === 'berlin' && this.rkiDetectionRateData.x) ||
+        (this.city === 'cologne' && this.rkiDetectionRateData.x)
+      ) {
+        serieses.push(this.rkiDetectionRateData)
+      }
+
+      return serieses
+    },
+
+    async prepareDiviData(newCity: string) {
+      const serieses: any[] = []
+
+      if (!this.cityDIVI[newCity]) return serieses
+
+      const response = await fetch(this.cityDIVI[newCity])
       const csvContents = await response.text()
       const data = Papa.parse(csvContents, {
         header: true,
@@ -2214,291 +2247,273 @@ export default class VueComponent extends Vue {
         skipEmptyLines: true,
       }).data
 
-      const xdates: any = []
-      const xcases: any = []
+      const dates: any = []
+      const cases: any = []
       let cumulative = 0
 
       // pull the cases field out of the CSV
       for (const datapoint of data) {
-        const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
-        xdates.push(day)
-        cumulative += datapoint.cases
-        xcases.push(cumulative)
+        try {
+          const day = datapoint.datum
+          if (datapoint.faelle_covid_aktuell) {
+            dates.push(day)
+            cases.push(datapoint.faelle_covid_aktuell)
+          }
+        } catch (e) {
+          // well, some lines are badly formatted. ignore them
+        }
       }
 
-      const name = newCity !== 'jakarta' ? `RKI ${this.cityCap} Infections` : 'Observed Infections'
       serieses.push({
-        name,
-        x: xdates,
-        y: xcases,
+        name: 'Reported: ' + this.cityCap + ' Intensive Care (DIVI)',
+        x: dates,
+        y: cases,
         line: {
           dash: 'dot',
-          width: 3,
-          color: '#080',
+          width: 2,
+          color: 'rgb(0,200,50)',
         },
       })
-    }
 
-    //get the meldedatum
-    if (this.cityCSVMeldedatum[newCity]) {
-      const responseM = await fetch(this.cityCSVMeldedatum[newCity])
-      const csvContentsM = await responseM.text()
-      const dataM = Papa.parse(csvContentsM, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
+      return serieses
+    },
 
-      const mDates: any = []
-      const mCases: any = []
-      let mCumulative = 0
-      const mOffset = -1
+    async prepareObservedData(newCity: string) {
+      const serieses = []
 
-      // pull the cases field out of the CSV
-      for (const datapoint of dataM) {
-        let dayObject = moment({
-          year: datapoint.year,
-          month: datapoint.month - 1,
-          day: datapoint.day,
+      // 1 - CASES DATA
+      if (this.cityCSV[newCity]) {
+        const response = await fetch(this.cityCSV[newCity])
+        const csvContents = await response.text()
+        const data = Papa.parse(csvContents, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        const xdates: any = []
+        const xcases: any = []
+        let cumulative = 0
+
+        // pull the cases field out of the CSV
+        for (const datapoint of data) {
+          const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
+          xdates.push(day)
+          cumulative += datapoint.cases
+          xcases.push(cumulative)
+        }
+
+        const name =
+          newCity !== 'jakarta' ? `RKI ${this.cityCap} Infections` : 'Observed Infections'
+        serieses.push({
+          name,
+          x: xdates,
+          y: xcases,
+          line: {
+            dash: 'dot',
+            width: 3,
+            color: '#080',
+          },
         })
-        dayObject.add(mOffset, 'days')
-
-        const day = dayObject.format('YYYY-MM-DD')
-
-        mDates.push(day)
-        mCumulative += datapoint.cases
-        mCases.push(mCumulative)
       }
 
-      serieses.push({
-        name: 'RKI-Meldedatum ' + this.cityCap,
-        x: mDates,
-        y: mCases,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { color: '#6d2', size: 3 },
-      })
-    }
+      //get the meldedatum
+      if (this.cityCSVMeldedatum[newCity]) {
+        const responseM = await fetch(this.cityCSVMeldedatum[newCity])
+        const csvContentsM = await responseM.text()
+        const dataM = Papa.parse(csvContentsM, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
 
-    //get test data
-    if (this.cityCSVTests[newCity]) {
-      const responseT = await fetch(this.cityCSVTests[newCity])
-      const csvContentsT = await responseT.text()
-      const dataT = Papa.parse(csvContentsT, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
+        const mDates: any = []
+        const mCases: any = []
+        let mCumulative = 0
+        const mOffset = -1
 
-      const tDates: any = []
-      const tCases: any = []
-      let tCumulative = 0
-      const tOffset = 0
+        // pull the cases field out of the CSV
+        for (const datapoint of dataM) {
+          let dayObject = moment({
+            year: datapoint.year,
+            month: datapoint.month - 1,
+            day: datapoint.day,
+          })
+          dayObject.add(mOffset, 'days')
 
-      // pull the cases field out of the CSV
-      for (const datapoint of dataT) {
-        let dayObject = moment({
-          year: datapoint.year,
-          month: datapoint.month - 1,
-          day: datapoint.day,
+          const day = dayObject.format('YYYY-MM-DD')
+
+          mDates.push(day)
+          mCumulative += datapoint.cases
+          mCases.push(mCumulative)
+        }
+
+        serieses.push({
+          name: 'RKI-Meldedatum ' + this.cityCap,
+          x: mDates,
+          y: mCases,
+          mode: 'markers',
+          type: 'scatter',
+          marker: { color: '#6d2', size: 3 },
         })
-        dayObject.add(tOffset, 'days')
-
-        const day = dayObject.format('YYYY-MM-DD')
-
-        tDates.push(day)
-        tCumulative += datapoint.cases
-        tCases.push(tCumulative)
-      }
-      serieses.push({
-        name: 'Positive Tests ' + this.cityCap,
-        x: tDates,
-        y: tCases,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { color: '#f42', size: 4 },
-      })
-    }
-
-    // get case surveillance data
-    if (this.cityRKISurveillance[newCity]) {
-      const responseSurv = await fetch(this.cityRKISurveillance[newCity])
-      const csvContentsSurv = await responseSurv.text()
-      const survData = Papa.parse(csvContentsSurv, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        delimiter: ';',
-      }).data
-
-      const sDates: any = []
-      const sShare: any = []
-      const text: any = []
-
-      // pull the cases field out of the CSV
-      for (const xdatapoint of survData) {
-        const dateField = xdatapoint['Beginn Meldewoche']
-        const year = parseInt(dateField.substring(6, 10))
-        const month = parseInt(dateField.substring(3, 5)) - 1
-        const zday = parseInt(dateField.substring(0, 2))
-        let dayObject = moment({
-          year,
-          month,
-          day: zday,
-        })
-
-        const day = dayObject.format('YYYY-MM-DD')
-        const estimPositive = xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
-
-        if (day === 'Invalid date') continue
-
-        sDates.push(day)
-        sShare.push(this.scaleRKISurveillanceAnteil * estimPositive)
-        text.push(estimPositive)
       }
 
-      serieses.push({
-        name: 'Reported: Share Positive Tests (ALM e.V.)',
-        x: sDates,
-        y: sShare,
-        text: text,
-        mode: 'markers',
-        type: 'scatter',
-        hovertemplate: '%{text}%',
-        marker: { symbol: 'cross', color: '#f80', size: 5 },
-      })
-    }
+      //get test data
+      if (this.cityCSVTests[newCity]) {
+        const responseT = await fetch(this.cityCSVTests[newCity])
+        const csvContentsT = await responseT.text()
+        const dataT = Papa.parse(csvContentsT, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
 
-    return serieses
-  }
+        const tDates: any = []
+        const tCases: any = []
+        let tCumulative = 0
+        const tOffset = 0
 
-  private async parseInfoTxt(city: string) {
-    const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
+        // pull the cases field out of the CSV
+        for (const datapoint of dataT) {
+          let dayObject = moment({
+            year: datapoint.year,
+            month: datapoint.month - 1,
+            day: datapoint.day,
+          })
+          dayObject.add(tOffset, 'days')
 
-    const response = await fetch(filepath)
-    const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: false })
+          const day = dayObject.format('YYYY-MM-DD')
 
-    return parsed.data
-  }
+          tDates.push(day)
+          tCumulative += datapoint.cases
+          tCases.push(tCumulative)
+        }
+        serieses.push({
+          name: 'Positive Tests ' + this.cityCap,
+          x: tDates,
+          y: tCases,
+          mode: 'markers',
+          type: 'scatter',
+          marker: { color: '#f42', size: 4 },
+        })
+      }
 
-  private async loadInfoTxt() {
-    console.log('_info.txt: generating lookups')
+      // get case surveillance data
+      if (this.cityRKISurveillance[newCity]) {
+        const responseSurv = await fetch(this.cityRKISurveillance[newCity])
+        const csvContentsSurv = await responseSurv.text()
+        const survData = Papa.parse(csvContentsSurv, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          delimiter: ';',
+        }).data
 
-    const infoTxt = await this.parseInfoTxt(this.city)
+        const sDates: any = []
+        const sShare: any = []
+        const text: any = []
 
-    const measures: any = {}
-    const runLookup: any = {}
+        // pull the cases field out of the CSV
+        for (const xdatapoint of survData) {
+          const dateField = xdatapoint['Beginn Meldewoche']
+          const year = parseInt(dateField.substring(6, 10))
+          const month = parseInt(dateField.substring(3, 5)) - 1
+          const zday = parseInt(dateField.substring(0, 2))
+          let dayObject = moment({
+            year,
+            month,
+            day: zday,
+          })
 
-    // first get column names for the measures that have been tested
-    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+          const day = dayObject.format('YYYY-MM-DD')
+          const estimPositive = xdatapoint['Anteil positiver Tests Lagebericht ' + this.cityCap]
 
-    for (const label of Object.keys(infoTxt[0])) {
-      if (ignore.indexOf(label) > -1) continue
-      measures[label] = new Set()
-    }
+          if (day === 'Invalid date') continue
 
-    // get all possible values
-    for (const row of infoTxt) {
-      if (row.RunId == undefined) continue
+          sDates.push(day)
+          sShare.push(this.scaleRKISurveillanceAnteil * estimPositive)
+          text.push(estimPositive)
+        }
 
-      // note this particular value, for every value
+        serieses.push({
+          name: 'Reported: Share Positive Tests (ALM e.V.)',
+          x: sDates,
+          y: sShare,
+          text: text,
+          mode: 'markers',
+          type: 'scatter',
+          hovertemplate: '%{text}%',
+          marker: { symbol: 'cross', color: '#f80', size: 5 },
+        })
+      }
+
+      return serieses
+    },
+
+    async parseInfoTxt(city: string) {
+      const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
+
+      const response = await fetch(filepath)
+      const text = await response.text()
+      const parsed: any = Papa.parse(text, { header: true, dynamicTyping: false })
+
+      return parsed.data
+    },
+
+    async loadInfoTxt() {
+      console.log('_info.txt: generating lookups')
+
+      const infoTxt = await this.parseInfoTxt(this.city)
+
+      const measures: any = {}
+      const runLookup: any = {}
+
+      // first get column names for the measures that have been tested
+      const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+
+      for (const label of Object.keys(infoTxt[0])) {
+        if (ignore.indexOf(label) > -1) continue
+        measures[label] = new Set()
+      }
+
+      // get all possible values
+      for (const row of infoTxt) {
+        if (row.RunId == undefined) continue
+
+        // note this particular value, for every value
+        for (const measure of Object.keys(measures)) {
+          if (row[measure] === 0 || row[measure]) measures[measure].add('' + row[measure])
+        }
+
+        // store the run in a lookup using all values as the key
+        let lookupKey = ''
+        for (const measure of Object.keys(measures)) {
+          lookupKey += row[measure] + '-'
+        }
+        runLookup[lookupKey] = row
+      }
+
       for (const measure of Object.keys(measures)) {
-        if (row[measure] === 0 || row[measure]) measures[measure].add('' + row[measure])
+        measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) =>
+          a < b ? -1 : 1
+        )
       }
 
-      // store the run in a lookup using all values as the key
-      let lookupKey = ''
-      for (const measure of Object.keys(measures)) {
-        lookupKey += row[measure] + '-'
+      this.runLookup = runLookup
+      this.measureOptions = measures
+
+      // Runs v8 and v9 require this because they don't have an sz0 run:
+      this.currentRun = infoTxt[0].RunId
+
+      // if there is only one run, just load it right away
+      if (Object.keys(runLookup).length == 1) {
+        this.currentRun = infoTxt[0]
+        this.loadZipFile(this.currentRun.RunId)
+        this.runChanged(this.currentRun)
       }
-      runLookup[lookupKey] = row
-    }
-
-    for (const measure of Object.keys(measures)) {
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) =>
-        a < b ? -1 : 1
-      )
-    }
-
-    this.runLookup = runLookup
-    this.measureOptions = measures
-
-    // Runs v8 and v9 require this because they don't have an sz0 run:
-    this.currentRun = infoTxt[0].RunId
-
-    // if there is only one run, just load it right away
-    if (Object.keys(runLookup).length == 1) {
-      this.currentRun = infoTxt[0]
-      this.loadZipFile(this.currentRun.RunId)
-      this.runChanged(this.currentRun)
-    }
-  }
-
-  private mdParser = new MarkdownIt()
-
-  private async updateNotes() {
-    const url = this.BATTERY_URL + this.runId + '/' + this.runYaml.readme
-
-    const response = await fetch(url)
-
-    if (response.status !== 200) return
-
-    const text = await response.text()
-
-    // bad url
-    if (text.startsWith('<!DOCTYPE')) return
-
-    this.cityMarkdownNotes = this.mdParser.render(text)
-  }
-
-  private get topNotes() {
-    if (!this.cityMarkdownNotes) return ''
-
-    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
-
-    if (i < 0) return this.cityMarkdownNotes
-    return this.cityMarkdownNotes.substring(0, i)
-  }
-
-  private get bottomNotes() {
-    if (!this.cityMarkdownNotes) return ''
-
-    const i = this.cityMarkdownNotes.indexOf(this.plotTag)
-
-    if (i < 0) return ''
-    return this.cityMarkdownNotes.substring(i + this.plotTag.length)
-  }
-
-  private updateSideMenu(categorie: string) {
-    const index = this.sideMenuCategories.indexOf(categorie)
-    this.activeSideMenu = index == this.activeSideMenu ? -1 : index
-  }
-
-  private allPlotsCheckIsUsedInThisRun() {
-    return this.allPlots.filter(function (u) {
-      return u.usedInThisRun
-    })
-  }
-
-  private showVegaPlots(id: string) {
-    if (this.vegaChartData[id].isVisible) {
-      this.vegaChartData[id].isVisible = false
-    } else {
-      this.vegaChartData[id].isVisible = true
-    }
-  }
-
-  private showPlotMenu(index: any) {
-    if (index === 'allActive') {
-      this.allPlots.forEach(element => (element.active = true))
-    } else if (index === 'allInactive') {
-      this.allPlots.forEach(element => (element.active = false))
-    } else {
-      this.allPlots[index].active = !this.allPlots[index].active
-    }
-  }
-}
+    },
+  },
+})
 
 // ###########################################################################
 </script>
