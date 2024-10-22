@@ -1,5 +1,5 @@
 <template lang="pug">
-#slider-thing
+.slector-widget
   .button-choices(v-if="showButtons")
     button.button.is-small(
       v-for="choice in stops"
@@ -12,67 +12,75 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-@Component({
+export default defineComponent({
+  name: 'SelectWidget',
   components: {},
-})
-export default class SectionViewer extends Vue {
-  @Prop({ required: true }) private state!: any
-  @Prop({ required: true }) private measure!: any
+  props: {
+    state: { type: Object, required: true },
+    measure: { type: String, required: true },
+  },
+  data() {
+    return {
+      value: 0 as any,
+      stops: [0, 1000] as any,
+      showButtons: false,
+      interventions: {
+        remainingFractionLeisure1: 'Leisure activities',
 
-  private value: any = 0
-  private stops: any[] = [0, 1000]
+        remainingFractionWork: 'Work activities',
+        remainingFractionLeisure2: 'Leisure activities',
+        remainingFractionShoppingBusinessErrands: 'All other activities',
 
-  private showButtons = false
-
-  private interventions: any = {
-    remainingFractionLeisure1: 'Leisure activities',
-
-    remainingFractionWork: 'Work activities',
-    remainingFractionLeisure2: 'Leisure activities',
-    remainingFractionShoppingBusinessErrands: 'All other activities',
-
-    remainingFractionKiga: 'Going to kindergarten',
-    remainingFractionPrima: 'Going to primary school',
-    remainingFractionSecon: 'Going to secondary/univ.',
-  }
-
-  private choseButton(choice: string) {
-    console.log(choice)
-    this.value = choice
-  }
-
-  private mounted() {
-    this.updateOptions()
-  }
-
-  private updateOptions() {
-    const experiments = []
-
-    for (const x of this.state.measures[this.measure]) {
-      let label = '' + x * 100 + '%'
-
-      this.value = label // select first choice
-      this.showButtons = true
-
-      experiments.push(label)
+        remainingFractionKiga: 'Going to kindergarten',
+        remainingFractionPrima: 'Going to primary school',
+        remainingFractionSecon: 'Going to secondary/univ.',
+      } as any,
     }
+  },
 
-    this.stops = experiments
-  }
+  mounted() {
+    this.updateOptions()
+  },
 
-  private get measureTitle() {
-    return this.interventions[this.measure]
-  }
+  computed: {
+    measureTitle() {
+      return this.interventions[this.measure]
+    },
+  },
 
-  @Watch('value')
-  private valueChanged() {
-    let answer = this.value.substring(0, this.value.length - 1)
-    answer = parseFloat(answer) / 100.0
-    this.$emit('changed', this.measure, answer)
-  }
-}
+  watch: {
+    value() {
+      let answer = this.value.substring(0, this.value.length - 1)
+      answer = parseFloat(answer) / 100.0
+      this.$emit('changed', this.measure, answer)
+    },
+  },
+
+  methods: {
+    choseButton(choice: string) {
+      console.log(choice)
+      this.value = choice
+    },
+
+    updateOptions() {
+      const experiments = []
+
+      for (const x of this.state.measures[this.measure]) {
+        let label = '' + x * 100 + '%'
+
+        this.value = label // select first choice
+        this.showButtons = true
+
+        experiments.push(label)
+      }
+
+      this.stops = experiments
+    },
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

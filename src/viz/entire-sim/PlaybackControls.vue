@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.my-vue-component
   vue-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
@@ -8,118 +8,108 @@
 
   .buttons
     .playpause(@click='toggleSimulation')
-      i.button-icon.fa.fa-1x.fa-pause(v-if="isRunning")
+      i.button-icon.fa.fa-1x.fa-pause(v-if="state.isRunning")
       i.button-icon.fa.fa-1x.fa-play(v-else)
 
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import VueSlider from 'vue-slider-component'
 import * as timeConvert from 'convert-seconds'
 
-@Component({ components: { VueSlider }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true })
-  private isRunning!: boolean
+import store from '@/store'
+import EventBus from '@/EventBus.vue'
 
-  @Prop({ required: true })
-  private timeStart!: number
+export default defineComponent({
+  name: 'PlaybackControls',
+  components: { VueSlider },
 
-  @Prop({ required: true })
-  private timeEnd!: number
+  data: () => {
+    const maxSliderVal = 100000.0
 
-  @Prop({ required: true })
-  private currentTime!: number
+    return {
+      state: store.state,
+      sliderValue: 0,
+      maxSliderVal,
+      sliderOptions: {
+        min: 0,
+        max: maxSliderVal - 1,
+        clickable: false,
+        dotSize: 28,
+        duration: 0,
+        lazy: true,
+        tooltip: 'active',
+        'tooltip-placement': 'top',
+      } as any,
+    }
+  },
 
-  @Prop({ required: true })
-  private currentDay!: number
+  methods: {
+    convertSecondsToClockTimeMinutes(index: number) {
+      const seconds = this.getSecondsFromSlider(index)
 
-  private sliderValue = 0
-
-  private sliderOptions = {
-    min: 0,
-    max: 10000000,
-    clickable: false,
-    dotSize: 30,
-    duration: 0,
-    lazy: true,
-    tooltip: 'active',
-    'tooltip-placement': 'top',
-    'tooltip-formatter': (v: number) => {
-      return this.createTooltipFromValue(v)
+      try {
+        const hms = timeConvert(seconds)
+        const minutes = ('00' + hms.minutes).slice(-2)
+        return `${hms.hours}:${minutes}`
+      } catch (e) {
+        return '00:00'
+      }
     },
-  }
 
-  private toggleSimulation() {
-    this.$emit('click')
-  }
+    onKeyPressed(ev: KeyboardEvent) {
+      if (ev.code === 'Space') this.toggleSimulation()
+    },
 
-  private createTooltipFromValue(value: number) {
-    const totalSeconds = this.getSecondsFromSlider(value)
-    const day = 1 + Math.floor(totalSeconds / 86400)
-    const secondsToday = totalSeconds % 86400
-
-    try {
-      const hms = timeConvert(secondsToday)
-      const minutes = ('00' + hms.minutes).slice(-2)
-      return `Day ${day}` // : ${hms.hours}:${minutes}`
-    } catch (e) {
-      return ''
-    }
-  }
-
-  private pauseWhileDragging = false
-
-  private dragStart() {
-    if (this.isRunning) {
-      this.pauseWhileDragging = true
+    toggleSimulation() {
       this.$emit('click')
-    }
-  }
+    },
 
-  private dragEnd() {
-    if (this.pauseWhileDragging) this.$emit('click')
-    this.pauseWhileDragging = false
-  }
+    dragStart() {
+      console.log('start')
+      EventBus.$emit(EventBus.DRAG, -1)
+    },
 
-  private dragging(value: number) {
-    this.$emit('time', this.getSecondsFromSlider(value))
-  }
+    dragEnd() {
+      console.log('end')
+      EventBus.$emit(EventBus.DRAG, -2)
+    },
 
-  private onKeyPressed(ev: KeyboardEvent) {
-    if (ev.code === 'Space') this.toggleSimulation()
-  }
+    dragging(value: any) {
+      EventBus.$emit(EventBus.DRAG, this.getSecondsFromSlider(value))
+    },
 
-  private getSecondsFromSlider(value: number) {
-    let seconds = ((this.timeEnd - this.timeStart) * value) / 10000000.0
-    if (seconds === this.timeEnd) seconds = this.timeEnd - 1
-    return seconds
-  }
+    getSecondsFromSlider(oneToTenThousand: number) {
+      let seconds = (oneToTenThousand / this.maxSliderVal) * 86400
+      if (seconds === 86400) seconds = 86400 - 1
+      return seconds
+    },
+  },
 
-  @Watch('currentTime')
-  @Watch('currentDay')
-  handleTimeChanged() {
-    const totalSeconds = 86400.0 * (this.currentDay - 1) + this.currentTime
+  mounted() {
+    this.sliderOptions['tooltip-formatter'] = this.convertSecondsToClockTimeMinutes
 
-    this.sliderValue =
-      (10000000.0 * (totalSeconds - this.timeStart)) / (this.timeEnd - this.timeStart)
-  }
-
-  private mounted() {
+    EventBus.$on(EventBus.SIMULATION_PERCENT, (time: number) => {
+      this.sliderValue = Math.floor(this.maxSliderVal * time)
+    })
     window.addEventListener('keyup', this.onKeyPressed)
-  }
+  },
 
-  private beforeDestroy() {
+  beforeDestroy() {
+    EventBus.$off(EventBus.SIMULATION_PERCENT)
     window.removeEventListener('keyup', this.onKeyPressed)
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">
+@import '~/vue-slider-component/theme/antd.css';
 @import '@/styles.scss';
 
-#vue-component {
+.my-vue-component {
   display: flex;
   flex-direction: row;
 }

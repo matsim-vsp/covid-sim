@@ -14,42 +14,40 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import VueSlideBar from 'vue-slide-bar'
 
-@Component({
-  components: {
-    VueSlideBar,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'SelectWidget',
+  components: { VueSlideBar },
+  props: {
+    state: { type: Object, required: true },
+    measure: { type: String, required: true },
   },
-})
-export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-  @Prop() private measure!: any
+  data() {
+    return {
+      value: 0 as any,
+      stops: [0, 1000],
+      showButtons: false,
+      showSlider: true,
 
-  private value: any = 0
-  private stops: any[] = [0, 1000]
+      interventions: {
+        remainingFractionKiga: 'Going to kindergarten',
+        remainingFractionPrimary: 'Going to primary school',
+        remainingFractionSecondary: 'Going to secondary school',
+        remainingFractionHigher: 'Going to univ./higher ed.',
 
-  private showButtons = false
-  private showSlider = true
+        remainingFractionWork: 'Work activities',
+        remainingFractionShopping: 'Shopping activities',
+        remainingFractionLeisure: 'Leisure activities',
+        remainingFractionErrandsBusiness: 'Errands & Business',
+      } as any,
+    }
+  },
 
-  private interventions: any = {
-    remainingFractionKiga: 'Going to kindergarten',
-    remainingFractionPrimary: 'Going to primary school',
-    remainingFractionSecondary: 'Going to secondary school',
-    remainingFractionHigher: 'Going to univ./higher ed.',
-
-    remainingFractionWork: 'Work activities',
-    remainingFractionShopping: 'Shopping activities',
-    remainingFractionLeisure: 'Leisure activities',
-    remainingFractionErrandsBusiness: 'Errands & Business',
-  }
-
-  private choseButton(choice: string) {
-    console.log(choice)
-    this.value = choice
-  }
-
-  private mounted() {
+  mounted() {
     const experiments = []
     for (const x of this.state.measures[this.measure]) {
       let label = x
@@ -69,32 +67,41 @@ export default class SectionViewer extends Vue {
 
     this.stops = experiments.map(x => (x <= 1 ? x * 100 : x))
     if (this.showSlider) this.value = 'Never'
-  }
+  },
 
-  private get measureTitle() {
-    return this.interventions[this.measure]
-  }
+  computed: {
+    measureTitle() {
+      return this.interventions[this.measure]
+    },
+  },
+  watch: {
+    value() {
+      let answer = this.value
+      if (answer === 'Never') {
+        answer = 1000
+      } else if (answer === '20%') {
+        answer = 0.2
+      } else if (answer === '40%') {
+        answer = 0.4
+      } else if (answer === '60%') {
+        answer = 0.6
+      } else if (answer === '80%') {
+        answer = 0.8
+      } else if (!isNaN(answer)) {
+        answer = 0.01 * answer
+      }
+      console.log(answer)
+      this.$emit('changed', this.measure, answer)
+    },
+  },
 
-  @Watch('value')
-  private valueChanged() {
-    let answer = this.value
-    if (answer === 'Never') {
-      answer = 1000
-    } else if (answer === '20%') {
-      answer = 0.2
-    } else if (answer === '40%') {
-      answer = 0.4
-    } else if (answer === '60%') {
-      answer = 0.6
-    } else if (answer === '80%') {
-      answer = 0.8
-    } else if (!isNaN(answer)) {
-      answer = 0.01 * answer
-    }
-    console.log(answer)
-    this.$emit('changed', this.measure, answer)
-  }
-}
+  methods: {
+    choseButton(choice: string) {
+      console.log(choice)
+      this.value = choice
+    },
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

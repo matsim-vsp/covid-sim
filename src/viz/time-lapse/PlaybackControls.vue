@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.pbvue-component
   vue-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
@@ -14,55 +14,41 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VueSlider from 'vue-slider-component'
 import * as timeConvert from 'convert-seconds'
 
 import store from '@/store'
 import EventBus from '@/EventBus.vue'
 
-@Component({ components: { VueSlider }, props: {} })
-export default class VueComponent extends Vue {
-  private state = store.state
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private sliderValue = 0
-  private maxSliderVal = 90.0
+export default defineComponent({
+  name: 'PlaybackControls',
+  components: { VueSlider },
+  props: {},
+  data() {
+    return {
+      state: store.state,
 
-  private sliderOptions = {
-    min: 0,
-    max: 90,
-    clickable: false,
-    dotSize: 28,
-    duration: 0,
-    lazy: true,
-    tooltip: 'active',
-    'tooltip-placement': 'top',
-    'tooltip-formatter': (v: number) => {
-      return 'Day ' + Math.floor(v)
-    },
-  }
+      sliderValue: 0,
+      maxSliderVal: 90.0,
 
-  private toggleSimulation() {
-    this.$emit('click')
-  }
-
-  private dragStart() {
-    console.log('start')
-    EventBus.$emit(EventBus.DRAG, -1)
-  }
-
-  private dragEnd() {
-    console.log('end')
-    EventBus.$emit(EventBus.DRAG, -2)
-  }
-
-  private dragging(value: any) {
-    EventBus.$emit(EventBus.DRAG, Math.floor(value))
-  }
-
-  private onKeyPressed(ev: KeyboardEvent) {
-    if (ev.code === 'Space') this.toggleSimulation()
-  }
+      sliderOptions: {
+        min: 0,
+        max: 90,
+        clickable: false,
+        dotSize: 28,
+        duration: 0,
+        lazy: true,
+        tooltip: 'active',
+        'tooltip-placement': 'top',
+        'tooltip-formatter': (v: number) => {
+          return 'Day ' + Math.floor(v)
+        },
+      },
+    }
+  },
 
   mounted() {
     const parent = this
@@ -72,19 +58,45 @@ export default class VueComponent extends Vue {
     })
 
     window.addEventListener('keyup', this.onKeyPressed)
-  }
+  },
 
   beforeDestroy() {
     EventBus.$off(EventBus.SIMULATION_PERCENT)
     window.removeEventListener('keyup', this.onKeyPressed)
-  }
-}
+  },
+
+  computed: {},
+  watch: {},
+
+  methods: {
+    toggleSimulation() {
+      this.$emit('click')
+    },
+
+    dragStart() {
+      console.log('start')
+      EventBus.$emit(EventBus.DRAG, -1)
+    },
+
+    dragEnd() {
+      console.log('end')
+      EventBus.$emit(EventBus.DRAG, -2)
+    },
+    dragging(value: any) {
+      EventBus.$emit(EventBus.DRAG, Math.floor(value))
+    },
+
+    onKeyPressed(ev: KeyboardEvent) {
+      if (ev.code === 'Space') this.toggleSimulation()
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
 @import '@/styles.scss';
 
-#vue-component {
+.pbvue-component {
   display: flex;
   flex-direction: row;
 }

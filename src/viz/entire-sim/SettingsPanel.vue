@@ -1,15 +1,5 @@
 <template lang="pug">
 .settings-panel-content
-  //- h4 Ein-/Ausblenden
-
-  //- .row(:key="label" v-for="label in Object.keys(items)")
-  //-   toggle-button.toggle(
-  //-     :width="40"
-  //-     :value="items[label]"
-  //-     :labels="false"
-  //-     :color="{checked: '#4b7cc4', unchecked: '#222'}"
-  //-     @change="$emit('click',label)")
-  //-   label {{ label }}
 
 </template>
 

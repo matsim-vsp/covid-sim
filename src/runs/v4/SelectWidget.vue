@@ -14,38 +14,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import VueSlideBar from 'vue-slide-bar'
 
-@Component({
+export default defineComponent({
+  name: 'SelectWidget',
   components: {
     VueSlideBar,
   },
-})
-export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-  @Prop() private measure!: any
+  props: {
+    state: { type: Object, required: true },
+    measure: { type: String, required: true },
+  },
+  data() {
+    return {
+      value: 0 as any,
+      stops: [0, 1000],
+      showButtons: false,
+      showSlider: true,
+      interventions: {
+        remainingFractionKiga: 'Going to kindergarten',
+        remainingFractionPrimary: 'Going to primary school',
+        remainingFractionSecondary: 'Going to secondary school',
+        remainingFractionHigher: 'Going to univ./higher ed.',
+        ShutdownType: 'Shutdown type',
+      } as any,
+    }
+  },
 
-  private value: any = 0
-  private stops: any[] = [0, 1000]
-
-  private showButtons = false
-  private showSlider = true
-
-  private interventions: any = {
-    remainingFractionKiga: 'Going to kindergarten',
-    remainingFractionPrimary: 'Going to primary school',
-    remainingFractionSecondary: 'Going to secondary school',
-    remainingFractionHigher: 'Going to univ./higher ed.',
-    ShutdownType: 'Shutdown type',
-  }
-
-  private choseButton(choice: string) {
-    console.log(choice)
-    this.value = choice
-  }
-
-  private mounted() {
+  mounted() {
     const experiments = []
     for (const x of this.state.measures[this.measure]) {
       let label = x
@@ -63,27 +62,36 @@ export default class SectionViewer extends Vue {
 
     this.stops = experiments.map(x => (x <= 1 ? x * 100 : x))
     if (this.showSlider) this.value = 'Never'
-  }
+  },
 
-  private get measureTitle() {
-    return this.interventions[this.measure]
-  }
+  computed: {
+    measureTitle() {
+      return this.interventions[this.measure]
+    },
+  },
+  watch: {
+    value() {
+      let answer = this.value
+      if (answer === 'Never') {
+        answer = 1000
+      } else if (answer === 'Type A') {
+        answer = 'weak'
+      } else if (answer === 'Type B') {
+        answer = 'strong'
+      } else if (!isNaN(answer)) {
+        answer = 0.01 * answer
+      }
+      this.$emit('changed', this.measure, answer)
+    },
+  },
 
-  @Watch('value')
-  private valueChanged() {
-    let answer = this.value
-    if (answer === 'Never') {
-      answer = 1000
-    } else if (answer === 'Type A') {
-      answer = 'weak'
-    } else if (answer === 'Type B') {
-      answer = 'strong'
-    } else if (!isNaN(answer)) {
-      answer = 0.01 * answer
-    }
-    this.$emit('changed', this.measure, answer)
-  }
-}
+  methods: {
+    choseButton(choice: string) {
+      console.log(choice)
+      this.value = choice
+    },
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

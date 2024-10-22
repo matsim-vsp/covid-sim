@@ -17,13 +17,11 @@ import type { PropType } from 'vue'
 
 import MarkdownIt from 'markdown-it'
 import textNoSuchRun from '@/assets/no-such-run.md?raw'
-const mdParser = new MarkdownIt()
-
-interface Breadcrumb {
-  title: string
-  url: string
-  isActive?: boolean
-}
+const mdParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
 export default defineComponent({
   name: 'MessagePane',
