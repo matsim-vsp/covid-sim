@@ -38,7 +38,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .outer {
   display: flex;
@@ -60,7 +60,9 @@ export default defineComponent({
   background-color: var(--bgCream3);
   outline: none;
   color: #888;
-  transition: background-color 0.25s, border-radius 0.15s;
+  transition:
+    background-color 0.25s,
+    border-radius 0.15s;
 }
 
 .xbutton:hover {

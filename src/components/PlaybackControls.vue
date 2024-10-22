@@ -106,8 +106,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import '~/vue-slider-component/theme/antd.css';
-@import '@/styles.scss';
+@use '~/vue-slider-component/theme/antd.css' as *;
+@use '@/styles.scss' as *;
 
 .my-vue-component {
   display: flex;

@@ -210,7 +210,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 @media only screen and (max-width: 640px) {
 }

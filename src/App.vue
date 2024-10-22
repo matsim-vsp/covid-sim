@@ -36,8 +36,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/styles.scss';
-@import '~/bulma/css/bulma.min.css';
+@use '@/styles.scss' as *;
+@use '~/bulma/css/bulma.min.css' as *;
 
 *,
 *::before,

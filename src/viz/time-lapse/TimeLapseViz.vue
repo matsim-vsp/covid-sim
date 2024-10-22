@@ -299,8 +299,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import '~/vue-slider-component/theme/default.css';
-@import '@/styles.scss';
+@use '~/vue-slider-component/theme/default.css' as *;
+@use '@/styles.scss' as *;
 
 #v3-app {
   position: absolute;

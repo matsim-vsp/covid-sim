@@ -510,7 +510,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .mobility-page {
   background-color: $paleBackground;

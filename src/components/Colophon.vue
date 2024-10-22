@@ -44,7 +44,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 #colophon-content {
   padding-top: 2rem;

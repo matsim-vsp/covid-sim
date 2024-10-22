@@ -301,9 +301,9 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-// @import '~/vue-slider-component/theme/default.css';
-@import '~/vue-slider-component/theme/antd.css';
-@import '@/styles.scss';
+// @use '~/vue-slider-component/theme/default.css';
+@use '~/vue-slider-component/theme/antd.css' as *;
+@use '@/styles.scss' as *;
 
 #v3-app {
   position: absolute;
