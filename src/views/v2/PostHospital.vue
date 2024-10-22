@@ -20,6 +20,8 @@ import type { PropType } from 'vue'
 
 import rkiCovidSariHospitalizationData from '@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv?raw'
 
+import HospitalWorker from './postHospital.worker?worker'
+
 export default defineComponent({
   name: 'PostHospital',
   components: { VuePlotly },
@@ -204,6 +206,7 @@ export default defineComponent({
               title: 'Occupancy / 100k Pop.',
             }
       }
+      this.layout = { ...this.layout }
     },
 
     async unselectLines() {
@@ -227,7 +230,7 @@ export default defineComponent({
 
     async calculateValues() {
       if (!this.postProcessWorker) {
-        this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
+        this.postProcessWorker = await spawn(new HospitalWorker())
       }
 
       if (!this.data.length) {

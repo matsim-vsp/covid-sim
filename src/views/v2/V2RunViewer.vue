@@ -1154,6 +1154,7 @@ export default defineComponent({
 
     logScale() {
       this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+      this.layout = { ...this.layout }
     },
 
     chartYamlFiles() {
@@ -1336,7 +1337,7 @@ export default defineComponent({
         const z = await this.zipWorker.extractFile(filename)
 
         this.seedComparison = z.data
-        console.log(this.seedComparison)
+        // console.log(this.seedComparison)
       } catch (e) {
         this.seedComparison = []
         console.log('Seed Comparison: no', filename)

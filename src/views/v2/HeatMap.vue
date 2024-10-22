@@ -16,7 +16,7 @@ export default defineComponent({
   props: {
     data: { type: String, required: true },
     endDate: { type: String, required: true },
-    heatMapMaxValue: { type: Number, required: true },
+    // heatMapMaxValue: { type: Number, required: false },
   },
 
   data() {

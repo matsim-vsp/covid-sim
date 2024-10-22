@@ -22,7 +22,7 @@ export default defineComponent({
   props: {
     city: { type: String, required: true },
     battery: { type: String, required: true },
-    currentRun: { type: Object, required: true },
+    currentRun: { type: [String, Object] as PropType<any>, required: true },
     startDate: { type: String, required: true },
     endDate: { type: String, required: true },
     plusminus: { type: Number, required: true },
@@ -236,7 +236,7 @@ export default defineComponent({
     },
 
     async loadCSV() {
-      if (!this.currentRun.RunId) return []
+      if (!this.currentRun?.RunId) return []
       if (!this.zipWorker) return []
 
       const filename = this.currentRun.RunId + '.restrictions.txt.csv'

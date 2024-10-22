@@ -14,9 +14,9 @@ export default defineComponent({
   name: 'DiseaseImport',
   components: { VuePlotly },
   props: {
-    startDate: { type: Object, required: true },
-    endDate: { type: Object, required: true },
     data: { type: Array as PropType<any[]>, required: true },
+    startDate: { type: String, required: true },
+    endDate: { type: String, required: true },
     logScale: { type: Boolean, required: true },
     metadata: { type: Object, required: true },
   },
@@ -96,7 +96,7 @@ export default defineComponent({
     this.calculateValues()
     this.unselectLines()
 
-    console.log(this.data)
+    // console.log(this.data)
   },
 
   computed: {},
@@ -166,6 +166,7 @@ export default defineComponent({
             autorange: true,
             title: 'nInfected',
           }
+      this.layout = { ...this.layout }
     },
 
     unselectLines() {

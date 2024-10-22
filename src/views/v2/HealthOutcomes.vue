@@ -132,7 +132,7 @@ export default defineComponent({
     dataLines: {
       deep: true,
       handler: async function () {
-        console.log(this.dataLines)
+        // console.log(this.dataLines)
         for (let i = 0; i < this.dataLines.length; i++) {
           if (
             this.dataLines[i].visible == 'legendonly' &&
@@ -171,6 +171,7 @@ export default defineComponent({
         delete this.layout.yaxis.range // [0, 1.5]
         this.layout.yaxis.autorange = true
       }
+      this.layout = { ...this.layout }
     },
 
     restylePlot(event: any) {
@@ -188,7 +189,7 @@ export default defineComponent({
       }
 
       this.dataLines = data
-      console.log(this.dataLines)
+      // console.log(this.dataLines)
     },
 
     unselectLines() {

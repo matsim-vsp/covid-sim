@@ -124,6 +124,7 @@ export default defineComponent({
             autorange: true,
             title: '7-Day Infections / 100k Pop.',
           }
+      this.layout = { ...this.layout }
     },
 
     dataLines: {

@@ -151,6 +151,7 @@ export default defineComponent({
         delete this.layout.yaxis.range // [0, 1.5]
         this.layout.yaxis.autorange = true
       }
+      this.layout = { ...this.layout }
     },
 
     dataLines: {

@@ -178,7 +178,7 @@ export default defineComponent({
   },
 
   mounted() {
-    console.log(this.strainValues)
+    // console.log(this.strainValues)
     this.loadStartURL()
 
     // If the simulation begins in the middle of a pandemic, then we need to add together susceptible, infected, and
@@ -230,6 +230,7 @@ export default defineComponent({
         //this.layout2.yaxis.range = [0.01, 100]
         //this.layout2.yaxis.range = [0, 100]
       }
+      this.layout = { ...this.layout }
     },
 
     dataLines: {
@@ -592,7 +593,6 @@ export default defineComponent({
         // Remove null values at the end
         for (let [key, value] of VOCMap) {
           if (key != 0) {
-            console.log(value.data)
             for (let i = value.data.length - 1; i >= 0; i--) {
               if (value.data[i] == 0) value.data.pop()
               else break
@@ -605,7 +605,7 @@ export default defineComponent({
             // Skip Date (0) and BA.2.9 (11)
             if (key == 0 || key == 11) continue
 
-            console.log(key, headerCologne[key])
+            // console.log(key, headerCologne[key])
 
             this.lineDataLookup[value.name] = {
               visible: true,

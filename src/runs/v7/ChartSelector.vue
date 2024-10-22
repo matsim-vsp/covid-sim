@@ -269,6 +269,7 @@ export default defineComponent({
 
     logScale() {
       this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+      this.layout = { ...this.layout }
     },
   },
 

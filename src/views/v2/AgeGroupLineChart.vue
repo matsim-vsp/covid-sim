@@ -114,6 +114,7 @@ export default defineComponent({
             //autorange: true,
             title: 'Incidence',
           }
+      this.layout = { ...this.layout }
     },
 
     dataMatrix: {

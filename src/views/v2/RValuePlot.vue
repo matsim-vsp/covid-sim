@@ -133,6 +133,7 @@ export default defineComponent({
         this.layout.yaxis.type = 'linear'
         // this.layout.yaxis.range = [0, 2]
       }
+      this.layout = { ...this.layout }
     },
 
     dataLines: {

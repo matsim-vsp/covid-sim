@@ -97,8 +97,6 @@ export default defineComponent({
   computed: {},
   watch: {
     $route(to: Route, from: Route) {
-      console.log('ROUTE CHANGED', to)
-
       // skip a reload if only the search query changed.
       if (to.path === from.path) return
 
@@ -137,6 +135,7 @@ export default defineComponent({
           : 'Viewer V1'
 
         this.allRuns.push({ name: readYaml.city, yaml: readYaml, runId: this.runId, crumbs })
+
         this.city = readYaml.city
         this.currentCity = 0
       } catch (e) {

@@ -143,6 +143,7 @@ export default defineComponent({
             autorange: true,
             title: 'Hospitalizations / 100k Pop.',
           }
+      this.layout = { ...this.layout }
     },
 
     dataLines: {

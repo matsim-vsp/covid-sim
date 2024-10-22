@@ -362,6 +362,7 @@ export default defineComponent({
         //this.layout.yaxis.type = 'linear'
         this.layout.yaxis.autorange = true
       }
+      this.layout = { ...this.layout }
     },
 
     unselectLines() {
