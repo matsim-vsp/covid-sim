@@ -58,20 +58,15 @@ echo "FILTER the RKI csv file ---"
 ## python3 scripts/rki-update.py rki.csv
 ## echo After rki-update.py
 ##
-## echo BUILD: Check out SVN and move *.csv files
-## # put them in the right places
-## svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
-##    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
-##
-## cp *cases* src/assets
-## cp *cases* Fallzahlen/RKI
 
-# this should be unnecessary. Thanks RKI
-mkdir -p Fallzahlen/RKI Fallzahlen/Berlin Fallzahlen/Other
+echo BUILD: Check out SVN and move *.csv files
+svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
+      https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
+cp *cases* src/assets
+cp *cases* Fallzahlen/RKI
 
 echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
-
 cp COVID-SARI-* Fallzahlen/RKI
 
 echo BUILD: Commit cases to SVN
@@ -87,7 +82,6 @@ echo BUILD: Process DIVI Cases
 
 cd Fallzahlen/DIVI
 
-# export SRC="https://diviexchange.blob.core.windows.net/%24web/zeitreihe-tagesdaten.csv"
 export SRC="https://raw.githubusercontent.com/robert-koch-institut/Intensivkapazitaeten_und_COVID-19-Intensivbettenbelegung_in_Deutschland/0b98fce502cadcdab724abc456e80c02ba258c0a/Intensivregister_Landkreise_Kapazitaeten.csv"
 export OUT="zeitreihe-tagesdaten.csv"
 wget -qO - ${SRC} > $OUT
