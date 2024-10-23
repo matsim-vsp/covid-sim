@@ -44,27 +44,31 @@ echo "FILTER the RKI csv file ---"
 
 # fetch the RKI hospitalization data from Github, data is in:
 # https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland
-echo BUILD: Fetch latest RKI hospitalization stats from Github
-git clone https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland COVID-Hospitalization
-cp -f COVID-Hospitalization/Archiv/`ls COVID-Hospitalization/Archiv | tail -1` src/assets/rki-deutschland-hospitalization.csv
 
-echo BUILD: Create [city]-cases.csv files
-# create the [city]-cases.csv files
-python3 --version
-echo Before rki-update.py
-python3 scripts/rki-update.py rki.csv
-echo After rki-update.py
-
-echo BUILD: Check out SVN and move *.csv files
-# put them in the right places
-svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
-    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
-
-cp *cases* src/assets
-cp *cases* Fallzahlen/RKI
+##  *** NOTE - BILLY COMMENTED THIS OUT 23-OCT-2024 because RKI deleted/moved these files:
+##
+## echo BUILD: Fetch latest RKI hospitalization stats from Github
+## git clone https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland COVID-Hospitalization
+## cp -f COVID-Hospitalization/Archiv/`ls COVID-Hospitalization/Archiv | tail -1` src/assets/rki-deutschland-hospitalization.csv
+##
+## echo BUILD: Create [city]-cases.csv files
+## # create the [city]-cases.csv files
+## python3 --version
+## echo Before rki-update.py
+## python3 scripts/rki-update.py rki.csv
+## echo After rki-update.py
+##
+## echo BUILD: Check out SVN and move *.csv files
+## # put them in the right places
+## svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
+##    https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
+##
+## cp *cases* src/assets
+## cp *cases* Fallzahlen/RKI
 
 echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
+
 cp COVID-SARI-* Fallzahlen/RKI
 
 echo BUILD: Commit cases to SVN
