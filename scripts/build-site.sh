@@ -104,8 +104,6 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Au
 # Back to root folder
 cd ../..
 
-export NODE_OPTIONS="--openssl-legacy-provider"
-
 # Build docs first
 cd docs
 yarn
@@ -113,6 +111,6 @@ yarn build
 cd ..
 
 # DONE WITH PREP! Build the site.
-echo BUILD: Finally lets build the site
-yarn install
-yarn run build && yarn run test:unit
+echo BUILD: Run NODE/VITE builder
+npm ci
+npm run build
