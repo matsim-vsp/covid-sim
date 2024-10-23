@@ -62,8 +62,10 @@ echo "FILTER the RKI csv file ---"
 echo BUILD: Check out SVN and move *.csv files
 svn checkout --username $SVN_USER --password $SVN_PASSWORD --no-auth-cache --depth infinity \
       https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/
-cp *cases* src/assets
-cp *cases* Fallzahlen/RKI
+
+# TODO BILLY - need to uncomment this after the RKI stuff above is fixed **
+# cp *cases* src/assets
+# cp *cases* Fallzahlen/RKI
 
 echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
