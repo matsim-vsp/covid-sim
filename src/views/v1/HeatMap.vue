@@ -5,7 +5,7 @@ vue-plotly(v-if="!isResizing" :data="dataMatrix" :layout="layout" :options="opti
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import { log, transpose } from 'mathjs'
 
 @Component({ components: { VuePlotly }, props: {} })
@@ -144,7 +144,7 @@ export default class VueComponent extends Vue {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 @media only screen and (max-width: 640px) {
 }

@@ -8,81 +8,87 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import YAML from 'yaml'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 
 import { Component, Vue } from 'vue-property-decorator'
 import SectionViewer from './ChartSelector.vue'
 
-@Component({
-  components: {
-    SectionViewer,
+import md from 'markdown-it'
+const mdParser = new md()
+import readme from '@/assets/v1-notes.md?raw'
+
+export default defineComponent({
+  name: 'V1',
+  components: { SectionViewer },
+  data() {
+    return {
+      state: {
+        measures: {},
+        runLookup: {},
+        publicPath: '/',
+      },
+      readme: mdParser.render(readme, {}),
+    }
   },
-})
-export default class App extends Vue {
-  private state: any = {
-    measures: {},
-    runLookup: {},
-    publicPath: '/',
-  }
 
-  private readme = require('@/assets/v1-notes.md')
-
-  public async mounted() {
+  async mounted() {
     const parsed = await this.loadIndexData()
     const matrix = await this.generateScenarioMatrix(parsed)
-  }
+  },
 
-  private async loadIndexData() {
-    console.log('fetching data')
-    const response = await fetch('/v1-info.txt')
-    const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
-    console.log({ parsed: parsed.data })
+  methods: {
+    async loadIndexData() {
+      console.log('fetching data')
+      const response = await fetch('/v1-info.txt')
+      const text = await response.text()
+      const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
+      console.log({ parsed: parsed.data })
 
-    return parsed.data
-  }
+      return parsed.data
+    },
 
-  private async generateScenarioMatrix(parsed: any[]) {
-    console.log('generating lookups')
-    const measures: any = {}
-    const runLookup: any = {}
+    async generateScenarioMatrix(parsed: any[]) {
+      console.log('generating lookups')
+      const measures: any = {}
+      const runLookup: any = {}
 
-    // first get column names for the measures that have been tested
-    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+      // first get column names for the measures that have been tested
+      const ignore = ['Config', 'Output', 'RunId', 'RunScript']
 
-    for (const label of Object.keys(parsed[0])) {
-      if (ignore.indexOf(label) > -1) continue
-      measures[label] = new Set()
-    }
-
-    // get all possible values
-    for (const run of parsed) {
-      if (!run.RunId) continue
-
-      // note this particular value, for every value
-      for (const measure of Object.keys(measures)) {
-        if (run[measure]) measures[measure].add(run[measure])
+      for (const label of Object.keys(parsed[0])) {
+        if (ignore.indexOf(label) > -1) continue
+        measures[label] = new Set()
       }
 
-      // store the run in a lookup using all values as the key
-      let lookupKey = ''
-      for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
-      runLookup[lookupKey] = run
-    }
+      // get all possible values
+      for (const run of parsed) {
+        if (!run.RunId) continue
 
-    for (const measure of Object.keys(measures)) {
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
-    }
+        // note this particular value, for every value
+        for (const measure of Object.keys(measures)) {
+          if (run[measure]) measures[measure].add(run[measure])
+        }
 
-    console.log({ measures, runLookup })
-    this.state.measures = measures
-    this.state.runLookup = runLookup
-  }
-}
+        // store the run in a lookup using all values as the key
+        let lookupKey = ''
+        for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
+        runLookup[lookupKey] = run
+      }
 
-// ###########################################################################
+      for (const measure of Object.keys(measures)) {
+        measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
+      }
+
+      console.log({ measures, runLookup })
+      this.state.measures = measures
+      this.state.runLookup = runLookup
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">

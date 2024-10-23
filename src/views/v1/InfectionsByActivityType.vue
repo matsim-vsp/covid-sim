@@ -1,212 +1,223 @@
 <template lang="pug">
-.mutations-plots(v-if="!isResizing")
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
-  vue-plotly.plot1(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
+  .mutations-plots(v-if="!isResizing")
+    vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options" @relayout="handleRelayout")
+    vue-plotly.plot1(:data="dataLines2" :layout="layout2" :options="options" @relayout="handleRelayout")
 
-</template>
+  </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 
-@Component({ components: { VuePlotly }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private endDate!: string
-  @Prop({ required: true }) private values!: any[]
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private color = '#04f'
+export default defineComponent({
+  name: 'InfectionsByActivityType',
+  components: { VuePlotly },
+  props: {
+    logScale: { type: Boolean, required: true },
+    endDate: { type: String, required: true },
+    values: { type: Array as PropType<any[]>, required: true },
+  },
+  data() {
+    return {
+      isResizing: false,
 
-  private dataLines: any[] = []
-  private dataLines2: any[] = []
+      color: '#04f',
 
-  private mounted() {
+      dataLines: [] as any[],
+      dataLines2: [] as any[],
+
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 0, l: 60 },
+        xaxis: {
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          range: [this.$store.state.graphStartDate, '2020-12-31'],
+          type: 'date',
+        },
+        yaxis: {
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          type: 'linear',
+          title: 'Num of Infections (vs. Home)',
+          hoverformat: '.1f',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      layout2: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 5, l: 60 },
+        xaxis: {
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          range: ['2020-02-09', '2020-12-31'],
+          type: 'date',
+        },
+        yaxis: {
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          type: 'linear',
+          title: '% Share',
+          hoverformat: '.1f',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'r-values',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+    }
+  },
+
+  mounted() {
     this.calculateValues()
-  }
+  },
 
-  private isResizing = false
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.layout2 = Object.assign({}, this.layout2)
-    this.isResizing = false
-  }
+  computed: {},
+  watch: {
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.layout2 = Object.assign({}, this.layout2)
+      this.isResizing = false
+    },
 
-  private handleRelayout(event: any) {
-    if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+    values() {
       this.calculateValues()
-    }
-  }
+    },
 
-  @Watch('values') private updateValues() {
-    this.calculateValues()
-  }
-
-  @Watch('logScale') updateScale() {
-    if (this.logScale) {
-      this.layout.yaxis.type = 'log'
-      // this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)]
-    } else {
-      this.layout.yaxis.type = 'linear'
-      // this.layout.yaxis.range = [0, 1.5]
-    }
-  }
-
-  private calculateValues() {
-    this.dataLines = []
-    this.dataLines2 = []
-    if (!this.values.length) return
-
-    // generate list of mutation names
-    const infections: { [activity: string]: number[] } = {}
-    const shares: { [activity: string]: number[] } = {}
-    const date: number[] = []
-
-    // get a map (date -> homeInfections). This will be used to make Infections by activity type plot be in relation to home activities.
-    // e.g. on xx/xx/2020 date, 1.8x as many infections occured in leisure context as in home.
-    // share plot is not affected - jr July2022
-    const mapHomeInfections = new Map()
-
-    for (const row of this.values) {
-      const act = row.activity
-      if (act == 'home') {
-        mapHomeInfections.set(row.date, row.infections)
+    logScale() {
+      if (this.logScale) {
+        this.layout.yaxis.type = 'log'
+        // this.layout.yaxis.range = [Math.log10(0.05), Math.log10(1.5)]
+      } else {
+        this.layout.yaxis.type = 'linear'
+        // this.layout.yaxis.range = [0, 1.5]
       }
-    }
+      this.layout = { ...this.layout }
+    },
+  },
 
-    // process the data
-    for (const row of this.values) {
-      const act = row.activity
-      if (!infections[act]) {
-        infections[act] = []
-        shares[act] = []
+  methods: {
+    handleRelayout(event: any) {
+      if (event['xaxis.range[0]'] == '2020-02-09' && event['xaxis.range[1]'] == '2020-12-31') {
+        this.calculateValues()
+      }
+    },
+
+    calculateValues() {
+      this.dataLines = []
+      this.dataLines2 = []
+      if (!this.values.length) return
+
+      // generate list of mutation names
+      const infections: { [activity: string]: number[] } = {}
+      const shares: { [activity: string]: number[] } = {}
+      const date: number[] = []
+
+      // get a map (date -> homeInfections). This will be used to make Infections by activity type plot be in relation to home activities.
+      // e.g. on xx/xx/2020 date, 1.8x as many infections occured in leisure context as in home.
+      // share plot is not affected - jr July2022
+      const mapHomeInfections = new Map()
+
+      for (const row of this.values) {
+        const act = row.activity
+        if (act == 'home') {
+          mapHomeInfections.set(row.date, row.infections)
+        }
       }
 
-      // update date row
-      if (date.length === 0 || row.date !== date[date.length - 1]) date.push(row.date)
+      // process the data
+      for (const row of this.values) {
+        const act = row.activity
+        if (!infections[act]) {
+          infections[act] = []
+          shares[act] = []
+        }
 
-      // update infections and shares
-      infections[act].push(row.infections / mapHomeInfections.get(row.date))
-      shares[act].push(100.0 * row.infectionsShare)
-    }
+        // update date row
+        if (date.length === 0 || row.date !== date[date.length - 1]) date.push(row.date)
 
-    // console.log({ date, infections, shares })
+        // update infections and shares
+        infections[act].push(row.infections / mapHomeInfections.get(row.date))
+        shares[act].push(100.0 * row.infectionsShare)
+      }
 
-    // set up the plots
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
-    this.layout2.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout2.xaxis.range[1] = this.endDate
+      // console.log({ date, infections, shares })
 
-    for (const actType of Object.keys(infections).sort()) {
-      this.dataLines.push({
-        name: actType,
-        x: date,
-        y: infections[actType],
-        // mode: 'markers',
-        // marker: { size: 4 },
-      })
+      // set up the plots
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
+      this.layout2.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout2.xaxis.range[1] = this.endDate
 
-      this.dataLines2.push({
-        name: actType + ' %',
-        x: date,
-        y: shares[actType],
-        // mode: 'markers',
-        // marker: { size: 4 },
-      })
-    }
-  }
+      for (const actType of Object.keys(infections).sort()) {
+        this.dataLines.push({
+          name: actType,
+          x: date,
+          y: infections[actType],
+        })
 
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
+        this.dataLines2.push({
+          name: actType + ' %',
+          x: date,
+          y: shares[actType],
+        })
+      }
     },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
-    xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      range: [this.$store.state.graphStartDate, '2020-12-31'],
-      type: 'date',
-    },
-    yaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      type: 'linear',
-      title: 'Num of Infections (vs. Home)',
-      hoverformat: '.1f',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private layout2 = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 5, l: 60 },
-    xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      range: ['2020-02-09', '2020-12-31'],
-      type: 'date',
-    },
-    yaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      type: 'linear',
-      title: '% Share',
-      hoverformat: '.1f',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'r-values',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .mutations-plots {
   position: absolute;

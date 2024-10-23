@@ -1,5 +1,5 @@
 <template lang="pug">
-#charts
+.charts-selector
   .preamble
     h3.select-scenario Select Scenario:
 
@@ -117,9 +117,8 @@
 
 <script lang="ts">
 // ###########################################################################
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papa from 'papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import Papa from '@simwrapper/papaparse'
+import VuePlotly from '@/components/VuePlotly.vue'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
@@ -127,291 +126,296 @@ import MySlider from './SelectWidget.vue'
 import HospitalizationPlot from '@/views/v2/HospitalizationPlot.vue'
 import RValuePlot from '@/views/v2/RValuePlot.vue'
 
-@Component({
-  components: {
-    HospitalizationPlot,
-    MySlider,
-    RValuePlot,
-    VuePlotly,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'ChartSelector',
+  components: { HospitalizationPlot, MySlider, RValuePlot, VuePlotly },
+  props: {
+    state: { type: Object, required: true },
+    city: { type: String, required: true },
+  },
+
+  data: () => {
+    return {
+      dayZero: {
+        berlin: '2020-02-20',
+        munich: '2020-02-20',
+        heinsberg: '2020-02-15',
+      } as any,
+
+      MAX_DAYS: 200,
+      plusminus: '0',
+      logScale: true,
+      isBase: false,
+
+      currentRun: {} as any,
+      data: [] as any[],
+
+      currentSituation: {} as any,
+      loadedSeriesData: {} as any,
+      zipLoader: {} as any,
+      zipCache: {} as any,
+
+      labels: {
+        nSusceptible: 'Susceptible',
+        nInfectedButNotContagious: 'Infected, not contagious',
+        nContagious: 'Contagious',
+        nShowingSymptoms: 'Showing Symptoms',
+        nSeriouslySick: 'Seriously Sick',
+        nCritical: 'Critical',
+        nTotalInfected: 'Total Infected',
+        nInfectedCumulative: 'Infected Cumulative',
+        nRecovered: 'Recovered',
+        nInQuarantine: 'In Quarantine',
+      } as any,
+
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 0, l: 60 },
+        xaxis: {
+          range: ['2020-02-09', '2020-08-31'],
+          type: 'date',
+        },
+        yaxis: {
+          type: 'log',
+          autorange: true,
+          title: 'Population (log scale)',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      },
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'custom_image',
+          width: 800,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+
+      fillcolors: {
+        Susceptible: '#0000ff',
+        'Seriously Sick': '#cc2211',
+        'Showing Symptoms': '#00ffff',
+        'Infected Cumulative': '#f791cf',
+        'Infected, not contagious': '#ee8800',
+        Critical: '#882299',
+        Recovered: '#eedd44',
+        Contagious: '#00aa00',
+        'Total Infected': '#a65628',
+      } as any,
+    }
+  },
+
+  mounted() {
+    this.loadZipData()
+  },
+
+  computed: {
+    cityCap() {
+      return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
+    },
+
+    prettyInfected() {
+      if (!this.state.cumulativeInfected) return ''
+
+      const rounded = 100 * Math.round(this.state.cumulativeInfected * 0.01)
+      return Number(rounded).toLocaleString()
+    },
+  },
+
+  watch: {
+    city() {
+      // Munich doesn't have +3 / +6
+      if (this.city !== 'berlin' && parseInt(this.plusminus) > 0) this.plusminus = '0'
+
+      this.loadedSeriesData = {}
+      this.loadZipData()
+    },
+
+    plusminus() {
+      this.showPlotForCurrentSituation()
+    },
+
+    logScale() {
+      this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
+      this.layout = { ...this.layout }
+    },
+  },
+
+  methods: {
+    setBase(value: boolean) {
+      this.isBase = value
+      this.showPlotForCurrentSituation()
+    },
+
+    setPlusMinus(value: string) {
+      this.plusminus = value
+    },
+
+    async loadZipData() {
+      console.log('loadZipData:', this.city)
+      // check cache first!
+      if (this.zipCache[this.city]) {
+        console.log('using cached zip for!', this.city)
+        this.zipLoader = this.zipCache[this.city]
+      } else {
+        // load the zip from file
+        const filepath = this.state.publicPath + 'v7-data-' + this.city + '.zip'
+        console.log('---loading', filepath)
+        this.zipLoader = new ZipLoader(filepath)
+        await this.zipLoader.load()
+        console.log('zip loaded!')
+      }
+
+      this.zipCache[this.city] = this.zipLoader
+      this.runChanged()
+      console.log({ measure: this.state.measures })
+    },
+
+    async runChanged() {
+      // maybe we already did the calcs
+      if (this.loadedSeriesData[this.currentRun.RunId]) {
+        this.data = this.loadedSeriesData[this.currentRun.RunId]
+        this.updateTotalInfected()
+        return
+      }
+
+      // load both datasets
+      const csvLow: any[] = await this.loadCSV(this.currentRun)
+      const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
+
+      // cache the result
+      this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
+
+      this.data = timeSeriesesLow
+      this.updateTotalInfected()
+    },
+
+    updateTotalInfected() {
+      const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
+      this.state.cumulativeInfected = Math.max(...infectedCumulative.y)
+    },
+
+    sliderChanged(measure: any, value: any) {
+      console.log(measure, value)
+      this.currentSituation[measure] = value
+      this.showPlotForCurrentSituation()
+    },
+
+    showPlotForCurrentSituation() {
+      if (this.isBase) {
+        this.currentRun = { RunId: 'sz0' }
+        this.runChanged()
+        return
+      }
+
+      let lookupKey = ''
+      for (const measure of Object.keys(this.state.measures))
+        lookupKey += this.currentSituation[measure] + '-'
+
+      const suffix = this.plusminus //  === '5' ? '5' : '-5'
+      const lookup = lookupKey.replace('undefined', suffix)
+
+      console.log(lookup)
+
+      this.currentRun = this.state.runLookup[lookup]
+
+      if (!this.currentRun) return
+
+      this.runChanged()
+    },
+
+    unpack(rows: any[], key: any) {
+      let v = rows.map(function (row) {
+        if (key === 'day') return row[key]
+        return row[key]
+      })
+
+      v = v.slice(0, this.MAX_DAYS)
+
+      // maybe the sim ended early - go out to 150 anyway
+      if (v.length < this.MAX_DAYS) {
+        v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
+      }
+      return v
+    },
+
+    async loadCSV(currentRun: any) {
+      if (!currentRun.RunId) return []
+
+      const filename = currentRun.RunId + '.infections.csv'
+      console.log('Extracting', filename)
+
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      return z.data
+    },
+
+    calculateDatefromSimulationDay(day: number) {
+      const shift = parseInt(this.plusminus)
+
+      const date = moment(this.dayZero[this.city])
+        .subtract(shift, 'days')
+        .add(day, 'days')
+        .format('YYYY-MM-DD')
+      return date
+    },
+
+    generateSeriesFromCSVData(data: any[]) {
+      const serieses = []
+
+      const days: number[] = this.unpack(data, 'day')
+      const x = days.map(d => this.calculateDatefromSimulationDay(d))
+
+      for (const column of Object.keys(this.labels)) {
+        const name = this.labels[column]
+
+        if (name === 'In Quarantine') continue
+
+        const y: number[] = this.unpack(data, column)
+        serieses.push({ x, y, name })
+      }
+
+      // Add Berlin "Reported Cases"
+      // if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+      serieses.push(this.state.berlinCases)
+
+      return serieses
+    },
   },
 })
-export default class SectionViewer extends Vue {
-  @Prop({ required: true }) private state!: any
-
-  @Prop({ required: true }) private city!: string
-
-  private dayZero: any = {
-    berlin: '2020-02-20',
-    munich: '2020-02-20',
-    heinsberg: '2020-02-15',
-  }
-
-  private MAX_DAYS = 200
-
-  private plusminus = '0'
-
-  private logScale = true
-
-  @Watch('city') private switchCity() {
-    // Munich doesn't have +3 / +6
-    if (this.city !== 'berlin' && parseInt(this.plusminus) > 0) this.plusminus = '0'
-
-    this.loadedSeriesData = {}
-    this.loadZipData()
-  }
-
-  @Watch('plusminus') private switchPlusMinus() {
-    this.showPlotForCurrentSituation()
-  }
-
-  @Watch('logScale') updateScale() {
-    this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
-  }
-
-  private isBase = false
-  private currentRun: any = {}
-
-  private data: any[] = []
-
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
-    xaxis: {
-      range: ['2020-02-09', '2020-08-31'],
-      type: 'date',
-    },
-    yaxis: {
-      type: this.logScale ? 'log' : 'linear',
-      autorange: true,
-      title: 'Population (' + (this.logScale ? 'log scale)' : 'Linear scale)'),
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'custom_image',
-      width: 800,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-
-  private setBase(value: boolean) {
-    this.isBase = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private setPlusMinus(value: string) {
-    this.plusminus = value
-  }
-
-  private get cityCap() {
-    return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
-  }
-
-  private currentSituation: any = {}
-  private loadedSeriesData: any = {}
-  private zipLoader: any
-
-  private labels: any = {
-    nSusceptible: 'Susceptible',
-    nInfectedButNotContagious: 'Infected, not contagious',
-    nContagious: 'Contagious',
-    nShowingSymptoms: 'Showing Symptoms',
-    nSeriouslySick: 'Seriously Sick',
-    nCritical: 'Critical',
-    nTotalInfected: 'Total Infected',
-    nInfectedCumulative: 'Infected Cumulative',
-    nRecovered: 'Recovered',
-    nInQuarantine: 'In Quarantine',
-  }
-
-  private mounted() {
-    this.loadZipData()
-  }
-
-  private zipCache: any = {}
-
-  private get prettyInfected() {
-    if (!this.state.cumulativeInfected) return ''
-
-    const rounded = 100 * Math.round(this.state.cumulativeInfected * 0.01)
-    return Number(rounded).toLocaleString()
-  }
-
-  private async loadZipData() {
-    console.log('loadZipData:', this.city)
-    // check cache first!
-    if (this.zipCache[this.city]) {
-      console.log('using cached zip for!', this.city)
-      this.zipLoader = this.zipCache[this.city]
-    } else {
-      // load the zip from file
-      const filepath = this.state.publicPath + 'v7-data-' + this.city + '.zip'
-      console.log('---loading', filepath)
-      this.zipLoader = new ZipLoader(filepath)
-      await this.zipLoader.load()
-      console.log('zip loaded!')
-    }
-
-    this.zipCache[this.city] = this.zipLoader
-    this.runChanged()
-    console.log({ measure: this.state.measures })
-  }
-
-  private fillcolors: any = {
-    Susceptible: '#0000ff',
-    'Seriously Sick': '#cc2211',
-    'Showing Symptoms': '#00ffff',
-    'Infected Cumulative': '#f791cf',
-    'Infected, not contagious': '#ee8800',
-    Critical: '#882299',
-    Recovered: '#eedd44',
-    Contagious: '#00aa00',
-    'Total Infected': '#a65628',
-  }
-
-  private async runChanged() {
-    // maybe we already did the calcs
-    if (this.loadedSeriesData[this.currentRun.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
-      this.updateTotalInfected()
-      return
-    }
-
-    // load both datasets
-    const csvLow: any[] = await this.loadCSV(this.currentRun)
-    const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
-
-    // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
-
-    this.data = timeSeriesesLow
-    this.updateTotalInfected()
-  }
-
-  private updateTotalInfected() {
-    const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-    this.state.cumulativeInfected = Math.max(...infectedCumulative.y)
-  }
-
-  private sliderChanged(measure: any, value: any) {
-    console.log(measure, value)
-    this.currentSituation[measure] = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private showPlotForCurrentSituation() {
-    if (this.isBase) {
-      this.currentRun = { RunId: 'sz0' }
-      this.runChanged()
-      return
-    }
-
-    let lookupKey = ''
-    for (const measure of Object.keys(this.state.measures))
-      lookupKey += this.currentSituation[measure] + '-'
-
-    const suffix = this.plusminus //  === '5' ? '5' : '-5'
-    const lookup = lookupKey.replace('undefined', suffix)
-
-    console.log(lookup)
-
-    this.currentRun = this.state.runLookup[lookup]
-
-    if (!this.currentRun) return
-
-    this.runChanged()
-  }
-
-  private unpack(rows: any[], key: any) {
-    let v = rows.map(function(row) {
-      if (key === 'day') return row[key]
-      return row[key]
-    })
-
-    v = v.slice(0, this.MAX_DAYS)
-
-    // maybe the sim ended early - go out to 150 anyway
-    if (v.length < this.MAX_DAYS) {
-      v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
-    }
-    return v
-  }
-
-  private async loadCSV(currentRun: any) {
-    if (!currentRun.RunId) return []
-
-    const filename = currentRun.RunId + '.infections.csv'
-    console.log('Extracting', filename)
-
-    let text = this.zipLoader.extractAsText(filename)
-    const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
-    return z.data
-  }
-
-  private calculateDatefromSimulationDay(day: number) {
-    const shift = parseInt(this.plusminus)
-
-    const date = moment(this.dayZero[this.city])
-      .subtract(shift, 'days')
-      .add(day, 'days')
-      .format('YYYY-MM-DD')
-    return date
-  }
-
-  private generateSeriesFromCSVData(data: any[]) {
-    const serieses = []
-
-    const days: number[] = this.unpack(data, 'day')
-    const x = days.map(d => this.calculateDatefromSimulationDay(d))
-
-    for (const column of Object.keys(this.labels)) {
-      const name = this.labels[column]
-
-      if (name === 'In Quarantine') continue
-
-      const y: number[] = this.unpack(data, column)
-      serieses.push({ x, y, name })
-    }
-
-    // Add Berlin "Reported Cases"
-    // if (this.city === 'berlin') serieses.push(this.state.berlinCases)
-    serieses.push(this.state.berlinCases)
-
-    return serieses
-  }
-}
 
 // ###########################################################################
 </script>

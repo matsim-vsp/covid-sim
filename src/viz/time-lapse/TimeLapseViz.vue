@@ -27,7 +27,7 @@
         :tooltip-formatter="val => val + 'x'"
       )
       p.speed-label(
-        :style="{'color': textColor.text}") {{ speed }}x speed
+        :style="{'color': getTextColor().text}") {{ speed }}x speed
 
       toggle-button(@change="toggleSusceptible"
                     :value="showSusceptible"
@@ -37,7 +37,7 @@
                     :speed="150")
 
       p.speed-label(
-        :style="{color: textColor.text}") Show susceptible
+        :style="{color: getTextColor().text}") Show susceptible
 
 
   playback-controls.playback-stuff(v-if="isLoaded" @click='toggleSimulation')
@@ -55,8 +55,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 
@@ -67,90 +66,38 @@ import PlaybackControls from './PlaybackControls.vue'
 import { ColorScheme, LIGHT_MODE, DARK_MODE } from '@/Globals'
 import { Route } from 'vue-router'
 
-@Component({
-  components: {
-    AnimationView,
-    ModalMarkdownDialog,
-    PlaybackControls,
-    VueSlider,
-    ToggleButton,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+import totalInfections from './totalInfections.csv?raw'
+
+export default defineComponent({
+  // name: '',
+  components: { AnimationView, ModalMarkdownDialog, PlaybackControls, VueSlider, ToggleButton },
+  props: {},
+
+  data: () => {
+    return {
+      numDays: 90,
+
+      newDay: 0,
+
+      state: store.state,
+      isDarkMode: true,
+      isLoaded: false,
+      showHelp: false,
+      showSusceptible: false,
+      totalInfections,
+
+      speedStops: [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10],
+      speed: 1,
+
+      legendBits: [] as any[],
+      dayColors: {} as { [day: number]: string },
+    }
   },
-})
-export default class VueComponent extends Vue {
-  private numDays = 90
 
-  private newDay: number = 0
-
-  private state = store.state
-  private isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
-  private isLoaded = false
-
-  private showHelp = false
-  private showSusceptible = false
-
-  private totalInfections = require('./totalInfections.csv').default
-
-  private speedStops = [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10]
-  private speed = 1
-
-  private legendBits: any[] = []
-
-  @Watch('state.colorScheme') private swapTheme() {
-    this.isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
-    this.updateLegendColors()
-    this.setCubeColors()
-  }
-
-  private updateLegendColors() {
-    const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
-
-    this.legendBits = [
-      { label: 'susceptible', color: theme.susceptible },
-      { label: 'latently infected', color: theme.infectedButNotContagious },
-      { label: 'contagious', color: theme.contagious },
-      { label: 'symptomatic', color: theme.symptomatic },
-      { label: 'seriously ill', color: theme.seriouslyIll },
-      { label: 'critical', color: theme.critical },
-      { label: 'recovered', color: theme.recovered },
-    ]
-  }
-
-  private get textColor() {
-    const lightmode = {
-      text: '#3498db',
-      bg: '#eeeef480',
-    }
-
-    const darkmode = {
-      text: 'white',
-      bg: '#181518aa',
-    }
-
-    return this.state.colorScheme === ColorScheme.DarkMode ? darkmode : lightmode
-  }
-
-  private setInitialDay() {
-    // set specified day, if we got one
-    const param = '' + this.$route.query.day
-    if (param && Number.isFinite(param)) {
-      const day = parseInt(param)
-      if (day >= 1 || day < this.numDays) {
-        this.newDay = day - 1 // stupid 0day
-        this.$nextTick()
-      }
-    }
-  }
-
-  private toggleSimulation() {
-    this.$store.commit('setSimulation', !this.state.isRunning)
-
-    // ok so, many times I mashed the play/pause wondering why things wouldn't
-    // start moving. Turns out a 0x speed is not very helpful! Help the user
-    // out and switch the speed up if they press play.
-    if (this.state.isRunning && this.speed === 0.0) this.speed = 1.0
-  }
-
-  private mounted() {
+  mounted() {
     this.$store.commit('setFullScreen', true)
 
     this.showHelp = !this.state.sawAgentAnimationHelp
@@ -164,133 +111,196 @@ export default class VueComponent extends Vue {
     // make nice colors
     this.setCubeColors()
     this.updateLegendColors()
-  }
+  },
 
-  private beforeDestroy() {
+  beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', false)
-  }
+  },
 
-  private dayColors: { [day: number]: string } = {}
+  watch: {
+    'state.colorScheme'() {
+      this.isDarkMode = this.state.colorScheme === ColorScheme.DarkMode
+      this.updateLegendColors()
+      this.setCubeColors()
+    },
+  },
 
-  private async setCubeColors() {
-    const dailyTotals = Papaparse.parse(this.totalInfections, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
+  computed: {
+    textColor() {
+      const lightmode = {
+        text: '#3498db',
+        bg: '#eeeef480',
+      }
 
-    const careAbout = [
-      'nInfectedButNotContagious',
-      'nContagious',
-      'nShowingSymptoms',
-      'nSeriouslySick',
-      'nCritical',
-      'nRecovered',
-    ]
+      const darkmode = {
+        text: 'white',
+        bg: '#181518aa',
+      }
 
-    const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+      return this.state.colorScheme === ColorScheme.DarkMode ? darkmode : lightmode
+    },
+  },
 
-    // loop for each row in infection summary data
-    // -- which doesn't have for day 0! But obviously no one is infected yet
-    this.dayColors[0] = theme.infectedButNotContagious
+  methods: {
+    getTextColor() {
+      return this.textColor
+    },
 
-    for (const row of dailyTotals) {
-      let count = 0
-      let largestCol = 'nix'
+    updateLegendColors() {
+      const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
 
-      for (const col of careAbout) {
-        if (row[col] > count) {
-          count = row[col]
-          largestCol = col
+      this.legendBits = [
+        { label: 'susceptible', color: theme.susceptible },
+        { label: 'latently infected', color: theme.infectedButNotContagious },
+        { label: 'contagious', color: theme.contagious },
+        { label: 'symptomatic', color: theme.symptomatic },
+        { label: 'seriously ill', color: theme.seriouslyIll },
+        { label: 'critical', color: theme.critical },
+        { label: 'recovered', color: theme.recovered },
+      ]
+    },
+
+    setInitialDay() {
+      // set specified day, if we got one
+      const param = '' + this.$route.query.day
+      if (param && Number.isFinite(param)) {
+        const day = parseInt(param)
+        if (day >= 1 || day < this.numDays) {
+          this.newDay = day - 1 // stupid 0day
+          this.$nextTick()
         }
       }
+    },
 
-      const day = row.day
+    toggleSimulation() {
+      this.$store.commit('setSimulation', !this.state.isRunning)
 
-      switch (largestCol) {
-        case 'nSusceptible':
-          this.dayColors[day] = theme.susceptible
-          break
-        case 'nInfectedButNotContagious':
-          this.dayColors[day] = theme.infectedButNotContagious
-          break
-        case 'nContagious':
-          this.dayColors[day] = theme.contagious
-          break
-        case 'nShowingSymptoms':
-          this.dayColors[day] = theme.symptomatic
-          break
-        case 'nSeriouslySick':
-          this.dayColors[day] = theme.seriouslyIll
-          break
-        case 'nCritical':
-          this.dayColors[day] = theme.critical
-          break
-        case 'nRecovered':
-          this.dayColors[day] = theme.recovered
-          break
-        default:
-          this.dayColors[day] = '#dddddd'
-          break
+      // ok so, many times I mashed the play/pause wondering why things wouldn't
+      // start moving. Turns out a 0x speed is not very helpful! Help the user
+      // out and switch the speed up if they press play.
+      if (this.state.isRunning && this.speed === 0.0) this.speed = 1.0
+    },
+
+    async setCubeColors() {
+      const dailyTotals = Papaparse.parse(this.totalInfections, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
+
+      const careAbout = [
+        'nInfectedButNotContagious',
+        'nContagious',
+        'nShowingSymptoms',
+        'nSeriouslySick',
+        'nCritical',
+        'nRecovered',
+      ]
+
+      const theme = this.state.colorScheme == ColorScheme.LightMode ? LIGHT_MODE : DARK_MODE
+
+      // loop for each row in infection summary data
+      // -- which doesn't have for day 0! But obviously no one is infected yet
+      this.dayColors[0] = theme.infectedButNotContagious
+
+      for (const row of dailyTotals) {
+        let count = 0
+        let largestCol = 'nix'
+
+        for (const col of careAbout) {
+          if (row[col] > count) {
+            count = row[col]
+            largestCol = col
+          }
+        }
+
+        const day = row.day
+
+        switch (largestCol) {
+          case 'nSusceptible':
+            this.dayColors[day] = theme.susceptible
+            break
+          case 'nInfectedButNotContagious':
+            this.dayColors[day] = theme.infectedButNotContagious
+            break
+          case 'nContagious':
+            this.dayColors[day] = theme.contagious
+            break
+          case 'nShowingSymptoms':
+            this.dayColors[day] = theme.symptomatic
+            break
+          case 'nSeriouslySick':
+            this.dayColors[day] = theme.seriouslyIll
+            break
+          case 'nCritical':
+            this.dayColors[day] = theme.critical
+            break
+          case 'nRecovered':
+            this.dayColors[day] = theme.recovered
+            break
+          default:
+            this.dayColors[day] = '#dddddd'
+            break
+        }
       }
-    }
-  }
+    },
 
-  private colorLookup(day: number): string {
-    return this.dayColors[day]
-  }
+    colorLookup(day: number): string {
+      return this.dayColors[day]
+    },
 
-  private clickedHelp() {
-    console.log('HEEELP!')
-    this.$store.commit('setSimulation', false)
-    this.showHelp = true
-    this.$store.commit('setShowingHelp', this.showHelp)
-  }
+    clickedHelp() {
+      console.log('HEEELP!')
+      this.$store.commit('setSimulation', false)
+      this.showHelp = true
+      this.$store.commit('setShowingHelp', this.showHelp)
+    },
 
-  private clickedCloseHelp() {
-    this.showHelp = false
-    this.$store.commit('setShowingHelp', this.showHelp)
-    // only show the help once
-    this.$store.commit('setSawAgentAnimationHelp', true)
-    this.$store.commit('setSimulation', true)
-  }
+    clickedCloseHelp() {
+      this.showHelp = false
+      this.$store.commit('setShowingHelp', this.showHelp)
+      // only show the help once
+      this.$store.commit('setSawAgentAnimationHelp', true)
+      this.$store.commit('setSimulation', true)
+    },
 
-  private toggleSusceptible() {
-    this.showSusceptible = !this.showSusceptible
-  }
+    toggleSusceptible() {
+      this.showSusceptible = !this.showSusceptible
+    },
 
-  private switchDay(day: number) {
-    const param = '' + (day + 1)
-    this.$router.replace({ query: { day: param } })
-    this.$nextTick()
+    switchDay(day: number) {
+      const param = '' + (day + 1)
+      this.$router.replace({ query: { day: param } })
+      this.$nextTick()
 
-    this.newDay = day
-  }
+      this.newDay = day
+    },
 
-  private dayStep(step: number) {
-    let day = this.newDay + step
+    dayStep(step: number) {
+      let day = this.newDay + step
 
-    // don't be stupid
-    if (day < 0) return
-    if (day >= this.numDays) return
+      // don't be stupid
+      if (day < 0) return
+      if (day >= this.numDays) return
 
-    this.switchDay(day)
-  }
+      this.switchDay(day)
+    },
 
-  private toggleLoaded(loaded: boolean) {
-    this.isLoaded = loaded
-  }
+    toggleLoaded(loaded: boolean) {
+      this.isLoaded = loaded
+    },
 
-  private rotateColors() {
-    this.$store.commit('rotateColors')
-  }
-}
+    rotateColors() {
+      this.$store.commit('rotateColors')
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '~vue-slider-component/theme/default.css';
-@import '@/styles.scss';
+@use '~/vue-slider-component/theme/default.css' as *;
+@use '@/styles.scss' as *;
 
 #v3-app {
   position: absolute;

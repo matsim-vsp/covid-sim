@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.bavue-component
   .content
 
     .stuff(v-html="mdContent")
@@ -12,37 +12,33 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import MarkdownIt from 'markdown-it'
-
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
-interface Breadcrumb {
-  title: string
-  url: string
-  isActive?: boolean
-}
-
-@Component({
-  components: {},
+import textNoSuchRun from '@/assets/no-such-run.md?raw'
+const mdParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
 })
-export default class VueComponent extends Vue {
-  private mdContent = ''
-  private mdParser = new MarkdownIt()
 
-  public mounted() {
-    const text = require('@/assets/no-such-run.md')
-    this.mdContent = text // this.mdParser.render(text)
-  }
-
-  private currentCity = -1
-}
-
-// ###########################################################################
+export default defineComponent({
+  name: 'MessagePane',
+  data() {
+    return {
+      mdContent: '',
+      currentCity: -1,
+    }
+  },
+  mounted() {
+    this.mdContent = mdParser.render(textNoSuchRun)
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .content {
   margin-top: 4rem;

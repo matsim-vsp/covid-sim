@@ -4,7 +4,7 @@
 
   .center-area
     router-view.main-view
-    
+
   .footer(v-if="!state.isFullScreen")
     //- a(href="https://vsp.tu-berlin.de")
     //-   img(alt="TU-Berlin logo" src="@/assets/images/vsp-logo.png" width=225)
@@ -15,7 +15,7 @@
     p GDPR: This site does not collect, store, or analyze any personal information.
     p For more info about VSP at TU Berlin, see
       a(href="https://www.vsp.tu-berlin.de") &nbsp;https://vsp.tu-berlin.de
-    
+
     p: router-link(to="/imprint") Imprint
 
 </template>
@@ -27,7 +27,7 @@ import store from '@/store'
 export default {
   name: 'App',
   components: { TopNavBar },
-  data: function() {
+  data: function () {
     return {
       state: store.state,
     }
@@ -36,8 +36,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/styles.scss';
-@import '~bulma/css/bulma.css';
+@use '@/styles.scss' as *;
+@use '~/bulma/css/bulma.min.css' as *;
 
 *,
 *::before,
@@ -169,5 +169,9 @@ h3 {
 
 .vue-slider-rail {
   background-color: green;
+}
+
+.vue-slider-dot {
+  background-color: yellow;
 }
 </style>

@@ -1,8 +1,10 @@
 import { expose } from 'threads/worker'
 import { PUBLIC_SVN } from '@/Globals'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 
 // configuration ----------------------------
+
+import bundeslandCSV from '@/assets/rki-deutschland-hospitalization.csv?raw'
 
 const observedHospitalizationConfig = {
   cologne: {
@@ -19,7 +21,6 @@ const cityObservedHospitalizationFiles = {
   cologne: originalDataUrl + 'Cologne/cologne-hospital.csv',
 }
 
-const bundeslandCSV = require('@/assets/rki-deutschland-hospitalization.csv').default
 const bundeslandIncidenceRateLookup = {
   berlin: { name: 'Berlin' },
   cologne: { name: 'Nordrhein-Westfalen' },

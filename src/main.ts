@@ -1,13 +1,15 @@
 import Vue from 'vue'
+import VueI18n from 'vue-i18n'
+
 import App from '@/App.vue'
 import router from '@/router'
 import store from '@/store'
-import VueI18n from 'vue-i18n'
 
 Vue.config.productionTip = false
 
 Vue.use(VueI18n)
 
+console.log('here')
 // locale: we only support EN and DE
 const locale = localStorage.getItem('default-locale')
   ? '' + localStorage.getItem('default-locale')

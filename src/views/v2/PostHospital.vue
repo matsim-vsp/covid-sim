@@ -10,264 +10,282 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import VuePlotly from '@statnett/vue-plotly'
+import VuePlotly from '@/components/VuePlotly.vue'
 import { spawn, Thread, Worker } from 'threads'
-import Papa from 'papaparse'
+import Papa from '@simwrapper/papaparse'
 import moment from 'moment'
 
-@Component({ components: { VuePlotly }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private startDate!: any
-  @Prop({ required: true }) private endDate!: any
-  @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private totalPopulation!: number
-  @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private intakesHosp!: boolean
-  @Prop({ required: true }) private city!: string
-  @Prop({ required: true }) private postHospUpdater!: number
-  @Prop({ required: true }) private metadata!: any
-  @Prop({ required: true }) private showRKI!: boolean
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private dataLines: any[] = []
-  private unselectedLines: string[] = []
+import rkiCovidSariHospitalizationData from '@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv?raw'
 
-  private postProcessWorker: any = null
+import HospitalWorker from './postHospital.worker?worker'
 
-  private updaterCount = 0
+export default defineComponent({
+  name: 'PostHospital',
+  components: { VuePlotly },
+  props: {
+    // state: { type: Object, required: true },
+    // measure: { type: String, required: true },
+    startDate: { type: String, required: true },
+    endDate: { type: String, required: true },
+    data: { type: Array as PropType<any[]>, required: true },
+    totalPopulation: { type: Number, required: true },
+    logScale: { type: Boolean, required: true },
+    intakesHosp: { type: Boolean, required: true },
+    city: { type: String, required: true },
+    postHospUpdater: { type: Number, required: true },
+    metadata: { type: Object, required: true },
+    showRKI: { type: Boolean, required: true },
+  },
 
-  private rkiCovidSariHospitalizationData = require('@/assets/COVID-SARI-Hospitalisierungsinzidenz.tsv')
-    .default
+  data() {
+    return {
+      isResizing: false,
+      dataLines: [] as any[],
+      unselectedLines: [] as string[],
+      postProcessWorker: null as any,
+      updaterCount: 0,
+      rkiCovidSariHospitalizationData,
 
-  private mounted() {
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 35, l: 60 },
+        xaxis: {
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          //autorange: true,
+          range: ['2020-02-09', '2020-12-31'],
+          type: 'date',
+        },
+        yaxis: {
+          // note this gets overwritten when the scale changes - see updateScale()
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          type: 'linear',
+          autorange: true,
+          //range: [0, 100],
+          title: 'nInfected',
+        } as any,
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'daily-cases',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+    }
+  },
+
+  mounted() {
     this.updateScale()
     this.calculateValues()
     //this.unselectLines()
-  }
+  },
 
-  private beforeDestroy() {
+  beforeDestroy() {
     if (this.postProcessWorker) Thread.terminate(this.postProcessWorker)
-  }
+  },
 
-  private isResizing = false
+  computed: {},
+  watch: {
+    data() {
+      this.calculateValues()
+    },
+    totalPopulation() {
+      this.calculateValues()
+    },
+    logScale() {
+      this.updateScale()
+    },
 
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.isResizing = false
-  }
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.isResizing = false
+    },
 
-  @Watch('data')
-  @Watch('totalPopulation')
-  updateData() {
-    this.calculateValues()
-    //this.unselectLines()
-  }
-
-  @Watch('logScale') updateScale() {
-    this.layout.xaxis.range[0] = this.$store.state.graphStartDate
-    this.layout.xaxis.range[1] = this.endDate
-    if (this.intakesHosp) {
-      this.layout.yaxis = this.logScale
-        ? {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'log',
-            autorange: true,
-            title: 'Intake Incidence',
+    dataLines: {
+      deep: true,
+      handler: async function () {
+        for (let i = 0; i < this.dataLines.length; i++) {
+          if (
+            this.dataLines[i].visible == 'legendonly' &&
+            !this.unselectedLines.includes(this.dataLines[i].name)
+          ) {
+            this.unselectedLines.push(this.dataLines[i].name)
+          } else if (
+            this.dataLines[i].visible != 'legendonly' &&
+            this.unselectedLines.includes(this.dataLines[i].name)
+          ) {
+            this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
           }
-        : {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'linear',
-            autorange: true,
-            title: 'Intake Incidence',
-          }
-    } else {
-      this.layout.yaxis = this.logScale
-        ? {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'log',
-            autorange: true,
-            title: 'Occupancy / 100k Pop.',
-          }
-        : {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'linear',
-            autorange: true,
-            title: 'Occupancy / 100k Pop.',
-          }
-    }
-  }
+        }
 
-  @Watch('dataLines', { deep: true }) async updateUrl() {
-    for (let i = 0; i < this.dataLines.length; i++) {
-      if (
-        this.dataLines[i].visible == 'legendonly' &&
-        !this.unselectedLines.includes(this.dataLines[i].name)
-      ) {
-        this.unselectedLines.push(this.dataLines[i].name)
-      } else if (
-        this.dataLines[i].visible != 'legendonly' &&
-        this.unselectedLines.includes(this.dataLines[i].name)
-      ) {
-        this.unselectedLines.splice(this.unselectedLines.indexOf(this.dataLines[i].name))
+        const params = Object.assign({}, this.$route.query)
+
+        params['plot-' + this.metadata.abbreviation] = this.unselectedLines
+
+        try {
+          await this.$router.replace({ query: params })
+        } catch (e) {
+          /** this is OK */
+        }
+      },
+    },
+  },
+
+  methods: {
+    updateScale() {
+      this.layout.xaxis.range[0] = this.$store.state.graphStartDate
+      this.layout.xaxis.range[1] = this.endDate
+      if (this.intakesHosp) {
+        this.layout.yaxis = this.logScale
+          ? {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'log',
+              autorange: true,
+              title: 'Intake Incidence',
+            }
+          : {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'linear',
+              autorange: true,
+              title: 'Intake Incidence',
+            }
+      } else {
+        this.layout.yaxis = this.logScale
+          ? {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'log',
+              autorange: true,
+              title: 'Occupancy / 100k Pop.',
+            }
+          : {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'linear',
+              autorange: true,
+              title: 'Occupancy / 100k Pop.',
+            }
       }
-    }
+      this.layout = { ...this.layout }
+    },
 
-    const params = Object.assign({}, this.$route.query)
+    async unselectLines() {
+      const query = this.$route.query as any
+      const name = 'plot-' + this.metadata.abbreviation
 
-    params['plot-' + this.metadata.abbreviation] = this.unselectedLines
-
-    try {
-      await this.$router.replace({ query: params })
-    } catch (e) {
-      /** this is OK */
-    }
-  }
-
-  private async unselectLines() {
-    const query = this.$route.query as any
-    const name = 'plot-' + this.metadata.abbreviation
-
-    if (Object.keys(query).includes(name)) {
-      let nameArray = query[name]
-      if (!Array.isArray(nameArray)) {
-        nameArray = [nameArray]
-      }
-      for (let i = 0; i < nameArray.length; i++) {
-        for (let j = 0; j < this.dataLines.length; j++) {
-          if (this.dataLines[j].name == nameArray[i]) {
-            this.dataLines[j].visible = 'legendonly'
+      if (Object.keys(query).includes(name)) {
+        let nameArray = query[name]
+        if (!Array.isArray(nameArray)) {
+          nameArray = [nameArray]
+        }
+        for (let i = 0; i < nameArray.length; i++) {
+          for (let j = 0; j < this.dataLines.length; j++) {
+            if (this.dataLines[j].name == nameArray[i]) {
+              this.dataLines[j].visible = 'legendonly'
+            }
           }
         }
       }
-    }
-  }
-
-  private async calculateValues() {
-    if (!this.postProcessWorker) {
-      this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
-    }
-
-    if (!this.data.length) {
-      return
-    }
-
-    const lines = await this.postProcessWorker.buildDataLines({
-      data: this.data,
-      totalPopulation: this.totalPopulation,
-      city: this.city,
-      intakesHosp: this.intakesHosp,
-    })
-
-    if (this.showRKI) {
-      const rkiLine = this.getRkiHospitalizationLines()
-      lines.push(rkiLine)
-    }
-
-    this.dataLines = lines
-    this.updaterCount = this.postHospUpdater
-
-    await this.unselectLines()
-  }
-
-  private getRkiHospitalizationLines() {
-    let hospData = []
-    try {
-      const allHospitalData = Papa.parse(this.rkiCovidSariHospitalizationData, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: true,
-      }).data
-
-      const filterAllAges = allHospitalData.filter(row => row.agegroup === '00+')
-
-      hospData = filterAllAges
-    } catch (e) {
-      // just leave it blank
-    }
-
-    const line = {
-      line: { width: 2, dash: 'dot', color: 'purple' },
-      name: 'Observed: COVID-SARI (DE)',
-      visible: true,
-      y: hospData.map(row => row.sari_covid19_incidence),
-      x: hospData.map(row =>
-        moment(row.date)
-          .add(3, 'days')
-          .toDate()
-      ),
-    }
-    return line
-  }
-
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
     },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 35, l: 60 },
-    xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      //autorange: true,
-      range: ['2020-02-09', '2020-12-31'],
-      type: 'date',
-    },
-    yaxis: {
-      // note this gets overwritten when the scale changes - see updateScale()
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      type: 'linear',
-      autorange: true,
-      //range: [0, 100],
-      title: 'nInfected',
-    } as any,
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
 
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'daily-cases',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+    async calculateValues() {
+      if (!this.postProcessWorker) {
+        this.postProcessWorker = await spawn(new HospitalWorker())
+      }
+
+      if (!this.data.length) {
+        return
+      }
+
+      const lines = await this.postProcessWorker.buildDataLines({
+        data: this.data,
+        totalPopulation: this.totalPopulation,
+        city: this.city,
+        intakesHosp: this.intakesHosp,
+      })
+
+      if (this.showRKI) {
+        const rkiLine = this.getRkiHospitalizationLines()
+        lines.push(rkiLine)
+      }
+
+      this.dataLines = lines
+      this.updaterCount = this.postHospUpdater
+
+      await this.unselectLines()
     },
-  }
-}
+
+    getRkiHospitalizationLines() {
+      let hospData = []
+      try {
+        const allHospitalData = Papa.parse(this.rkiCovidSariHospitalizationData, {
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: true,
+        }).data
+
+        const filterAllAges = allHospitalData.filter((row: any) => row.agegroup === '00+')
+
+        hospData = filterAllAges
+      } catch (e) {
+        // just leave it blank
+      }
+
+      const line = {
+        line: { width: 2, dash: 'dot', color: 'purple' },
+        name: 'Observed: COVID-SARI (DE)',
+        visible: true,
+        y: hospData.map((row: any) => row.sari_covid19_incidence),
+        x: hospData.map((row: any) => moment(row.date).add(3, 'days').toDate()),
+      }
+      return line
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .vue-component {
   position: absolute;

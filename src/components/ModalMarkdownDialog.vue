@@ -12,32 +12,48 @@
 
     footer.modal-card-foot
       button(v-if="buttons.length == 1" class="button is-link" @click="clicked(buttons[0])") {{ buttons[0] }}
-      button(v-for="msg in buttons.slice(1)" :key="msg" class="button" @click="clicked(msg)") {{ msg }}
+      button.button(v-for="msg in buttons.slice(1)" :key="msg" @click="clicked(msg)") {{ msg }}
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-@Component({ components: {}, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private title!: string
-  @Prop({ required: true }) private md!: string
-  @Prop({ required: true }) private buttons!: string[]
+import Markdown from 'markdown-it'
+import mdHelpText from '@/assets/animation-helptext.md?raw'
+const html = new Markdown({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).render(mdHelpText)
 
-  private html: string = ''
+export default defineComponent({
+  name: 'ModalMarkdownDialog',
+  props: {
+    title: { type: String, required: true },
+    md: { type: String, required: true },
+    buttons: { type: Array as PropType<string[]>, required: true },
+  },
+  data() {
+    return {
+      html: '',
+    }
+  },
 
-  private mounted() {
-    this.html = require('@/assets/animation-helptext.md')
-  }
+  mounted() {
+    this.html = html
+  },
 
-  private clicked(msg: string) {
-    this.$emit('click', msg)
-  }
-}
+  methods: {
+    clicked(msg: string) {
+      this.$emit('click', msg)
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .modal {
   margin-top: 3rem;

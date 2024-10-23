@@ -1,5 +1,5 @@
 <template lang="pug">
-#home
+.home-index
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -100,7 +100,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+
 import Colophon from '@/components/Colophon.vue'
 import ReportViewer from '@/components/ReportViewer.vue'
 import VizCard from '@/components/VizCard.vue'
@@ -108,356 +109,350 @@ import VizCard from '@/components/VizCard.vue'
 import reports from '@/assets/reports'
 import allCalculators from '@/assets/calculators'
 
-@Component({ components: { Colophon, ReportViewer, VizCard }, props: {} })
-export default class VueComponent extends Vue {
-  private readme = require('@/assets/index.md')
-  private readmeBottom = require('@/assets/index-bottom.md')
+// import readme from '@/assets/index.md'
+// import readmeBottom from '@/assets/index-bottom.md'
 
-  private latestReport = reports[0]
+const latestReport = reports[0]
+const rCalculators = allCalculators
 
-  private rCalculators = allCalculators
+export default defineComponent({
+  name: 'HomeIndex',
+  components: { Colophon, ReportViewer, VizCard },
+  data() {
+    return {
+      modelruns: [
+        {
+          url: '/jakob/2023-11-06/1-bmbf-calibrate-eg-B',
+          date: 'Released: 13 November 2023',
+          title: 'Report runs 13 November',
+          subtitle: 'Wave length, Winter 23/24',
+        },
+        {
+          url: '/cologne/2023-02-15/2-firstWave',
+          date: 'Released: 27 February 2023',
+          title: 'Report runs 27 February',
+          subtitle: 'Retrospective',
+        },
+        {
+          url: '/cologne/2022-11-23/variants',
+          date: 'Released: 02 December 2022',
+          title: 'Report runs 02 December',
+          subtitle: 'Variant soup',
+        },
+        {
+          url: '/cologne/2022-10-18/3-meas',
+          date: 'Released: 24 October 2022',
+          title: 'Report runs 24 October',
+          subtitle: 'Emergency measures',
+        },
+        {
+          url: '/cologne/2022-08-04/9b-leis-dec',
+          date: 'Released: 09 August 2022',
+          title: 'Report runs 09 August',
+          subtitle: 'Measures in autumn and winter',
+        },
+        {
+          url: '/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25',
+          date: 'Released: 28 June 2022',
+          title: 'Report runs 28 June',
+          subtitle: 'Measures in autumn and winter',
+        },
+        {
+          url: '/cologne/2022-04-13/?mutEscOm=6.0&timePeriodIgA=730.0&mutDate=2022-10-01',
+          date: 'Released: 26 April 2022',
+          title: 'Report runs 26 April',
+          subtitle: 'Vaccination strategies next autumn',
+        },
+        {
+          url: '/cologne/2022-02-22/1?ba2Inf=1.5&ba1ba2Long=True',
+          date: 'Released: 23 Feb 2022',
+          title: 'Report runs 23 Feb.',
+          subtitle: 'Omicron variant BA.2',
+        },
+        {
+          url: '/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current',
+          date: 'Released: 20 Jan 2022',
+          title: 'Report runs 20 Jan.',
+          subtitle: '',
+        },
+        {
+          url: '/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25',
+          date: 'Released: 17 Dec 2021',
+          title: 'Report runs 17 Dec.',
+          subtitle: '',
+        },
+        {
+          url: '/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected',
+          date: 'Released: 19 Nov 2021',
+          title: 'Report runs 19 Nov.',
+          subtitle: 'Measures without activity reductions',
+        },
+        {
+          url: '/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected',
+          date: 'Released: 19 Nov 2021',
+          title: 'Report runs 19 Nov.',
+          subtitle: 'Measures with activity reductions',
+        },
+        {
+          url: '/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no',
+          date: 'Released: 22 Oct 2021',
+          title: 'Report runs 22 Oct.',
+          subtitle: 'Booster vaccinations',
+        },
+        {
+          url: '/cologne/2021-09-22/1?leisureUnv=no',
+          date: 'Released: 24 Sep 2021',
+          title: 'Cologne',
+          subtitle: 'Cologne: Measures for fall',
+        },
+        {
+          url: '/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+          date: 'Released: 2 Sep 2021',
+          title: 'Report runs Sep 3',
+          subtitle: 'Measures for fall',
+        },
+        {
+          url: '/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+          date: 'Released: 2 Sep 2021',
+          title: 'Report runs Sep 3',
+          subtitle: 'Measures for fall',
+        },
+        {
+          url: '/2021-09-02/3?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+          date: 'Released: 2 Sep 2021',
+          title: 'Report runs Sep 3',
+          subtitle: 'Measures for fall',
+        },
+        {
+          url: '/2021-09-02/4?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
+          date: 'Released: 2 Sep 2021',
+          title: 'Report runs Sep 3',
+          subtitle: 'Measures for fall',
+        },
+        {
+          url: '/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25',
+          date: 'Released: 16 July 2021',
+          title: 'Report runs July 16',
+          subtitle: 'School measures after the holidays',
+        },
+        {
+          url: '/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no',
+          date: 'Released: 18 June 2021',
+          title: 'Report runs June 18',
+          subtitle: 'Virus mutations',
+        },
+        {
+          url: '/2021-05-20/bmbf?b1351inf=1.8&b1351VaccinationEffectiveness=70%25&vaccinationCompliance=80%25&revaccinationDate=no',
+          date: 'Released: 21 May 2021',
+          title: 'Report runs May 21',
+          subtitle: 'Virus mutations and revaccination',
+        },
+        {
+          url: '/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25',
+          date: 'Released: 30 April 2021',
+          title: 'Report runs April 30',
+          subtitle: 'Opening strategies',
+        },
+        {
+          url: '/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes',
+          date: 'Released: 09 April 2021',
+          title: 'Report runs April 09',
+          subtitle: '1.8 higher infectivity of B117',
+        },
+        {
+          url: '/2021-04-09/bmbf-2.0?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes',
+          date: 'Released: 09 April 2021',
+          title: 'Report runs April 09',
+          subtitle: '2.0 higher infectivity of B117',
+        },
+        {
+          url: '/2021-03-19/testing?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29',
+          date: 'Released: 19 March 2021',
+          title: 'Report runs March 19',
+          subtitle: 'Activity-based testing strategies',
+        },
+        {
+          url: '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',
+          date: 'Released: 26 Feb 2021',
+          title: 'Report runs Feb. 26',
+          subtitle: 'Effect of adaptive restrictions',
+        },
+        {
+          url: '/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes',
+          date: 'Released: 26 Feb 2021',
+          title: 'Report runs Feb. 26',
+          subtitle: 'Testing strategies',
+        },
+        {
+          url: '/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15',
+          date: 'Released: 05 Feb 2021',
+          title: 'Report runs Feb. 05',
+          subtitle: 'Examination of new strains, curfews, and some reopening strategies',
+        },
+        {
+          url: '/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346',
+          date: 'Released: 15 Jan 2021',
+          title: 'Curfews & vaccinations',
+          subtitle: 'Examination of new strains, curfews, and the start of vaccinations',
+        },
+        {
+          url: '/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346',
+          date: 'Released: 15 Jan 2021',
+          title: 'Where do we stand after the holidays?',
+          subtitle: 'Effect of the holidays, virus variants, and the start of vaccinations.',
+        },
+        {
+          url: '/2020-12-03/secondLockdown',
+          date: 'Released: 03 Dec 2020',
+          title: 'Second Lockdown & Curfew',
+          subtitle: 'Effect of second lockdown and curfew hours.',
+        },
+        {
+          url: '/2020-11-12/secondLockdownCurfew',
+          date: 'Released: 12 Nov 2020',
+          title: 'Second Lockdown & Curfew',
+          subtitle: 'Effect of second lockdown and curfew hours.',
+        },
+        {
+          url: '/2020-11-12/secondLockdown',
+          date: 'Released: 12 Nov 2020',
+          title: 'Second Lockdown',
+          subtitle: 'Different options for second lockdown.',
+        },
+        {
+          url: '/2020-11-09/tracing',
+          date: 'Released: 09 Nov 2020',
+          title: 'Tracing',
+          subtitle: 'Effects of different tracing capabilities.',
+        },
+        {
+          url: '/2020-11-03/sensitivity',
+          date: 'Released: 03 Nov 2020',
+          title: 'Sensitivity',
+          subtitle: 'Effects of switching off different parts of the model.',
+        },
+        {
+          url: '/2020-10-23/interventions',
+          date: 'Released: 23 Oct 2020',
+          title: 'Run 2020.10.23',
+          subtitle: 'Several interventions to control virus spreading.',
+        },
+        {
+          url: '/2020-10-01/bmbf',
+          date: 'Released: 01 Oct 2020',
+          title: 'Run 2020.10.01',
+          subtitle: 'Effects of various measures to control virus spreading.',
+        },
+        {
+          url: '/2020-09-11/bmbf',
+          date: 'Released: 11 Sep 2020',
+          title: 'Run 2020.09.11',
+          subtitle: 'Effects of different intervention methods in educational facilities.',
+        },
+        {
+          url: '/2020-07-22',
+          date: 'Released: 22 July 2020',
+          title: 'Run 2020.07.22',
+          subtitle:
+            'Behavioral changes after June 01 and increased indoor activities in winter; further measures at October 01.',
+        },
+        {
+          url: '/2020-07-21',
+          date: 'Released: 21 July 2020',
+          title: 'Run 2020.07.21',
+          subtitle: 'Behavioral changes after June 01 and increased indoor activities in winter.',
+        },
+        {
+          url: '/2020-06-19',
+          date: 'Released: 19 June 2020',
+          title: 'Run 2020.06.19',
+          subtitle:
+            'Closing of educational facilities; reduced activities and public transport; masks; contact tracing.',
+        },
+        {
+          url: '/2020-06-05',
+          date: 'Released: 19 June 2020',
+          title: 'Run 2020.06.05',
+          subtitle: 'Contact tracing and school reopenings',
+        },
+        {
+          url: '/v9/masks/berlin',
+          date: 'Released: 11 May 2020',
+          title: 'v9: Masks',
+          subtitle: 'Impact of different types of masks and their usage levels',
+        },
+        {
+          url: '/v9/tracing2/berlin',
+          date: 'Released: 11 May 2020',
+          title: 'v9: Contact Tracing',
+          subtitle: 'Part 2: More contact tracing options',
+        },
+        {
+          url: '/v8/masks',
+          date: 'Released: 11 May 2020',
+          title: 'v8: Masks',
+          subtitle: 'Impact of different types of masks and their usage levels',
+        },
+        {
+          url: '/v7',
+          date: 'Released: 22 April 2020',
+          title: 'School Reopening Options (3)',
+          subtitle:
+            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
+        },
+        {
+          url: '/v5',
+          date: 'Updated: 6 April 2020',
+          title: 'School Reopening Options (2)',
+          subtitle:
+            'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
+        },
+        {
+          url: '/v4',
+          date: 'Released: 1 April 2020',
+          title: 'School Reopening Options (1)',
+          subtitle:
+            'Explore re-opening of kindergarten, primary and secondary school, and universities.',
+        },
+        {
+          url: '/v2',
+          date: 'Updated: 28 March 2020',
+          title: 'Adherence Rates for Different Intervention Strategies',
+          subtitle: 'Different adherence rates for different stay-at-home interventions.',
+        },
+        {
+          url: '/v1',
+          date: 'Updated: 25 March 2020',
+          title: 'Timings of Different Intervention Strategies',
+          subtitle: 'Different timings of different stay-at-home interventions.',
+        },
+      ],
+      readme: '',
+      readmeBottom: '',
+      latestReport,
+      rCalculators,
 
-  private modelruns: any[] = [
-    {
-      url: '/jakob/2023-11-06/1-bmbf-calibrate-eg-B',
-      date: 'Released: 13 November 2023',
-      title: 'Report runs 13 November',
-      subtitle: 'Wave length, Winter 23/24',
-    },
-    {
-      url: '/cologne/2023-02-15/2-firstWave',
-      date: 'Released: 27 February 2023',
-      title: 'Report runs 27 February',
-      subtitle: 'Retrospective',
-    },
-    {
-      url: '/cologne/2022-11-23/variants',
-      date: 'Released: 02 December 2022',
-      title: 'Report runs 02 December',
-      subtitle: 'Variant soup',
-    },
-    {
-      url: '/cologne/2022-10-18/3-meas',
-      date: 'Released: 24 October 2022',
-      title: 'Report runs 24 October',
-      subtitle: 'Emergency measures',
-    },
-    {
-      url: '/cologne/2022-08-04/9b-leis-dec',
-      date: 'Released: 09 August 2022',
-      title: 'Report runs 09 August',
-      subtitle: 'Measures in autumn and winter',
-    },
-    {
-      url:
-        '/cologne/2022-06-23/2b?strAEsc=6.0&resDate=2022-12-01&vacCamp=off&edu=normal&leis=100%25&work=100%25',
-      date: 'Released: 28 June 2022',
-      title: 'Report runs 28 June',
-      subtitle: 'Measures in autumn and winter',
-    },
-    {
-      url: '/cologne/2022-04-13/?mutEscOm=6.0&timePeriodIgA=730.0&mutDate=2022-10-01',
-      date: 'Released: 26 April 2022',
-      title: 'Report runs 26 April',
-      subtitle: 'Vaccination strategies next autumn',
-    },
-    {
-      url: '/cologne/2022-02-22/1?ba2Inf=1.5&ba1ba2Long=True',
-      date: 'Released: 23 Feb 2022',
-      title: 'Report runs 23 Feb.',
-      subtitle: 'Omicron variant BA.2',
-    },
-    {
-      url: '/cologne/2022-01-18/2?leis=1.0&leisUnv=0.75&daysImmuneQ=current',
-      date: 'Released: 20 Jan 2022',
-      title: 'Report runs 20 Jan.',
-      subtitle: '',
-    },
-    {
-      url: '/cologne/2021-12-16/1?vacSp=100%25&leis=100%25&leisUnv=75%25',
-      date: 'Released: 17 Dec 2021',
-      title: 'Report runs 17 Dec.',
-      subtitle: '',
-    },
-    {
-      url: '/cologne/2021-11-17/1?leisUnv=100%25&wTest=current&schools=protected',
-      date: 'Released: 19 Nov 2021',
-      title: 'Report runs 19 Nov.',
-      subtitle: 'Measures without activity reductions',
-    },
-    {
-      url: '/cologne/2021-11-17/3?leisUnv=100%25&wTest=current&schools=protected',
-      date: 'Released: 19 Nov 2021',
-      title: 'Report runs 19 Nov.',
-      subtitle: 'Measures with activity reductions',
-    },
-    {
-      url: '/cologne/2021-10-21/1?vacInf=50%25&leisureUnv=no',
-      date: 'Released: 22 Oct 2021',
-      title: 'Report runs 22 Oct.',
-      subtitle: 'Booster vaccinations',
-    },
-    {
-      url: '/cologne/2021-09-22/1?leisureUnv=no',
-      date: 'Released: 24 Sep 2021',
-      title: 'Cologne',
-      subtitle: 'Cologne: Measures for fall',
-    },
-    {
-      url:
-        '/2021-09-02/1?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
-      date: 'Released: 2 Sep 2021',
-      title: 'Report runs Sep 3',
-      subtitle: 'Measures for fall',
-    },
-    {
-      url:
-        '/2021-09-02/2?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
-      date: 'Released: 2 Sep 2021',
-      title: 'Report runs Sep 3',
-      subtitle: 'Measures for fall',
-    },
-    {
-      url:
-        '/2021-09-02/3?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
-      date: 'Released: 2 Sep 2021',
-      title: 'Report runs Sep 3',
-      subtitle: 'Measures for fall',
-    },
-    {
-      url:
-        '/2021-09-02/4?leisureUnv=no&workUnv=no&leisureTests=current&eduTests=current&workTests=current',
-      date: 'Released: 2 Sep 2021',
-      title: 'Report runs Sep 3',
-      subtitle: 'Measures for fall',
-    },
-    {
-      url:
-        '/2021-07-13/schools?vaccinationAgeGroup=6m&testingRatePCRTest=100%25&testingRateRapidTest=100%25',
-      date: 'Released: 16 July 2021',
-      title: 'Report runs July 16',
-      subtitle: 'School measures after the holidays',
-    },
-    {
-      url:
-        '/2021-06-17/mutations?mutBinf=2.2&mutBVaccinationEffectiveness=80%25&vaccinationAgeGroup=16y&masks=no&revaccinationDate=no',
-      date: 'Released: 18 June 2021',
-      title: 'Report runs June 18',
-      subtitle: 'Virus mutations',
-    },
-    {
-      url:
-        '/2021-05-20/bmbf?b1351inf=1.8&b1351VaccinationEffectiveness=70%25&vaccinationCompliance=80%25&revaccinationDate=no',
-      date: 'Released: 21 May 2021',
-      title: 'Report runs May 21',
-      subtitle: 'Virus mutations and revaccination',
-    },
-    {
-      url:
-        '/2021-04-30/opening?testingRateEduWorkLeisure=20-5-5&sh_e_1=100%25&sc_2=100%25&l_w_2=90%25&u_2=50%25&l_w_3=100%25&u_3=100%25',
-      date: 'Released: 30 April 2021',
-      title: 'Report runs April 30',
-      subtitle: 'Opening strategies',
-    },
-    {
-      url:
-        '/2021-04-09/bmbf-1.8?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes',
-      date: 'Released: 09 April 2021',
-      title: 'Report runs April 09',
-      subtitle: '1.8 higher infectivity of B117',
-    },
-    {
-      url:
-        '/2021-04-09/bmbf-2.0?leisure=current&activityLevel=current&work=no&vaccinationRate=current&liftRestrictions=no&outdoorModel=yes',
-      date: 'Released: 09 April 2021',
-      title: 'Report runs April 09',
-      subtitle: '2.0 higher infectivity of B117',
-    },
-    {
-      url: '/2021-03-19/testing?easterModel=yes&extrapolateRestrictions=76pct%20%28current%29',
-      date: 'Released: 19 March 2021',
-      title: 'Report runs March 19',
-      subtitle: 'Activity-based testing strategies',
-    },
-    {
-      url:
-        '/2021-02-20?leisureTrigger=35.0&workTrigger=35.0&eduTrigger=35.0&shopErrandsTrigger=35.0&dailyInitialVaccinations=3000',
-      date: 'Released: 26 Feb 2021',
-      title: 'Report runs Feb. 26',
-      subtitle: 'Effect of adaptive restrictions',
-    },
-    {
-      url: '/2021-02-23/testing?testingFalseNegative=30%25&outdoorModel=yes',
-      date: 'Released: 26 Feb 2021',
-      title: 'Report runs Feb. 26',
-      subtitle: 'Testing strategies',
-    },
-    {
-      url:
-        '/2021-02-02/?extrapolateRestrictions=no&work=no&dailyInitialVaccinations=3000&curfew=no&newVariantInfectiousness=2.0&newVariantDate=2020-12-15',
-      date: 'Released: 05 Feb 2021',
-      title: 'Report runs Feb. 05',
-      subtitle: 'Examination of new strains, curfews, and some reopening strategies',
-    },
-    {
-      url:
-        '/2021-01-17/curfew?newVariantDate=2020-12-15&extrapolateRestrictions=yesUntil80&curfew=no&seed=7564655870752979346',
-      date: 'Released: 15 Jan 2021',
-      title: 'Curfews & vaccinations',
-      subtitle: 'Examination of new strains, curfews, and the start of vaccinations',
-    },
-    {
-      url: '/2021-01-13/bmbf?newVariantDate=2020-12-15&schools=closed&seed=7564655870752979346',
-      date: 'Released: 15 Jan 2021',
-      title: 'Where do we stand after the holidays?',
-      subtitle: 'Effect of the holidays, virus variants, and the start of vaccinations.',
-    },
-    {
-      url: '/2020-12-03/secondLockdown',
-      date: 'Released: 03 Dec 2020',
-      title: 'Second Lockdown & Curfew',
-      subtitle: 'Effect of second lockdown and curfew hours.',
-    },
-    {
-      url: '/2020-11-12/secondLockdownCurfew',
-      date: 'Released: 12 Nov 2020',
-      title: 'Second Lockdown & Curfew',
-      subtitle: 'Effect of second lockdown and curfew hours.',
-    },
-    {
-      url: '/2020-11-12/secondLockdown',
-      date: 'Released: 12 Nov 2020',
-      title: 'Second Lockdown',
-      subtitle: 'Different options for second lockdown.',
-    },
-    {
-      url: '/2020-11-09/tracing',
-      date: 'Released: 09 Nov 2020',
-      title: 'Tracing',
-      subtitle: 'Effects of different tracing capabilities.',
-    },
-    {
-      url: '/2020-11-03/sensitivity',
-      date: 'Released: 03 Nov 2020',
-      title: 'Sensitivity',
-      subtitle: 'Effects of switching off different parts of the model.',
-    },
-    {
-      url: '/2020-10-23/interventions',
-      date: 'Released: 23 Oct 2020',
-      title: 'Run 2020.10.23',
-      subtitle: 'Several interventions to control virus spreading.',
-    },
-    {
-      url: '/2020-10-01/bmbf',
-      date: 'Released: 01 Oct 2020',
-      title: 'Run 2020.10.01',
-      subtitle: 'Effects of various measures to control virus spreading.',
-    },
-    {
-      url: '/2020-09-11/bmbf',
-      date: 'Released: 11 Sep 2020',
-      title: 'Run 2020.09.11',
-      subtitle: 'Effects of different intervention methods in educational facilities.',
-    },
-    {
-      url: '/2020-07-22',
-      date: 'Released: 22 July 2020',
-      title: 'Run 2020.07.22',
-      subtitle:
-        'Behavioral changes after June 01 and increased indoor activities in winter; further measures at October 01.',
-    },
-    {
-      url: '/2020-07-21',
-      date: 'Released: 21 July 2020',
-      title: 'Run 2020.07.21',
-      subtitle: 'Behavioral changes after June 01 and increased indoor activities in winter.',
-    },
-    {
-      url: '/2020-06-19',
-      date: 'Released: 19 June 2020',
-      title: 'Run 2020.06.19',
-      subtitle:
-        'Closing of educational facilities; reduced activities and public transport; masks; contact tracing.',
-    },
-    {
-      url: '/2020-06-05',
-      date: 'Released: 19 June 2020',
-      title: 'Run 2020.06.05',
-      subtitle: 'Contact tracing and school reopenings',
-    },
-    {
-      url: '/v9/masks/berlin',
-      date: 'Released: 11 May 2020',
-      title: 'v9: Masks',
-      subtitle: 'Impact of different types of masks and their usage levels',
-    },
-    {
-      url: '/v9/tracing2/berlin',
-      date: 'Released: 11 May 2020',
-      title: 'v9: Contact Tracing',
-      subtitle: 'Part 2: More contact tracing options',
-    },
-    {
-      url: '/v8/masks',
-      date: 'Released: 11 May 2020',
-      title: 'v8: Masks',
-      subtitle: 'Impact of different types of masks and their usage levels',
-    },
-    {
-      url: '/v7',
-      date: 'Released: 22 April 2020',
-      title: 'School Reopening Options (3)',
-      subtitle:
-        'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
-    },
-    {
-      url: '/v5',
-      date: 'Updated: 6 April 2020',
-      title: 'School Reopening Options (2)',
-      subtitle:
-        'Select adherence rates for stay-at-home and explore re-opening options for kindergarten/schools/universities.',
-    },
-    {
-      url: '/v4',
-      date: 'Released: 1 April 2020',
-      title: 'School Reopening Options (1)',
-      subtitle:
-        'Explore re-opening of kindergarten, primary and secondary school, and universities.',
-    },
-    {
-      url: '/v2',
-      date: 'Updated: 28 March 2020',
-      title: 'Adherence Rates for Different Intervention Strategies',
-      subtitle: 'Different adherence rates for different stay-at-home interventions.',
-    },
-    {
-      url: '/v1',
-      date: 'Updated: 25 March 2020',
-      title: 'Timings of Different Intervention Strategies',
-      subtitle: 'Different timings of different stay-at-home interventions.',
-    },
-  ]
-
-  private visualizations: any[] = [
-    {
-      url: '/v3?day=5',
-      title: 'Infection Traces',
-      subtitle: 'Animation of infection spreading through the population.',
-    },
-    {
-      url: '/timelapse',
-      title: '90 Day Time Lapse',
-      subtitle: 'Home locations of residents, colored by their infection status through time.',
-    },
-  ]
-}
+      visualizations: [
+        {
+          url: '/v3?day=5',
+          title: 'Infection Traces',
+          subtitle: 'Animation of infection spreading through the population.',
+        },
+        {
+          url: '/timelapse',
+          title: '90 Day Time Lapse',
+          subtitle: 'Home locations of residents, colored by their infection status through time.',
+        },
+      ],
+    }
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
-#home {
+.home-index {
   background-color: $paleBackground;
 }
 

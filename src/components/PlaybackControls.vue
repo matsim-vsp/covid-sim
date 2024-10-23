@@ -1,5 +1,5 @@
 <template lang="pug">
-#vue-component
+.my-vue-component
   vue-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
@@ -14,95 +14,102 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import VueSlider from 'vue-slider-component'
 import * as timeConvert from 'convert-seconds'
 
 import store from '@/store'
 import EventBus from '@/EventBus.vue'
 
-@Component({ components: { VueSlider }, props: {} })
-export default class VueComponent extends Vue {
-  private state = store.state
+export default defineComponent({
+  name: 'PlaybackControls',
+  components: { VueSlider },
 
-  private sliderValue = 0
-  private maxSliderVal = 100000.0
+  data: () => {
+    const maxSliderVal = 100000.0
 
-  private sliderOptions = {
-    min: 0,
-    max: this.maxSliderVal - 1,
-    clickable: false,
-    dotSize: 28,
-    duration: 0,
-    lazy: true,
-    tooltip: 'active',
-    'tooltip-placement': 'top',
-    'tooltip-formatter': (v: number) => {
-      return this.convertSecondsToClockTimeMinutes(v)
-    },
-  }
-
-  private toggleSimulation() {
-    this.$emit('click')
-  }
-
-  private convertSecondsToClockTimeMinutes(index: number) {
-    const seconds = this.getSecondsFromSlider(index)
-
-    try {
-      const hms = timeConvert(seconds)
-      const minutes = ('00' + hms.minutes).slice(-2)
-      return `${hms.hours}:${minutes}`
-    } catch (e) {
-      return '00:00'
+    return {
+      state: store.state,
+      sliderValue: 0,
+      maxSliderVal,
+      sliderOptions: {
+        min: 0,
+        max: maxSliderVal - 1,
+        clickable: false,
+        dotSize: 28,
+        duration: 0,
+        lazy: true,
+        tooltip: 'active',
+        'tooltip-placement': 'top',
+      } as any,
     }
-  }
+  },
 
-  private dragStart() {
-    console.log('start')
-    EventBus.$emit(EventBus.DRAG, -1)
-  }
+  methods: {
+    convertSecondsToClockTimeMinutes(index: number) {
+      const seconds = this.getSecondsFromSlider(index)
 
-  private dragEnd() {
-    console.log('end')
-    EventBus.$emit(EventBus.DRAG, -2)
-  }
+      try {
+        const hms = timeConvert(seconds)
+        const minutes = ('00' + hms.minutes).slice(-2)
+        return `${hms.hours}:${minutes}`
+      } catch (e) {
+        return '00:00'
+      }
+    },
 
-  private dragging(value: any) {
-    EventBus.$emit(EventBus.DRAG, this.getSecondsFromSlider(value))
-  }
+    onKeyPressed(ev: KeyboardEvent) {
+      if (ev.code === 'Space') this.toggleSimulation()
+    },
 
-  private onKeyPressed(ev: KeyboardEvent) {
-    if (ev.code === 'Space') this.toggleSimulation()
-  }
+    toggleSimulation() {
+      this.$emit('click')
+    },
 
-  private getSecondsFromSlider(oneToTenThousand: number) {
-    let seconds = (oneToTenThousand / this.maxSliderVal) * 86400
-    if (seconds === 86400) seconds = 86400 - 1
-    return seconds
-  }
+    dragStart() {
+      console.log('start')
+      EventBus.$emit(EventBus.DRAG, -1)
+    },
+
+    dragEnd() {
+      console.log('end')
+      EventBus.$emit(EventBus.DRAG, -2)
+    },
+
+    dragging(value: any) {
+      EventBus.$emit(EventBus.DRAG, this.getSecondsFromSlider(value))
+    },
+
+    getSecondsFromSlider(oneToTenThousand: number) {
+      let seconds = (oneToTenThousand / this.maxSliderVal) * 86400
+      if (seconds === 86400) seconds = 86400 - 1
+      return seconds
+    },
+  },
 
   mounted() {
-    const parent = this
+    this.sliderOptions['tooltip-formatter'] = this.convertSecondsToClockTimeMinutes
 
-    EventBus.$on(EventBus.SIMULATION_PERCENT, function(time: number) {
-      parent.sliderValue = Math.floor(parent.maxSliderVal * time)
+    EventBus.$on(EventBus.SIMULATION_PERCENT, (time: number) => {
+      this.sliderValue = Math.floor(this.maxSliderVal * time)
     })
-
     window.addEventListener('keyup', this.onKeyPressed)
-  }
+  },
 
   beforeDestroy() {
     EventBus.$off(EventBus.SIMULATION_PERCENT)
     window.removeEventListener('keyup', this.onKeyPressed)
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '~/vue-slider-component/theme/antd.css' as *;
+@use '@/styles.scss' as *;
 
-#vue-component {
+.my-vue-component {
   display: flex;
   flex-direction: row;
 }

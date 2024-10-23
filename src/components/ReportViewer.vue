@@ -16,44 +16,50 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
 import MarkdownIt from 'markdown-it'
 
 import allReports from '@/assets/reports'
 
-@Component({ components: {}, props: {} })
-export default class VueComponent extends Vue {
-  private mdParser = new MarkdownIt()
-
-  private reports = allReports
-  private selectedReport = this.reports[0]
-
-  private mounted() {
-    this.loadReports() // this will return immediately and load in background
-  }
-
-  private clickedDownload() {
-    window.location.href = this.selectedReport.url
-  }
-
-  private changeReport(report: any) {
-    this.selectedReport = report
-  }
-
-  private async loadReports() {
-    for (const report of this.reports) {
-      const response = await fetch(report.md)
-      const text = await response.text()
-      const md = this.mdParser.render(text)
-
-      report.html = md
+export default defineComponent({
+  name: 'ReportViewer',
+  data() {
+    return {
+      mdParser: new MarkdownIt(),
+      reports: allReports,
+      selectedReport: allReports[0],
     }
-  }
-}
+  },
+
+  mounted() {
+    this.loadReports() // this will return immediately and load in background
+  },
+
+  methods: {
+    clickedDownload() {
+      window.location.href = this.selectedReport.url
+    },
+
+    changeReport(report: any) {
+      this.selectedReport = report
+    },
+
+    async loadReports() {
+      for (const report of this.reports) {
+        const response = await fetch(report.md)
+        const text = await response.text()
+        const md = this.mdParser.render(text)
+        report.html = md
+      }
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .vue-component {
   display: flex;

@@ -20,179 +20,193 @@
 
 <script lang="ts">
 // ###########################################################################
-import YAML from 'yaml'
-import Papa from 'papaparse'
-import * as moment from 'moment'
+import Papa from '@simwrapper/papaparse'
 
-import { Component, Vue, Watch } from 'vue-property-decorator'
 import SectionViewer from '@/runs/v6/ChartSelector.vue'
 
-@Component({
-  components: {
-    SectionViewer,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+import Markdown from 'markdown-it'
+import v6Notes from '@/assets/v6-notes.md?raw'
+import berlinCSV from '@/assets/berlin-cases.csv?raw'
+
+const html = new Markdown({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).render(v6Notes)
+
+export default defineComponent({
+  name: 'V6',
+  components: { SectionViewer },
+  props: {},
+
+  data() {
+    return {
+      state: {
+        measures: {},
+        runLookup: {},
+        cumulativeInfected: 0,
+        berlinCases: {} as any,
+        publicPath: '/',
+      },
+      readme: {
+        berlin: html,
+        munich: html,
+      } as any,
+      plotTag: '{{PLOTS}}',
+      city: '',
+      plusminus: '-5',
+    }
   },
-})
-export default class App extends Vue {
-  private state: any = {
-    measures: {},
-    runLookup: {},
-    cumulativeInfected: 0,
-    berlinCases: [],
-    publicPath: '/',
-  }
 
-  private get cities() {
-    return ['Berlin', 'Munich']
-  }
-
-  private readme: any = {
-    berlin: require('@/assets/v6-notes.md'),
-    munich: require('@/assets/v6-notes.md'),
-  }
-
-  private plotTag = '{{PLOTS}}'
-
-  @Watch('$route') async routeChanged(to: any, from: any) {
-    console.log(to)
-    await this.loadDataInBackground()
-    this.city = to.params.city
-  }
-
-  private get topNotes() {
-    const notes = this.readme[this.city]
-    if (!notes) return ''
-
-    const i = notes.indexOf(this.plotTag)
-
-    if (i < 0) return notes
-    return notes.substring(0, i)
-  }
-
-  private get bottomNotes() {
-    const notes = this.readme[this.city]
-    if (!notes) return ''
-
-    const i = notes.indexOf(this.plotTag)
-
-    if (i < 0) return ''
-    return notes.substring(i + this.plotTag.length)
-  }
-
-  private berlinCSV = require('@/assets/berlin-cases.csv').default
-
-  private city = ''
-  private plusminus = '-5'
-
-  public async mounted() {
+  async mounted() {
     console.log({ route: this.$route })
     this.city = this.$route.params.city
 
     await this.loadDataInBackground()
-  }
+  },
 
-  private async loadDataInBackground() {
-    this.state.berlinCases = this.prepareBerlinData()
+  computed: {
+    cities() {
+      return ['Berlin', 'Munich']
+    },
 
-    const filepath = this.state.publicPath + 'v6-info-' + this.city + '.txt'
-    const parsed = await this.loadCSVData(filepath)
-    const matrix = await this.generateScenarioMatrix(parsed)
-  }
+    topNotes() {
+      const notes = this.readme[this.city]
+      if (!notes) return ''
 
-  private prepareBerlinData() {
-    // Our simulation start date is 2020.02.16 based on school closures 13.March
-    // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
-    // Thus we begin Berlin data with 2 cases.
-    const data = Papa.parse(this.berlinCSV, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-    }).data
+      const i = notes.indexOf(this.plotTag)
 
-    console.log({ data })
+      if (i < 0) return notes
+      return notes.substring(0, i)
+    },
 
-    const dates: any = []
-    const cases: any = []
-    let cumulative = 0
+    bottomNotes() {
+      const notes = this.readme[this.city]
+      if (!notes) return ''
 
-    console.log('fetched berlin data:', data.length)
+      const i = notes.indexOf(this.plotTag)
 
-    // pull the cases field out of the CSV
-    for (const datapoint of data) {
-      const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
-      dates.push(day)
+      if (i < 0) return ''
+      return notes.substring(i + this.plotTag.length)
+    },
+  },
 
-      cumulative += datapoint.cases
-      cases.push(cumulative)
-    }
+  watch: {
+    async $route(to: any, from: any) {
+      console.log(to)
+      await this.loadDataInBackground()
+      this.city = to.params.city
+    },
+  },
 
-    const series = {
-      name: 'Berlin Infections (RKI)',
-      x: dates,
-      y: cases,
-      line: {
-        dash: 'dot',
-        width: 3,
-        color: 'rgb(0,200,150)',
-      },
-    }
+  methods: {
+    async loadDataInBackground() {
+      this.state.berlinCases = this.prepareBerlinData()
 
-    console.log({ berlinSeries: series })
-    return series
-  }
+      const filepath = this.state.publicPath + 'v6-info-' + this.city + '.txt'
+      const parsed = await this.loadCSVData(filepath)
+      const matrix = await this.generateScenarioMatrix(parsed)
+    },
 
-  private async loadCSVData(filepath: string) {
-    console.log('fetching data')
-    const response = await fetch(filepath)
-    const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
-    console.log({ parsed: parsed.data })
+    prepareBerlinData() {
+      // Our simulation start date is 2020.02.16 based on school closures 13.March
+      // Two cases in RKI data before 2020.02.16 (as of 2020.04.16)
+      // Thus we begin Berlin data with 2 cases.
+      const data = Papa.parse(berlinCSV, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data
 
-    return parsed.data
-  }
+      console.log({ data })
 
-  private async generateScenarioMatrix(parsed: any[]) {
-    console.log('generating lookups')
-    const measures: any = {}
-    const runLookup: any = {}
+      const dates: any = []
+      const cases: any = []
+      let cumulative = 0
 
-    // first get column names for the measures that have been tested
-    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+      console.log('fetched berlin data:', data.length)
 
-    for (const label of Object.keys(parsed[0])) {
-      if (ignore.indexOf(label) > -1) continue
-      measures[label] = new Set()
-    }
+      // pull the cases field out of the CSV
+      for (const datapoint of data) {
+        const day = datapoint.year + '-' + datapoint.month + '-' + datapoint.day
+        dates.push(day)
 
-    // get all possible values
-    for (const run of parsed) {
-      if (!run.RunId) continue
-
-      // note this particular value, for every value
-      for (const measure of Object.keys(measures)) {
-        if (run[measure] === 0 || run[measure]) measures[measure].add(run[measure])
+        cumulative += datapoint.cases
+        cases.push(cumulative)
       }
 
-      // store the run in a lookup using all values as the key
-      let lookupKey = ''
-      for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
-      runLookup[lookupKey] = run
-    }
+      const series = {
+        name: 'Berlin Infections (RKI)',
+        x: dates,
+        y: cases,
+        line: {
+          dash: 'dot',
+          width: 3,
+          color: 'rgb(0,200,150)',
+        },
+      }
 
-    for (const measure of Object.keys(measures)) {
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
-    }
+      console.log({ berlinSeries: series })
+      return series
+    },
 
-    console.log({ measures, runLookup })
-    this.state.measures = measures
-    this.state.runLookup = runLookup
-  }
-}
+    async loadCSVData(filepath: string) {
+      console.log('fetching data')
+      const response = await fetch(filepath)
+      const text = await response.text()
+      const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
+      console.log({ parsed: parsed.data })
+
+      return parsed.data
+    },
+
+    async generateScenarioMatrix(parsed: any[]) {
+      console.log('generating lookups')
+      const measures: any = {}
+      const runLookup: any = {}
+
+      // first get column names for the measures that have been tested
+      const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+
+      for (const label of Object.keys(parsed[0])) {
+        if (ignore.indexOf(label) > -1) continue
+        measures[label] = new Set()
+      }
+
+      // get all possible values
+      for (const run of parsed) {
+        if (!run.RunId) continue
+
+        // note this particular value, for every value
+        for (const measure of Object.keys(measures)) {
+          if (run[measure] === 0 || run[measure]) measures[measure].add(run[measure])
+        }
+
+        // store the run in a lookup using all values as the key
+        let lookupKey = ''
+        for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
+        runLookup[lookupKey] = run
+      }
+
+      for (const measure of Object.keys(measures)) {
+        measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
+      }
+
+      console.log({ measures, runLookup })
+      this.state.measures = measures
+      this.state.runLookup = runLookup
+    },
+  },
+})
 
 // ###########################################################################
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .content {
   padding: 0rem 3rem;

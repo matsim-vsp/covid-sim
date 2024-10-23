@@ -20,42 +20,43 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
 import store from '@/store'
 import AnimationView from '@/runs/v3/AnimationView.vue'
 
-@Component({
-  components: {
-    AnimationView,
+export default defineComponent({
+  name: 'V3',
+  components: { AnimationView },
+  data() {
+    return {
+      state: store.state,
+      isLoaded: false,
+    }
   },
-})
-export default class App extends Vue {
-  private state = store.state
-  private isLoaded = false
+  methods: {
+    toggleSimulation() {
+      console.log('halt!')
+      this.$store.commit('setSimulation', !store.state.isRunning)
+    },
+    toggleLoaded(loaded: boolean) {
+      this.isLoaded = loaded
+    },
+    rotateColors() {
+      this.$store.commit('rotateColors')
+    },
+  },
 
-  private toggleSimulation() {
-    console.log('halt!')
-    this.$store.commit('setSimulation', !store.state.isRunning)
-  }
-
-  private mounted() {
+  mounted() {
     this.$store.commit('setFullScreen', true)
     this.$store.commit('setSimulation', true)
-  }
-  private beforeDestroy() {
+  },
+  beforeDestroy() {
     this.$store.commit('setFullScreen', false)
     this.$store.commit('setSimulation', true)
-  }
-
-  private toggleLoaded(loaded: boolean) {
-    this.isLoaded = loaded
-  }
-
-  private rotateColors() {
-    this.$store.commit('rotateColors')
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">

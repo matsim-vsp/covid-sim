@@ -14,7 +14,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+import pngV3 from '@/assets/images/v3-thumb.png'
+import pngTimelapse from '@/assets/images/timelapse.jpg'
+import pngV6 from '@/assets/images/thumb-v6.png'
 
 interface Viz {
   url: string
@@ -22,37 +27,34 @@ interface Viz {
   subtitle?: string
 }
 
-@Component({ props: { viz: {} } })
-export default class VizThumbnail extends Vue {
-  @Prop({ required: true })
-  private viz!: Viz
+export default defineComponent({
+  name: 'VizCard',
+  props: {
+    viz: { type: Object as PropType<Viz>, required: true },
+  },
+  computed: {
+    vizNumber() {
+      const n = this.viz.url.slice(1)
+      const query = n.indexOf('?')
+      if (query === -1) return n
+      return n.substring(0, query)
+    },
 
-  private get vizNumber() {
-    const n = this.viz.url.slice(1)
-    const query = n.indexOf('?')
-    if (query === -1) return n
-    return n.substring(0, query)
-  }
-
-  private get thumbnail() {
-    // const filename = this.viz.url.replace(/\//g, '-')
-    // console.log(filename)
-    if (this.viz.url.indexOf('v3') > -1) {
-      const zimg = require(`../assets/images/v3-thumb.png`)
-      return zimg
-    } else if (this.viz.url.indexOf('timelapse') > -1) {
-      const zimg = require(`../assets/images/timelapse.jpg`)
-      return zimg
-    } else {
-      const zimg = require(`../assets/images/thumb-v6.png`)
-      return zimg
-    }
-  }
-}
+    thumbnail() {
+      if (this.viz.url.indexOf('v3') > -1) {
+        return pngV3
+      } else if (this.viz.url.indexOf('timelapse') > -1) {
+        return pngTimelapse
+      } else {
+        return pngV6
+      }
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .card {
   display: grid;

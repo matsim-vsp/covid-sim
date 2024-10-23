@@ -1,5 +1,5 @@
 <template lang="pug">
-#app
+.app
   .content
     .readme(v-html="readme")
 
@@ -8,82 +8,93 @@
 </template>
 
 <script lang="ts">
-// ###########################################################################
-import YAML from 'yaml'
-import Papa from 'papaparse'
-
-import { Component, Vue } from 'vue-property-decorator'
+import Papa from '@simwrapper/papaparse'
 import SectionViewer from '@/runs/v4/ChartSelector.vue'
 
-@Component({
-  components: {
-    SectionViewer,
-  },
-})
-export default class App extends Vue {
-  private state: any = {
-    measures: {},
-    runLookup: {},
-    cumulativeInfected: 0,
-    publicPath: '/',
-  }
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private readme = require('@/assets/v4-notes.md')
+import Markdown from 'markdown-it'
+import readme from '@/assets/v4-notes.md?raw'
+const readmeHTML = new Markdown({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).render(readme)
 
-  public async mounted() {
-    const parsed = await this.loadIndexData()
-    const matrix = await this.generateScenarioMatrix(parsed)
-  }
-
-  private async loadIndexData() {
-    console.log('fetching data')
-    const response = await fetch(this.state.publicPath + 'v4-info.txt')
-    const text = await response.text()
-    const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
-    console.log({ parsed: parsed.data })
-
-    return parsed.data
-  }
-
-  private async generateScenarioMatrix(parsed: any[]) {
-    console.log('generating lookups')
-    const measures: any = {}
-    const runLookup: any = {}
-
-    // first get column names for the measures that have been tested
-    const ignore = ['Config', 'Output', 'RunId', 'RunScript']
-
-    for (const label of Object.keys(parsed[0])) {
-      if (ignore.indexOf(label) > -1) continue
-      measures[label] = new Set()
+export default defineComponent({
+  name: 'V4',
+  components: { SectionViewer },
+  props: {},
+  data() {
+    return {
+      state: {
+        measures: {},
+        runLookup: {},
+        cumulativeInfected: 0,
+        publicPath: '/',
+      },
+      readme: readmeHTML,
     }
+  },
 
-    // get all possible values
-    for (const run of parsed) {
-      if (!run.RunId) continue
+  async mounted() {
+    const parsed = await this.loadIndexData()
+    await this.generateScenarioMatrix(parsed)
+  },
 
-      // note this particular value, for every value
-      for (const measure of Object.keys(measures)) {
-        if (run[measure] === 0 || run[measure]) measures[measure].add(run[measure])
+  computed: {},
+  watch: {},
+
+  methods: {
+    async loadIndexData() {
+      console.log('fetching data')
+      const response = await fetch(this.state.publicPath + 'v4-info.txt')
+      const text = await response.text()
+      const parsed: any = Papa.parse(text, { header: true, dynamicTyping: true })
+      console.log({ parsed: parsed.data })
+
+      return parsed.data
+    },
+
+    async generateScenarioMatrix(parsed: any[]) {
+      console.log('generating lookups')
+      const measures: any = {}
+      const runLookup: any = {}
+
+      // first get column names for the measures that have been tested
+      const ignore = ['Config', 'Output', 'RunId', 'RunScript']
+
+      for (const label of Object.keys(parsed[0])) {
+        if (ignore.indexOf(label) > -1) continue
+        measures[label] = new Set()
       }
 
-      // store the run in a lookup using all values as the key
-      let lookupKey = ''
-      for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
-      runLookup[lookupKey] = run
-    }
+      // get all possible values
+      for (const run of parsed) {
+        if (!run.RunId) continue
 
-    for (const measure of Object.keys(measures)) {
-      measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
-    }
+        // note this particular value, for every value
+        for (const measure of Object.keys(measures)) {
+          if (run[measure] === 0 || run[measure]) measures[measure].add(run[measure])
+        }
 
-    console.log({ measures, runLookup })
-    this.state.measures = measures
-    this.state.runLookup = runLookup
-  }
-}
+        // store the run in a lookup using all values as the key
+        let lookupKey = ''
+        for (const measure of Object.keys(measures)) lookupKey += run[measure] + '-'
+        runLookup[lookupKey] = run
+      }
 
-// ###########################################################################
+      for (const measure of Object.keys(measures)) {
+        measures[measure] = Array.from(measures[measure].keys()).sort((a: any, b: any) => a - b)
+      }
+
+      console.log({ measures, runLookup })
+      this.state.measures = measures
+      this.state.runLookup = runLookup
+    },
+  },
+})
 </script>
 
 <style scoped>

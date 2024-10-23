@@ -1,6 +1,6 @@
 import { expose } from 'threads/worker'
 import ZipLoader from 'zip-loader'
-import Papaparse from 'papaparse'
+import Papaparse from '@simwrapper/papaparse'
 
 let _zipFile = null
 // let _zipLoaderLookup: { [run: string]: Promise<any> } = {} // holds the ZipLoaders

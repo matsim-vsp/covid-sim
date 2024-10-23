@@ -1,5 +1,5 @@
 <template lang="pug">
-#charts
+.charts
   .preamble
     h3.select-scenario Select Scenario:
 
@@ -57,375 +57,379 @@
 <script lang="ts">
 // ###########################################################################
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import Papa from 'papaparse'
-import VuePlotly from '@statnett/vue-plotly'
+import Papa from '@simwrapper/papaparse'
+import VuePlotly from '@/components/VuePlotly.vue'
 import ZipLoader from 'zip-loader'
 import moment from 'moment'
 
 import MySlider from './SelectWidget.vue'
 
-@Component({
-  components: {
-    MySlider,
-    VuePlotly,
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+export default defineComponent({
+  name: 'ChartSelector',
+  components: { MySlider, VuePlotly },
+  props: {
+    state: { type: Object, required: true },
+    city: { type: String, required: true },
+  },
+  data() {
+    return {
+      MAX_DAYS: 200,
+      plusminus: '-5',
+      isBase: false,
+
+      data: [] as any[],
+
+      layout: {
+        autosize: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { l: 50, t: 10, r: 10, b: 0 },
+        yaxis: {
+          title: 'Population',
+          autorange: true,
+        },
+        xaxis: {
+          range: ['2020-02-16', '2020-08-31'],
+          type: 'date',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      },
+
+      loglayout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 0, l: 60 },
+        xaxis: {
+          range: ['2020-02-16', '2020-08-31'],
+          type: 'date',
+        },
+        yaxis: {
+          type: 'log',
+          autorange: true,
+          title: 'Population (log scale)',
+        },
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      },
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'custom_image',
+          width: 800,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+
+      currentSituation: {} as any,
+      currentRun: {} as any,
+
+      loadedSeriesData: {} as any,
+      zipLoader: {} as any,
+      zipCache: {} as any,
+
+      labels: {
+        nSusceptible: 'Susceptible',
+        nInfectedButNotContagious: 'Infected, not contagious',
+        nContagious: 'Contagious',
+        nShowingSymptoms: 'Showing Symptoms',
+        nSeriouslySick: 'Seriously Sick',
+        nCritical: 'Critical',
+        nTotalInfected: 'Total Infected',
+        nInfectedCumulative: 'Infected Cumulative',
+        nRecovered: 'Recovered',
+        nInQuarantine: 'In Quarantine',
+      } as any,
+
+      fillcolors: {
+        Susceptible: '#0000ff',
+        'Seriously Sick': '#cc2211',
+        'Showing Symptoms': '#00ffff',
+        'Infected Cumulative': '#f791cf',
+        'Infected, not contagious': '#ee8800',
+        Critical: '#882299',
+        Recovered: '#eedd44',
+        Contagious: '#00aa00',
+        'Total Infected': '#a65628',
+      } as any,
+    }
+  },
+
+  mounted() {
+    this.loadZipData()
+  },
+
+  computed: {
+    cityCap() {
+      return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
+    },
+
+    prettyInfected() {
+      if (!this.state.cumulativeInfected) return ''
+
+      const rounded = 100 * Math.round(this.state.cumulativeInfected * 0.01)
+      return Number(rounded).toLocaleString()
+    },
+  },
+
+  watch: {
+    city() {
+      this.loadedSeriesData = {}
+      this.loadZipData()
+    },
+
+    plusminus() {
+      console.log('now we are', this.plusminus)
+      this.showPlotForCurrentSituation()
+    },
+  },
+
+  methods: {
+    setBase(value: boolean) {
+      this.isBase = value
+      this.showPlotForCurrentSituation()
+    },
+
+    setPlusMinus(value: string) {
+      this.plusminus = value
+    },
+
+    async loadZipData() {
+      // check cache first!
+      if (this.zipCache[this.city]) {
+        console.log('using cached zip for!', this.city)
+        this.zipLoader = this.zipCache[this.city]
+      } else {
+        // load the zip from file
+        const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
+        this.zipLoader = new ZipLoader(filepath)
+        await this.zipLoader.load()
+      }
+
+      console.log('zip loaded!')
+      this.zipCache[this.city] = this.zipLoader
+      this.runChanged()
+    },
+
+    testErrors() {
+      const blow: any = [
+        {
+          x: [1, 2, 3],
+          y: [1, 1.1, 1.2],
+          name: 'low',
+        },
+      ]
+
+      const z = blow[0].x.length
+
+      console.log({ z })
+
+      const high = [
+        {
+          x: [1, 2, 3, 4],
+          y: [3, 4, 5, 6],
+          name: 'high',
+        },
+      ]
+
+      blow[0].x.push(55)
+      console.log({ z })
+
+      const answer = this.generateErrorBars(blow, high)
+      console.log({ answer })
+    },
+
+    generateErrorBars(low: any[], high: any[]): any[] {
+      console.log({ low, high })
+
+      for (let metric = 0; metric < low.length; metric++) {
+        const lowLen = low[metric].x.length
+        const highLen = high[metric].x.length
+
+        console.log({ lowLen, highLen })
+
+        let newX: any[] = []
+        newX = newX.concat(low[metric]['x'])
+        // if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
+        // if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
+
+        newX = newX.concat(high[metric]['x'].slice().reverse()) // slice copies, then reverse reverses in-place.
+
+        let newY: any[] = []
+        newY = newY.concat(low[metric]['y'])
+        // if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
+        // if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
+
+        newY = newY.concat(high[metric]['y'].slice().reverse()) // slice copies, then reverse reverses in-place.
+
+        low[metric].x = newX
+        low[metric].y = newY
+
+        const color = this.fillcolors[low[metric]['name']]
+        // scatterplot fakes a look like error bands
+        low[metric].fillcolor = color + '20'
+        low[metric].showlegend = true
+        low[metric].line = { color: color }
+        low[metric].fill = 'tozerox'
+        low[metric].type = 'scatter'
+      }
+
+      console.log({ errorBar: low })
+      return low
+    },
+
+    async runChanged() {
+      // maybe we already did the calcs
+      if (this.loadedSeriesData[this.currentRun.RunId]) {
+        this.data = this.loadedSeriesData[this.currentRun.RunId]
+        this.updateTotalInfected()
+        return
+      }
+
+      // load both datasets
+      const csvLow: any[] = await this.loadCSV(this.currentRun)
+      const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
+
+      // const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
+
+      // cache the result
+      this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
+
+      this.data = timeSeriesesLow
+      this.updateTotalInfected()
+    },
+
+    updateTotalInfected() {
+      const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
+      this.state.cumulativeInfected = Math.max(...infectedCumulative.y)
+    },
+
+    sliderChanged(measure: any, value: any) {
+      console.log(measure, value)
+      this.currentSituation[measure] = value
+      this.showPlotForCurrentSituation()
+    },
+
+    showPlotForCurrentSituation() {
+      if (this.isBase) {
+        this.currentRun = { RunId: 'sz0' }
+        this.runChanged()
+        return
+      }
+
+      let lookupKey = ''
+      for (const measure of Object.keys(this.state.measures))
+        lookupKey += this.currentSituation[measure] + '-'
+
+      const suffix = this.plusminus === '5' ? '5' : '-5'
+      const lookup = lookupKey.replace('undefined', suffix)
+      // const lookupLow = lookupKey.replace('undefined', '-5')
+      // const lookupHigh = lookupKey.replace('undefined', '5')
+
+      console.log(lookup) // , lookupLow, lookupHigh)
+
+      this.currentRun = this.state.runLookup[lookup]
+      // this.currentRunHigh = this.state.runLookup[lookupHigh]
+
+      if (!this.currentRun) return
+
+      this.runChanged()
+    },
+
+    unpack(rows: any[], key: any) {
+      let v = rows.map(function (row) {
+        if (key === 'day') return row[key]
+        return row[key]
+      })
+
+      v = v.slice(0, this.MAX_DAYS)
+
+      // maybe the sim ended early - go out to 150 anyway
+      if (v.length < this.MAX_DAYS) {
+        v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
+      }
+      return v
+    },
+
+    async loadCSV(currentRun: any) {
+      if (!currentRun.RunId) return []
+
+      const filename = currentRun.RunId + '.infections.txt'
+      console.log('Extracting', filename)
+
+      let text = this.zipLoader.extractAsText(filename)
+      const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
+
+      return z.data
+    },
+
+    calculateDatefromSimulationDay(day: number) {
+      const startDay = this.plusminus === '-5' ? '2020-02-22' : '2020-02-12'
+      const date = moment(startDay).add(day, 'days').format('YYYY-MM-DD')
+      return date
+    },
+
+    generateSeriesFromCSVData(data: any[]) {
+      const serieses = []
+
+      const days: number[] = this.unpack(data, 'day')
+      console.log({ days })
+      const x = days.map(d => this.calculateDatefromSimulationDay(d))
+
+      console.log({ x })
+
+      for (const column of Object.keys(this.labels)) {
+        const name = this.labels[column]
+
+        if (name === 'In Quarantine') continue
+
+        const y: number[] = this.unpack(data, column)
+        serieses.push({ x, y, name })
+      }
+
+      // Add Berlin "Reported Cases"
+      if (this.city === 'berlin') serieses.push(this.state.berlinCases)
+
+      return serieses
+    },
   },
 })
-export default class SectionViewer extends Vue {
-  @Prop() private state!: any
-
-  @Prop({ required: true }) private city!: string
-
-  private MAX_DAYS = 200
-  private plusminus = '-5'
-
-  @Watch('city') private switchCity() {
-    this.loadedSeriesData = {}
-    this.loadZipData()
-  }
-
-  @Watch('plusminus') private switchPlusMinus() {
-    console.log('now we are', this.plusminus)
-    this.showPlotForCurrentSituation()
-  }
-
-  private isBase = false
-
-  private data: any[] = []
-
-  private layout = {
-    autosize: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { l: 50, t: 10, r: 10, b: 0 },
-    yaxis: {
-      title: 'Population',
-      autorange: true,
-    },
-    xaxis: {
-      range: ['2020-02-16', '2020-08-31'],
-      type: 'date',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private loglayout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
-    },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 0, l: 60 },
-    xaxis: {
-      range: ['2020-02-16', '2020-08-31'],
-      type: 'date',
-    },
-    yaxis: {
-      type: 'log',
-      autorange: true,
-      title: 'Population (log scale)',
-    },
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'custom_image',
-      width: 800,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-
-  private setBase(value: boolean) {
-    this.isBase = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private setPlusMinus(value: string) {
-    this.plusminus = value
-  }
-
-  private get cityCap() {
-    return this.city.slice(0, 1).toUpperCase() + this.city.slice(1)
-  }
-
-  private currentSituation: any = {}
-  private loadedSeriesData: any = {}
-  private zipLoader: any
-
-  private labels: any = {
-    nSusceptible: 'Susceptible',
-    nInfectedButNotContagious: 'Infected, not contagious',
-    nContagious: 'Contagious',
-    nShowingSymptoms: 'Showing Symptoms',
-    nSeriouslySick: 'Seriously Sick',
-    nCritical: 'Critical',
-    nTotalInfected: 'Total Infected',
-    nInfectedCumulative: 'Infected Cumulative',
-    nRecovered: 'Recovered',
-    nInQuarantine: 'In Quarantine',
-  }
-
-  private mounted() {
-    this.loadZipData()
-  }
-
-  private zipCache: any = {}
-
-  private get prettyInfected() {
-    if (!this.state.cumulativeInfected) return ''
-
-    const rounded = 100 * Math.round(this.state.cumulativeInfected * 0.01)
-    return Number(rounded).toLocaleString()
-  }
-
-  private async loadZipData() {
-    // check cache first!
-    if (this.zipCache[this.city]) {
-      console.log('using cached zip for!', this.city)
-      this.zipLoader = this.zipCache[this.city]
-    } else {
-      // load the zip from file
-      const filepath = this.state.publicPath + 'v6-data-' + this.city + '.zip'
-      this.zipLoader = new ZipLoader(filepath)
-      await this.zipLoader.load()
-    }
-
-    console.log('zip loaded!')
-    this.zipCache[this.city] = this.zipLoader
-    this.runChanged()
-  }
-
-  private fillcolors: any = {
-    Susceptible: '#0000ff',
-    'Seriously Sick': '#cc2211',
-    'Showing Symptoms': '#00ffff',
-    'Infected Cumulative': '#f791cf',
-    'Infected, not contagious': '#ee8800',
-    Critical: '#882299',
-    Recovered: '#eedd44',
-    Contagious: '#00aa00',
-    'Total Infected': '#a65628',
-  }
-
-  private testErrors() {
-    const blow: any = [
-      {
-        x: [1, 2, 3],
-        y: [1, 1.1, 1.2],
-        name: 'low',
-      },
-    ]
-
-    const z = blow[0].x.length
-
-    console.log({ z })
-
-    const high = [
-      {
-        x: [1, 2, 3, 4],
-        y: [3, 4, 5, 6],
-        name: 'high',
-      },
-    ]
-
-    blow[0].x.push(55)
-    console.log({ z })
-
-    const answer = this.generateErrorBars(blow, high)
-    console.log({ answer })
-  }
-
-  private generateErrorBars(low: any[], high: any[]): any[] {
-    console.log({ low, high })
-
-    for (let metric = 0; metric < low.length; metric++) {
-      const lowLen = low[metric].x.length
-      const highLen = high[metric].x.length
-
-      console.log({ lowLen, highLen })
-
-      let newX: any[] = []
-      newX = newX.concat(low[metric]['x'])
-      // if (highLen > lowLen) newX.push(high[metric]['x'][highLen - 1])
-      // if (highLen < lowLen) newX.push(low[metric]['x'][lowLen - 1])
-
-      newX = newX.concat(high[metric]['x'].slice().reverse()) // slice copies, then reverse reverses in-place.
-
-      let newY: any[] = []
-      newY = newY.concat(low[metric]['y'])
-      // if (highLen > lowLen) newY.push(low[metric]['y'][lowLen - 1])
-      // if (highLen < lowLen) newY.push(high[metric]['y'][highLen - 1])
-
-      newY = newY.concat(high[metric]['y'].slice().reverse()) // slice copies, then reverse reverses in-place.
-
-      low[metric].x = newX
-      low[metric].y = newY
-
-      const color = this.fillcolors[low[metric]['name']]
-      // scatterplot fakes a look like error bands
-      low[metric].fillcolor = color + '20'
-      low[metric].showlegend = true
-      low[metric].line = { color: color }
-      low[metric].fill = 'tozerox'
-      low[metric].type = 'scatter'
-    }
-
-    console.log({ errorBar: low })
-    return low
-  }
-
-  private async runChanged() {
-    // maybe we already did the calcs
-    if (this.loadedSeriesData[this.currentRun.RunId]) {
-      this.data = this.loadedSeriesData[this.currentRun.RunId]
-      this.updateTotalInfected()
-      return
-    }
-
-    // load both datasets
-    const csvLow: any[] = await this.loadCSV(this.currentRun)
-    const timeSeriesesLow = this.generateSeriesFromCSVData(csvLow)
-
-    // const errorBars = this.generateErrorBars(timeSeriesesLow, timeSeriesesHigh)
-
-    // cache the result
-    this.loadedSeriesData[this.currentRun.RunId] = timeSeriesesLow
-
-    this.data = timeSeriesesLow
-    this.updateTotalInfected()
-  }
-
-  private updateTotalInfected() {
-    const infectedCumulative = this.data.filter(a => a.name === 'Infected Cumulative')[0]
-    this.state.cumulativeInfected = Math.max(...infectedCumulative.y)
-  }
-
-  private sliderChanged(measure: any, value: any) {
-    console.log(measure, value)
-    this.currentSituation[measure] = value
-    this.showPlotForCurrentSituation()
-  }
-
-  private showPlotForCurrentSituation() {
-    if (this.isBase) {
-      this.currentRun = { RunId: 'sz0' }
-      this.runChanged()
-      return
-    }
-
-    let lookupKey = ''
-    for (const measure of Object.keys(this.state.measures))
-      lookupKey += this.currentSituation[measure] + '-'
-
-    const suffix = this.plusminus === '5' ? '5' : '-5'
-    const lookup = lookupKey.replace('undefined', suffix)
-    // const lookupLow = lookupKey.replace('undefined', '-5')
-    // const lookupHigh = lookupKey.replace('undefined', '5')
-
-    console.log(lookup) // , lookupLow, lookupHigh)
-
-    this.currentRun = this.state.runLookup[lookup]
-    // this.currentRunHigh = this.state.runLookup[lookupHigh]
-
-    if (!this.currentRun) return
-
-    this.runChanged()
-  }
-
-  private currentRun: any = {}
-  // private currentRunHigh: any = {}
-
-  private unpack(rows: any[], key: any) {
-    let v = rows.map(function(row) {
-      if (key === 'day') return row[key]
-      return row[key]
-    })
-
-    v = v.slice(0, this.MAX_DAYS)
-
-    // maybe the sim ended early - go out to 150 anyway
-    if (v.length < this.MAX_DAYS) {
-      v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
-    }
-    return v
-  }
-
-  private async loadCSV(currentRun: any) {
-    if (!currentRun.RunId) return []
-
-    const filename = currentRun.RunId + '.infections.txt'
-    console.log('Extracting', filename)
-
-    let text = this.zipLoader.extractAsText(filename)
-    const z = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true })
-
-    return z.data
-  }
-
-  private calculateDatefromSimulationDay(day: number) {
-    const startDay = this.plusminus === '-5' ? '2020-02-22' : '2020-02-12'
-    const date = moment(startDay)
-      .add(day, 'days')
-      .format('YYYY-MM-DD')
-    return date
-  }
-
-  private generateSeriesFromCSVData(data: any[]) {
-    const serieses = []
-
-    const days: number[] = this.unpack(data, 'day')
-    console.log({ days })
-    const x = days.map(d => this.calculateDatefromSimulationDay(d))
-
-    console.log({ x })
-
-    for (const column of Object.keys(this.labels)) {
-      const name = this.labels[column]
-
-      if (name === 'In Quarantine') continue
-
-      const y: number[] = this.unpack(data, column)
-      serieses.push({ x, y, name })
-    }
-
-    // Add Berlin "Reported Cases"
-    if (this.city === 'berlin') serieses.push(this.state.berlinCases)
-
-    return serieses
-  }
-}
 
 // ###########################################################################
 </script>

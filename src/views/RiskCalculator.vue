@@ -1,24 +1,5 @@
-<i18n>
-en:
-  risk-calculator: 'Personal Risk Calculator'
-  badpage: 'That page not found, sorry!'
-  released: 'Released'
-  estimated-risk: 'Estimated Infection Risk'
-  explore-scenarios: 'Explore typical scenarios'
-  try-combos: '...or try different combinations below.'
-  remarks: 'Remarks'
-de:
-  risk-calculator: 'Personalrisiko Rechner'
-  badpage: 'Seite wurde nicht gefunden.'
-  released: 'Veröffentlicht'
-  explore-scenarios: 'Typische Szenarien erforschen'
-  try-combos: '...oder versuchen Sie verschiedene Kombinationen unten.'
-  estimated-risk: 'Geschätztes Infektionsrisiko'
-  remarks: 'Bemerkungen'
-</i18n>
-
 <template lang="pug">
-#home
+.rcc
   .banner
     h2 VSP / Technische Universität Berlin
     h3 COVID-19 Analysis Portal
@@ -90,14 +71,41 @@ de:
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+const i18n = {
+  messages: {
+    en: {
+      'risk-calculator': 'Personal Risk Calculator',
+      badpage: 'That page not found, sorry!',
+      released: 'Released',
+      'estimated-risk': 'Estimated Infection Risk',
+      'explore-scenarios': 'Explore typical scenarios',
+      'try-combos': '...or try different combinations below.',
+      remarks: 'Remarks',
+    },
+    de: {
+      'risk-calculator': 'Personalrisiko Rechner',
+      badpage: 'Seite wurde nicht gefunden.',
+      released: 'Veröffentlicht',
+      'explore-scenarios': 'Typische Szenarien erforschen',
+      'try-combos': '...oder versuchen Sie verschiedene Kombinationen unten.',
+      'estimated-risk': 'Geschätztes Infektionsrisiko',
+      remarks: 'Bemerkungen',
+    },
+  },
+}
+
 import YAML from 'yaml'
-import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
 import { PUBLIC_SVN } from '@/Globals'
+
+const markdownParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
 type RiskYaml = {
   description: string
@@ -123,222 +131,236 @@ type RiskYaml = {
   }
 }
 
-@Component({ components: { VueSlider }, props: {} })
-export default class VueComponent extends Vue {
-  private calcId = ''
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private yaml: RiskYaml = {
-    description: '',
-    calibrationParam: 0.075,
-    multipliers: {},
-    divisors: {},
-    scenarios: {},
-    notes: [],
-  }
+export default defineComponent({
+  name: 'RiskCalculator',
+  i18n,
+  components: { VueSlider },
+  props: {},
 
-  private badPage = false
-  private markdownParser = new MarkdownIt()
+  data() {
+    return {
+      calcId: '',
 
-  private sliders: { [measure: string]: { title: string; value: number } } = {}
+      yaml: {
+        description: '',
+        calibrationParam: 0.075,
+        multipliers: {},
+        divisors: {},
+        scenarios: {},
+        notes: [],
+      } as RiskYaml,
 
-  @Watch('$route') routeChanged(to: Route, from: Route) {
-    this.buildPageForURL()
-  }
+      badPage: false,
+      selectedScenario: {} as any,
 
-  private async mounted() {
-    this.buildPageForURL()
-  }
+      sliders: {} as { [measure: string]: { title: string; value: number } },
 
-  private parseMarkdown(text: string) {
-    return this.markdownParser.render(text)
-  }
+      finalR: 0,
+      adjustedR: 0,
 
-  private async buildPageForURL() {
-    this.badPage = false
-
-    this.calcId = this.$route.params.rcalc
-
-    const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
-    const url = PUBLIC_SVN + `risk-calculator/${this.calcId}.${lang}.yaml`
-
-    let responseText = ''
-
-    try {
-      const response = await fetch(url)
-      responseText = await response.text()
-    } catch (e) {
-      console.error(e)
+      lookup: {} as { [measure: string]: { title: string; value: number }[] },
+      factors: {} as { [measure: string]: number },
+      divFactors: {} as { [measure: string]: number },
     }
+  },
 
-    // maybe .de. doesn't exist, fallback .en.:
-    if (!responseText && url.indexOf('.de.') > -1) {
-      console.warn('no', url, 'falling back to .en.')
-      const en_url = url.replace('.de.', '.en.')
-      console.log(en_url)
+  mounted() {
+    this.buildPageForURL()
+  },
+
+  computed: {
+    multipliers() {
+      return Object.keys(this.yaml.multipliers)
+    },
+    divisors() {
+      return Object.keys(this.yaml.divisors)
+    },
+  },
+
+  watch: {
+    $route() {
+      this.buildPageForURL()
+    },
+  },
+
+  methods: {
+    parseMarkdown(text: string) {
+      return markdownParser.render(text)
+    },
+
+    async buildPageForURL() {
+      this.badPage = false
+
+      this.calcId = this.$route.params.rcalc
+
+      const lang = this.$i18n.locale //  === 'de' ? '.de' : ''
+      const url = PUBLIC_SVN + `risk-calculator/${this.calcId}.${lang}.yaml`
+
+      let responseText = ''
+
       try {
-        const response = await fetch(en_url)
+        const response = await fetch(url)
         responseText = await response.text()
       } catch (e) {
         console.error(e)
       }
-    }
 
-    if (!responseText) {
-      this.badPage = true
-      return
-    }
-
-    this.yaml = YAML.parse(responseText)
-    this.buildUI()
-    this.updateR()
-  }
-
-  private async handleDivFactorButton(measure: string) {
-    const slider = this.sliders[measure]
-    this.divFactors[measure] = slider.value
-    this.updateR()
-    this.$forceUpdate()
-  }
-
-  private async handleFactorButton(measure: string) {
-    const slider = this.sliders[measure]
-    this.factors[measure] = slider.value
-    this.updateR()
-    this.$forceUpdate()
-  }
-
-  private selectedScenario: any = ''
-
-  private async handleScenario(scenario: string) {
-    this.selectedScenario = this.yaml.scenarios[scenario]
-    for (const measure of Object.keys(this.selectedScenario.presets) as any) {
-      const title = this.selectedScenario.presets[measure]
-
-      //@ts-ignore:
-      const value = this.lookup[measure].find((a: any) => a.title === title).value
-
-      console.log(measure, title, value)
-
-      if (this.multipliers.indexOf(measure) > -1) this.factors[measure] = value
-      if (this.divisors.indexOf(measure) > -1) this.divFactors[measure] = value
-
-      // find this entry for the slider!
-      for (const choice of this.lookup[measure]) {
-        if (choice.title === title) {
-          this.sliders[measure] = choice
-          break
+      // maybe .de. doesn't exist, fallback .en.:
+      if (!responseText && url.indexOf('.de.') > -1) {
+        console.warn('no', url, 'falling back to .en.')
+        const en_url = url.replace('.de.', '.en.')
+        console.log(en_url)
+        try {
+          const response = await fetch(en_url)
+          responseText = await response.text()
+        } catch (e) {
+          console.error(e)
         }
       }
-    }
 
-    this.updateR()
-    this.$forceUpdate()
-  }
+      if (!responseText) {
+        this.badPage = true
+        return
+      }
 
-  private get multipliers() {
-    return Object.keys(this.yaml.multipliers)
-  }
+      this.yaml = YAML.parse(responseText)
+      this.buildUI()
+      this.updateR()
+    },
 
-  private get divisors() {
-    return Object.keys(this.yaml.divisors)
-  }
+    async handleDivFactorButton(measure: string) {
+      const slider = this.sliders[measure]
+      this.divFactors[measure] = slider.value
+      this.updateR()
+      this.$forceUpdate()
+    },
 
-  private finalR = 0
-  private adjustedR = 0
+    async handleFactorButton(measure: string) {
+      const slider = this.sliders[measure]
+      this.factors[measure] = slider.value
+      this.updateR()
+      this.$forceUpdate()
+    },
 
-  private updateR() {
-    let r = this.yaml.calibrationParam
+    async handleScenario(scenario: string) {
+      this.selectedScenario = this.yaml.scenarios[scenario]
+      for (const measure of Object.keys(this.selectedScenario.presets) as any) {
+        const title = this.selectedScenario.presets[measure]
 
-    // multiplicative factors
-    for (const factor of Object.values(this.factors)) r *= factor
-    // divisors factors, already 1/x
-    for (const factor of Object.values(this.divFactors)) r *= factor
-    // exp result
-    r = 1.0 - Math.exp(-1.0 * r)
+        //@ts-ignore:
+        const value = this.lookup[measure].find((a: any) => a.title === title).value
 
-    // fancy!
-    this.finalR = Math.min(99, r * 100.0) // percentage
-    this.animateTowardNewRValue()
-  }
+        console.log(measure, title, value)
 
-  private animateTowardNewRValue() {
-    const diff = this.finalR - this.adjustedR
-    const step = this.adjustedR + diff * 0.2
-    this.adjustedR = step
+        if (this.multipliers.indexOf(measure) > -1) this.factors[measure] = value
+        if (this.divisors.indexOf(measure) > -1) this.divFactors[measure] = value
 
-    if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
-      this.adjustedR = this.finalR
-    } else {
-      setTimeout(this.animateTowardNewRValue, 16)
-    }
-  }
-
-  private lookup: { [measure: string]: { title: string; value: number }[] } = {}
-  private factors: { [measure: string]: number } = {}
-  private divFactors: { [measure: string]: number } = {}
-
-  private buildUI() {
-    // multiplicative factors
-    for (const measureName of Object.keys(this.yaml.multipliers)) {
-      const measures = this.yaml.multipliers[measureName]
-      this.lookup[measureName] = []
-
-      for (const option of measures.options) {
-        const title = Object.keys(option)[0]
-        const value = option[title]
-
-        if (!isNaN(value)) {
-          this.lookup[measureName].push({ title, value })
-
-          // first?
-          if (this.yaml.multipliers[measureName].options === undefined) {
-            this.factors[measureName] = value
-            this.sliders[measureName] = this.lookup[measureName][0]
+        // find this entry for the slider!
+        for (const choice of this.lookup[measure]) {
+          if (choice.title === title) {
+            this.sliders[measure] = choice
+            break
           }
-        } else {
-          // user specified a default with an asterisk* after the number
-          const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
-          const choice = { title, value: trimAsterisk }
-          this.lookup[measureName].push(choice)
-          this.sliders[measureName] = choice
-          this.factors[measureName] = trimAsterisk
         }
       }
-    }
 
-    // divisors
-    for (const measureName of Object.keys(this.yaml.divisors)) {
-      const measures = this.yaml.divisors[measureName]
-      this.lookup[measureName] = []
+      this.updateR()
+      this.$forceUpdate()
+    },
 
-      for (const option of measures.options) {
-        const title = Object.keys(option)[0]
-        const value = option[title]
+    updateR() {
+      let r = this.yaml.calibrationParam
 
-        if (!isNaN(value)) {
-          this.lookup[measureName].push({ title, value: 1.0 / value })
+      // multiplicative factors
+      for (const factor of Object.values(this.factors)) r *= factor
+      // divisors factors, already 1/x
+      for (const factor of Object.values(this.divFactors)) r *= factor
+      // exp result
+      r = 1.0 - Math.exp(-1.0 * r)
 
-          // first?
-          if (this.yaml.divisors[measureName].options === undefined) {
-            this.divFactors[measureName] = value
-            this.sliders[measureName] = this.lookup[measureName][0]
+      // fancy!
+      this.finalR = Math.min(99, r * 100.0) // percentage
+      this.animateTowardNewRValue()
+    },
+
+    animateTowardNewRValue() {
+      const diff = this.finalR - this.adjustedR
+      const step = this.adjustedR + diff * 0.2
+      this.adjustedR = step
+
+      if (Math.abs(this.adjustedR - this.finalR) < 0.01) {
+        this.adjustedR = this.finalR
+      } else {
+        setTimeout(this.animateTowardNewRValue, 16)
+      }
+    },
+
+    buildUI() {
+      // multiplicative factors
+      for (const measureName of Object.keys(this.yaml.multipliers)) {
+        const measures = this.yaml.multipliers[measureName]
+        this.lookup[measureName] = []
+
+        for (const option of measures.options) {
+          const title = Object.keys(option)[0]
+          const value = option[title]
+
+          if (!isNaN(value)) {
+            this.lookup[measureName].push({ title, value })
+
+            // first?
+            if (this.yaml.multipliers[measureName].options === undefined) {
+              this.factors[measureName] = value
+              this.sliders[measureName] = this.lookup[measureName][0]
+            }
+          } else {
+            // user specified a default with an asterisk* after the number
+            const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
+            const choice = { title, value: trimAsterisk }
+            this.lookup[measureName].push(choice)
+            this.sliders[measureName] = choice
+            this.factors[measureName] = trimAsterisk
           }
-        } else {
-          // user specified a default with an asterisk* after the number
-          const trimAsterisk = 1.0 / parseFloat(value.substring(0, value.length - 1))
-          const choice = { title, value: trimAsterisk }
-          this.lookup[measureName].push(choice)
-          this.sliders[measureName] = choice
-          this.divFactors[measureName] = trimAsterisk
         }
       }
-    }
-  }
-}
+
+      // divisors
+      for (const measureName of Object.keys(this.yaml.divisors)) {
+        const measures = this.yaml.divisors[measureName]
+        this.lookup[measureName] = []
+
+        for (const option of measures.options) {
+          const title = Object.keys(option)[0]
+          const value = option[title]
+
+          if (!isNaN(value)) {
+            this.lookup[measureName].push({ title, value: 1.0 / value })
+
+            // first?
+            if (this.yaml.divisors[measureName].options === undefined) {
+              this.divFactors[measureName] = value
+              this.sliders[measureName] = this.lookup[measureName][0]
+            }
+          } else {
+            // user specified a default with an asterisk* after the number
+            const trimAsterisk = 1.0 / parseFloat(value.substring(0, value.length - 1))
+            const choice = { title, value: trimAsterisk }
+            this.lookup[measureName].push(choice)
+            this.sliders[measureName] = choice
+            this.divFactors[measureName] = trimAsterisk
+          }
+        }
+      }
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
-@import '@/styles.scss';
+@use '@/styles.scss' as *;
 
 .center-area {
   max-width: 70rem;
