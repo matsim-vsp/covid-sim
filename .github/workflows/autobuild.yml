@@ -44,7 +44,7 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         run: |
           sudo apt update
-          sudo apt-get -y install python3 python3-pip python3-pandas python3-numpy wget
+          sudo apt-get -y install python3 python3-pip python3-pandas python3-numpy subversion wget
           pip3 install dfply
           bash scripts/build-site.sh
 
