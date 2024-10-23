@@ -66,6 +66,9 @@ echo "FILTER the RKI csv file ---"
 ## cp *cases* src/assets
 ## cp *cases* Fallzahlen/RKI
 
+# this should be unnecessary. Thanks RKI
+mkdir -p Fallzahlen/RKI Fallzahlen/Berlin Fallzahlen/Other
+
 echo BUILD: Fetch RKI Hospitalization cases from GitHub
 wget https://github.com/robert-koch-institut/COVID-SARI-Hospitalisierungsinzidenz/raw/main/COVID-SARI-Hospitalisierungsinzidenz.tsv
 
