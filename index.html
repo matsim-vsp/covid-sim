@@ -1,7 +1,101 @@
-<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta content="text/html; charset=utf-8" http-equiv=Content-Type><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name=site_name content="{{ site.name }}"><meta name=author content="{{ site.author }}"><meta name=twitter:card content=summary_large_image><meta name=twitter:site content=@billyinberlin><meta name=twitter:creator content=@billyinberlin><meta name=twitter:image content=https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v1-thumb.png><meta name=twitter:title content="Mobility traces and the spreading of COVID-19"><meta name=twitter:description content="Simulations of COVID-19 spreading through the population. The outcomes examine consequences of starting various interventions a number of days after the simulation starts."><meta name=og:title content="Mobility traces and the spreading of COVID-19"><meta name=og:url content=https://covid-sim.info/v1/ ><meta name=og:image content=https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v1-thumb.png><meta name=og:description content="Simulations of COVID-19 spreading through the population. The outcomes examine consequences of starting various interventions a number of days after the simulation starts."><script>;(function() {
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+    />
+
+    <meta name="site_name" content="{{ site.name }}" />
+
+    <meta name="author" content="{{ site.author }}" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="twitter:site" content="@billyinberlin" />
+
+    <meta name="twitter:creator" content="@billyinberlin" />
+
+    <meta
+      name="twitter:image"
+      content="https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v1-thumb.png"
+    />
+
+    <meta name="twitter:title" content="Mobility traces and the spreading of COVID-19" />
+
+    <meta
+      name="twitter:description"
+      content="Simulations of COVID-19 spreading through the population. The outcomes examine consequences of starting various interventions a number of days after the simulation starts."
+    />
+
+    <meta name="og:title" content="Mobility traces and the spreading of COVID-19" />
+
+    <meta name="og:url" content="https://covid-sim.info/v1/" />
+
+    <meta
+      name="og:image"
+      content="https://github.com/matsim-vsp/covid-sim/raw/master/src/assets/images/v1-thumb.png"
+    />
+
+    <meta
+      name="og:description"
+      content="Simulations of COVID-19 spreading through the population. The outcomes examine consequences of starting various interventions a number of days after the simulation starts."
+    />
+
+    <!-- github pages hack -->
+
+    <script>
+      ;(function () {
         var redirect = sessionStorage.redirect
         delete sessionStorage.redirect
         if (redirect && redirect != location.href) {
           history.replaceState(null, null, redirect)
         }
-      })()</script><link rel=stylesheet href=https://use.fontawesome.com/releases/v5.7.1/css/all.css integrity=sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr crossorigin=anonymous><link href="https://fonts.googleapis.com/css?family=Roboto:300,700&display=swap" rel=stylesheet><link href="https://fonts.googleapis.com/css?family=Roboto+Slab&display=swap" rel=stylesheet><title>COVID-19 DataViewer</title><link href=/css/V1.0819725e.css rel=prefetch><link href=/css/V2.c57f5358.css rel=prefetch><link href=/css/V3.8ad86984.css rel=prefetch><link href=/css/V3~entiresim~multiday.d4a7aed1.css rel=prefetch><link href=/css/V4.866e2573.css rel=prefetch><link href=/css/V5.c1fbecec.css rel=prefetch><link href=/css/V6.70953cd2.css rel=prefetch><link href=/css/V7.5c8d84f1.css rel=prefetch><link href=/css/calculators.ff80fa49.css rel=prefetch><link href=/css/entiresim.05b117aa.css rel=prefetch><link href=/css/mobility.c953b016.css rel=prefetch><link href=/css/multiday.f34a917a.css rel=prefetch><link href=/css/norun.64718bd1.css rel=prefetch><link href=/css/r-calcs.ccc1a9f9.css rel=prefetch><link href=/css/risk-calcs.d40086f6.css rel=prefetch><link href=/css/runviewer.449fabf9.css rel=prefetch><link href=/js/V1.c5d267d9.js rel=prefetch><link href=/js/V1~V2~V3~V4~V5~V6~V7~multiday.2c5eea32.js rel=prefetch><link href=/js/V1~V2~V4~V5~V6~V7~entiresim~mobility~runviewer.db78404e.js rel=prefetch><link href=/js/V1~V2~V4~V5~V6~V7~mobility~r-calcs~risk-calcs~runviewer.0844efcc.js rel=prefetch><link href=/js/V1~V2~V4~V5~V6~V7~mobility~runviewer.7e785513.js rel=prefetch><link href=/js/V2.24e55d6e.js rel=prefetch><link href=/js/V3.4f4b0185.js rel=prefetch><link href=/js/V3~entiresim~mobility~multiday~r-calcs~risk-calcs.99f36f48.js rel=prefetch><link href=/js/V3~entiresim~multiday.303a5d33.js rel=prefetch><link href=/js/V4.f13e2351.js rel=prefetch><link href=/js/V5.7c630e23.js rel=prefetch><link href=/js/V6.23f32391.js rel=prefetch><link href=/js/V7.abb7ed9b.js rel=prefetch><link href=/js/calculators.20d404e3.js rel=prefetch><link href=/js/entiresim.e0a3bd98.js rel=prefetch><link href=/js/mobility.ba1a50e9.js rel=prefetch><link href=/js/multiday.9d7a9e44.js rel=prefetch><link href=/js/norun.5f481dba.js rel=prefetch><link href=/js/r-calcs.cfcc590c.js rel=prefetch><link href=/js/r-calcs~risk-calcs~runviewer.093443d5.js rel=prefetch><link href=/js/risk-calcs.d3ba5800.js rel=prefetch><link href=/js/runviewer.f41d88f8.js rel=prefetch><link href=/css/app.04da3268.css rel=preload as=style><link href=/css/chunk-vendors.b0b73e46.css rel=preload as=style><link href=/js/app.c258a106.js rel=preload as=script><link href=/js/chunk-vendors.bf366f0e.js rel=preload as=script><link href=/css/chunk-vendors.b0b73e46.css rel=stylesheet><link href=/css/app.04da3268.css rel=stylesheet></head><body><noscript><strong>We're sorry but dataviewer-proto doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div><script src=/js/chunk-vendors.bf366f0e.js></script><script src=/js/app.c258a106.js></script></body></html>
+      })()
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+      crossorigin="anonymous"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto+Slab&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- <link href="/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png" /> -->
+
+    <title>COVID-19 DataViewer</title>
+    <script type="module" crossorigin src="/assets/index-BSPVUhcA.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BT20EuPg.css">
+  </head>
+
+  <body>
+
+    <noscript>
+      <strong>
+        We're sorry but covid-sim.info doesn't work properly without JavaScript enabled. Please
+        enable it to continue.
+      </strong>
+    </noscript>
+
+    <div id="app"></div>
+
+    <!-- built files will be auto injected -->
+  </body>
+</html>
