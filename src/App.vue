@@ -170,4 +170,8 @@ h3 {
 .vue-slider-rail {
   background-color: green;
 }
+
+.vue-slider-dot {
+  background-color: yellow;
+}
 </style>
