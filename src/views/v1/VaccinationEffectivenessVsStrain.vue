@@ -1,217 +1,221 @@
 <template lang="pug">
-.vue-component(v-if="!isResizing" )
-  vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
+  .vue-component(v-if="!isResizing" )
+    vue-plotly.plot1(:data="dataLines" :layout="layout" :options="options")
 
-</template>
+  </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@/components/VuePlotly.vue'
 import Papaparse from '@simwrapper/papaparse'
 
 import { PUBLIC_SVN } from '@/Globals'
 
-@Component({ components: { VuePlotly }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private startDate!: any
-  @Prop({ required: true }) private endDate!: any
-  @Prop({ required: true }) private vaccineEffectivenessData!: any[]
-  @Prop({ required: true }) private vaccineEffectivenessFields!: string[]
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private logScale = false
+export default defineComponent({
+  name: 'VaccEffectivenessVsStrain',
+  components: { VuePlotly },
+  props: {
+    startDate: { type: String, required: true },
+    endDate: { type: String, required: true },
+    vaccineEffectivenessData: { type: Array as PropType<any[]>, required: true },
+    vaccineEffectivenessFields: { type: Array as PropType<string[]>, required: true },
+  },
+  data() {
+    return {
+      skipVariants: ['wildtypeVe', 'alphaVe'],
+      isResizing: false,
+      logScale: false,
+      color: ['#094', '#0c4'],
+      lagDays: 1,
+      dataLines: [] as any[],
+      observedLine: {} as any,
 
-  private color = ['#094', '#0c4']
-
-  private lagDays = 1
-
-  // private observedColumn = {
-  //   mRNA: 'mRNA-Delta',
-  //   vector: 'Vector-Delta',
-  // } as any
-
-  private dataLines: any[] = []
-
-  private mounted() {
-    this.calculateValues()
-  }
-
-  private isResizing = false
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.isResizing = false
-  }
-
-  @Watch('vaccineEffectivenessData') private updateModelData() {
-    this.calculateValues()
-  }
-
-  @Watch('logScale') updateScale() {
-    this.layout.yaxis = this.logScale
-      ? {
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'v',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 35, l: 60 },
+        xaxis: {
           //fixedrange: window.innerWidth < 700,
           fixedrange: true,
-          type: 'log',
-          range: [Math.log10(2), Math.log10(10000)],
-          title: 'Hospitalizations / 100k Pop.',
-        }
-      : {
+          autorange: true,
+          title: 'Days since vaccination',
+        },
+        yaxis: {
+          // note this gets overwritten when the scale changes - see updateScale()
           //fixedrange: window.innerWidth < 700,
           fixedrange: true,
           type: 'linear',
-          autorange: true,
-          title: 'Hospitalizations / 100k Pop.',
+          // autorange: true,
+          range: [0, 100],
+          title: 'Vaccine Effectiveness',
+        } as any,
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'daily-cases',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+    }
+  },
+
+  mounted() {
+    this.calculateValues()
+  },
+
+  computed: {},
+  watch: {
+    vaccineEffectivenessData() {
+      this.calculateValues()
+    },
+
+    logScale() {
+      this.layout.yaxis = this.logScale
+        ? {
+            //fixedrange: window.innerWidth < 700,
+            fixedrange: true,
+            type: 'log',
+            range: [Math.log10(2), Math.log10(10000)],
+            title: 'Hospitalizations / 100k Pop.',
+          }
+        : {
+            //fixedrange: window.innerWidth < 700,
+            fixedrange: true,
+            type: 'linear',
+            autorange: true,
+            title: 'Hospitalizations / 100k Pop.',
+          }
+      this.layout = { ...this.layout }
+    },
+
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.isResizing = false
+    },
+  },
+
+  methods: {
+    async addObservedData() {
+      // already have it?
+      if (this.observedLine) {
+        this.dataLines.push(this.observedLine)
+        return
+      }
+
+      try {
+        const url = PUBLIC_SVN + 'original-data/vaccine-effectiveness/nordstroem-paper.tsv'
+        const data = await (await fetch(url)).text()
+
+        const rows = Papaparse.parse(data, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        }).data
+
+        const columnName = '' // this.observedColumn[this.vaccineType]
+
+        this.observedLine = {
+          name: 'Nordström: ' + columnName,
+          x: rows.map((row: any) => row.day),
+          y: rows.map((row: any) => 100 * row[columnName]),
+          line: {
+            dash: 'dot',
+            width: 2,
+            color: '#f4c',
+          },
         }
-  }
+      } catch (e) {
+        console.warn(e)
+      }
 
-  private skipVariants = ['wildtypeVe', 'alphaVe']
+      this.dataLines.push(this.observedLine)
+    },
 
-  private calculateValues() {
-    if (this.vaccineEffectivenessData.length === 0) return
+    reformatDate(day: string) {
+      const pieces = day.split('.')
+      const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
+      return date
+    },
 
-    const lines = { day: [] } as { [id: string]: any[] }
+    calculateValues() {
+      if (this.vaccineEffectivenessData.length === 0) return
 
-    const columns = this.vaccineEffectivenessFields.slice(1)
-    // .filter(col => skipVariants.indexOf(col) === -1)
+      const lines = { day: [] } as { [id: string]: any[] }
 
-    columns.forEach(col => (lines[col] = [] as number[]))
+      const columns = this.vaccineEffectivenessFields.slice(1)
+      // .filter(col => skipVariants.indexOf(col) === -1)
 
-    for (const row of this.vaccineEffectivenessData) {
-      // if all we have is a day and a blank record, skip it
-      if (Object.keys(row).length === 1) continue
+      columns.forEach(col => (lines[col] = [] as number[]))
 
-      if (row.day > 400) continue
+      for (const row of this.vaccineEffectivenessData) {
+        // if all we have is a day and a blank record, skip it
+        if (Object.keys(row).length === 1) continue
 
-      lines.day.push(row.day)
+        if (row.day > 400) continue
+
+        lines.day.push(row.day)
+
+        columns.forEach(col => {
+          let v = row[col]
+          if (v === undefined || v === -Infinity || v === '-inf') {
+            lines[col].push(NaN)
+          } else {
+            lines[col].push(Math.round(10000 * row[col]) / 100)
+          }
+        })
+      }
+
+      this.dataLines = []
 
       columns.forEach(col => {
-        let v = row[col]
-        if (v === undefined || v === -Infinity || v === '-inf') {
-          lines[col].push(NaN)
-        } else {
-          lines[col].push(Math.round(10000 * row[col]) / 100)
-        }
+        this.dataLines.push({
+          name: col,
+          x: lines.day,
+          y: lines[col],
+          line: { width: 1 },
+          visible: this.skipVariants.indexOf(col) > -1 ? 'legendonly' : 'true',
+        })
       })
-    }
 
-    this.dataLines = []
-
-    columns.forEach(col => {
-      this.dataLines.push({
-        name: col,
-        x: lines.day,
-        y: lines[col],
-        line: { width: 1 },
-        visible: this.skipVariants.indexOf(col) > -1 ? 'legendonly' : 'true',
-      })
-    })
-
-    // this.addObservedData()
-  }
-
-  private observedLine: any
-
-  private async addObservedData() {
-    // already have it?
-    if (this.observedLine) {
-      this.dataLines.push(this.observedLine)
-      return
-    }
-
-    try {
-      const url = PUBLIC_SVN + 'original-data/vaccine-effectiveness/nordstroem-paper.tsv'
-      const data = await (await fetch(url)).text()
-
-      const rows = Papaparse.parse(data, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-      }).data
-
-      const columnName = '' // this.observedColumn[this.vaccineType]
-
-      this.observedLine = {
-        name: 'Nordström: ' + columnName,
-        x: rows.map(row => row.day),
-        y: rows.map(row => 100 * row[columnName]),
-        line: {
-          dash: 'dot',
-          width: 2,
-          color: '#f4c',
-        },
-      }
-    } catch (e) {
-      console.warn(e)
-    }
-
-    this.dataLines.push(this.observedLine)
-  }
-
-  private reformatDate(day: string) {
-    const pieces = day.split('.')
-    const date = pieces[2] + '-' + pieces[1] + '-' + pieces[0]
-    return date
-  }
-
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'v',
+      // this.addObservedData()
     },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
-    },
-    margin: { t: 5, r: 10, b: 35, l: 60 },
-    xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      autorange: true,
-      title: 'Days since vaccination',
-    },
-    yaxis: {
-      // note this gets overwritten when the scale changes - see updateScale()
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      type: 'linear',
-      // autorange: true,
-      range: [0, 100],
-      title: 'Vaccine Effectiveness',
-    } as any,
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
-
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'daily-cases',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
-    },
-  }
-}
+  },
+})
 </script>
 
 <style scoped lang="scss">

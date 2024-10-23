@@ -16,40 +16,60 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MarkdownIt from 'markdown-it'
 
 import allReports from '@/assets/reports'
 
-@Component({ components: {}, props: {} })
-export default class VueComponent extends Vue {
-  private mdParser = new MarkdownIt()
+const mdParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
-  private reports = allReports
-  private selectedReport = this.reports[0]
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private mounted() {
-    this.loadReports() // this will return immediately and load in background
-  }
-
-  private clickedDownload() {
-    window.location.href = this.selectedReport.url
-  }
-
-  private changeReport(report: any) {
-    this.selectedReport = report
-  }
-
-  private async loadReports() {
-    for (const report of this.reports) {
-      const response = await fetch(report.md)
-      const text = await response.text()
-      const md = this.mdParser.render(text)
-
-      report.html = md
+export default defineComponent({
+  name: 'ReportViewer',
+  components: {},
+  props: {
+    // state: { type: Object, required: true },
+    // measure: { type: String, required: true },
+  },
+  data() {
+    return {
+      reports: allReports,
+      selectedReport: allReports[0],
     }
-  }
-}
+  },
+
+  mounted() {
+    this.loadReports() // this will return immediately and load in background
+  },
+
+  computed: {},
+  watch: {},
+
+  methods: {
+    clickedDownload() {
+      window.location.href = this.selectedReport.url
+    },
+
+    changeReport(report: any) {
+      this.selectedReport = report
+    },
+
+    async loadReports() {
+      for (const report of this.reports) {
+        const response = await fetch(report.md)
+        const text = await response.text()
+        const md = mdParser.render(text)
+
+        report.html = md
+      }
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">

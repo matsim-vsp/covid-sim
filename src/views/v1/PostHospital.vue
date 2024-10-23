@@ -1,173 +1,190 @@
 <template lang="pug">
-.vue-component(v-if="!isResizing" )
-  vue-plotly.plot1(
-    :data="dataLines"
-    :layout="layout"
-    :options="options"
-    :class="{'processing': postHospUpdater !== updaterCount}"
-  )
+  .vue-component(v-if="!isResizing" )
+    vue-plotly.plot1(
+      :data="dataLines"
+      :layout="layout"
+      :options="options"
+      :class="{'processing': postHospUpdater !== updaterCount}"
+    )
 
-</template>
+  </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@/components/VuePlotly.vue'
 import { spawn, Thread, Worker } from 'threads'
 
-@Component({ components: { VuePlotly }, props: {} })
-export default class VueComponent extends Vue {
-  @Prop({ required: true }) private startDate!: any
-  @Prop({ required: true }) private endDate!: any
-  @Prop({ required: true }) private data!: any[]
-  @Prop({ required: true }) private totalPopulation!: number
-  @Prop({ required: true }) private logScale!: boolean
-  @Prop({ required: true }) private intakesHosp!: boolean
-  @Prop({ required: true }) private city!: string
-  @Prop({ required: true }) private postHospUpdater!: number
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
-  private dataLines: any[] = []
+import HospitalWorker from './postHospital.worker?worker'
 
-  private postProcessWorker: any = null
+export default defineComponent({
+  name: 'PostHospital',
+  components: { VuePlotly },
+  props: {
+    startDate: { type: String, required: true },
+    endDate: { type: String, required: true },
+    data: { type: Array as PropType<any[]>, required: true },
+    totalPopulation: { type: Number, required: true },
+    logScale: { type: Boolean, required: true },
+    intakesHosp: { type: Boolean, required: true },
+    city: { type: String, required: true },
+    postHospUpdater: { type: Number, required: true },
+  },
 
-  private updaterCount = 0
+  data() {
+    return {
+      isResizing: false,
+      dataLines: [] as any[],
+      postProcessWorker: null as any,
+      updaterCount: 0,
 
-  private mounted() {
+      layout: {
+        autosize: true,
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+        },
+        font: {
+          family: 'Roboto,Arial,Helvetica,sans-serif',
+          size: 12,
+          color: '#000',
+        },
+        margin: { t: 5, r: 10, b: 35, l: 60 },
+        xaxis: {
+          fixedrange: true,
+          autorange: true,
+        },
+        yaxis: {
+          // note this gets overwritten when the scale changes - see updateScale()
+          //fixedrange: window.innerWidth < 700,
+          fixedrange: true,
+          type: 'linear',
+          autorange: true,
+          //range: [0, 100],
+          title: 'nInfected',
+        } as any,
+        plot_bgcolor: '#f8f8f8',
+        paper_bgcolor: '#f8f8f8',
+      } as any,
+
+      options: {
+        // displayModeBar: true,
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: [
+          'pan2d',
+          'zoom2d',
+          'select2d',
+          'lasso2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'autoScale2d',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian',
+          'resetScale2d',
+          'toggleSpikelines',
+          'resetViewMapbox',
+        ],
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: 'daily-cases',
+          width: 1200,
+          height: 600,
+          scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+        },
+      },
+    }
+  },
+
+  mounted() {
     this.updateScale()
     this.calculateValues()
-  }
+  },
 
-  private beforeDestroy() {
+  beforeDestroy() {
     if (this.postProcessWorker) Thread.terminate(this.postProcessWorker)
-  }
+  },
 
-  private isResizing = false
-
-  @Watch('$store.state.isWideMode') async handleWideModeChanged() {
-    this.isResizing = true
-    await this.$nextTick()
-    this.layout = Object.assign({}, this.layout)
-    this.isResizing = false
-  }
-
-  @Watch('data')
-  @Watch('totalPopulation')
-  updateData() {
-    this.calculateValues()
-  }
-
-  @Watch('logScale') updateScale() {
-    if (this.intakesHosp) {
-      this.layout.yaxis = this.logScale
-        ? {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'log',
-            autorange: true,
-            title: 'Intake Incidence',
-          }
-        : {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'linear',
-            autorange: true,
-            title: 'Intake Incidence',
-          }
-    } else {
-      this.layout.yaxis = this.logScale
-        ? {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'log',
-            autorange: true,
-            title: 'Occupancy / 100k Pop.',
-          }
-        : {
-            //fixedrange: window.innerWidth < 700,
-            fixedrange: true,
-            type: 'linear',
-            autorange: true,
-            title: 'Occupancy / 100k Pop.',
-          }
-    }
-  }
-
-  private async calculateValues() {
-    if (!this.postProcessWorker) {
-      this.postProcessWorker = await spawn(new Worker('./postHospital.worker'))
-    }
-
-    if (!this.data.length) {
-      return
-    }
-
-    const lines = await this.postProcessWorker.buildDataLines({
-      data: this.data,
-      totalPopulation: this.totalPopulation,
-      city: this.city,
-      intakesHosp: this.intakesHosp,
-    })
-
-    this.dataLines = lines
-    this.updaterCount = this.postHospUpdater
-  }
-
-  private layout = {
-    autosize: true,
-    showlegend: true,
-    legend: {
-      orientation: 'h',
+  computed: {},
+  watch: {
+    data() {
+      this.calculateValues()
     },
-    font: {
-      family: 'Roboto,Arial,Helvetica,sans-serif',
-      size: 12,
-      color: '#000',
+    totalPopulation() {
+      this.calculateValues()
     },
-    margin: { t: 5, r: 10, b: 35, l: 60 },
-    xaxis: {
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      autorange: true,
+    logScale() {
+      this.updateScale()
     },
-    yaxis: {
-      // note this gets overwritten when the scale changes - see updateScale()
-      //fixedrange: window.innerWidth < 700,
-      fixedrange: true,
-      type: 'linear',
-      autorange: true,
-      //range: [0, 100],
-      title: 'nInfected',
-    } as any,
-    plot_bgcolor: '#f8f8f8',
-    paper_bgcolor: '#f8f8f8',
-  }
 
-  private options = {
-    // displayModeBar: true,
-    displaylogo: false,
-    responsive: true,
-    modeBarButtonsToRemove: [
-      'pan2d',
-      'zoom2d',
-      'select2d',
-      'lasso2d',
-      'zoomIn2d',
-      'zoomOut2d',
-      'autoScale2d',
-      'hoverClosestCartesian',
-      'hoverCompareCartesian',
-      'resetScale2d',
-      'toggleSpikelines',
-      'resetViewMapbox',
-    ],
-    toImageButtonOptions: {
-      format: 'svg', // one of png, svg, jpeg, webp
-      filename: 'daily-cases',
-      width: 1200,
-      height: 600,
-      scale: 1.0, // Multiply title/legend/axis/canvas sizes by this factor
+    async '$store.state.isWideMode'() {
+      this.isResizing = true
+      await this.$nextTick()
+      this.layout = Object.assign({}, this.layout)
+      this.isResizing = false
     },
-  }
-}
+  },
+
+  methods: {
+    updateScale() {
+      if (this.intakesHosp) {
+        this.layout.yaxis = this.logScale
+          ? {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'log',
+              autorange: true,
+              title: 'Intake Incidence',
+            }
+          : {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'linear',
+              autorange: true,
+              title: 'Intake Incidence',
+            }
+      } else {
+        this.layout.yaxis = this.logScale
+          ? {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'log',
+              autorange: true,
+              title: 'Occupancy / 100k Pop.',
+            }
+          : {
+              //fixedrange: window.innerWidth < 700,
+              fixedrange: true,
+              type: 'linear',
+              autorange: true,
+              title: 'Occupancy / 100k Pop.',
+            }
+      }
+      this.layout = { ...this.layout }
+    },
+
+    async calculateValues() {
+      if (!this.postProcessWorker) {
+        this.postProcessWorker = await spawn(new HospitalWorker())
+      }
+
+      if (!this.data.length) {
+        return
+      }
+
+      const lines = await this.postProcessWorker.buildDataLines({
+        data: this.data,
+        totalPopulation: this.totalPopulation,
+        city: this.city,
+        intakesHosp: this.intakesHosp,
+      })
+
+      this.dataLines = lines
+      this.updaterCount = this.postHospUpdater
+    },
+  },
+})
 </script>
 
 <style scoped lang="scss">
