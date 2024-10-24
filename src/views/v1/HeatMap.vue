@@ -4,7 +4,6 @@ vue-plotly(v-if="!isResizing" :data="dataMatrix" :layout="layout" :options="opti
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import VuePlotly from '@/components/VuePlotly.vue'
 import { log, transpose } from 'mathjs'
 

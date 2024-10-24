@@ -21,7 +21,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { PropType } from 'vue'
 
 import store from '@/store'
 import AnimationView from '@/runs/v3/AnimationView.vue'

@@ -5,19 +5,23 @@ import App from '@/App.vue'
 import router from '@/router'
 import store from '@/store'
 
+import Buefy from 'buefy'
+import 'buefy/dist/buefy.min.css'
+
 Vue.config.productionTip = false
 
 Vue.use(VueI18n)
+Vue.use(Buefy)
 
 console.log('here')
 // locale: we only support EN and DE
 const locale = localStorage.getItem('default-locale')
   ? '' + localStorage.getItem('default-locale')
   : // @ts-ignore
-  // @ts-ignore
-  (navigator.language || navigator.userLanguage).startsWith('de')
-  ? 'de'
-  : 'en'
+    // @ts-ignore
+    (navigator.language || navigator.userLanguage).startsWith('de')
+    ? 'de'
+    : 'en'
 
 const i18n = new VueI18n({
   locale,

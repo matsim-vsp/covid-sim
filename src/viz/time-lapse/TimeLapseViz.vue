@@ -18,14 +18,16 @@
   .right-side
 
     .morestuff(v-if="isLoaded")
-      vue-slider.speed-slider(v-model="speed"
-        :data="speedStops"
-        :duration="0"
+      b-slider.speed-slider(v-model="speedSlider"
+        :min="0" :max="speedStops.length-1"
         :dotSize="20"
         tooltip="active"
         tooltip-placement="bottom"
-        :tooltip-formatter="val => val + 'x'"
+        :custom-formatter="val => speedStops[val] + 'x'"
+        @input="speed = speedStops[speedSlider]"
       )
+        b-slider-tick(v-for="tick in speedStops" :key="tick" :value="tick")
+
       p.speed-label(
         :style="{'color': getTextColor().text}") {{ speed }}x speed
 
@@ -56,7 +58,6 @@
 
 <script lang="ts">
 import Papaparse from '@simwrapper/papaparse'
-import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 
 import store from '@/store'
@@ -73,7 +74,7 @@ import totalInfections from './totalInfections.csv?raw'
 
 export default defineComponent({
   // name: '',
-  components: { AnimationView, ModalMarkdownDialog, PlaybackControls, VueSlider, ToggleButton },
+  components: { AnimationView, ModalMarkdownDialog, PlaybackControls, ToggleButton },
   props: {},
 
   data: () => {
@@ -91,6 +92,7 @@ export default defineComponent({
 
       speedStops: [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10],
       speed: 1,
+      speedSlider: 9,
 
       legendBits: [] as any[],
       dayColors: {} as { [day: number]: string },
@@ -299,7 +301,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '~/vue-slider-component/theme/default.css' as *;
 @use '@/styles.scss' as *;
 
 #v3-app {

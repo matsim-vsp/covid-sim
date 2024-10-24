@@ -14,7 +14,6 @@ import type { PropType } from 'vue'
 import YAML from 'yaml'
 import Papa from '@simwrapper/papaparse'
 
-import { Component, Vue } from 'vue-property-decorator'
 import SectionViewer from './ChartSelector.vue'
 
 import md from 'markdown-it'

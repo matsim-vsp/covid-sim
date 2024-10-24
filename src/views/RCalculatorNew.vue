@@ -104,7 +104,6 @@ const i18n = {
   },
 }
 
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import YAML from 'yaml'
 import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'

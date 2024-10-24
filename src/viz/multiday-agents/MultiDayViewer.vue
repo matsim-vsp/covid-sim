@@ -32,14 +32,16 @@
 
   .right-side
     .morestuff(v-if="isLoaded")
-      vue-slider.speed-slider(v-model="speed"
-        :data="speedStops"
-        :duration="0"
+      b-slider.speed-slider(v-model="speedSlider"
+        :min="0" :max="speedStops.length-1"
         :dotSize="20"
         tooltip="active"
         tooltip-placement="bottom"
-        :tooltip-formatter="val => val + 'x'"
+        :custom-formatter="val => speedStops[val] + 'x'"
+        @input="speed = speedStops[speedSlider]"
       )
+        b-slider-tick(v-for="tick in speedStops" :key="tick" :value="tick")
+
       p.speed-label(
         :style="{'color': textColor.text}") {{ speed }}x speed
 
@@ -70,10 +72,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { PropType } from 'vue'
 
 import Papaparse from '@simwrapper/papaparse'
-import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 
 import store from '@/store'
@@ -81,13 +81,12 @@ import AnimationView from './AnimationView.vue'
 import ModalMarkdownDialog from '@/components/ModalMarkdownDialog.vue'
 import PlaybackControls from '@/components/PlaybackControls.vue'
 import { ColorScheme, LIGHT_MODE, DARK_MODE } from '@/Globals'
-import { Route } from 'vue-router'
 
 import totalInfections from './totalInfections.csv?raw'
 
 export default defineComponent({
   name: 'MultiDayViewer',
-  components: { AnimationView, ModalMarkdownDialog, PlaybackControls, VueSlider, ToggleButton },
+  components: { AnimationView, ModalMarkdownDialog, PlaybackControls, ToggleButton },
   data: () => {
     return {
       numDays: 90,
@@ -100,6 +99,7 @@ export default defineComponent({
       totalInfections,
       speedStops: [-10, -5, -2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2, 5, 10],
       speed: 1,
+      speedSlider: 9, // 9th element of speedStops above = 1.0
       legendBits: [] as any[],
       dayColors: {} as { [day: number]: string },
     }
@@ -301,8 +301,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-// @use '~/vue-slider-component/theme/default.css';
-@use '~/vue-slider-component/theme/antd.css' as *;
 @use '@/styles.scss' as *;
 
 #v3-app {

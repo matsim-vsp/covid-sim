@@ -1,10 +1,10 @@
 <template lang="pug">
 .pbvue-component
-  vue-slider.slider(v-model="sliderValue"
+  b-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
-    @drag-start="dragStart"
-    @drag-end="dragEnd")
+    @dragstart="dragStart"
+    @dragend="dragEnd")
 
   .buttons
     .playpause(@click='toggleSimulation')
@@ -14,9 +14,6 @@
 </template>
 
 <script lang="ts">
-import VueSlider from 'vue-slider-component'
-import * as timeConvert from 'convert-seconds'
-
 import store from '@/store'
 import EventBus from '@/EventBus.vue'
 
@@ -25,7 +22,7 @@ import type { PropType } from 'vue'
 
 export default defineComponent({
   name: 'PlaybackControls',
-  components: { VueSlider },
+  components: {},
   props: {},
   data() {
     return {
@@ -38,12 +35,13 @@ export default defineComponent({
         min: 0,
         max: 90,
         clickable: false,
-        dotSize: 28,
         duration: 0,
         lazy: true,
         tooltip: 'active',
+        size: 'is-large',
+        'tooltip-always': true,
         'tooltip-placement': 'top',
-        'tooltip-formatter': (v: number) => {
+        'custom-formatter': (v: number) => {
           return 'Day ' + Math.floor(v)
         },
       },

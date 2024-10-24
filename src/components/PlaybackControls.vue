@@ -1,10 +1,10 @@
 <template lang="pug">
 .my-vue-component
-  vue-slider.slider(v-model="sliderValue"
+  b-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
-    @drag-start="dragStart"
-    @drag-end="dragEnd")
+    @dragstart="dragStart"
+    @dragend="dragEnd")
 
   .buttons
     .playpause(@click='toggleSimulation')
@@ -17,19 +17,36 @@
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 
-import VueSlider from 'vue-slider-component'
-import * as timeConvert from 'convert-seconds'
+import timeConvert from 'convert-seconds'
 
 import store from '@/store'
 import EventBus from '@/EventBus.vue'
 
+const maxSliderVal = 100000.0
+
+const getSecondsFromSlider = (oneToTenThousand: number) => {
+  let seconds = (oneToTenThousand / maxSliderVal) * 86400
+  if (seconds === 86400) seconds = 86400 - 1
+  return seconds
+}
+
+const convertSecondsToClockTimeMinutes = (index: number) => {
+  const seconds = getSecondsFromSlider(index)
+
+  try {
+    const hms = timeConvert(seconds)
+    const minutes = ('00' + hms.minutes).slice(-2)
+    return `${hms.hours}:${minutes}`
+  } catch (e) {
+    return '00:00'
+  }
+}
+
 export default defineComponent({
   name: 'PlaybackControls',
-  components: { VueSlider },
+  components: {},
 
   data: () => {
-    const maxSliderVal = 100000.0
-
     return {
       state: store.state,
       sliderValue: 0,
@@ -42,24 +59,17 @@ export default defineComponent({
         duration: 0,
         lazy: true,
         tooltip: 'active',
+        size: 'is-large',
+        'tooltip-always': true,
         'tooltip-placement': 'top',
-      } as any,
+        'custom-formatter': convertSecondsToClockTimeMinutes,
+        // (v: number) => {
+        //   return convertSecondsToClockTimeMinutes(v)
+        // },
+      },
     }
   },
-
   methods: {
-    convertSecondsToClockTimeMinutes(index: number) {
-      const seconds = this.getSecondsFromSlider(index)
-
-      try {
-        const hms = timeConvert(seconds)
-        const minutes = ('00' + hms.minutes).slice(-2)
-        return `${hms.hours}:${minutes}`
-      } catch (e) {
-        return '00:00'
-      }
-    },
-
     onKeyPressed(ev: KeyboardEvent) {
       if (ev.code === 'Space') this.toggleSimulation()
     },
@@ -79,18 +89,12 @@ export default defineComponent({
     },
 
     dragging(value: any) {
-      EventBus.$emit(EventBus.DRAG, this.getSecondsFromSlider(value))
-    },
-
-    getSecondsFromSlider(oneToTenThousand: number) {
-      let seconds = (oneToTenThousand / this.maxSliderVal) * 86400
-      if (seconds === 86400) seconds = 86400 - 1
-      return seconds
+      EventBus.$emit(EventBus.DRAG, getSecondsFromSlider(value))
     },
   },
 
   mounted() {
-    this.sliderOptions['tooltip-formatter'] = this.convertSecondsToClockTimeMinutes
+    // this.sliderOptions['tooltip-formatter'] = convertSecondsToClockTimeMinutes
 
     EventBus.$on(EventBus.SIMULATION_PERCENT, (time: number) => {
       this.sliderValue = Math.floor(this.maxSliderVal * time)
@@ -106,7 +110,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '~/vue-slider-component/theme/antd.css' as *;
 @use '@/styles.scss' as *;
 
 .my-vue-component {

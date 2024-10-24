@@ -44,7 +44,7 @@
             br
             | {{ speed }}x
 
-          vue-slider.speed-slider(v-model="speed"
+          b-slider.speed-slider(v-model="speed"
             :data="speedStops"
             :duration="0"
             :dotSize="20"
@@ -67,7 +67,6 @@
 
 <script lang="ts">
 import Papaparse from '@simwrapper/papaparse'
-import VueSlider from 'vue-slider-component'
 import { ToggleButton } from 'vue-js-toggle-button'
 import crossfilter from 'crossfilter2'
 import * as coroutines from 'js-coroutines'
@@ -92,7 +91,6 @@ export default defineComponent({
   components: {
     CollapsiblePanel,
     SettingsPanel,
-    VueSlider,
     // LegendColors,
     PlaybackControls,
     ToggleButton,
@@ -535,7 +533,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '~vue-slider-component/theme/default.css' as *;
 @use '@/styles.scss' as *;
 
 #entire-sim {

@@ -1,6 +1,6 @@
 <template lang="pug">
 .my-vue-component
-  vue-slider.slider(v-model="sliderValue"
+  b-slider.slider(v-model="sliderValue"
     v-bind="sliderOptions"
     @dragging="dragging"
     @drag-start="dragStart"
@@ -17,15 +17,14 @@
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 
-import VueSlider from 'vue-slider-component'
-import * as timeConvert from 'convert-seconds'
+import timeConvert from 'convert-seconds'
 
 import store from '@/store'
 import EventBus from '@/EventBus.vue'
 
 export default defineComponent({
   name: 'PlaybackControls',
-  components: { VueSlider },
+  components: {},
 
   data: () => {
     const maxSliderVal = 100000.0
@@ -106,7 +105,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '~/vue-slider-component/theme/antd.css' as *;
 @use '@/styles.scss' as *;
 
 .my-vue-component {

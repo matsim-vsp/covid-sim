@@ -16,13 +16,33 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+
 import Colophon from '@/components/Colophon.vue'
 
-@Component({ components: { Colophon }, props: {} })
-export default class VueComponent extends Vue {
-  private imprint = require('@/assets/imprint.en.md')
-}
+import imprint from '@/assets/imprint.en.md?raw'
+
+import Markdown from 'markdown-it'
+
+const html = new Markdown({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).render(imprint)
+
+export default defineComponent({
+  name: 'Imprint',
+  components: { Colophon },
+  props: {},
+
+  data() {
+    return {
+      imprint: html,
+    }
+  },
+
+  methods: {},
+})
 </script>
 
 <style scoped lang="scss">
