@@ -21,7 +21,7 @@
       b-slider.speed-slider(v-model="speedSlider"
         :min="0" :max="speedStops.length-1"
         :dotSize="20"
-        tooltip="active"
+        :tooltip="true"
         tooltip-placement="bottom"
         :custom-formatter="val => speedStops[val] + 'x'"
         @input="speed = speedStops[speedSlider]"

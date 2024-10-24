@@ -37,7 +37,7 @@ export default defineComponent({
         clickable: false,
         duration: 0,
         lazy: true,
-        tooltip: 'active',
+        tooltip: true,
         size: 'is-large',
         'tooltip-always': true,
         'tooltip-placement': 'top',
