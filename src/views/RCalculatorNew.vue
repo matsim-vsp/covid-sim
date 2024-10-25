@@ -21,7 +21,7 @@
             h3: b {{ $t('base-r-value')}}:&nbsp;&nbsp;
             h3.greenbig {{ selectedBaseR.toFixed(2) }}
 
-            .base-buttons(v-if="yaml.baseValues.length > 1")
+            .base-buttons(v-if="yaml.baseValues && yaml.baseValues.length > 1")
               button.button.is-small(
                 v-for="base in yaml.baseValues"
                 :class="{active: selectedBaseR == Object.values(base)[0], 'is-link': selectedBaseR == Object.values(base)[0] }"
@@ -39,32 +39,33 @@
                   span(:style="{fontWeight: 'normal'}"
                       v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
 
-                vue-slider.slider(
+                b-slider.slider(
                       v-model="selectedOptionLabels[measure]"
-                      :data="labels[measure]"
-                      :marks="true"
-                      :adsorb="true"
-                      :dotSize=24
-                      tooltip="none"
-                      @change="handleAdditiveButton(measure)"
+                      :min="0" :max="labels[measure].length-1"
+                      :tooltip="false"
+                      size="is-large"
+                      @input="handleAdditiveButton(measure)"
                 )
-                p.slider-label {{ sliders[measure].description }}
+                      b-slider-tick(v-for="tick,i in labels[measure]" :key="i" :value="i")
+
+                p.slider-label {{ labels[measure][selectedOptionLabels[measure]] }}
 
               //- multiplicative factors
               .option-group(v-for="measure in optionGroups" :key="measure")
                 h4 {{ measure }}
                   span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
 
-                vue-slider.slider(
+
+                b-slider.slider(
                       v-model="selectedOptionLabels[measure]"
-                      :data="labels[measure]"
-                      :marks="true"
-                      :adsorb="true"
-                      :dotSize=24
-                      tooltip="none"
-                      @change="handleButton(measure)"
+                      :min="0" :max="labels[measure].length-1"
+                      :tooltip="false"
+                      size="is-large"
+                      @input="handleButton(measure)"
                 )
-                p.slider-label {{ sliders[measure].description }}
+                      b-slider-tick(v-for="tick,i in labels[measure]" :key="i" :value="i")
+
+                p.slider-label {{ labels[measure][selectedOptionLabels[measure]] }}
 
         br
 
@@ -105,12 +106,9 @@ const i18n = {
 }
 
 import YAML from 'yaml'
-import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-import VueSlider from 'vue-slider-component'
 
 import Colophon from '@/components/Colophon.vue'
-import 'vue-slider-component/theme/default.css'
 
 import allCalculators from '@/assets/calculators'
 import { PUBLIC_SVN } from '@/Globals'
@@ -136,7 +134,7 @@ import type { PropType } from 'vue'
 export default defineComponent({
   name: 'RCalculatorNew',
   i18n,
-  components: { VueSlider, Colophon },
+  components: { Colophon },
   props: {},
 
   data() {
@@ -155,7 +153,7 @@ export default defineComponent({
 
       sliders: {} as { [measure: string]: { title: string; value: number; description: string } },
       labels: {} as { [measure: string]: string[] },
-      selectedOptionLabels: {} as { [measure: string]: string },
+      selectedOptionLabels: {} as { [measure: string]: number },
 
       factors: {} as { [measure: string]: number },
       additions: {} as { [measure: string]: number },
@@ -241,8 +239,8 @@ export default defineComponent({
     },
 
     async handleButton(measure: string) {
-      const selectedTitle = this.selectedOptionLabels[measure]
-      const selection = this.lookup[measure].filter(a => a.title === selectedTitle)[0]
+      const i = this.selectedOptionLabels[measure]
+      const selection = this.lookup[measure][i]
 
       this.sliders[measure] = selection
       this.factors[measure] = selection.value
@@ -251,8 +249,8 @@ export default defineComponent({
     },
 
     async handleAdditiveButton(measure: string) {
-      const selectedTitle = this.selectedOptionLabels[measure]
-      const selection = this.lookup[measure].filter(a => a.title === selectedTitle)[0]
+      const i = this.selectedOptionLabels[measure]
+      const selection = this.lookup[measure][i]
 
       this.sliders[measure] = selection
       this.additions[measure] = selection.value
@@ -340,7 +338,7 @@ export default defineComponent({
             if (this.yaml.additiveGroups[group] === undefined) {
               this.additions[group] = value
               this.sliders[group] = this.lookup[group][0]
-              this.selectedOptionLabels[group] = this.sliders[group].title
+              this.selectedOptionLabels[group] = this.sliders[group].value
             }
           } else {
             // user specified a default with an asterisk* after the number
@@ -349,7 +347,7 @@ export default defineComponent({
             this.lookup[group].push(choice)
             this.sliders[group] = choice
             this.additions[group] = trimAsterisk
-            this.selectedOptionLabels[group] = this.sliders[group].title
+            this.selectedOptionLabels[group] = this.sliders[group].value
           }
         }
         this.labels[group] = this.lookup[group].map(g => g.title)
@@ -494,8 +492,8 @@ li.notes-item {
 }
 
 .slider {
+  padding: 0.5rem;
   margin: 0 0;
-  // 0.5rem 0.5rem 0.5rem 0.5rem;
 }
 
 .slider-label {

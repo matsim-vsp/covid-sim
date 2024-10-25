@@ -31,34 +31,35 @@
         h4 {{ group }}
         .description {{ yaml.multipliers[group].description }}
 
-        vue-slider.slider(
-              v-model="sliders[group]"
-              :data="lookup[group]"
-              :data-value="'value'"
-              :data-label="'title'"
-              tooltip="none"
-              :adsorb="true"
-              :dotSize=20
-              @change="handleFactorButton(group)"
+        b-slider.slider(
+            :value="0"
+            v-model="sliders[group]"
+            :min="0" :max="lookup[group].length-1"
+            :tooltip="false"
+            size="is-large"
+            @input="handleFactorButton(group)"
         )
-        p.slider-label {{ sliders[group].title }}
+            b-slider-tick(v-for="tick,i in lookup[group]" :key="tick.title" :value="i")
+
+        p.slider-label {{ lookup[group][sliders[group]].title}}
+
 
       //- divisors
       .option-group(v-for="group in divisors" :key="group")
         h4 {{ group }}
         .description {{ yaml.divisors[group].description }}
 
-        vue-slider.slider(
-              v-model="sliders[group]"
-              :data="lookup[group]"
-              :data-value="'value'"
-              :data-label="'title'"
-              tooltip="none"
-              :adsorb="true"
-              :dotSize=20
-              @change="handleDivFactorButton(group)"
+        b-slider.slider(
+            :value="0"
+            v-model="sliders[group]"
+            :min="0" :max="lookup[group].length-1"
+            :tooltip="false"
+            size="is-large"
+            @input="handleDivFactorButton(group)"
         )
-        p.slider-label {{ sliders[group].title }}
+            b-slider-tick(v-for="tick,i in lookup[group]" :key="tick.title" :value="i")
+
+        p.slider-label {{ lookup[group][sliders[group]].title}}
 
 
       br
@@ -96,8 +97,6 @@ const i18n = {
 
 import YAML from 'yaml'
 import MarkdownIt from 'markdown-it'
-import VueSlider from 'vue-slider-component'
-import 'vue-slider-component/theme/default.css'
 
 import { PUBLIC_SVN } from '@/Globals'
 
@@ -137,7 +136,7 @@ import type { PropType } from 'vue'
 export default defineComponent({
   name: 'RiskCalculator',
   i18n,
-  components: { VueSlider },
+  components: {},
   props: {},
 
   data() {
@@ -156,12 +155,11 @@ export default defineComponent({
       badPage: false,
       selectedScenario: {} as any,
 
-      sliders: {} as { [measure: string]: { title: string; value: number } },
-
       finalR: 0,
       adjustedR: 0,
 
       lookup: {} as { [measure: string]: { title: string; value: number }[] },
+      sliders: {} as { [measure: string]: number },
       factors: {} as { [measure: string]: number },
       divFactors: {} as { [measure: string]: number },
     }
@@ -232,15 +230,17 @@ export default defineComponent({
     },
 
     async handleDivFactorButton(measure: string) {
-      const slider = this.sliders[measure]
-      this.divFactors[measure] = slider.value
+      const idx = this.sliders[measure]
+      const option = this.lookup[measure][idx]
+      this.divFactors[measure] = option.value
       this.updateR()
       this.$forceUpdate()
     },
 
     async handleFactorButton(measure: string) {
-      const slider = this.sliders[measure]
-      this.factors[measure] = slider.value
+      const idx = this.sliders[measure]
+      const option = this.lookup[measure][idx]
+      this.factors[measure] = option.value
       this.updateR()
       this.$forceUpdate()
     },
@@ -259,9 +259,10 @@ export default defineComponent({
         if (this.divisors.indexOf(measure) > -1) this.divFactors[measure] = value
 
         // find this entry for the slider!
-        for (const choice of this.lookup[measure]) {
+        for (let i = 0; i < this.lookup[measure].length; i++) {
+          const choice = this.lookup[measure][i]
           if (choice.title === title) {
-            this.sliders[measure] = choice
+            this.sliders[measure] = i
             break
           }
         }
@@ -304,24 +305,26 @@ export default defineComponent({
         const measures = this.yaml.multipliers[measureName]
         this.lookup[measureName] = []
 
-        for (const option of measures.options) {
+        for (let i = 0; i < measures.options.length; i++) {
+          const option = measures.options[i]
           const title = Object.keys(option)[0]
           const value = option[title]
 
+          Number.isNaN
           if (!isNaN(value)) {
             this.lookup[measureName].push({ title, value })
 
             // first?
             if (this.yaml.multipliers[measureName].options === undefined) {
               this.factors[measureName] = value
-              this.sliders[measureName] = this.lookup[measureName][0]
+              this.sliders[measureName] = i // this.lookup[measureName][0].value
             }
           } else {
             // user specified a default with an asterisk* after the number
             const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
             const choice = { title, value: trimAsterisk }
             this.lookup[measureName].push(choice)
-            this.sliders[measureName] = choice
+            this.sliders[measureName] = i
             this.factors[measureName] = trimAsterisk
           }
         }
@@ -332,7 +335,8 @@ export default defineComponent({
         const measures = this.yaml.divisors[measureName]
         this.lookup[measureName] = []
 
-        for (const option of measures.options) {
+        for (let i = 0; i < measures.options.length; i++) {
+          const option = measures.options[i]
           const title = Object.keys(option)[0]
           const value = option[title]
 
@@ -342,14 +346,14 @@ export default defineComponent({
             // first?
             if (this.yaml.divisors[measureName].options === undefined) {
               this.divFactors[measureName] = value
-              this.sliders[measureName] = this.lookup[measureName][0]
+              this.sliders[measureName] = i // this.lookup[measureName][0].value
             }
           } else {
             // user specified a default with an asterisk* after the number
             const trimAsterisk = 1.0 / parseFloat(value.substring(0, value.length - 1))
             const choice = { title, value: trimAsterisk }
             this.lookup[measureName].push(choice)
-            this.sliders[measureName] = choice
+            this.sliders[measureName] = i // choice.value
             this.divFactors[measureName] = trimAsterisk
           }
         }
@@ -484,7 +488,8 @@ li.notes-item {
 }
 
 .slider {
-  margin: 0.5rem 0.5rem;
+  padding: 0.5rem;
+  margin: 0rem 0rem;
 }
 
 .slider-label {

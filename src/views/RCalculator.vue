@@ -39,17 +39,16 @@
                   span(:style="{fontWeight: 'normal'}"
                       v-if="additions[measure] != 0") &nbsp; : {{additions[measure]>0 ? '+' : ''}}{{ additions[measure].toFixed(3) }}
 
-                vue-slider.slider(
+                b-slider.slider(
                       v-model="sliders[measure]"
-                      :data="lookup[measure]"
-                      :data-value="'value'"
-                      :data-label="'title'"
-                      tooltip="none"
-                      :adsorb="true"
-                      :dotSize=20
-                      @change="handleAdditiveButton(measure)"
+                      :min="0" :max="lookup[measure].length-1"
+                      :tooltip="false"
+                      size="is-large"
+                      @input="handleAdditiveButton(measure)"
                 )
-                p.slider-label {{ sliders[measure].title }}
+                    b-slider-tick(v-for="tick,i in lookup[measure]" :key="tick.title" :value="i")
+
+                p.slider-label {{ lookup[measure][sliders[measure]].title}}
 
 
               //- multiplicative factors
@@ -57,17 +56,17 @@
                 h4 {{ measure }}
                   span(:style="{fontWeight: 'normal'}" v-if="factors[measure] != 1") &nbsp; : {{ factors[measure].toFixed(2) }}x
 
-                vue-slider.slider(
+                b-slider.slider(
                       v-model="sliders[measure]"
-                      :data="lookup[measure]"
-                      :data-value="'value'"
-                      :data-label="'title'"
-                      tooltip="none"
-                      :adsorb="true"
-                      :dotSize=20
-                      @change="handleButton(measure)"
+                      :min="0" :max="lookup[measure].length-1"
+                      :tooltip="false"
+                      size="is-large"
+                      @input="handleButton(measure)"
                 )
-                p.slider-label {{ sliders[measure].title }}
+                    b-slider-tick(v-for="tick,i in lookup[measure]" :key="tick.title" :value="i")
+
+                p.slider-label {{ lookup[measure][sliders[measure]].title}}
+
 
         br
 
@@ -108,12 +107,9 @@ const i18n = {
 }
 
 import YAML from 'yaml'
-import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-import VueSlider from 'vue-slider-component'
 
 import Colophon from '@/components/Colophon.vue'
-import 'vue-slider-component/theme/default.css'
 import { PUBLIC_SVN } from '@/Globals'
 
 import allCalculators from '@/assets/calculators'
@@ -139,7 +135,7 @@ import type { PropType } from 'vue'
 export default defineComponent({
   name: 'RCalculator',
   i18n,
-  components: { VueSlider, Colophon },
+  components: { Colophon },
   props: {},
 
   data() {
@@ -154,7 +150,7 @@ export default defineComponent({
       oldCalculators: allCalculators,
 
       lookup: {} as { [measure: string]: { title: string; value: number }[] },
-      sliders: {} as { [measure: string]: { title: string; value: number } },
+      sliders: {} as { [measure: string]: number },
       factors: {} as { [measure: string]: number },
       additions: {} as { [measure: string]: number },
     }
@@ -240,15 +236,17 @@ export default defineComponent({
     },
 
     async handleButton(measure: string) {
-      const slider = this.sliders[measure]
-      this.factors[measure] = slider.value
+      const idx = this.sliders[measure] as any
+      const option = this.lookup[measure][idx]
+      this.factors[measure] = option.value
       this.updateR()
       this.$forceUpdate()
     },
 
     async handleAdditiveButton(measure: string) {
-      const slider = this.sliders[measure]
-      this.additions[measure] = slider.value
+      const idx = this.sliders[measure] as any
+      const option = this.lookup[measure][idx]
+      this.additions[measure] = option.value
       this.updateR()
       this.$forceUpdate()
     },
@@ -282,6 +280,7 @@ export default defineComponent({
     },
 
     buildUI() {
+      console.log({ yaml: this.yaml })
       if (this.yaml.baseValues) {
         this.selectedBaseR = Object.values(this.yaml.baseValues[0])[0]
       }
@@ -301,14 +300,14 @@ export default defineComponent({
             // first?
             if (this.yaml.optionGroups[group] === undefined) {
               this.factors[group] = value
-              this.sliders[group] = this.lookup[group][0]
+              this.sliders[group] = this.lookup[group][0].value
             }
           } else {
             // user specified a default with an asterisk* after the number
             const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
             const choice = { title, value: trimAsterisk }
             this.lookup[group].push(choice)
-            this.sliders[group] = choice
+            this.sliders[group] = choice.value
             this.factors[group] = trimAsterisk
           }
         }
@@ -329,14 +328,14 @@ export default defineComponent({
             // first?
             if (this.yaml.additiveGroups[group] === undefined) {
               this.additions[group] = value
-              this.sliders[group] = this.lookup[group][0]
+              this.sliders[group] = this.lookup[group][0].value
             }
           } else {
             // user specified a default with an asterisk* after the number
             const trimAsterisk = parseFloat(value.substring(0, value.length - 1))
             const choice = { title, value: trimAsterisk }
             this.lookup[group].push(choice)
-            this.sliders[group] = choice
+            this.sliders[group] = choice.value
             this.additions[group] = trimAsterisk
           }
         }
@@ -507,6 +506,11 @@ li.notes-item {
 
 ul {
   margin-bottom: 1rem;
+}
+
+.my-tooltip {
+  background-color: yellow !important;
+  z-index: 5;
 }
 
 @media only screen and (max-width: 950px) {
