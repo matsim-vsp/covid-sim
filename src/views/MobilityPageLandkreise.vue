@@ -197,17 +197,14 @@ const i18n = {
   },
 }
 
-import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import Papaparse from '@simwrapper/papaparse'
-import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
 
 import Colophon from '@/components/Colophon.vue'
 import MobilityPlot from '@/components/MobilityPlot.vue'
 import MobilityPlotLandkreise from '@/components/MobilityPlotLandkreise.vue'
 import MobilityMap from '@/components/MobilityMap.vue'
-import 'vue-slider-component/theme/default.css'
 
 type MobilityYaml = {
   description?: string
@@ -216,7 +213,6 @@ type MobilityYaml = {
 }
 
 import { defineComponent } from 'vue'
-import type { PropType } from 'vue'
 
 const public_svn =
   'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
@@ -230,11 +226,8 @@ const markdownParser = new MarkdownIt({
 export default defineComponent({
   name: 'MobilityPageLandkreise',
   i18n,
-  components: { VueSlider, Colophon, MobilityPlot, MobilityMap, MobilityPlotLandkreise },
-  props: {
-    // state: { type: Object, required: true },
-    // measure: { type: String, required: true },
-  },
+  components: { Colophon, MobilityPlot, MobilityMap, MobilityPlotLandkreise },
+  props: {},
   data() {
     return {
       badPage: false,
@@ -583,7 +576,8 @@ export default defineComponent({
         }
       }
 
-      for (var i = 0; i < this.mobilityWeekly.length; i++) {
+      const minLength = Math.min(this.mobilityWeekly.length, this.rangeWeekly.length)
+      for (var i = 0; i < minLength; i++) {
         var landkreis = this.mobilityWeekly[i].Landkreis
         var date = this.rangeWeekly[i].date
         var dailyRange = this.rangeWeekly[i].dailyRangePerPerson

@@ -90,7 +90,6 @@ export default defineComponent({
 
   mounted() {
     this.loadData(this.svnUrl + this.landkreiseUrl)
-    //this.loadBundesland(this.svnUrl + this.bundeslandUrl)
     this.updateMap()
   },
 
@@ -158,7 +157,6 @@ export default defineComponent({
         var locations = []
         var data = []
         var names = []
-        var localActivity = this.activity
         for (const [key, value] of Object.entries(this.landkreisData)) {
           var id
           id = this.mapping[key]
@@ -199,6 +197,9 @@ export default defineComponent({
             this.data[0].z = data
             this.data[0].featureidkey = 'properties.id_2'
             this.data[0].text = names
+            // force update the data array...
+            // otherwise the map won't update
+            this.data = [...this.data]
           }
         }
       } else {
