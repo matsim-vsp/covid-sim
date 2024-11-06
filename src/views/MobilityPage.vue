@@ -124,20 +124,15 @@ const i18n = {
   },
 }
 
-import { Route } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import Papaparse from '@simwrapper/papaparse'
-import VueSlider from 'vue-slider-component'
 import YAML from 'yaml'
-import { getHolidays, Region } from 'feiertagejs'
+import { Region } from 'feiertagejs'
 
 import Colophon from '@/components/Colophon.vue'
 import MobilityPlot from '@/components/MobilityPlot.vue'
 import MobilityMap from '@/components/MobilityMap.vue'
-import 'vue-slider-component/theme/default.css'
-import { concat } from 'js-coroutines'
 import { PUBLIC_SVN } from '@/Globals'
-import { all } from 'mathjs'
 
 type MobilityYaml = {
   description?: string
@@ -154,12 +149,12 @@ const markdownParser = new MarkdownIt({
 })
 
 import { defineComponent } from 'vue'
-import type { PropType } from 'vue'
+// import type { PropType } from 'vue'
 
 export default defineComponent({
   name: 'MobilityPage',
   i18n,
-  components: { VueSlider, Colophon, MobilityPlot, MobilityMap },
+  components: { Colophon, MobilityPlot, MobilityMap },
   props: {},
 
   data() {
@@ -613,19 +608,6 @@ p {
 
 li.notes-item {
   line-height: 1.3rem;
-}
-
-.slider {
-  margin: 0 0;
-  // 0.5rem 0.5rem 0.5rem 0.5rem;
-}
-
-.slider-label {
-  font-size: 0.9rem;
-  line-height: 1.1rem;
-  font-weight: bold;
-  color: #383ab1;
-  margin: 1.5rem 0 0 -1.35rem;
 }
 
 .columns {
