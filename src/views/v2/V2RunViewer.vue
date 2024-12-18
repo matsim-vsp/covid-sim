@@ -208,6 +208,7 @@
                 :seedComparison="seedComparison"
                 :showSeedComparison="showSeedComparison"
                 :city="city"
+                :estimatedReportedAndUnreportedCases="estimatedReportedAndUnreportedCases"
                 )
 
           //- ---------- VIRUS STRAINS -------
@@ -673,6 +674,7 @@ export default defineComponent({
 
       unreportedIncidence: [] as any[],
       unreportedIncidenceNRW: [] as any[],
+      estimatedReportedAndUnreportedCases: [] as any[],
 
       currentSituation: {} as any,
       loadedSeriesData: {} as any,
@@ -1139,6 +1141,7 @@ export default defineComponent({
     cityCap() {
       this.loadUnreportedIncidence()
       this.loadUnreportedIncidenceNRW()
+      this.loadEstimatedReportedAndUnreportedCases()
     },
 
     async '$store.state.isWideMode'() {
@@ -1839,6 +1842,32 @@ export default defineComponent({
         this.allPlots.forEach(element => (element.active = false))
       } else {
         this.allPlots[index].active = !this.allPlots[index].active
+      }
+    },
+
+    async loadEstimatedReportedAndUnreportedCases() {
+      if (this.cityCap == 'Cologne') {
+        const url =
+          'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/original-data/Fallzahlen/MaxvonKleist/EstimatedCasesMaxvonKleist.csv'
+
+        try {
+          const response = await fetch(url)
+          const csvContents = await response.text()
+          this.estimatedReportedAndUnreportedCases = Papa.parse(csvContents, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+          }).data
+
+          this.estimatedReportedAndUnreportedCases = this.estimatedReportedAndUnreportedCases.map(
+            element => ({
+              min_n_true: element.min_n_true,
+              date: element.date,
+            })
+          )
+        } catch (e) {
+          console.warn(e)
+        }
       }
     },
 

@@ -27,6 +27,7 @@ export default defineComponent({
     seedComparison: { type: Array as PropType<any[]>, required: true },
     unreportedIncidence: { type: Array as PropType<any[]>, required: true },
     unreportedIncidenceNRW: { type: Array as PropType<any[]>, required: true },
+    estimatedReportedAndUnreportedCases: { type: Array as PropType<any[]>, required: true },
     rkiDetectionData: {
       type: Object as PropType<{
         x?: any[]
@@ -438,6 +439,41 @@ export default defineComponent({
       this.calculateUnreportedNRW()
     },
 
+    addEstimatedReportedAndUnreportedCases() {
+      const totalPopulation = 82000000
+      const incidencePer100k = 100000
+
+      if (!this.estimatedReportedAndUnreportedCases.length) return
+
+      const estimatedReportedAndUnreportedCases: any = {
+        type: 'scatter',
+        mode: 'markers',
+        marker: { size: 4, color: '#ff0000' },
+        x: [] as any,
+        y: [] as any,
+      }
+
+      let sumMinNTrue = 0
+
+      for (let i = 3; i + 3 < this.estimatedReportedAndUnreportedCases.length; i = i + 7) {
+        for (let j = i - 3; j < i + 4; j++) {
+          sumMinNTrue += this.estimatedReportedAndUnreportedCases[j].min_n_true
+        }
+
+        estimatedReportedAndUnreportedCases.x.push(this.estimatedReportedAndUnreportedCases[i].date)
+        estimatedReportedAndUnreportedCases.y.push(
+          sumMinNTrue / (totalPopulation / incidencePer100k)
+        )
+        sumMinNTrue = 0
+      }
+
+      estimatedReportedAndUnreportedCases.name =
+        'Estimated Reported and Unreported Cases (Germany, XX et al.)'
+      estimatedReportedAndUnreportedCases.visible = true
+
+      this.dataLines.push(estimatedReportedAndUnreportedCases)
+    },
+
     calculateSeedComparison(factor100k: number) {
       if (this.seedComparison.length == 0) return
 
@@ -652,8 +688,8 @@ export default defineComponent({
       if (this.rkiDetectionData.x) this.dataLines.push(this.rkiDetectionData)
 
       this.calculateSeedComparison(factor100k)
-
       this.calculateObserved(factor100k)
+      this.addEstimatedReportedAndUnreportedCases()
     },
 
     reformatDate(day: string) {
