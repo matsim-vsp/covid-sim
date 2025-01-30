@@ -214,7 +214,7 @@
                 )
 
           //- ---------- R-VALUES -------
-          .linear-plot(v-if="allPlots[6].active")
+          .linear-plot(v-if="data.length && allPlots[6].active")
             h5 {{ cityCap }} {{allPlots[6].name}}
               button.button.is-small.hider(@click="toggleShowPlot(6)") ..
 
