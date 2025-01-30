@@ -1989,9 +1989,9 @@ export default defineComponent({
       v = v.slice(0, this.MAX_DAYS)
 
       // maybe the sim ended early - go out to 150 anyway
-      if (v.length < this.MAX_DAYS) {
-        v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
-      }
+      // if (v.length < this.MAX_DAYS) {
+      //  v.push(key === 'day' ? this.MAX_DAYS : v[v.length - 1])
+      //}
       return v
     },
 
