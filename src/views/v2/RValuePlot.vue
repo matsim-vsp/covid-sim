@@ -265,7 +265,6 @@ export default defineComponent({
         //   marker: { color: '#c44', size: 3 },
         // },
       ]
-
       // save the 7-day average so we can query it later for the summary stats
       this.avg7dayLookup = { date: x.slice(center), avgR }
     },
@@ -343,6 +342,13 @@ export default defineComponent({
           },
         },
       ]
+
+      // Ensure avg7dayLookup is updated when manually calculating R-values,
+      // so it remains available even if precomputed rValues are missing.
+      this.avg7dayLookup = {
+        date: susceptible.x.slice(this.lagDays * 2),
+        avgR: rValues,
+      }
     },
   },
 })

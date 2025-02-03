@@ -288,6 +288,12 @@ export default defineComponent({
           },
         },
       ]
+      // Ensure avg7dayLookup is updated when manually calculating R-values,
+      // so it remains available even if precomputed rValues are missing.
+      this.avg7dayLookup = {
+        date: susceptible.x.slice(this.lagDays * 2),
+        avgR: rValues,
+      }
     },
   },
 })
