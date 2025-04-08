@@ -44,13 +44,15 @@ module.exports = {
       '/documentation/': [
         {
           title: 'Documentation',
-          collapsable: true,
+          collapsable: false,
+          sidebarDepth: 2, // Set the depth of the sidebar
           children: [
             '',
             'run-setup',
             'configuration',
             'website',
             'plots',
+            'example',
           ]
         }
       ],
