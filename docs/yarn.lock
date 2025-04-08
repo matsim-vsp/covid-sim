@@ -5458,6 +5458,11 @@ markdown-it-emoji@^1.4.0:
   resolved "https://registry.yarnpkg.com/markdown-it-emoji/-/markdown-it-emoji-1.4.0.tgz#9bee0e9a990a963ba96df6980c4fddb05dfb4dcc"
   integrity sha512-QCz3Hkd+r5gDYtS2xsFXmBYrgw6KuWcJZLCEkdfAuwzZbShCmCfta+hwAMq4NX/4xPzkSHduMKgMkkPUJxSXNg==
 
+markdown-it-footnote@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/markdown-it-footnote/-/markdown-it-footnote-4.0.0.tgz#02ede0cb68a42d7e7774c3abdc72d77aaa24c531"
+  integrity sha512-WYJ7urf+khJYl3DqofQpYfEYkZKbmXmwxQV8c8mO/hGIhgZ1wOe7R4HLFNwqx7TjILbnC98fuyeSsin19JdFcQ==
+
 markdown-it-table-of-contents@^0.4.0:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/markdown-it-table-of-contents/-/markdown-it-table-of-contents-0.4.4.tgz#3dc7ce8b8fc17e5981c77cc398d1782319f37fbc"

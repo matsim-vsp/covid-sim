@@ -71,5 +71,10 @@ module.exports = {
   plugins: [
     '@vuepress/plugin-back-to-top',
     '@vuepress/plugin-medium-zoom',
-  ]
+  ],
+  markdown: {
+    extendMarkdown: (md) => {
+      md.use(require('markdown-it-footnote'));
+    }
+  }
 }
