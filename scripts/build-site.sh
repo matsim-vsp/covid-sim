@@ -108,10 +108,10 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Au
 cd ../..
 
 # Build docs first
-# cd docs
-# yarn
-# yarn build
-# cd ..
+cd docs
+yarn
+yarn build
+cd ..
 
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
