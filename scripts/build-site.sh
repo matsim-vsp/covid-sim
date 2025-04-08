@@ -108,6 +108,7 @@ svn commit --username $SVN_USER --password $SVN_PASSWORD  --no-auth-cache -m "Au
 cd ../..
 
 # Build docs first
+echo BUILD: Docs
 cd docs
 yarn
 yarn build
