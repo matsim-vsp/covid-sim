@@ -53,6 +53,12 @@ module.exports = {
             'website',
             'plots',
             'example',
+            'quickstart',
+            'introduction',
+            'repositorystructure.md',
+            'simulationsetup.md',
+            'episimsimulation.md',
+            'outputandanalysis.md',
           ]
         }
       ],
