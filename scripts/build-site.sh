@@ -109,6 +109,7 @@ cd ../..
 
 # Build docs first
 echo BUILD: Docs
+export NODE_OPTIONS=--openssl-legacy-provider
 cd docs
 yarn
 yarn build
