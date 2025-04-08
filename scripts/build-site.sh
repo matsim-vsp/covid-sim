@@ -113,7 +113,9 @@ export NODE_OPTIONS=--openssl-legacy-provider
 cd docs
 yarn
 yarn build
+ls
 cd ..
+ls
 
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
