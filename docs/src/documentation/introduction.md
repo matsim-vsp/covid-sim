@@ -1,11 +1,6 @@
-# Introduction
+# EpiSim - Introduction 
 
-Here is a footnote reference[^1].
-
-[^1]: This is the footnote content.
-
-EpiSim is an
-agent-based epidemiological model used to track the development of
+EpiSim is an agent-based epidemiological model used to track the development of
 COVID-19 cases
 and estimate the impact of various government-imposed mitigation
 strategies ([Müller 2020](

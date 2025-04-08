@@ -1,4 +1,4 @@
-# EpiSim Outputs and Analysis
+# EpiSim - Outputs and Analysis
 All infections and disease state changes are documented by
 `EpisimReporting`. This class is used to produce the output files useful
 for analysis. One of the most important outputs created is

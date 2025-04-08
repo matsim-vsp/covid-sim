@@ -1,4 +1,4 @@
-# EpiSim Simulation
+# EpiSim - Simulation
 
 So far, the scenario preparation process has been described; the
 episim-config data structure, the various inputs, and the restriction
@@ -12,7 +12,7 @@ times, followed by the Saturday events and, finally, the Sunday events.
 At the beginning of each day, there is a certain initialization phase:
 e.g. vaccinations and tests are administered to portions of the
 population. This is also where the disease progression model changes the
-disease states of individuals (see *progressionModel*). Based on transition probabilities, some
+disease states of individuals (see *[Disease Progression Model](#disease-progression-model)*). Based on transition probabilities, some
 infectious individuals start, for example, to show symptoms or some
 seriously sick individuals recover.
 
@@ -70,22 +70,22 @@ that an infection occurs. EpiSim uses a mechanical infection model (
 following is a simplified model version, which is useful for explanatory
 purposes:
 
-$$p(\mbox{infect}|\mbox{contact}) \approx \Theta \times sh \times ci \times in \times \tau$$
+*p(infect|contact) ≈ Θ × sh × ci × in × τ.*
 
-Here, the "shedding rate\", $sh$, is the viral load that the infected
+Here, the "shedding rate\", *sh*, is the viral load that the infected
 person produces through exhalation; this is dependent on what stage of
 the disease the person is in and whether they are wearing a mask.
-Conversely, the "intake rate\", $in$, is how much viral load a
+Conversely, the "intake rate\", *in*, is how much viral load a
 susceptible agent breathes in, which is also dependent on mask-usage.
 Age-dependent susceptibility and
 infectivity, which were defined in the episim-config,
 also play a role in the shedding and intake rates. The "contact
-intensity\", $ci$, describes the aerodynamic characteristics of the
+intensity\", *ci*, describes the aerodynamic characteristics of the
 room, which impact the viral load, including size of the room and how
 much air exchange takes place (i.e. through the opening of windows).
-Finally, the duration of contact $\tau$ is an important factor, which
+Finally, the duration of contact *τ* is an important factor, which
 can be gleaned from the activity trajectories. The calibration factor,
-$\Theta$, is determined through model calibration; this also absorbs all
+*Θ*, is determined through model calibration; this also absorbs all
 units of the individual factors. All of this together predicts whether
 susceptible individuals become infected with SARS-CoV-2 during an
 interaction with an infectious person. For additional details, see
@@ -106,7 +106,9 @@ possible progression would be as follows:
 → `showingSymptoms` → `seriouslySick` → `critical` → `seriouslySick` → `recovered`[^2]. However, starting with the
 `infectious` state, there is always a chance of becoming `recovered`.
 
-ADD FIGURE HERE
+  ![Example Image](./../images/DiseaseProgressionModel.png)
+  *Visualization of progression model. See also [Müller 2020](
+https://doi.org/10.48550/arXiv.2011.11453)*.
 
 The progression model uses age-dependent transition probabilities to
 determine whether the agent moves to a more dire state or to the

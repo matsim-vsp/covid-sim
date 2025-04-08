@@ -1,4 +1,4 @@
-# Simulation Setup
+# EpiSim - Simulation Setup
 
 At the beginning of an EpiSim simulation, various input files must be
 imported and the settings must be configured. Doing this manually for
@@ -36,7 +36,7 @@ The essential input files for any EpiSim simulation are:
 - **Events Files:** Vital to EpiSim is the mobility behavior of
   individuals; this information is contained in so-called "events"
   files. The format of the events file follows the standard set by the
-  MATSim output events files (see below for a depiction of an exemplary events file). Users can, however, create map
+  MATSim output events files (see Figure 1 below for a depiction of an exemplary events file). Users can, however, create map
   mobility data from other sources (i.e. travel diaries). If an agent
   travels per public transit, the model knows when they got on and off
   the vehicle and the ID of that vehicle. When the agent conducts an
@@ -54,7 +54,18 @@ The essential input files for any EpiSim simulation are:
   multiple events files may also be included[^1].
 
   ![Example Image](./../images/traj2.png)
-  *Example Trajectories of three agents (Toby, Lily, and Sam), in which agents spend time in the same spaces (in a bus, or in school, in this example).*
+
+  `<event time="8:00" type="actend" person="Lily" facility="home\_lily" actType="home"/>}` \
+  `<event time="8:10" type="actend" person="Sam" facility="home\_sam" actType="home"/>` \
+  `<event time="8:15” type="PersonEntersVehicle" person="Lily" vehicle="Bus245"/>` \
+  `<event time="8:20” type="PersonEntersVehicle" person="Sam" vehicle="Bus245"/>` \
+  `<event time="8:45" type="actend" person="Toby" facility="home\_toby" actType="home"/>` \
+  `<event time="8:50” type="PersonLeavesVehicle" person="Lily" vehicle="Bus245"/>` \
+  `<event time="9:00" type="actstart" person="Toby" facility="schoolX" actType="edu"/>` \
+  `<event time="9:00" type="actstart" person="Lily" facility="schoolX" actType="edu"/>` \
+  `<event time="9:10” type="PersonLeavesVehicle" person="Sam" vehicle="Bus245"/>` \
+  `<event time="9:15" type="actstart" person="Sam" facility="officeX" actType="work"/>` \
+  _**Figure 1.** Top: Example Trajectories of three agents (Toby, Lily, and Sam), in which agents spend time in the same spaces (in a bus, or in school, in this example). Bottom: Corresponding list of events required for EpiSim to determine whether agents spent time in same space._
 
 - **Activity Reduction:** While the events files provide the typical
   daily plans of agents, an activity reduction input is required to
@@ -79,7 +90,7 @@ Optional inputs for an EpiSim simulation are:
   vaccinations from December 26h, 2020 until July 9th, 2024. The number
   of vaccinations per day in the model follows these official
   vaccination numbers (see
-  *Vaccination Model*).
+  **[Vaccination Model](episimsimulation.md##vaccination-model)**).
 
 - **Mask Usage.** Mask files provide the compliance to mask mandates on
   public transport. The model agents comply to these mandates at the
@@ -115,11 +126,11 @@ simulation.
 
 Nested within the episim-config are the progression and policy configs.
 The progression-config (see
-*progressionModel*) specifies the transition probabilities
+*[Disease Progression Model](episimsimulation.md##disease-progression-model)*) specifies the transition probabilities
 between different disease states: i.e. what percent of young adults will
 become "seriously sick\" after "showing symptoms\" for 4 days. It also
 includes the policy-config, which specifies how restrictions will be
-applied to the population throughout the simulation (see *progressionModel*).
+applied to the population throughout the simulation (see *[Disease Progression Model](episimsimulation.md##disease-progression-model)*).
 
 ## Policy
 
@@ -140,7 +151,7 @@ usage---what percent of people wear what type of mask---maximum group
 sizes, whether activities locations close early or are closed
 altogether. The policy-config specifies how the `Restriction` container
 is filled. The `remainingFraction`s are based on the input data (see
-activity reductions, above).
+activity reduction, above).
 
 [^1]: **VSP Implementation**: VSP uses three event files: a typical
     weekday, a typical Saturday, and a typical Sunday. In a week, the

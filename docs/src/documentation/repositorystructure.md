@@ -1,4 +1,4 @@
-# Repository Structure
+# EpiSim - Repository Structure
 
 There are three repositories on GitHub for
 EpiSim:

@@ -1,4 +1,4 @@
-# Quickstart
+# EpiSim - Quickstart
 
 This approach targets programmers who are comfortable with Java and an
 IDE. In this case, we will assume you are using IntelliJ IDEA, although
