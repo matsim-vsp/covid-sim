@@ -113,9 +113,13 @@ export NODE_OPTIONS=--openssl-legacy-provider
 cd docs
 yarn
 yarn build
-ls
 cd ..
-ls
+
+echo "BUILD: Neue Docs (docs2/)"
+cd docs2
+npm install
+npx vuepress build .
+cd ..
 
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
