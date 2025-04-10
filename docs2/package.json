@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "vuepress build . && rm -rf ../../public/docs2 && mkdir -p ../../public/docs2 && cp -r .vuepress/dist/* ../../public/docs2"
+  },
   "devDependencies": {
     "@vuepress/bundler-vite": "^2.0.0-rc.20",
     "@vuepress/plugin-markdown-ext": "^2.0.0-rc.92",

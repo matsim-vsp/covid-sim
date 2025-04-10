@@ -118,7 +118,7 @@ cd ..
 echo "BUILD: Neue Docs (docs2/)"
 cd docs2
 npm install
-npx vuepress build .
+npm run build
 cd ..
 
 # DONE WITH PREP! Build the site.
