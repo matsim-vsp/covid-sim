@@ -121,9 +121,11 @@ npm install
 npm run build
 cd ..
 
-ls
-
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
 npm ci
 npm run build
+
+echo COPY: Adding docs2 to dist
+mkdir -p dist/docs2
+cp -r public/docs2/* dist/docs2/
