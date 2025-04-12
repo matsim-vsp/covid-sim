@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "dev": "vuepress dev .",
     "build": "vuepress build . && rm -rf ../public/docs2 && mkdir -p ../public/docs2 && cp -vr .vuepress/dist/* ../public/docs2"
   },
   "devDependencies": {

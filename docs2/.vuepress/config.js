@@ -12,11 +12,13 @@ export default defineUserConfig({
   title: 'Covid Sim Doku',
   description: 'Dokumentation zum Covid Simulator',
 
-  base: '/docs2/',
+
 
   bundler: viteBundler(),
 
   theme: defaultTheme({
+    lastUpdated: false,     // "Zuletzt aktualisiert" deaktivieren
+    contributors: false,
     navbar: [{ text: 'Dokumentation', link: '/docs2/' }],
     sidebar: {
       '/docs2/': [
