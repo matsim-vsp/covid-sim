@@ -11,6 +11,9 @@ export default defineUserConfig({
   lang: 'de-DE',
   title: 'Covid Sim Doku',
   description: 'Dokumentation zum Covid Simulator',
+
+  base: '/docs2/',
+
   bundler: viteBundler(),
 
   theme: defaultTheme({
