@@ -121,6 +121,8 @@ npm install
 npm run build
 cd ..
 
+ls
+
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
 npm ci
