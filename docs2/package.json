@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "vuepress build . && rm -rf ../../public/docs2 && mkdir -p ../../public/docs2 && cp -r .vuepress/dist/* ../../public/docs2"
+    "build": "vuepress build . && rm -rf ../dist/docs2 && mkdir -p ../dist/docs2 && cp -vr .vuepress/dist/* ../dist/docs2"
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "^2.0.0-rc.20",

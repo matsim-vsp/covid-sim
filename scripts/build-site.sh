@@ -125,7 +125,3 @@ cd ..
 echo BUILD: Run NODE/VITE builder
 npm ci
 npm run build
-
-echo COPY: Adding docs2 to dist
-mkdir -p dist/docs2
-cp -r public/docs2/* dist/docs2/
