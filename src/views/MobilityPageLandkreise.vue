@@ -603,6 +603,9 @@ export default defineComponent({
           }
         }
       }
+
+      this.allWeekDates.sort()
+      this.allWeekdayDates.sort()
     },
 
     async loadAllLandkreise() {
@@ -734,121 +737,149 @@ export default defineComponent({
     },
 
     async clickButton(statusNum: number) {
-      var queryStatement = '?'
-
-      for (const [key, value] of Object.entries(this.queryParameter)) {
-        if (value != '' && value !== undefined) {
-          queryStatement += key + '=' + value + '&'
+      const buildQuery = () => {
+        let qs = '?'
+        for (const [k, v] of Object.entries(this.queryParameter)) {
+          if (v !== '' && v !== undefined) qs += `${k}=${v}&`
         }
+        return qs.length === 1 ? '' : qs.slice(0, -1)
       }
 
-      if (queryStatement[queryStatement.length - 1] == '?') {
-        queryStatement = ''
-      } else if (queryStatement[queryStatement.length - 1] == '&') {
-        queryStatement = queryStatement.substr(0, queryStatement.length - 1)
-      }
-
+      /*
+       * Time Buttons:
+       * 5 = week
+       * 6 = weekday
+       * 7 = weekend
+       */
       if (statusNum > 4) {
-        var kind = ''
-        if (this.status == 1) {
-          kind = '/duration'
-        } else if (this.status == 2) {
-          kind = '/distance'
-        } else if (this.status == 3) {
-          kind = '/proportion-mobile-persons'
-        } else if (this.status == 4) {
-          kind = '/nightly-activity'
-        }
+        const prevInterval = this.weekInterval
+        const oldStart = this.startdate
+        const oldEnd = this.enddate
+
+        // Parse the URL to get the current status
+        const typeSeg =
+          this.status === 1
+            ? '/duration'
+            : this.status === 2
+              ? '/distance'
+              : this.status === 3
+                ? '/proportion-mobile-persons'
+                : '/nightly-activity'
+
+        /* --- neues Intervall setzen --------------------------------------- */
         this.statusTime = statusNum
-        if (statusNum == 5) {
-          this.weekInterval = 'week'
-          window.history.pushState(
-            kind + 'week',
-            'Title',
-            '/mobility-counties' + kind + '/week' + queryStatement
-          )
-          if (!this.allWeekDates.includes(this.startdate)) {
-            this.startdate = this.allWeekDates[0]
-          }
-          if (!this.allWeekDates.includes(this.enddate)) {
-            this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
-          }
-        } else if (statusNum == 6) {
-          if (!this.allWeekdayDates.includes(this.startdate)) {
-            this.startdate = this.allWeekdayDates[0]
-          }
-          if (!this.allWeekdayDates.includes(this.enddate)) {
-            this.enddate = this.allWeekdayDates[this.allWeekdayDates.length - 1]
-          }
-          this.weekInterval = 'weekday'
-          window.history.pushState(
-            'weekday',
-            'Title',
-            '/mobility-counties' + kind + '/weekday' + queryStatement
-          )
-        } else if (statusNum == 7) {
-          if (!this.allWeekDates.includes(this.startdate)) {
-            this.startdate = this.allWeekDates[0]
-          }
-          if (!this.allWeekDates.includes(this.enddate)) {
-            this.enddate = this.allWeekDates[this.allWeekDates.length - 1]
-          }
-          this.weekInterval = 'weekend'
-          window.history.pushState(
-            'weekend',
-            'Title',
-            '/mobility-counties' + kind + '/weekend' + queryStatement
-          )
+        this.weekInterval = statusNum === 6 ? 'weekday' : statusNum === 7 ? 'weekend' : 'week'
+
+        const pool = statusNum === 6 ? this.allWeekdayDates : this.allWeekDates
+
+        // The dates for week/weekend and weekday are different. This means that after a change the dates must be adjusted.
+        // For a change from weekday to week/weekend, the next later date must be selected.
+        // For a change from week/weekend to weekday, the next earlier date must be selected.
+        if (prevInterval === 'weekday' && (statusNum === 5 || statusNum === 7)) {
+          // weekday -> week/weekend -> next later date
+          if (!pool.includes(this.startdate)) this.startdate = this.getClosestAfter(oldStart, pool)
+          if (!pool.includes(this.enddate)) this.enddate = this.getClosestAfter(oldEnd, pool)
+        } else if ((prevInterval === 'week' || prevInterval === 'weekend') && statusNum === 6) {
+          // week|weekend -> weekday -> next earlier date
+          if (!pool.includes(this.startdate)) this.startdate = this.getClosestBefore(oldStart, pool)
+          if (!pool.includes(this.enddate)) this.enddate = this.getClosestBefore(oldEnd, pool)
+        } else {
+          // Fallback: Choose the first and last date for the start and end date.
+          if (!pool.includes(this.startdate)) this.startdate = pool[0]
+          if (!pool.includes(this.enddate)) this.enddate = pool[pool.length - 1]
         }
+
+        this.queryParameter.date_one = this.startdate
+        this.queryParameter.date_two = this.enddate
+        const queryStatement = buildQuery()
+
+        const intervalSeg =
+          this.weekInterval === 'weekday'
+            ? '/weekday'
+            : this.weekInterval === 'weekend'
+              ? '/weekend'
+              : '/week'
+
+        window.history.pushState(
+          `${typeSeg}${intervalSeg}`,
+          'Title',
+          `/mobility-counties${typeSeg}${intervalSeg}${queryStatement}`
+        )
       } else {
-        var kind = ''
-        if (this.statusTime == 5) {
-          kind = '/week'
-        } else if (this.statusTime == 6) {
-          kind = '/weekday'
-        } else if (this.statusTime == 7) {
-          kind = '/weekend'
-        }
+        /*
+         * Kind Buttons:
+         * 1 = duration
+         * 2 = distance
+         * 3 = proportion
+         * 4 = nightly
+         */
+        const intervalSeg =
+          this.statusTime === 6 ? '/weekday' : this.statusTime === 7 ? '/weekend' : '/week'
+
         this.status = statusNum
-        if (statusNum == 1) {
+
+        if (statusNum === 1) {
           this.activity = 'outOfHomeDuration'
           this.yAxisNAme = 'Time per Day [h]'
           this.plotHeading = 'Amount of Time Spent Outside the Home'
-          window.history.pushState(
-            'duration' + kind,
-            'Title',
-            '/mobility-counties/duration' + kind + queryStatement
-          )
-        } else if (statusNum == 2) {
+        } else if (statusNum === 2) {
           this.activity = 'dailyRangePerPerson'
           this.yAxisNAme = 'Distance per Person [km]'
-          this.plotHeading = 'Average distance traveled '
-          window.history.pushState(
-            'distance' + kind,
-            'Title',
-            '/mobility-counties/distance' + kind + queryStatement
-          )
-        } else if (statusNum == 3) {
+          this.plotHeading = 'Average distance traveled'
+        } else if (statusNum === 3) {
           this.activity = 'sharePersonLeavingHome'
           this.yAxisNAme = 'Percent [%]'
           this.plotHeading = 'Proportion of mobile persons'
-          window.history.pushState(
-            'proportion-mobile-persons' + kind,
-            'Title',
-            '/mobility-counties/proportion-mobile-persons' + kind + queryStatement
-          )
-        } else if (statusNum == 4) {
+        } else {
           this.activity = 'endHomeActs'
           this.yAxisNAme =
             'Per day of out-of-home activity between 10 p.m. and 5 a.m. <br> per 1,000 inhabitants'
           this.plotHeading = 'AENDERN'
-          window.history.pushState(
-            'nightly-activity' + kind,
-            'Title',
-            '/mobility-counties/nightly-activity' + kind + queryStatement
-          )
         }
+
+        const typeSeg =
+          statusNum === 1
+            ? '/duration'
+            : statusNum === 2
+              ? '/distance'
+              : statusNum === 3
+                ? '/proportion-mobile-persons'
+                : '/nightly-activity'
+
+        const queryStatement = buildQuery()
+
+        window.history.pushState(
+          `${typeSeg}${intervalSeg}`,
+          'Title',
+          `/mobility-counties${typeSeg}${intervalSeg}${queryStatement}`
+        )
       }
+    },
+
+    /*
+     * Calculate the closest date before the target date
+     * @param target - The target date to compare against
+     * @param pool - The array of dates to search through
+     */
+    getClosestBefore(target: string, pool: string[]): string {
+      const sorted = pool.slice().sort()
+      for (let i = sorted.length - 1; i >= 0; i--) {
+        if (sorted[i] <= target) return sorted[i]
+      }
+      return sorted[0]
+    },
+
+    /*
+     * Calculate the closest date after the target date
+     * @param target - The target date to compare against
+     * @param pool - The array of dates to search through
+     */
+    getClosestAfter(target: string, pool: string[]): string {
+      const sorted = pool.slice().sort()
+      for (let i = 0; i < sorted.length; i++) {
+        if (sorted[i] >= target) return sorted[i]
+      }
+      return sorted[sorted.length - 1]
     },
 
     parseMarkdown(text: string) {
