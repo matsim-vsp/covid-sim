@@ -1,6 +1,6 @@
 # Plots
 
-Thee results of the runs are shown in the plots below. The following plots are available for visualization. The `RunId` describes the run currently selected via the buttons. Each run is contained as a .zip file in the summaries folder. The URL for the `PUBLIC_SVN` is: [https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim]()
+The results of the runs are shown in the plots below. The following plots are available for visualization. The `RunId` describes the run currently selected via the buttons. Each run is contained as a .zip file in the summaries folder. The URL for the `PUBLIC_SVN` is: [https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim]()
 
 | Plot name                                                                                                                                           | Short name             | File name                                  |
 | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------ |
