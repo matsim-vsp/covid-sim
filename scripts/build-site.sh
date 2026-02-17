@@ -115,12 +115,6 @@ yarn
 yarn build
 cd ..
 
-echo "BUILD: Neue Docs (docs2/)"
-cd docs2
-npm install
-npm run build
-cd ..
-
 # DONE WITH PREP! Build the site.
 echo BUILD: Run NODE/VITE builder
 npm ci
