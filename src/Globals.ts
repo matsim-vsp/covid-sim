@@ -1,3 +1,5 @@
+import type { ObservedDefinition } from '@/util/observedData'
+
 export const PUBLIC_SVN =
   'https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/episim/'
 //'http://localhost:8000/'
@@ -80,6 +82,12 @@ export interface RunYaml {
   heatMapMaxValue?: number
   // Starting date for left-panel R-Value statistic
   rValueDate?: string
+  // pathogen of the run, e.g. 'influenza'; used for the page title
+  pathogen?: string
+  // overrides the page title derived from the pathogen
+  portalTitle?: string
+  // observed data to compare the model with; replaces the built-in COVID-19 observations
+  observed?: ObservedDefinition[]
   // these are for everything
   optionGroups: {
     day?: number

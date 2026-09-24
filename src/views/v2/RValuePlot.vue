@@ -30,6 +30,7 @@ export default defineComponent({
       unselectedLines: [] as string[],
 
       avg7dayLookup: { date: [], avgR: [] } as { date: string[]; avgR: number[] },
+      autoPickedRValueDate: '',
 
       layout: {
         autosize: true,
@@ -175,6 +176,16 @@ export default defineComponent({
     },
 
     updateSummaryRValue() {
+      // without a date, report the latest available average; a date picked this way is
+      // picked again when the lookup changes (e.g. once the pre-calculated r-values arrive)
+      const isAutoPicked = !this.rValueDate || this.rValueDate === this.autoPickedRValueDate
+      const dates = this.avg7dayLookup.date
+      if (isAutoPicked && dates.length && this.rValueDate !== dates[dates.length - 1]) {
+        this.autoPickedRValueDate = dates[dates.length - 1]
+        this.$emit('update:rValueDate', this.autoPickedRValueDate)
+        return
+      }
+
       const index = this.avg7dayLookup.date.indexOf(this.rValueDate)
       const rValue = index < 0 ? '' : '' + Math.round(1000 * this.avg7dayLookup.avgR[index]) / 1000
       this.$emit('avgR', rValue)
@@ -265,8 +276,9 @@ export default defineComponent({
         //   marker: { color: '#c44', size: 3 },
         // },
       ]
-      // save the 7-day average so we can query it later for the summary stats
-      this.avg7dayLookup = { date: x.slice(center), avgR }
+      // save the 7-day average so we can query it later for the summary stats;
+      // there is no average for the last `center` days, so their dates are left out
+      this.avg7dayLookup = { date: x.slice(center, x.length - center), avgR }
     },
 
     /**

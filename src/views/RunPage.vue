@@ -4,7 +4,7 @@
     .version-banner {{ viewerPrettyName }}
     .banner-text
       h2 VSP / Technische Universität Berlin
-      h3 COVID-19 Analysis Portal
+      h3 {{ portalTitle }}
     .city-picker(v-if="!badPage")
       .which-city(v-for="(run,index) in allRuns"
         :key="run.runId"
@@ -94,7 +94,29 @@ export default defineComponent({
     document.title = 'covid-sim.info'
   },
 
-  computed: {},
+  computed: {
+    portalTitle(): string {
+      if (this.badPage) return 'EpiSim Analysis Portal'
+
+      const yaml = this.allRuns[this.currentCity]?.yaml
+      if (!yaml) return ''
+      if (yaml.portalTitle) return yaml.portalTitle
+
+      // runs without a pathogen predate multi-pathogen support and are all COVID-19
+      if (!yaml.pathogen) return 'COVID-19 Analysis Portal'
+
+      const knownNames: { [pathogen: string]: string } = {
+        influenza: 'Influenza',
+        rsv: 'RSV',
+        sars_cov_2: 'COVID-19',
+      }
+      const pathogen =
+        knownNames[yaml.pathogen.toLowerCase()] ||
+        yaml.pathogen.slice(0, 1).toUpperCase() + yaml.pathogen.slice(1)
+
+      return pathogen + ' Analysis Portal'
+    },
+  },
   watch: {
     $route(to: Route, from: Route) {
       // skip a reload if only the search query changed.

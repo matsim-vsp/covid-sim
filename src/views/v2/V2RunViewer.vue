@@ -193,7 +193,8 @@
 
 
             .hideIt(v-show="allPlots[4].showPlot")
-              p New persons showing symptoms (model) vs. new cases (reality)
+              p(v-if="observedSeries") New persons showing symptoms per 100k in 7 days (model) vs. observed data
+              p(v-else) New persons showing symptoms (model) vs. new cases (reality)
               .plotarea.tall
                 p.plotsize(v-if="!isZipLoaded") Loading data...
                 p.plotsize(v-if="isZipLoaded && isDataMissing") Results not found
@@ -209,6 +210,7 @@
                 :showSeedComparison="showSeedComparison"
                 :city="city"
                 :estimatedReportedAndUnreportedCases="estimatedReportedAndUnreportedCases"
+                :configuredObserved="observedFor('casCom')"
                 )
 
           //- ---------- VIRUS STRAINS -------
@@ -245,7 +247,7 @@
                   :endDate="endDate"
                   :logScale="false"
                   :rValues="rValues"
-                  :rValueDate="summaryRValueDate"
+                  :rValueDate.sync="summaryRValueDate"
                   @avgR="gotNewSummaryRValue"
                   @method="switchRMethod"
                   :metadata="allPlots[6]")
@@ -423,6 +425,7 @@
                 :city="city"
                 :logScale="logScale"
                 :metadata="allPlots[15]"
+                :configuredObserved="observedFor('hospNewCas')"
                 )
 
           //- ---------- HOSPITALIZATION RATES
@@ -573,6 +576,7 @@ import MarkdownIt from 'markdown-it'
 import Papa from '@simwrapper/papaparse'
 import VuePlotly from '@/components/VuePlotly.vue'
 import moment from 'moment'
+import { loadObservedSeries, ObservedSeries } from '@/util/observedData'
 import yaml from 'yaml'
 
 import store from '@/store'
@@ -1025,6 +1029,8 @@ export default defineComponent({
 
       measureOptions: {} as any,
       runLookup: {} as any,
+      // observed data declared in metadata.yaml; null if the YAML declares none
+      observedSeries: null as ObservedSeries[] | null,
 
       observedCases: [] as any[],
       diviData: [] as any[],
@@ -1516,6 +1522,8 @@ export default defineComponent({
       // cache the result
       this.loadedSeriesData[this.currentRun.RunId] = timeSerieses
 
+      this.setDateRangeFromData(timeSerieses[0].x)
+
       // populate the data where we need it
       this.hospitalData = timeSerieses
       this.data = timeSerieses.filter(row => row.name !== ignoreRow)
@@ -1535,6 +1543,28 @@ export default defineComponent({
       //this.dataHealth = this.data.filter(row => !ignoreRowHealth.includes(row.name))
 
       this.updatePlotMenu()
+    },
+
+    // Fills in the dates the YAML leaves open from the simulated days,
+    // so the graphs cover the simulation instead of a hardcoded 2020 range
+    setDateRangeFromData(dates: string[]) {
+      if (!dates.length) return
+
+      if (!this.runYaml.endDate) {
+        this.endDate = dates[dates.length - 1]
+        this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
+      }
+
+      // an empty date makes the R-value plot pick the latest available one
+      if (!this.runYaml.rValueDate && !dates.includes(this.summaryRValueDate)) {
+        this.summaryRValueDate = ''
+      }
+    },
+
+    // observed series declared in the YAML for one plot; null if the YAML declares none
+    observedFor(plot: string) {
+      if (!this.observedSeries) return null
+      return this.observedSeries.filter(series => series.definition.plots?.includes(plot))
     },
 
     updatePlotMenu() {
@@ -1954,12 +1984,12 @@ export default defineComponent({
         return
       }
 
-      // set start date for Graphs -- not the same as start date of simulation
-      this.$store.commit('setGraphStartDate', this.runYaml.graphStartDate || '2020-02-09') // this.startDate)
+      // set start date for Graphs -- can differ from the start date of the simulation;
+      // without an explicit graphStartDate the graphs start with the simulation
+      this.$store.commit('setGraphStartDate', this.runYaml.graphStartDate || this.startDate)
 
-      // set end date
-      this.endDate = this.runYaml.endDate ? this.runYaml.endDate : '2020-08-31'
-      // console.log({ endDate: this.endDate })
+      // set end date; without an explicit endDate it is taken from the simulated data in runChanged()
+      this.endDate = this.runYaml.endDate || ''
       this.layout.xaxis.range = [this.$store.state.graphStartDate, this.endDate]
 
       // build offsets
@@ -1988,8 +2018,13 @@ export default defineComponent({
 
       this.updateNotes()
 
+      // observed data declared in the YAML replaces the built-in COVID-19 observations
+      this.observedSeries = this.runYaml.observed
+        ? await loadObservedSeries(this.runYaml.observed, this.BATTERY_URL + this.runId)
+        : null
+
       // berlin has some observed data, other cities don't
-      if (this.cityCSV[this.city]) {
+      if (!this.observedSeries && this.cityCSV[this.city]) {
         this.observedCases = await this.prepareObservedData(this.city)
         this.diviData = await this.prepareDiviData(this.city)
       }
@@ -2255,8 +2290,9 @@ export default defineComponent({
 
       // // Add RKI Detection-Rate-Trend Data
       if (
-        (this.city === 'berlin' && this.rkiDetectionRateData.x) ||
-        (this.city === 'cologne' && this.rkiDetectionRateData.x)
+        !this.observedSeries &&
+        ((this.city === 'berlin' && this.rkiDetectionRateData.x) ||
+          (this.city === 'cologne' && this.rkiDetectionRateData.x))
       ) {
         serieses.push(this.rkiDetectionRateData)
       }

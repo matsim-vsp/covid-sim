@@ -7,6 +7,7 @@ vue-plotly(v-if="!isResizing" :data="dataLines" :layout="layout" :options="optio
 import VuePlotly from '@/components/VuePlotly.vue'
 
 import { PUBLIC_SVN } from '@/Globals'
+import { observedTrace, ObservedSeries } from '@/util/observedData'
 
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
@@ -25,6 +26,8 @@ export default defineComponent({
     endDate: { type: String, required: true },
     city: { type: String, required: true },
     metadata: { type: Object, required: true },
+    // observed series from metadata.yaml
+    configuredObserved: { type: Array as PropType<ObservedSeries[] | null>, default: null },
   },
 
   data() {
@@ -127,6 +130,12 @@ export default defineComponent({
       this.observedData = []
     },
 
+    configuredObserved() {
+      this.updateScale()
+      this.calculate()
+      this.unselectLines()
+    },
+
     logScale() {
       this.updateScale()
     },
@@ -170,12 +179,13 @@ export default defineComponent({
 
   methods: {
     updateScale() {
-      if (this.logScale) {
+      // configured observations come with their own ranges, so the axis scales to the data
+      if (this.logScale && !this.configuredObserved) {
         this.layout.yaxis.type = 'log'
         this.layout.yaxis.autorange = false
         this.layout.yaxis.range = [Math.log10(0.1), 2]
       } else {
-        this.layout.yaxis.type = 'linear'
+        this.layout.yaxis.type = this.logScale ? 'log' : 'linear'
         delete this.layout.yaxis.range // [0, 1.5]
         this.layout.yaxis.autorange = true
       }
@@ -271,6 +281,9 @@ export default defineComponent({
             // shape: 'hvh',
           },
         })
+
+        // observed 7-day values are dated on their last day, like the model points above
+        for (const series of this.configuredObserved || []) this.dataLines.push(observedTrace(series))
 
         // Moved to new hosp plot
       } catch (e) {

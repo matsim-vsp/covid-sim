@@ -9,6 +9,7 @@ import Papaparse from '@simwrapper/papaparse'
 import VuePlotly from '@/components/VuePlotly.vue'
 
 import { PUBLIC_SVN } from '@/Globals'
+import { observedTrace, ObservedSeries } from '@/util/observedData'
 
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
@@ -37,6 +38,8 @@ export default defineComponent({
       }>,
       required: true,
     },
+    // observed series from metadata.yaml; when set (even empty) they replace the built-in observations
+    configuredObserved: { type: Array as PropType<ObservedSeries[] | null>, default: null },
   },
 
   data() {
@@ -122,8 +125,10 @@ export default defineComponent({
   },
 
   async mounted() {
-    await this.fetchSewageData()
-    if (this.city === 'brandenburg') await this.fetchBrandenburgIncidenceData()
+    if (!this.configuredObserved) {
+      await this.fetchSewageData()
+      if (this.city === 'brandenburg') await this.fetchBrandenburgIncidenceData()
+    }
     this.calculateValues()
     this.unselectLines()
   },
@@ -145,12 +150,22 @@ export default defineComponent({
       this.updateShowSeedComparison()
     },
 
+    configuredObserved() {
+      this.calculateValues()
+      this.unselectLines()
+    },
+
     seedComparison() {
       this.calculateValues()
       this.unselectLines()
     },
 
     logScale() {
+      if (this.configuredObserved) {
+        this.setObservedAxes()
+        return
+      }
+
       this.layout.yaxis = this.logScale
         ? {
             //fixedrange: window.innerWidth < 700,
@@ -600,6 +615,29 @@ export default defineComponent({
       this.calculateUnreported()
     },
 
+    // Configured observations have their own units and ranges, so the axes scale to the data
+    setObservedAxes() {
+      const observed = this.configuredObserved || []
+      const y2Names = observed.filter(s => s.axis === 'y2').map(s => s.definition.name)
+
+      this.layout.yaxis = {
+        fixedrange: true,
+        type: this.logScale ? 'log' : 'linear',
+        autorange: true,
+        title: '7-Day Infections / 100k Pop.',
+      }
+      this.layout.yaxis2 = {
+        fixedrange: true,
+        type: this.logScale ? 'log' : 'linear',
+        autorange: true,
+        title: y2Names.length === 1 ? y2Names[0] : 'Observed',
+        overlaying: 'y',
+        side: 'right',
+        visible: y2Names.length > 0,
+      }
+      this.layout = { ...this.layout }
+    },
+
     /**
      * We are calculating a seven day running infection rate.
      */
@@ -676,6 +714,16 @@ export default defineComponent({
           },
         },
       ]
+
+      if (this.configuredObserved) {
+        // drop the COVID-19 target line; observed weekly values are dated on the last day of their
+        // week, the model points above sit mid-week
+        this.dataLines = this.dataLines.filter(line => line.name === 'Model')
+        for (const series of this.configuredObserved) this.dataLines.push(observedTrace(series, -3))
+        this.setObservedAxes()
+        this.calculateSeedComparison(factor100k)
+        return
+      }
 
       if (this.observedSewageData.length) this.dataLines.push(this.observedSewageData[0])
       if (this.observedSewageData.length > 1) this.dataLines.push(this.observedSewageData[1])
