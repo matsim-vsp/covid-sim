@@ -1288,9 +1288,13 @@ export default defineComponent({
       }
     },
 
+    // the run folder, not the page URL: on a multi-city page the URL is the parent of the city folders
+    runFolder(): string {
+      return this.runId.replace(/\/+$/, '')
+    },
+
     async checkForInfectionMap() {
-      const url = new URL(window.location.href)
-      const currentFolder = `${this.BATTERY_URL}${url.pathname.slice(1)}/summaries`
+      const currentFolder = `${this.BATTERY_URL}${this.runFolder()}/summaries`
       const RunId = this.currentRun.RunId
       const infectionFileUrl = `${currentFolder}/${RunId}.infectionLoc.csv.gz`
 
@@ -1303,8 +1307,7 @@ export default defineComponent({
     },
 
     showInfectionMap() {
-      const url = new URL(window.location.href)
-      const currentFolder = `${url.pathname.slice(1)}/summaries`
+      const currentFolder = `${this.runFolder()}/summaries`
       const RunId = this.currentRun.RunId
       const infectionFileUrl = `?path=${currentFolder}/${RunId}.infectionLoc.csv.gz`
       const finalUrl = '/infection-map' + infectionFileUrl
@@ -1967,6 +1970,10 @@ export default defineComponent({
 
       await this.clearZipLoaderLookups()
       this.isUsingRealDates = false
+
+      // another city's run may have the same RunId (e.g. '0'); forget the loaded one so runChanged() loads again
+      this.currentRun = {}
+      this.previousRun = ''
 
       this.$nextTick()
 
