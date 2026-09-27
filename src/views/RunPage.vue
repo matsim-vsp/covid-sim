@@ -258,9 +258,13 @@ export default defineComponent({
     async loadYaml(path: string) {
       const url = PUBLIC_SVN + 'battery/' + path + '/metadata.yaml'
 
+      // a folder without metadata.yaml is not a run; without these checks the server's 404 page
+      // parses as a YAML string and hides the city subfolders of a multi-city folder
       const response = await fetch(url)
-      const text = await response.text()
-      const yml: RunYaml = YAML.parse(text)
+      if (!response.ok) throw Error(`${url}: HTTP ${response.status}`)
+
+      const yml: RunYaml = YAML.parse(await response.text())
+      if (!yml || typeof yml !== 'object') throw Error(`${url}: not a run metadata file`)
 
       return yml
     },

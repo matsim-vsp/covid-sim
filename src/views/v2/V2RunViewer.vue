@@ -1452,11 +1452,10 @@ export default defineComponent({
     },
 
     async runChanged(newRun: { RunId: string }) {
-      if (this.currentRun?.RunId === this.previousRun) {
-        return
-      } else {
-        this.previousRun = this.currentRun.RunId
-      }
+      // previousRun is the latest requested run: skip repeated requests for it, and drop the result
+      // of an older request that finishes after a newer one (see below)
+      if (newRun.RunId === this.previousRun) return
+      this.previousRun = newRun.RunId
 
       const ignoreRow = 'Cumulative Hospitalized'
       const ignoreRowHealth = [
@@ -1478,6 +1477,9 @@ export default defineComponent({
       // load run dataset
 
       const csv: any[] = await this.loadCSVs(newRun)
+
+      // another run (or city) was requested in the meantime
+      if (newRun.RunId !== this.previousRun) return
 
       // zip might not yet be loaded
       if (csv.length === 0) return
@@ -2038,7 +2040,10 @@ export default defineComponent({
 
       await this.loadInfoTxt()
 
-      this.runChanged({ RunId: '' })
+      // Select the run for the current options. The option buttons only report changes, so after
+      // switching to a city with the same options (e.g. infectiousness 0.3/0.4/0.5 in both) they stay
+      // silent and nothing else would load the new city's run. A single run is loaded by loadInfoTxt().
+      if (Object.keys(this.runLookup).length > 1) this.showPlotForCurrentSituation()
       this.showActivityLevelPlot()
 
       this.hasBaseRun = await this.isThereABaseRun()
