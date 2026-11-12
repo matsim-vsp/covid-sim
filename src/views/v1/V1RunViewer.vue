@@ -613,10 +613,12 @@ export default defineComponent({
   props: {
     runYaml: { type: Object as PropType<RunYaml>, required: true },
     runId: { type: String, required: true },
+    baseUrl: { type: String, default: BATTERY_URL },
     chartYamlFiles: { type: Array as PropType<string[]>, required: true },
   },
   data() {
     return {
+      BATTERY_URL: this.baseUrl,
       state: store.state,
 
       postHospUpdater1: 0,
@@ -1108,7 +1110,7 @@ export default defineComponent({
 
   methods: {
     async updateNotes() {
-      const url = BATTERY_URL + this.runId + '/' + this.runYaml.readme
+      const url = this.BATTERY_URL + this.runId + '/' + this.runYaml.readme
 
       const response = await fetch(url)
 
@@ -1253,7 +1255,7 @@ export default defineComponent({
       // get the ZipLoader for this run
 
       await this.zipWorker.setZipFile({
-        BATTERY_URL,
+        BATTERY_URL: this.BATTERY_URL,
         runId: this.runId,
         zipFolder: this.runYaml.zipFolder,
         whichZip: currentRun.RunId,
@@ -1550,7 +1552,7 @@ export default defineComponent({
     },
 
     async parseInfoTxt(city: string) {
-      const filepath = BATTERY_URL + this.runId + '/_info.txt'
+      const filepath = this.BATTERY_URL + this.runId + '/_info.txt'
 
       const response = await fetch(filepath)
       const text = await response.text()
@@ -2017,7 +2019,7 @@ export default defineComponent({
       // const loader = new Promise(async (resolve, reject) => {
 
       await this.zipWorker.setZipFile({
-        BATTERY_URL,
+        BATTERY_URL: this.BATTERY_URL,
         runId: this.runId,
         zipFolder: this.runYaml.zipFolder,
         whichZip,
@@ -2255,7 +2257,7 @@ export default defineComponent({
     async loadVegaYamlFiles() {
       for (const yamlFile of this.chartYamlFiles) {
         try {
-          const url = `${BATTERY_URL}/${this.runId}/${yamlFile}`
+          const url = `${this.BATTERY_URL}${this.runId}/${yamlFile}`
           const response = await fetch(url).then()
           const text = await response.text()
           const definition = yaml.parse(text)

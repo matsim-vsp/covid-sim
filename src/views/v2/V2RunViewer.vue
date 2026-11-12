@@ -662,6 +662,7 @@ export default defineComponent({
   props: {
     runYaml: { type: Object as PropType<RunYaml>, required: true },
     runId: { type: String, required: true },
+    baseUrl: { type: String, default: BATTERY_URL },
     chartYamlFiles: { type: Array as PropType<string[]>, required: true },
   },
   data() {
@@ -994,7 +995,7 @@ export default defineComponent({
 
       cachedOptionKeys: '',
 
-      BATTERY_URL,
+      BATTERY_URL: this.baseUrl,
 
       cityCSV: {
         berlin: RKI_URL + 'berlin-cases.csv',
@@ -1294,6 +1295,11 @@ export default defineComponent({
     },
 
     async checkForInfectionMap() {
+      // The infection-map page currently resolves only legacy SVN paths.
+      if (this.baseUrl !== BATTERY_URL) {
+        this.hasInfectionMapData = false
+        return
+      }
       const currentFolder = `${this.BATTERY_URL}${this.runFolder()}/summaries`
       const RunId = this.currentRun.RunId
       const infectionFileUrl = `${currentFolder}/${RunId}.infectionLoc.csv.gz`
@@ -2204,7 +2210,7 @@ export default defineComponent({
     async loadVegaYamlFiles() {
       for (const yamlFile of this.chartYamlFiles) {
         try {
-          const url = `${this.BATTERY_URL}/${this.runId}/${yamlFile}`
+          const url = `${this.BATTERY_URL}${this.runId}/${yamlFile}`
           const response = await fetch(url).then()
           const text = await response.text()
           const definition = yaml.parse(text)

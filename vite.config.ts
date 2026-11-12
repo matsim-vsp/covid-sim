@@ -7,6 +7,25 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     base: '/',
+    server: {
+      proxy: {
+        '/sources/episerve': {
+          target: 'https://api.episerve.zib.de',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/sources\/episerve/, ''),
+        },
+        '/sources/doip': {
+          target: 'https://doip.episerve.zib.de',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/sources\/doip/, ''),
+        },
+        '/sources/catalog': {
+          target: 'https://data.episerve.zib.de',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/sources\/catalog/, ''),
+        },
+      },
+    },
     build: { sourcemap: true },
     plugins: [
       // vue

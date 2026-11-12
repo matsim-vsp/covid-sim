@@ -13,7 +13,7 @@ class SVNFileSystem {
     console.log(this.baseUrl)
   }
 
-  async getDirectory(scaryPath: string): Promise<DirectoryEntry> {
+  async getDirectory(scaryPath: string, strict = false): Promise<DirectoryEntry> {
     // hostile user could put anything in the URL really...
     let path = this.baseUrl + scaryPath.replace(/^0-9a-zA-Z_\-\/:+/i, '')
 
@@ -24,11 +24,15 @@ class SVNFileSystem {
     console.log('fetching dir:', path)
 
     return await fetch(path)
-      .then(response => response.text())
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return response.text()
+      })
       .then(data => {
         return this.buildListFromHtml(data)
       })
       .catch(error => {
+        if (strict) throw error
         return { dirs: [], files: [] }
       })
   }

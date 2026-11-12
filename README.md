@@ -6,6 +6,10 @@ This repo contains the visualization website for MATSim/EpiSim, available at htt
 
 This README details build instructions for the website itself.
 
+## Source catalog
+
+The homepage browses SVN and EpiServe runs. See [source-catalog.md](docs/source-catalog.md) for the proposed EpiSim package layout, local development and required production proxy routes. The previous homepage is available at `/about`.
+
 ## Project pre-requisites
 
 The site uses npm and yarn, and was developed using VS Code.

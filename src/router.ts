@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeIndex from '@/views/HomeIndex.vue'
+import SourceHome from '@/views/SourceHome.vue'
 import Imprint from '@/views/Imprint.vue'
 
 Vue.use(VueRouter)
@@ -11,7 +11,13 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HomeIndex,
+    component: SourceHome,
+  },
+  { path: '/about', name: 'About', component: () => import('@/views/HomeIndex.vue') },
+  {
+    path: '/episerve/:runId',
+    name: 'EpiServeRun',
+    component: () => import('@/views/EpiServeRun.vue'),
   },
   {
     path: '/imprint',
